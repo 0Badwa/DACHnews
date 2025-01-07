@@ -1,0 +1,367 @@
+﻿<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DACH.news</title>
+  <link rel="stylesheet" href="../src/css/styles.css">
+</head>
+<body data-theme="light">
+  <nav>
+    <div class="menu">
+      <button id="settings-button" aria-haspopup="true" aria-expanded="false" aria-label="Menu">☰</button>
+      <div id="dropdown-menu" class="dropdown" role="menu" aria-label="Settings menu">
+        <button id="toggle-dark-mode">Dark Mode</button>
+        <div id="change-font-size" style="display:flex; justify-content: space-around;">
+          <button id="font-increase">A+</button>
+          <button id="font-decrease">A-</button>
+        </div>
+        <button id="rearrange-tabs">Rearanžiraj tabove</button>
+        <button id="block-source">Blokiranje izvora</button>
+      </div>
+    </div>
+    <img src="dachnewslogo.png" alt="Dach News Logo" />
+  </nav>
+
+  <div class="tabs-container" role="tablist">
+    <button class="tab active" data-tab="home" role="tab" aria-selected="true">🏠</button>
+    <button class="tab" data-tab="latest" role="tab" aria-selected="false">⏰</button>
+    <button class="tab" data-tab="politik" role="tab" aria-selected="false">Politik</button>
+    <button class="tab" data-tab="wirtschaft" role="tab" aria-selected="false">Wirtschaft</button>
+    <button class="tab" data-tab="sport" role="tab" aria-selected="false">Sport</button>
+    <button class="tab" data-tab="kultur" role="tab" aria-selected="false">Kultur</button>
+    <button class="tab" data-tab="wissenschaft" role="tab" aria-selected="false">Wissenschaft</button>
+    <button class="tab" data-tab="gesellschaft" role="tab" aria-selected="false">Gesellschaft</button>
+    <button class="tab" data-tab="panorama" role="tab" aria-selected="false">Panorama</button>
+    <button class="tab" data-tab="gesundheit" role="tab" aria-selected="false">Gesundheit</button>
+    <button class="tab" data-tab="wetter" role="tab" aria-selected="false">Wetter</button>
+    <button class="tab" data-tab="reisen" role="tab" aria-selected="false">Reisen</button>
+    <button class="tab" data-tab="auto-mobilitaet" role="tab" aria-selected="false">Auto &amp; Mobilität</button>
+    <button class="tab" data-tab="digital" role="tab" aria-selected="false">Digital</button>
+    <button class="tab" data-tab="kurioses" role="tab" aria-selected="false">Kurioses</button>
+  </div>
+
+  <div id="rearrange-modal">
+    <div class="modal-content">
+      <h2>Rearanžiraj tabove</h2>
+      <ul id="sortable-list">
+        <li draggable="true" data-tab="politik">
+          Politik
+          <span>
+            <button class="move-up">↑</button>
+            <button class="move-down">↓</button>
+          </span>
+        </li>
+        <li draggable="true" data-tab="wirtschaft">
+          Wirtschaft
+          <span>
+            <button class="move-up">↑</button>
+            <button class="move-down">↓</button>
+          </span>
+        </li>
+        <li draggable="true" data-tab="sport">
+          Sport
+          <span>
+            <button class="move-up">↑</button>
+            <button class="move-down">↓</button>
+          </span>
+        </li>
+        <li draggable="true" data-tab="kultur">
+          Kultur
+          <span>
+            <button class="move-up">↑</button>
+            <button class="move-down">↓</button>
+          </span>
+        </li>
+        <li draggable="true" data-tab="wissenschaft">
+          Wissenschaft
+          <span>
+            <button class="move-up">↑</button>
+            <button class="move-down">↓</button>
+          </span>
+        </li>
+        <li draggable="true" data-tab="gesellschaft">
+          Gesellschaft
+          <span>
+            <button class="move-up">↑</button>
+            <button class="move-down">↓</button>
+          </span>
+        </li>
+        <li draggable="true" data-tab="panorama">
+          Panorama
+          <span>
+            <button class="move-up">↑</button>
+            <button class="move-down">↓</button>
+          </span>
+        </li>
+        <li draggable="true" data-tab="gesundheit">
+          Gesundheit
+          <span>
+            <button class="move-up">↑</button>
+            <button class="move-down">↓</button>
+          </span>
+        </li>
+        <li draggable="true" data-tab="wetter">
+          Wetter
+          <span>
+            <button class="move-up">↑</button>
+            <button class="move-down">↓</button>
+          </span>
+        </li>
+        <li draggable="true" data-tab="reisen">
+          Reisen
+          <span>
+            <button class="move-up">↑</button>
+            <button class="move-down">↓</button>
+          </span>
+        </li>
+        <li draggable="true" data-tab="auto-mobilitaet">
+          Auto &amp; Mobilität
+          <span>
+            <button class="move-up">↑</button>
+            <button class="move-down">↓</button>
+          </span>
+        </li>
+        <li draggable="true" data-tab="digital">
+          Digital
+          <span>
+            <button class="move-up">↑</button>
+            <button class="move-down">↓</button>
+          </span>
+        </li>
+        <li draggable="true" data-tab="kurioses">
+          Kurioses
+          <span>
+            <button class="move-up">↑</button>
+            <button class="move-down">↓</button>
+          </span>
+        </li>
+      </ul>
+      <button id="close-modal">Zatvori</button>
+    </div>
+  </div>
+
+
+  <!-- Tab sadržaji -->
+  <div id="home" class="tab-content active">
+    <div class="container">
+      <div class="tab-name-box">Aktuell</div>
+      <div class="news-card">
+        <img src="https://via.placeholder.com/125" alt="News Image"/>
+        <div><a href="#" class="news-title">Vesti 1</a><p class="news-meta">Source | Published 1 hour ago</p></div>
+      </div>
+      <div class="news-card">
+        <img src="https://via.placeholder.com/125" alt="News Image"/>
+        <div><a href="#" class="news-title">Vesti 2</a><p class="news-meta">Source | Published 2 hours ago</p></div>
+      </div>
+      <div class="news-card">
+        <img src="https://via.placeholder.com/125" alt="News Image"/>
+        <div><a href="#" class="news-title">Vesti 3</a><p class="news-meta">Source | Published 3 hours ago</p></div>
+      </div>
+      <div class="news-card">
+        <img src="https://via.placeholder.com/125" alt="News Image"/>
+        <div><a href="#" class="news-title">Vesti 4</a><p class="news-meta">Source | Published 4 hours ago</p></div>
+      </div>
+      <div class="news-card">
+        <img src="https://via.placeholder.com/125" alt="News Image"/>
+        <div><a href="#" class="news-title">Vesti 5</a><p class="news-meta">Source | Published 5 hours ago</p></div>
+      </div>
+      <div class="news-card">
+        <img src="https://via.placeholder.com/125" alt="News Image"/>
+        <div><a href="#" class="news-title">Vesti 6</a><p class="news-meta">Source | Published 6 hours ago</p></div>
+      </div>
+      <div class="news-card">
+        <img src="https://via.placeholder.com/125" alt="News Image"/>
+        <div><a href="#" class="news-title">Vesti 7</a><p class="news-meta">Source | Published 7 hours ago</p></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="latest" class="tab-content">
+    <div class="container">
+      <div class="tab-name-box">Neueste nachrichten</div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 1</a><p class="news-meta">Source | Published 1 hour ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 2</a><p class="news-meta">Source | Published 2 hours ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 3</a><p class="news-meta">Source | Published 3 hours ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 4</a><p class="news-meta">Source | Published 4 hours ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 5</a><p class="news-meta">Source | Published 5 hours ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 6</a><p class="news-meta">Source | Published 6 hours ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 7</a><p class="news-meta">Source | Published 7 hours ago</p></div></div>
+    </div>
+  </div>
+
+
+  <div id="politik" class="tab-content">
+    <div class="container">
+      <div class="tab-name-box">Politik</div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 1</a><p class="news-meta">Source | Published 1 hour ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 2</a><p class="news-meta">Source | Published 2 hours ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 3</a><p class="news-meta">Source | Published 3 hours ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 4</a><p class="news-meta">Source | Published 4 hours ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 5</a><p class="news-meta">Source | Published 5 hours ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 6</a><p class="news-meta">Source | Published 6 hours ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 7</a><p class="news-meta">Source | Published 7 hours ago</p></div></div>
+    </div>
+  </div>
+
+  <div id="wirtschaft" class="tab-content">
+    <div class="container">
+      <div class="tab-name-box">Wirtschaft</div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 1</a><p class="news-meta">Source | Published 1 hour ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 2</a><p class="news-meta">Source | Published 2 hours ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 3</a><p class="news-meta">Source | Published 3 hours ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 4</a><p class="news-meta">Source | Published 4 hours ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 5</a><p class="news-meta">Source | Published 5 hours ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 6</a><p class="news-meta">Source | Published 6 hours ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 7</a><p class="news-meta">Source | Published 7 hours ago</p></div></div>
+    </div>
+  </div>
+
+  <div id="sport" class="tab-content">
+    <div class="container">
+      <div class="tab-name-box">Sport</div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 1</a><p class="news-meta">Source | Published 1 hour ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 2</a><p class="news-meta">Source | Published 2 hours ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 3</a><p class="news-meta">Source | Published 3 hours ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 4</a><p class="news-meta">Source | Published 4 hours ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 5</a><p class="news-meta">Source | Published 5 hours ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 6</a><p class="news-meta">Source | Published 6 hours ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 7</a><p class="news-meta">Source | Published 7 hours ago</p></div></div>
+    </div>
+  </div>
+
+
+  <div id="kultur" class="tab-content">
+    <div class="container">
+      <div class="tab-name-box">Kultur</div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 1</a><p class="news-meta">Source | Published 1 hour ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 2</a><p class="news-meta">Source | Published 2 hours ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 3</a><p class="news-meta">Source | Published 3 hours ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 4</a><p class="news-meta">Source | Published 4 hours ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 5</a><p class="news-meta">Source | Published 5 hours ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 6</a><p class="news-meta">Source | Published 6 hours ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 7</a><p class="news-meta">Source | Published 7 hours ago</p></div></div>
+    </div>
+  </div>
+
+  <div id="wissenschaft" class="tab-content">
+    <div class="container">
+      <div class="tab-name-box">Wissenschaft</div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 1</a><p class="news-meta">Source | Published 1 hour ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 2</a><p class="news-meta">Source | Published 2 hours ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 3</a><p class="news-meta">Source | Published 3 hours ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 4</a><p class="news-meta">Source | Published 4 hours ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 5</a><p class="news-meta">Source | Published 5 hours ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 6</a><p class="news-meta">Source | Published 6 hours ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 7</a><p class="news-meta">Source | Published 7 hours ago</p></div></div>
+    </div>
+  </div>
+
+  <div id="gesellschaft" class="tab-content">
+    <div class="container">
+      <div class="tab-name-box">Gesellschaft</div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 1</a><p class="news-meta">Source | Published 1 hour ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 2</a><p class="news-meta">Source | Published 2 hours ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 3</a><p class="news-meta">Source | Published 3 hours ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 4</a><p class="news-meta">Source | Published 4 hours ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 5</a><p class="news-meta">Source | Published 5 hours ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 6</a><p class="news-meta">Source | Published 6 hours ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 7</a><p class="news-meta">Source | Published 7 hours ago</p></div></div>
+    </div>
+  </div>
+
+
+  <div id="panorama" class="tab-content">
+    <div class="container">
+      <div class="tab-name-box">Panorama</div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 1</a><p class="news-meta">Source | Published 1 hour ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 2</a><p class="news-meta">Source | Published 2 hours ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 3</a><p class="news-meta">Source | Published 3 hours ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 4</a><p class="news-meta">Source | Published 4 hours ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 5</a><p class="news-meta">Source | Published 5 hours ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 6</a><p class="news-meta">Source | Published 6 hours ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 7</a><p class="news-meta">Source | Published 7 hours ago</p></div></div>
+    </div>
+  </div>
+
+  <div id="gesundheit" class="tab-content">
+    <div class="container">
+      <div class="tab-name-box">Gesundheit</div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 1</a><p class="news-meta">Source | Published 1 hour ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 2</a><p class="news-meta">Source | Published 2 hours ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 3</a><p class="news-meta">Source | Published 3 hours ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 4</a><p class="news-meta">Source | Published 4 hours ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 5</a><p class="news-meta">Source | Published 5 hours ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 6</a><p class="news-meta">Source | Published 6 hours ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 7</a><p class="news-meta">Source | Published 7 hours ago</p></div></div>
+    </div>
+  </div>
+
+  <div id="wetter" class="tab-content">
+    <div class="container">
+      <div class="tab-name-box">wetter</div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 1</a><p class="news-meta">Source | Published 1 hour ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 2</a><p class="news-meta">Source | Published 2 hours ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 3</a><p class="news-meta">Source | Published 3 hours ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 4</a><p class="news-meta">Source | Published 4 hours ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 5</a><p class="news-meta">Source | Published 5 hours ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 6</a><p class="news-meta">Source | Published 6 hours ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 7</a><p class="news-meta">Source | Published 7 hours ago</p></div></div>
+    </div>
+  </div>
+
+  <div id="reisen" class="tab-content">
+    <div class="container">
+      <div class="tab-name-box">Reisen</div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 1</a><p class="news-meta">Source | Published 1 hour ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 2</a><p class="news-meta">Source | Published 2 hours ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 3</a><p class="news-meta">Source | Published 3 hours ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 4</a><p class="news-meta">Source | Published 4 hours ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 5</a><p class="news-meta">Source | Published 5 hours ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 6</a><p class="news-meta">Source | Published 6 hours ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 7</a><p class="news-meta">Source | Published 7 hours ago</p></div></div>
+    </div>
+  </div>
+
+
+  <div id="auto-mobilitaet" class="tab-content">
+    <div class="container">
+      <div class="tab-name-box">Auto-mobilitaet</div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 1</a><p class="news-meta">Source | Published 1 hour ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 2</a><p class="news-meta">Source | Published 2 hours ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 3</a><p class="news-meta">Source | Published 3 hours ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 4</a><p class="news-meta">Source | Published 4 hours ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 5</a><p class="news-meta">Source | Published 5 hours ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 6</a><p class="news-meta">Source | Published 6 hours ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 7</a><p class="news-meta">Source | Published 7 hours ago</p></div></div>
+    </div>
+  </div>
+
+  <div id="digital" class="tab-content">
+    <div class="container">
+      <div class="tab-name-box">Digital</div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 1</a><p class="news-meta">Source | Published 1 hour ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 2</a><p class="news-meta">Source | Published 2 hours ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 3</a><p class="news-meta">Source | Published 3 hours ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 4</a><p class="news-meta">Source | Published 4 hours ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 5</a><p class="news-meta">Source | Published 5 hours ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 6</a><p class="news-meta">Source | Published 6 hours ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 7</a><p class="news-meta">Source | Published 7 hours ago</p></div></div>
+    </div>
+  </div>
+
+  <div id="kurioses" class="tab-content">
+    <div class="container">
+      <div class="tab-name-box">Kurioses</div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 1</a><p class="news-meta">Source | Published 1 hour ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 2</a><p class="news-meta">Source | Published 2 hours ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 3</a><p class="news-meta">Source | Published 3 hours ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 4</a><p class="news-meta">Source | Published 4 hours ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 5</a><p class="news-meta">Source | Published 5 hours ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 6</a><p class="news-meta">Source | Published 6 hours ago</p></div></div>
+      <div class="news-card"><img src="https://via.placeholder.com/125" alt="News Image"/><div><a href="#" class="news-title">Vesti 7</a><p class="news-meta">Source | Published 7 hours ago</p></div></div>
+    </div>
+  </div>
+
+<script src="../src/js/scripts.js"></script>
+</body>
+</html>
