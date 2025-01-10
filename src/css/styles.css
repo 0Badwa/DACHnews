@@ -247,7 +247,7 @@ nav .menu button:hover {
   height: 60px; /* Visina dugmeta */
   background: none;
   border: none;
-  padding: 5px;
+  padding: 15px;
   cursor: pointer;
 }
 
