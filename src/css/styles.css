@@ -259,14 +259,12 @@ nav .menu button:hover {
   border-radius: 1px; /* Zaobljeni uglovi linije */
 }
 
-#settings-button .red {
+#settings-button .black {
   background-color: black;
 }
-
-#settings-button .orange {
+#settings-button .black {
   background-color: black;
-}
-
-#settings-button .yellow {
+  }
+#settings-button .black {
   background-color: black;
 }
