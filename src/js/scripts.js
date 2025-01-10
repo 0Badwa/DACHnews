@@ -35,7 +35,7 @@ settingsButton.addEventListener('click', (e) => {
   e.stopPropagation();
   const isExpanded = settingsButton.getAttribute('aria-expanded') === 'true';
   settingsButton.setAttribute('aria-expanded', String(!isExpanded));
-  menuContainer.style.display = menuContainer.style.display === 'flex' ? 'none' : 'flex';
+  menuContainer.style.display = classList.toggle('open');
 });
 
 document.addEventListener('click', (e) => {
