@@ -379,3 +379,12 @@ nav .menu button:hover {
   margin: 0; /* Reset margine */
   flex: 0 1 auto; /* Zadržava širinu dugmadi bez pomeranja */
 }
+
+
+.image-below-header {
+  display: block;
+  margin: 0px auto 0; /* 10px razmaka od vrha (od hedera) i centriranje */
+  max-width: 100%; /* Osigurava da slika ne prelazi širinu stranice */
+  height: auto; /* Zadržava proporcije slike */
+}
+
