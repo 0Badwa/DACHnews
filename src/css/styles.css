@@ -39,8 +39,9 @@ nav {
   z-index: 1000;
 }
 nav img {
-  height: 50px;
-  width: auto;
+  max-height: 60px;
+  max-width: 100%;
+  object-fit: scale-down; /* Prilagođava sliku bez rastezanja */
 }
 nav .menu {
   position: relative;
