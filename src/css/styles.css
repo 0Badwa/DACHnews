@@ -125,6 +125,7 @@ nav .menu button:hover {
 [data-theme="dark"] .dropdown button:hover {
   background-color: #333333;
 }
+
 .tabs-container {
   margin-top: 60px;
   background-color: var(--secondary-color);
@@ -147,9 +148,14 @@ nav .menu button:hover {
 }
 .tabs-container button:hover,
 .tabs-container button.active {
-  background-color: var(--primary-color);
-  color: white;
-  border-radius: 5px;
+  background: rgba(4, 170, 109, 0.5); /* Zelena boja sa 50% transparentnošću */
+ backdrop-filter: blur(10px); /* Blur efekat */
+  -webkit-backdrop-filter: blur(10px); /* Podrška za Safari */
+  color: white; /* Bela boja teksta */
+  border-radius: 5px; /* Zaobljeni uglovi */
+  padding: 0.5rem 1rem; /* Prostor unutar taba */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Blaga senka */
+  transition: all 0.3s ease; /* Glatka tranzicija prilikom promene stanja */
 }
 .container {
   padding: 0;
