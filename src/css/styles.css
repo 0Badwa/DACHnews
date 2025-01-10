@@ -1,4 +1,4 @@
-﻿:root {
+:root {
   --background-color: #ffffff;
   --text-color: #000000;
   --primary-color: #04AA6D;
@@ -29,9 +29,9 @@ nav {
   color: white;
   height: 60px;
   display: flex;
-  justify-content: space-between; /* Elementi raspoređeni levo-desno */
+  justify-content: space-between;
   align-items: center;
-   padding: 0 16px; /* Dovoljno razmaka između sadržaja */
+  padding: 0 1rem;
   position: fixed;
   top: 0;
   left: 0;
@@ -39,60 +39,73 @@ nav {
   z-index: 1000;
 }
 nav img {
-  max-height: 40px;
-  max-width: 100%;
-  object-fit: scale-down; /* Prilagođava sliku bez rastezanja */
-  margin-left: auto; /* Pomiče logo desno */
+  height: 50px;
+  width: auto;
 }
 nav .menu {
   position: relative;
 }
-
-.menuContent {
-  display: none; /* Sakrij meni */
-  position: absolute;
-  top: 60px; /* Spušta meni ispod dugmeta */
-  left: 0; /* Poravnava meni uz levi rub dugmeta */
-  z-index: 1000; /* Osigurava da je meni iznad drugih elemenata */
-  background-color: white; /* Dodaje pozadinsku boju za vidljivost */
-  border: 1px solid #ccc; /* Dodaje obrub */
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Blagi senka za estetiku */
-}
-
-.menu-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.menu-list li {
+nav .menu button {
+  background-color: transparent;
+  color: #000000;
+  border: 2px solid var(--primary-color);
+  padding: 0.32rem;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1.2rem;
   display: flex;
   align-items: center;
-  padding: 8px 0;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
+  justify-content: center;
+  outline: none;
+  box-shadow: none;
+  transition: none;
 }
-
-.menu-list li:hover {
-  background-color: var(--primary-color);
+[data-theme="dark"] nav .menu button {
   color: #ffffff;
+}
+nav .menu button:focus {
+  outline: none;
+  box-shadow: none;
+}
+nav .menu button:hover {
+  transform: scale(1.05);
+}
+.dropdown {
+  position: absolute;
+  top: 60px;
+  left: 0;
+  background-color: #ffffff;
+  color: #000000;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
   border-radius: 5px;
+  overflow: hidden;
+  display: none;
+  flex-direction: column;
+  min-width: 200px;
+  z-index: 1001;
+  font-size: 0.9rem;
 }
-
-.menu-list img {
-  width: 24px;
-  height: 24px;
-  margin-right: 12px;
-}
-
-.menu-list span {
-  font-size: var(--font-size);
+[data-theme="dark"] .dropdown {
+  background-color: var(--secondary-color);
   color: var(--text-color);
 }
-
-
-
-
+.dropdown button {
+  background: none;
+  border: none;
+  color: inherit;
+  padding: 0.75rem 1rem;
+  text-align: left;
+  width: 100%;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-size: inherit;
+}
+.dropdown button:hover {
+  background-color: #f0f0f0;
+}
+[data-theme="dark"] .dropdown button:hover {
+  background-color: #333333;
+}
 .tabs-container {
   margin-top: 60px;
   background-color: var(--secondary-color);
@@ -223,27 +236,3 @@ nav .menu {
 #sortable-list li {
   cursor: move;
 }
-
-
-#settings-button {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-  width: 24px; /* Širina dugmeta */
-  height: 24px; /* Visina dugmeta */
-  background: none;
-  border: none;
-  padding: 0px;
-  cursor: pointer;
-}
-
-#settings-button .dot {
-  display: block;        /* Ensure each line is on its own row */
-  width: 24px; /* Dužina linije */
-  height: 2px; /* Debljina linije */
-  background-color: black; /* Boja tačke */
-   margin: 4px 0;         /* Spacing between bars */
-  /* border-radius: 50%; Zaobljeni uglovi linije */
-}
-
