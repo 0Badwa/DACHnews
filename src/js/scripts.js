@@ -128,3 +128,4 @@ window.addEventListener('load', () => {
 });
 
 
+export {}; // Ako je potrebno da izbegnete sintaksnu grešku.
