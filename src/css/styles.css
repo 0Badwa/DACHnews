@@ -285,7 +285,7 @@ nav .menu button:hover {
   cursor: move;
 }
 #rearrange-modal li:hover {
-  background-color: #c0c0c0; /* Svetlija pozadina na hover */
+  background-color: #d8f9d8; /* Svetlija pozadina na hover */
 }
 
 [data-theme="dark"] #rearrange-modal li:hover {
