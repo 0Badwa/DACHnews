@@ -117,3 +117,4 @@ window.addEventListener('load', () => {
 document.getElementById('block-source').addEventListener('click', () => {
   alert('Blokiranje izvora');
 });
+<script src="src/js/scripts.js" defer></script>
