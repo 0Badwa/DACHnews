@@ -1,6 +1,6 @@
-const settingsButton = document.getElementById('settings-button'); // ID hamburger dugmeta
+const settingsButton = document.getElementById('settingsButton'); // ID hamburger dugmeta
 const menuContent = document.querySelector('.menuContent'); // Klasa za meni
-document.getElementById('settings-button').addEventListener('click', () => {
+document.getElementById('settingsButton').addEventListener('click', () => {
   menuContent.style.display = menuContent.style.display === 'none' ? 'block' : 'none';
 });
 
