@@ -83,7 +83,7 @@ nav .menu button:hover {
   overflow: hidden;
   display: none;
   flex-direction: column;
-  min-width: 150px;
+  min-width: 200px;
   z-index: 1001;
   font-size: 0.8rem;
 }
@@ -100,8 +100,10 @@ nav .menu button:hover {
   padding: 1rem 1.5rem;
   text-align: left;
   width: 200px;
-    line-height: 1.6; /* Veći broj za više prostora između redova */
-    margin-bottom: 0.1rem; /* Prostor između dugmadi */
+  box-sizing: border-box; /* Osigurava da širina uključuje padding i border */
+  display: block; /* Osigurava da širina funkcioniše */
+  line-height: 1.6; /* Veći broj za više prostora između redova */
+  margin-bottom: 0.1rem; /* Prostor između dugmadi */
   cursor: pointer;
   transition: background-color 0.2s;
   font-size: inherit;
