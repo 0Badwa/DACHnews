@@ -273,17 +273,3 @@ nav .menu button:hover {
 #settings-button .black {
   background-color: black;
 }
-
-#block-source {
-  display: flex; /* Omogućava horizontalno poravnanje */
-  align-items: center; /* Vertikalno poravnanje */
-  gap: 0.5rem; /* Razmak između ikonice i teksta */
-  white-space: nowrap; /* Sprečava prelom teksta u novi red */
-}
-
-#block-source .icon {
-  flex-shrink: 0; /* Sprečava smanjivanje ikonice */
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
