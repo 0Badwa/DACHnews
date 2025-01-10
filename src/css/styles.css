@@ -200,8 +200,8 @@ nav .menu button:hover {
   position: fixed;
   top: 60px; /* Kao i dropdown meni */
   left: 0;
-   padding: 1.5rem;
-  background: rgba(0, 0, 0, 0.5); /* Poluprovidna pozadina */
+   padding: 1rem;
+  background: var(--secondary-color); /* Svetla pozadina */
   color: var(--text-color); /* Isto kao dropdown meni */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Dodaj senku */
   border-radius: 5px;
@@ -209,7 +209,8 @@ nav .menu button:hover {
   text-align: center; /* Centriran tekst */
   align-items: center; /* Vertikalno centriranje */
   justify-content: center; /* Horizontalno centriranje */
-  width: 100%;
+  width: 300px; /* Širina modala */
+    max-width: 90%; /* Prilagodljiva širina za manje ekrane */
   height: 100%;
   z-index: 2000; /* Da ostane iznad svega */
 }
