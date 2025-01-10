@@ -223,7 +223,6 @@ nav .menu button:hover {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Blaga senka */
   max-width: 450px; /* Maksimalna širina */
   width: 90%; /* Prilagodljiva širina */
-  text-align: center; /* Centriran tekst *
 }
 #rearrange-modal ul {
   list-style: none;
