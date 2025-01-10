@@ -18,54 +18,45 @@ tabs.forEach(tab => {
   });
 });
 
+const settingsButton = document.getElementById('settings-button');
+const dropdownMenu = document.getElementById('dropdown-menu');
 
+settingsButton.addEventListener('click', (e) => {
+  e.stopPropagation();
+  const isExpanded = settingsButton.getAttribute('aria-expanded') === 'true';
+  settingsButton.setAttribute('aria-expanded', String(!isExpanded));
+  dropdownMenu.style.display = dropdownMenu.style.display === 'flex' ? 'none' : 'flex';
+});
 
-// Dark Mode toggle
-document.querySelector('.menu-list li:first-child').addEventListener('click', () => {
+document.addEventListener('click', (e) => {
+  if (!settingsButton.contains(e.target) && !dropdownMenu.contains(e.target)) {
+    dropdownMenu.style.display = 'none';
+    settingsButton.setAttribute('aria-expanded', 'false');
+  }
+});
+
+document.getElementById('toggle-dark-mode').addEventListener('click', () => {
   const body = document.body;
-  const isDarkMode = body.getAttribute('data-theme') === 'dark';
-  body.setAttribute('data-theme', isDarkMode ? 'light' : 'dark');
+  const darkModeActive = body.getAttribute('data-theme') === 'dark';
+  body.setAttribute('data-theme', darkModeActive ? 'light' : 'dark');
+  dropdownMenu.style.display = 'none';
+  settingsButton.setAttribute('aria-expanded', 'false');
+  document.getElementById('toggle-dark-mode').innerText = darkModeActive ? 'Dark Mode' : 'Light Mode';
 });
 
-// Hover efekti za meni stavke
-document.querySelectorAll('.menu-list li').forEach(item => {
-  item.addEventListener('mouseover', () => {
-    item.style.transform = 'scale(1.05)';
-  });
-  item.addEventListener('mouseout', () => {
-    item.style.transform = 'scale(1)';
-  });
+document.getElementById('font-increase').addEventListener('click', () => {
+  let currentSize = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--news-title-font-size'));
+  if(currentSize < 2.0) {
+    document.documentElement.style.setProperty('--news-title-font-size', (currentSize + 0.1).toFixed(2) + 'rem');
+  }
 });
 
-// Klik na "Schriftgröße"
-document.querySelector('.menu-list li:nth-child(2)').addEventListener('click', () => {
-  alert('Promena veličine fonta nije trenutno dostupna.');
+document.getElementById('font-decrease').addEventListener('click', () => {
+  let currentSize = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--news-title-font-size'));
+  if(currentSize > 0.8) {
+    document.documentElement.style.setProperty('--news-title-font-size', (currentSize - 0.1).toFixed(2) + 'rem');
+  }
 });
-
-// Klik na "Quellen blockieren"
-document.querySelector('.menu-list li:nth-child(3)').addEventListener('click', () => {
-  alert('Blokiranje izvora.');
-});
-
-// Klik na "Tabs anordnen"
-document.querySelector('.menu-list li:nth-child(4)').addEventListener('click', () => {
-  alert('Rearanžiranje tabova.');
-});
-
-// Klik na "Kontakt"
-document.querySelector('.menu-list li:nth-child(5)').addEventListener('click', () => {
-  alert('Kontakt forma.');
-});
-
-// Klik na "Über"
-document.querySelector('.menu-list li:nth-child(6)').addEventListener('click', () => {
-  alert('Informacije o aplikaciji.');
-});
-
-
-
-
-
 
 document.querySelectorAll('#sortable-list .move-up').forEach(button => {
   button.addEventListener('click', () => {
@@ -120,12 +111,9 @@ window.addEventListener('load', () => {
         tabButton.parentNode.appendChild(tabButton);
       }
     });
-
-
-    <script src="src/js/scripts.js" defer></script>
-
   }
 });
 
-
-export {}; // Ako je potrebno da izbegnete sintaksnu grešku.
+document.getElementById('block-source').addEventListener('click', () => {
+  alert('Blokiranje izvora');
+});
