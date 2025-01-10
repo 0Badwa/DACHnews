@@ -1,4 +1,4 @@
-<html lang="en">
+﻿<html lang="de">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -10,7 +10,15 @@
 <body data-theme="light">
   <nav>
     <div class="menu">
-      <button id="settings-button" aria-haspopup="true" aria-expanded="false" aria-label="Menu">☰</button>
+      <button id="settings-button" aria-haspopup="true" aria-expanded="false" aria-label="Menu">
+  <div class="rainbow-line red"></div>
+  <div class="rainbow-line orange"></div>
+  <div class="rainbow-line yellow"></div>
+  <div class="rainbow-line green"></div>
+  <div class="rainbow-line blue"></div>
+  <div class="rainbow-line purple"></div>
+</button>
+
       <div id="dropdown-menu" class="dropdown" role="menu" aria-label="Settings menu">
         <button id="toggle-dark-mode">Dark Mode</button>
         <div id="change-font-size" style="display:flex; justify-content: space-around;">
@@ -364,6 +372,7 @@
     </div>
   </div>
 
+<script src="src/js/scripts.js"></script>
 
 </body>
 </html>
