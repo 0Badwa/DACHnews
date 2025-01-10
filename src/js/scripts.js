@@ -86,7 +86,7 @@ const sortableList = document.getElementById('sortable-list');
 rearrangeTabsBtn.addEventListener('click', () => {
   dropdownMenu.style.display = 'none';
   settingsButton.setAttribute('aria-expanded', 'false');
-  rearrangeModal.style.display = 'block';
+  rearrangeModal.style.display = 'flex';
 });
 
 closeModalBtn.addEventListener('click', () => {
