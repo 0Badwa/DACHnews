@@ -2,11 +2,6 @@ const settingsButton = document.getElementById('settings-button'); // ID hamburg
 const menuContainer = document.querySelector('.menu-Container'); // Klasa za meni
 
 
-menuContainer.addEventListener('click', () => {
-  const isMenuVisible = menuContainer.style.display === 'block';
-  menuContainer.style.display = isMenuVisible ? 'none' : 'block';
-});
-
 
 const tabs = document.querySelectorAll('.tab');
 const contents = document.querySelectorAll('.tab-content');
