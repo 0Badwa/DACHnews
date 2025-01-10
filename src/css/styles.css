@@ -99,6 +99,7 @@ nav .menu button:hover {
   color: inherit;
   padding: 0 1.5rem;
   height: 2.5rem; /* Povećava visinu */
+  margin-bottom: 0.5rem; /* Dodaj razmak između dugmadi */
   text-align: left;
   width: 100%;
   cursor: pointer;
