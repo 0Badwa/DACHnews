@@ -123,3 +123,9 @@ document.getElementById('kontakt').addEventListener('click', () => {
 document.getElementById('about').addEventListener('click', () => {
   alert('about');
 });
+
+
+// Zatvaranje modala
+document.getElementById('close-modal').addEventListener('click', () => {
+  rearrangeModal.style.display = 'none';
+});
