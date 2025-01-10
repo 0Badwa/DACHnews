@@ -101,6 +101,7 @@ nav .menu button:hover {
   text-align: left;
   width: 100%;
     line-height: 1.6; /* Veći broj za više prostora između redova */
+    margin-bottom: 0.2rem; /* Prostor između dugmadi */
   cursor: pointer;
   transition: background-color 0.2s;
   font-size: inherit;
