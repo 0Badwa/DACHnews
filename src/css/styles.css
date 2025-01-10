@@ -274,3 +274,7 @@ nav .menu button:hover {
 #settings-button .black {
   background-color: black;
 }
+
+.dropdown button:not(:last-child) {
+  margin-bottom: 0.5rem;
+}
