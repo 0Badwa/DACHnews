@@ -76,7 +76,8 @@ nav .menu button:hover {
   position: absolute;
   top: 60px;
   left: 0;
-  background-color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.5); /* Bela sa 50% providnosti */
+    backdrop-filter: blur(10px); /* Blur efekat */
   color: #000000;
   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
   border-radius: 2px;
