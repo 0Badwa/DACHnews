@@ -212,7 +212,7 @@ nav .menu button:hover {
   width: 300px; /* Širina modala */
     max-width: 90%; /* Prilagodljiva širina za manje ekrane */
   height: 80%;
-  z-index: 2000; /* Da ostane iznad svega */
+  z-index: 9999; /* Da ostane iznad svega */
 }
 #rearrange-modal .modal-content {
   background: #ffffff; /* Bela pozadina */
@@ -263,13 +263,15 @@ margin-bottom: 0.2rem; /* Razmak između stavki */
 }
 
 #close-modal {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
   background: var(--primary-color); /* Zeleno dugme */
   color: #ffffff; /* Bela boja teksta */
   border: none;
   padding: 0.5rem 1rem;
   border-radius: 5px;
   cursor: pointer;
-  margin-top: 1rem;
   font-size: 1rem;
 }
 
