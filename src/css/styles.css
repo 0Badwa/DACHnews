@@ -356,3 +356,17 @@ nav .menu button:hover {
     height: 80px; /* Održavajte proporcije */
   }
 }
+
+#change-font-size {
+  display: flex;
+  justify-content: center; /* Centriranje dugmadi */
+  align-items: center; /* Vertikalno poravnanje */
+  gap: 1rem; /* Razmak između dugmadi */
+}
+
+#font-increase {
+  margin-right: 0; /* Osigurava da nema dodatnog pomeranja */
+}
+
+#font-decrease {
+  margin-left: 0; /* Sprečava pomeranje dugmeta desno */
