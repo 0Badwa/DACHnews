@@ -97,7 +97,8 @@ nav .menu button:hover {
   background: none;
   border: none;
   color: inherit;
-  padding: 1rem 1.5rem;
+  padding: 0 1.5rem;
+  height: 2.5rem; /* Povećava visinu */
   text-align: left;
   width: 100%;
   cursor: pointer;
