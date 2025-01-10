@@ -23,7 +23,14 @@ tabs.forEach(tab => {
   });
 });
 
-
+function loadMenuIcons() {
+  // Selektujemo sve slike koje imaju data-src, a nemaju još postavljen src
+  document.querySelectorAll('img[data-src]').forEach(img => {
+    if (!img.src) {
+      img.src = img.getAttribute('data-src');
+    }
+  });
+}
 settingsButton.addEventListener('click', (e) => {
   e.stopPropagation();
   const isExpanded = settingsButton.getAttribute('aria-expanded') === 'true';
