@@ -200,7 +200,7 @@ nav .menu button:hover {
   position: fixed;
   top: 60px; /* Kao i dropdown meni */
   left: 0;
-   padding: 0.5rem;
+   padding: 1rem;
   background: var(--secondary-color); /* Svetla pozadina */
   color: var(--text-color); /* Isto kao dropdown meni */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Dodaj senku */
@@ -231,7 +231,7 @@ nav .menu button:hover {
   padding: 0;
 }
 #rearrange-modal li {
-  padding: 0.5rem 0.8rem; /* Prostor unutar svake stavke */
+  padding: 0.7rem 1rem; /* Prostor unutar svake stavke */
 margin-bottom: 0.2rem; /* Razmak između stavki */
   background: var(--secondary-color); /* Pozadina slična Settings meniju */
   border: 1px solid var(--border-color); /* Obrub stavki */
