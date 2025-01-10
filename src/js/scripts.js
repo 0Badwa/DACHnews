@@ -117,3 +117,9 @@ window.addEventListener('load', () => {
 document.getElementById('block-source').addEventListener('click', () => {
   alert('Blokiranje izvora');
 });
+document.getElementById('kontakt').addEventListener('click', () => {
+  alert('Kontakt');
+});
+document.getElementById('about').addEventListener('click', () => {
+  alert('about');
+});
