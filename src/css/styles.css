@@ -99,7 +99,7 @@ nav .menu button:hover {
   color: inherit;
   padding: 1rem 1.5rem;
   text-align: left;
-  width: 100%;
+  width: 200px;
     line-height: 1.6; /* Veći broj za više prostora između redova */
     margin-bottom: 0.2rem; /* Prostor između dugmadi */
   cursor: pointer;
