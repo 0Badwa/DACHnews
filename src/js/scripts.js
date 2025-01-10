@@ -1,10 +1,3 @@
-const settingsButton = document.getElementById('settingsButton'); // ID hamburger dugmeta
-const menuContent = document.querySelector('.menuContent'); // Klasa za meni
-document.getElementById('settingsButton').addEventListener('click', () => {
-  menuContent.style.display = menuContent.style.display === 'none' ? 'block' : 'none';
-});
-
-
 const tabs = document.querySelectorAll('.tab');
 const contents = document.querySelectorAll('.tab-content');
 
@@ -25,24 +18,19 @@ tabs.forEach(tab => {
   });
 });
 
-function loadMenuIcons() {
-  // Selektujemo sve slike koje imaju data-src, a nemaju još postavljen src
-  document.querySelectorAll('img[data-src]').forEach(img => {
-    if (!img.src) {
-      img.src = img.getAttribute('data-src');
-    }
-  });
-}
+const settingsButton = document.getElementById('settings-button');
+const dropdownMenu = document.getElementById('dropdown-menu');
+
 settingsButton.addEventListener('click', (e) => {
   e.stopPropagation();
   const isExpanded = settingsButton.getAttribute('aria-expanded') === 'true';
   settingsButton.setAttribute('aria-expanded', String(!isExpanded));
-  menuContent.style.display = menuContent.style.display === 'none' ? 'block' : 'none';
+  dropdownMenu.style.display = dropdownMenu.style.display === 'flex' ? 'none' : 'flex';
 });
 
 document.addEventListener('click', (e) => {
-  if (!settingsButton.contains(e.target) && !menuContent.contains(e.target)) {
-    menuContent.style.display = 'none';
+  if (!settingsButton.contains(e.target) && !dropdownMenu.contains(e.target)) {
+    dropdownMenu.style.display = 'none';
     settingsButton.setAttribute('aria-expanded', 'false');
   }
 });
@@ -51,7 +39,7 @@ document.getElementById('toggle-dark-mode').addEventListener('click', () => {
   const body = document.body;
   const darkModeActive = body.getAttribute('data-theme') === 'dark';
   body.setAttribute('data-theme', darkModeActive ? 'light' : 'dark');
-  menuContent.style.display = 'none';
+  dropdownMenu.style.display = 'none';
   settingsButton.setAttribute('aria-expanded', 'false');
   document.getElementById('toggle-dark-mode').innerText = darkModeActive ? 'Dark Mode' : 'Light Mode';
 });
@@ -96,7 +84,7 @@ const closeModalBtn = document.getElementById('close-modal');
 const sortableList = document.getElementById('sortable-list');
 
 rearrangeTabsBtn.addEventListener('click', () => {
-  menuContainer.style.display = 'none';
+  dropdownMenu.style.display = 'none';
   settingsButton.setAttribute('aria-expanded', 'false');
   rearrangeModal.style.display = 'flex';
 });
@@ -129,4 +117,3 @@ window.addEventListener('load', () => {
 document.getElementById('block-source').addEventListener('click', () => {
   alert('Blokiranje izvora');
 });
-
