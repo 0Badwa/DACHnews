@@ -217,7 +217,7 @@ nav .menu button:hover {
 #rearrange-modal .modal-content {
   background: #ffffff; /* Bela pozadina */
   color: var(--text-color); /* Tekst u skladu sa temom */
-  padding: 1.5rem; /* Ukloni padding */
+  padding: 1.5rem 1.5rem 1.5rem 20px; /* Dodajte razmak od 20px sa leve strane */
  border: 2px solid var(--primary-color); /* Zeleni outline */
   border-radius: 5px; /* Zaobljeni uglovi */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Blaga senka */
@@ -225,7 +225,7 @@ nav .menu button:hover {
   width: 90%; /* Prilagodljiva širina */
   max-height: 80vh; /* Maksimalna visina (80% visine ekrana) */
   overflow-y: auto; /* Omogućava vertikalno skrolovanje */
-  text-align: center; /* Centriran tekst */
+  text-align: left; /* Centriran tekst */
 }
 #rearrange-modal ul {
   list-style: none;
