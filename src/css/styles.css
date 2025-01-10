@@ -215,11 +215,15 @@ nav .menu button:hover {
   z-index: 2000; /* Da ostane iznad svega */
 }
 #rearrange-modal .modal-content {
-   background: none; /* Koristi pozadinu modala */
-  color: inherit;
-  padding: 0; /* Ukloni padding */
-  font-size: 0.9rem; /* Usaglasi font sa dropdown menijem */
-  text-align: left; /* Tekst da se poravna levo */
+  background: #ffffff; /* Bela pozadina */
+  color: var(--text-color); /* Tekst u skladu sa temom */
+  padding: 1.5; /* Ukloni padding */
+ border: 2px solid var(--primary-color); /* Zeleni outline */
+  border-radius: 5px; /* Zaobljeni uglovi */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Blaga senka */
+  max-width: 400px; /* Maksimalna širina */
+  width: 90%; /* Prilagodljiva širina */
+  text-align: center; /* Centriran tekst *
 }
 #rearrange-modal ul {
   list-style: none;
