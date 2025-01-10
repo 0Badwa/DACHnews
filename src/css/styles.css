@@ -244,10 +244,10 @@ nav .menu button:hover {
   align-items: center;
   justify-content: space-between;
   width: 5px; /* Širina dugmeta * /
-  height: 15px; /* Visina dugmeta */
+  height: 25px; /* Visina dugmeta */
   background: none;
   border: none;
-  padding: 2px;
+  padding: 4px;
   cursor: pointer;
 }
 
