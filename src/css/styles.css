@@ -47,11 +47,13 @@ nav .menu {
 }
 
 .menu-container {
-  width: 214px;
-  background-color: var(--secondary-color);
-  border-radius: 8px;
-  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-  padding: 16px;
+  position: absolute;
+  top: 100%; /* Spušta meni ispod dugmeta */
+  left: 0; /* Poravnava meni uz levi rub dugmeta */
+  z-index: 1000; /* Osigurava da je meni iznad drugih elemenata */
+  background-color: white; /* Dodaje pozadinsku boju za vidljivost */
+  border: 1px solid #ccc; /* Dodaje obrub */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Blagi senka za estetiku */
 }
 
 .menu-list {
