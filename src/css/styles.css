@@ -249,7 +249,7 @@ nav .menu button:hover {
   padding-left: 20px; /* Razmak od najdužeg teksta */
   text-align: right; /* Poravnajte strelice desno */
   display: flex;
-  gap: 10px; /* Razmak između strelica */
+  gap: 5px; /* Razmak između strelica */
 }
 
 #rearrange-modal li button {
