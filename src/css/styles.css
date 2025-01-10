@@ -244,7 +244,7 @@ nav .menu button:hover {
   align-items: center;
   justify-content: space-between;
   width: 40px; /* Širina dugmeta * /
-  height: 10px; /* Visina dugmeta */
+  height: 80px; /* Visina dugmeta */
   background: none;
   border: none;
   padding: 2px;
