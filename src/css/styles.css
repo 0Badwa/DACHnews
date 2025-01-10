@@ -363,7 +363,7 @@ nav .menu button:hover {
   flex-direction: column; /* Vertikalno slaganje dugmadi */
   justify-content: center;
   align-items: center;
-  gap: 0.2rem; /* Razmak između dugmadi */
+  gap: 0.4rem; /* Razmak između dugmadi */
 }
 
 #font-increase,
