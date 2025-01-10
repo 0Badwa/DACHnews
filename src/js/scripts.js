@@ -1,5 +1,11 @@
-const tabs = document.querySelectorAll('.tab');
-const contents = document.querySelectorAll('.tab-content');
+const hamburgerMenu = document.getElementById('settings-button'); // ID hamburger dugmeta
+const menuContainer = document.querySelector('.menu-container'); // Klasa za meni
+
+
+hamburgerMenu.addEventListener('click', () => {
+  const isMenuVisible = menuContainer.style.display === 'block';
+  menuContainer.style.display = isMenuVisible ? 'none' : 'block';
+});
 
 tabs.forEach(tab => {
   tab.addEventListener('click', () => {
