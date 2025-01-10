@@ -252,32 +252,9 @@ nav .menu button:hover {
 }
 
 #settings-button .rainbow-line {
-  width: 100%; /* Dužina linije */
-  height: 1px; /* Debljina linije */
-  margin: 1.3px 0; /*  vrednost za veći razmak */
-  border-radius: 1px; /* Zaobljeni uglovi linije */
+  width: 4px; /* Dužina linije */
+  height: 4px; /* Debljina linije */
+  background-color: black; /* Boja tačke */
+  border-radius: 50%; /* Zaobljeni uglovi linije */
 }
 
-#settings-button .red {
-  background-color: red;
-}
-
-#settings-button .orange {
-  background-color: orange;
-}
-
-#settings-button .yellow {
-  background-color: yellow;
-}
-
-#settings-button .green {
-  background-color: green;
-}
-
-#settings-button .blue {
-  background-color: blue;
-}
-
-#settings-button .purple {
-  background-color: purple;
-}
