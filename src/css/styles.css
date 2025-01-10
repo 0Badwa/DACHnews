@@ -243,18 +243,18 @@ nav .menu button:hover {
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  width: 30px; /* Širina dugmeta * /
-  height: 40px; /* Visina dugmeta */
+  width: 10px; /* Širina dugmeta * /
+  height: 20px; /* Visina dugmeta */
   background: none;
   border: none;
-  padding: 5px;
+  padding: 2px;
   cursor: pointer;
 }
 
 #settings-button .rainbow-line {
   width: 100%; /* Dužina linije */
-  height: 3px; /* Debljina linije */
-  border-radius: 2px; /* Zaobljeni uglovi linije */
+  height: 2px; /* Debljina linije */
+  border-radius: 1px; /* Zaobljeni uglovi linije */
 }
 
 #settings-button .red {
