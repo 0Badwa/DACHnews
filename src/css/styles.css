@@ -252,6 +252,7 @@ nav .menu button:hover {
 }
 
 #settings-button .dot {
+  display: block;        /* Ensure each line is on its own row */
   width: 24px; /* Dužina linije */
   height: 2px; /* Debljina linije */
   background-color: black; /* Boja tačke */
