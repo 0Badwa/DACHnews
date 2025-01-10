@@ -196,7 +196,7 @@ nav .menu button:hover {
 }
 /* Modal */
 #rearrange-modal {
-  display: flex; /* Omogućava centriranje */
+  display: none; /* Modal je sakriven po učitavanju */
   position: fixed;
   top: 60px; /* Kao i dropdown meni */
   left: 0;
