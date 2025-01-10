@@ -120,6 +120,10 @@ window.addEventListener('load', () => {
         tabButton.parentNode.appendChild(tabButton);
       }
     });
+
+
+    <script src="src/js/scripts.js" defer></script>
+
   }
 });
 
