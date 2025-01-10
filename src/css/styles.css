@@ -259,25 +259,15 @@ nav .menu button:hover {
 }
 
 #settings-button .red {
-  background-color: red;
+  background-color: black;
 }
 
 #settings-button .orange {
-  background-color: orange;
+  background-color: black;
 }
 
 #settings-button .yellow {
-  background-color: yellow;
+  background-color: black;
 }
 
-#settings-button .green {
-  background-color: green;
-}
 
-#settings-button .blue {
-  background-color: blue;
-}
-
-#settings-button .purple {
-  background-color: purple;
-}
