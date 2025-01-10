@@ -51,7 +51,7 @@ nav .menu {
 .menuContent {
   display: none; /* Sakrij meni */
   position: absolute;
-  top: 100%; /* Spušta meni ispod dugmeta */
+  top: 60px; /* Spušta meni ispod dugmeta */
   left: 0; /* Poravnava meni uz levi rub dugmeta */
   z-index: 1000; /* Osigurava da je meni iznad drugih elemenata */
   background-color: white; /* Dodaje pozadinsku boju za vidljivost */
