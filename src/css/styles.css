@@ -243,7 +243,7 @@ nav .menu button:hover {
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  width: 30px; /* Širina dugmeta */
+  width: 30px; /* Širina dugmeta * /
   height: 40px; /* Visina dugmeta */
   background: none;
   border: none;
