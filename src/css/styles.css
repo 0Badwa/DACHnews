@@ -364,9 +364,8 @@ nav .menu button:hover {
   gap: 1rem; /* Razmak između dugmadi */
 }
 
-#font-increase {
-  margin-right: 0; /* Osigurava da nema dodatnog pomeranja */
-}
-
+#font-increase,
 #font-decrease {
-  margin-left: 0; /* Sprečava pomeranje dugmeta desno */
+  margin: 0; /* Reset margine */
+  flex: 0 1 auto; /* Zadržava širinu dugmadi bez pomeranja */
+}
