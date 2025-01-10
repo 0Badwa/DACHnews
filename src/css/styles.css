@@ -1,4 +1,4 @@
-﻿:root {
+:root {
   --background-color: #ffffff;
   --text-color: #000000;
   --primary-color: #04AA6D;
@@ -235,49 +235,4 @@ nav .menu button:hover {
 }
 #sortable-list li {
   cursor: move;
-}
-
-
-#settings-button {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-  width: 25px; /* Širina dugmeta * /
-  height: 25px; /* Visina dugmeta */
-  background: none;
-  border: none;
-  padding: 0px;
-  cursor: pointer;
-}
-
-#settings-button .rainbow-line {
-  width: 100%; /* Dužina linije */
-  height: 1px; /* Debljina linije */
-  margin: 1.3px 0; /*  vrednost za veći razmak */
-  border-radius: 1px; /* Zaobljeni uglovi linije */
-}
-
-#settings-button .red {
-  background-color: red;
-}
-
-#settings-button .orange {
-  background-color: orange;
-}
-
-#settings-button .yellow {
-  background-color: yellow;
-}
-
-#settings-button .green {
-  background-color: green;
-}
-
-#settings-button .blue {
-  background-color: blue;
-}
-
-#settings-button .purple {
-  background-color: purple;
 }
