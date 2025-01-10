@@ -247,13 +247,13 @@ nav .menu button:hover {
   height: 25px; /* Visina dugmeta */
   background: none;
   border: none;
-  padding: 4px;
+  padding: 2px;
   cursor: pointer;
 }
 
 #settings-button .rainbow-line {
   width: 100%; /* Dužina linije */
-  height: 1px; /* Debljina linije */
+  height: 2px; /* Debljina linije */
   border-radius: 1px; /* Zaobljeni uglovi linije */
 }
 
