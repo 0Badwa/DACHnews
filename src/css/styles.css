@@ -243,8 +243,8 @@ nav .menu button:hover {
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  width: 25px; /* Širina dugmeta * /
-  height: 25px; /* Visina dugmeta */
+  width: 24px; /* Širina dugmeta * /
+  height: 24px; /* Visina dugmeta */
   background: none;
   border: none;
   padding: 0px;
@@ -252,9 +252,9 @@ nav .menu button:hover {
 }
 
 #settings-button .rainbow-line {
-  width: 15px; /* Dužina linije */
-  height: 3px; /* Debljina linije */
+  width: 4px; /* Dužina linije */
+  height: 4px; /* Debljina linije */
   background-color: black; /* Boja tačke */
-  border-radius: 1px; /* Zaobljeni uglovi linije */
+  border-radius: 50%; /* Zaobljeni uglovi linije */
 }
 
