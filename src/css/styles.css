@@ -223,6 +223,9 @@ nav .menu button:hover {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Blaga senka */
   max-width: 450px; /* Maksimalna širina */
   width: 90%; /* Prilagodljiva širina */
+  max-height: 80vh; /* Maksimalna visina (80% visine ekrana) */
+  overflow-y: auto; /* Omogućava vertikalno skrolovanje */
+  text-align: center; /* Centriran tekst */
 }
 #rearrange-modal ul {
   list-style: none;
@@ -230,7 +233,7 @@ nav .menu button:hover {
   padding: 0;
 }
 #rearrange-modal li {
-  padding: 0.7rem 1rem; /* Prostor unutar svake stavke */
+  padding: 0.5rem 0.8rem; /* Prostor unutar svake stavke */
 margin-bottom: 0.2rem; /* Razmak između stavki */
   background: var(--secondary-color); /* Pozadina slična Settings meniju */
   border: 1px solid var(--border-color); /* Obrub stavki */
