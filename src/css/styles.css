@@ -251,7 +251,7 @@ nav .menu button:hover {
   cursor: pointer;
 }
 
-#settings-button .rainbow-line {
+#settings-button .menu-line {
   width: 100%; /* Dužina linije */
   height: 2px; /* Debljina linije */
   margin: 2px 0; /*  vrednost za veći razmak */
