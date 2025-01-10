@@ -41,7 +41,7 @@ settingsButton.addEventListener('click', (e) => {
 });
 
 document.addEventListener('click', (e) => {
-  if (!settingsButton.contains(e.target) && !menuContainer.contains(e.target)) {
+  if (!settingsButton.contains(e.target) && !menuContent.contains(e.target)) {
     menuContent.style.display = 'none';
     settingsButton.setAttribute('aria-expanded', 'false');
   }
@@ -51,7 +51,7 @@ document.getElementById('toggle-dark-mode').addEventListener('click', () => {
   const body = document.body;
   const darkModeActive = body.getAttribute('data-theme') === 'dark';
   body.setAttribute('data-theme', darkModeActive ? 'light' : 'dark');
-  menuContainer.style.display = 'none';
+  menuContent.style.display = 'none';
   settingsButton.setAttribute('aria-expanded', 'false');
   document.getElementById('toggle-dark-mode').innerText = darkModeActive ? 'Dark Mode' : 'Light Mode';
 });
