@@ -254,6 +254,7 @@ nav .menu button:hover {
 #settings-button .rainbow-line {
   width: 100%; /* Dužina linije */
   height: 2px; /* Debljina linije */
+  margin: 4px 0; /*  vrednost za veći razmak */
   border-radius: 1px; /* Zaobljeni uglovi linije */
 }
 
