@@ -213,7 +213,9 @@ nav .menu button:hover {
   top: 60px; /* Kao i dropdown meni */
   left: 0;
    padding: 1rem;
-  background: var(--secondary-color); /* Svetla pozadina */
+  background: rgba(255, 255, 255, 0.5); /* Bela boja sa 50% transparentnošću */
+    backdrop-filter: blur(10px); /* Blur efekat */
+    -webkit-backdrop-filter: blur(10px); /* Podrška za Safari */
   color: var(--text-color); /* Isto kao dropdown meni */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Dodaj senku */
   border-radius: 5px;
