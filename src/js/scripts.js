@@ -1,4 +1,4 @@
-const hamburgerMenu = document.getElementById('settings-button'); // ID hamburger dugmeta
+const settingsButton = document.getElementById('settings-button'); // ID hamburger dugmeta
 const menuContainer = document.querySelector('.menu-container'); // Klasa za meni
 
 
@@ -24,19 +24,17 @@ tabs.forEach(tab => {
   });
 });
 
-const settingsButton = document.getElementById('settings-button');
-const dropdownMenu = document.getElementById('dropdown-menu');
 
 settingsButton.addEventListener('click', (e) => {
   e.stopPropagation();
   const isExpanded = settingsButton.getAttribute('aria-expanded') === 'true';
   settingsButton.setAttribute('aria-expanded', String(!isExpanded));
-  dropdownMenu.style.display = dropdownMenu.style.display === 'flex' ? 'none' : 'flex';
+  menuContainer.style.display = dropdownMenu.style.display === 'flex' ? 'none' : 'flex';
 });
 
 document.addEventListener('click', (e) => {
-  if (!settingsButton.contains(e.target) && !dropdownMenu.contains(e.target)) {
-    dropdownMenu.style.display = 'none';
+  if (!settingsButton.contains(e.target) && !menuContainer.contains(e.target)) {
+    menuContainer.style.display = 'none';
     settingsButton.setAttribute('aria-expanded', 'false');
   }
 });
@@ -45,7 +43,7 @@ document.getElementById('toggle-dark-mode').addEventListener('click', () => {
   const body = document.body;
   const darkModeActive = body.getAttribute('data-theme') === 'dark';
   body.setAttribute('data-theme', darkModeActive ? 'light' : 'dark');
-  dropdownMenu.style.display = 'none';
+  menuContainer.style.display = 'none';
   settingsButton.setAttribute('aria-expanded', 'false');
   document.getElementById('toggle-dark-mode').innerText = darkModeActive ? 'Dark Mode' : 'Light Mode';
 });
@@ -90,7 +88,7 @@ const closeModalBtn = document.getElementById('close-modal');
 const sortableList = document.getElementById('sortable-list');
 
 rearrangeTabsBtn.addEventListener('click', () => {
-  dropdownMenu.style.display = 'none';
+  menuContainer.style.display = 'none';
   settingsButton.setAttribute('aria-expanded', 'false');
   rearrangeModal.style.display = 'flex';
 });
