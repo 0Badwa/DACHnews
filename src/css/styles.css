@@ -344,3 +344,11 @@ nav .menu button:hover {
 .dropdown button:not(:last-child) {
   margin-bottom: 0.5rem;
 }
+
+
+@media (max-width: 768px) {
+  .news-card img {
+    width: 80px; /* Prilagodite veličinu slike */
+    height: 80px; /* Održavajte proporcije */
+  }
+}
