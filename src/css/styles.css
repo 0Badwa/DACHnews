@@ -47,7 +47,7 @@ nav .menu {
   position: relative;
 }
 
-.menuContainer {
+.menuContent {
   display: none; /* Sakrij meni */
   position: absolute;
   top: 100%; /* Spušta meni ispod dugmeta */
