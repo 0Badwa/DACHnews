@@ -359,9 +359,10 @@ nav .menu button:hover {
 
 #change-font-size {
   display: flex;
-  justify-content: center; /* Centriranje dugmadi */
-  align-items: center; /* Vertikalno poravnanje */
-  gap: 1rem; /* Razmak između dugmadi */
+  flex-direction: column; /* Vertikalno slaganje dugmadi */
+  justify-content: center;
+  align-items: center;
+  gap: 0.2rem; /* Razmak između dugmadi */
 }
 
 #font-increase,
