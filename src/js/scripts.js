@@ -53,7 +53,7 @@ document.getElementById('font-increase').addEventListener('click', () => {
 
 document.getElementById('font-decrease').addEventListener('click', () => {
   let currentSize = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--news-title-font-size'));
-  if(currentSize > 0.8) {
+  if(currentSize > 0.7) {
     document.documentElement.style.setProperty('--news-title-font-size', (currentSize - 0.1).toFixed(2) + 'rem');
   }
 });
