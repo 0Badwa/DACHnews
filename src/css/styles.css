@@ -71,7 +71,7 @@ nav .menu button:hover {
   transform: scale(1.05);
 }
 .dropdown {
-   font-size: 1rem; /* Veličina fonta iz kategorija */
+   font-size: 0.8rem; /* Veličina fonta iz kategorija */
     font-family: Arial, sans-serif; /* Font iz kategorija */
   position: absolute;
   top: 60px;
