@@ -87,6 +87,13 @@ nav .menu button:hover {
   z-index: 1001;
   font-size: 0.8rem;
 }
+
+#dropdown-menu {
+  padding: 0.5rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Senka za okvir menija */
+  border-radius: 5px; /* Zaobljeni uglovi okvira */
+  overflow: hidden; /* Sprečava prelazak sadržaja iz okvira */
+}
 [data-theme="dark"] .dropdown {
   background-color: var(--secondary-color);
   color: var(--text-color);
@@ -107,7 +114,10 @@ nav .menu button:hover {
   transition: background-color 0.2s;
 }
 .dropdown button:hover {
-  background-color: #f0f0f0;
+  background-color: #f0f0f0; /* Svetlija pozadina na hover */
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3); /* Hover senka */
+  outline: none; /* Sprečava prelazak linije */
+  overflow: hidden; /* Sprečava prelazak sadržaja */
 }
 [data-theme="dark"] .dropdown button:hover {
   background-color: #333333;
