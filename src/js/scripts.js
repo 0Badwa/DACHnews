@@ -96,7 +96,7 @@ const closeModalBtn = document.getElementById('close-modal');
 const sortableList = document.getElementById('sortable-list');
 
 rearrangeTabsBtn.addEventListener('click', () => {
-  menuContainer.style.display = 'none';
+  menuContent.style.display = 'none';
   settingsButton.setAttribute('aria-expanded', 'false');
   rearrangeModal.style.display = 'flex';
 });
