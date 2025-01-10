@@ -1,5 +1,5 @@
 const settingsButton = document.getElementById('settings-button'); // ID hamburger dugmeta
-const menuContainer = document.querySelector('.menu-container'); // Klasa za meni
+const menuContainer = document.querySelector('.menu-Container'); // Klasa za meni
 
 
 menuContainer.addEventListener('click', () => {
