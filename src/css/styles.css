@@ -198,50 +198,55 @@ nav .menu button:hover {
 #rearrange-modal {
   display: none;
   position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: rgba(0,0,0,0.5);
-  align-items: center;
-  justify-content: center;
-  z-index: 2000;
-  border-radius: 10px;
+  top: 60px; /* Kao i dropdown meni */
+  left: 0;
+  background: var(--secondary-color); /* Isto kao dropdown meni */
+  color: var(--text-color); /* Isto kao dropdown meni */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Dodaj senku */
+  border-radius: 5px;
+  overflow: hidden;
+  width: 200px; /* Širina kao dropdown meni */
+  z-index: 2000; /* Da ostane iznad svega */
 }
 #rearrange-modal .modal-content {
-  background: var(--primary-color);
-  color: #000000;
-  padding: 20px;
-  border-radius: 10px;
-  max-width: 90%;
-  text-align: center;
-  font-size: 1rem;
+   background: none; /* Koristi pozadinu modala */
+  color: inherit;
+  padding: 0; /* Ukloni padding */
+  font-size: 0.9rem; /* Usaglasi font sa dropdown menijem */
+  text-align: left; /* Tekst da se poravna levo */
 }
 #rearrange-modal ul {
   list-style: none;
+  margin: 0;
   padding: 0;
-  margin: 1rem 0;
-  font-size: 1rem;
 }
 #rearrange-modal li {
-  padding: 0.4rem;
-  margin: 0.2rem 0;
-  background: #4f4f4f;
+  padding: 0.75rem 1rem; /* Isto kao dugmad u dropdown meniju */
+  margin: 0; /* Ukloni dodatni razmak između stavki */
+  background: none; /* Bez posebne pozadine */
   cursor: pointer;
-  user-select: none;
-  color: #000000;
-  border-radius: 5px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  transition: background-color 0.2s; /* Animacija za hover */
+  color: inherit; /* Koristi boju teksta iz dropdown-a */
 }
 #rearrange-modal li button {
   background: none;
   border: none;
-  cursor: pointer;
-  font-size: 1rem;
+  color: inherit;
+  font-size: inherit; /* Usaglasi font sa stavkom liste */
   margin-left: 0.5rem;
+  cursor: pointer;
+  transition: color 0.2s;
 }
+
 #sortable-list li {
   cursor: move;
+}
+#rearrange-modal li button:hover {
+  color: var(--primary-color); /* Promeni boju na hover */
+}
+
+[data-theme="dark"] #rearrange-modal li:hover {
+  background-color: #333333; /* Tamnija pozadina na hover za dark mode */
 }
 
 
