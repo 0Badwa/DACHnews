@@ -91,7 +91,10 @@ nav .menu button:hover {
   background-color: var(--secondary-color);
   color: var(--text-color);
 }
-.dropdown button {
+..dropdown button:not(#font-increase):not(#font-decrease) {
+  text-align: left; /* Poravnanje teksta na levo */
+  padding-left: 1.5rem; /* Dodavanje razmaka sa leve strane za bolje poravnanje */
+  display: block; /* Osigurava da dugmad budu prikazana kao blok */
   font-size: inherit; /* Nasleđuje veličinu fonta iz `.dropdown` */
     font-family: inherit; /* Nasleđuje font iz `.dropdown` */
   background: none;
