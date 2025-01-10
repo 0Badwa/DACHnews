@@ -196,7 +196,7 @@ nav .menu button:hover {
 }
 /* Modal */
 #rearrange-modal {
-  display: none;
+  display: flex; /* Omogućava centriranje */
   position: fixed;
   top: 60px; /* Kao i dropdown meni */
   left: 0;
@@ -211,17 +211,17 @@ nav .menu button:hover {
   justify-content: center; /* Horizontalno centriranje */
   width: 300px; /* Širina modala */
     max-width: 90%; /* Prilagodljiva širina za manje ekrane */
-  height: 100%;
+  height: 80%;
   z-index: 2000; /* Da ostane iznad svega */
 }
 #rearrange-modal .modal-content {
   background: #ffffff; /* Bela pozadina */
   color: var(--text-color); /* Tekst u skladu sa temom */
-  padding: 1.5; /* Ukloni padding */
+  padding: 1.5rem; /* Ukloni padding */
  border: 2px solid var(--primary-color); /* Zeleni outline */
   border-radius: 5px; /* Zaobljeni uglovi */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Blaga senka */
-  max-width: 400px; /* Maksimalna širina */
+  max-width: 450px; /* Maksimalna širina */
   width: 90%; /* Prilagodljiva širina */
   text-align: center; /* Centriran tekst *
 }
@@ -231,12 +231,13 @@ nav .menu button:hover {
   padding: 0;
 }
 #rearrange-modal li {
-  padding: 0.5rem 0.8rem; /* Isto kao dugmad u dropdown meniju */
-  margin: 0; /* Ukloni dodatni razmak između stavki */
-  background: none; /* Bez posebne pozadine */
-  cursor: pointer;
-  transition: background-color 0.2s; /* Animacija za hover */
-  color: inherit; /* Koristi boju teksta iz dropdown-a */
+  padding: 0.5rem 0.8rem; /* Prostor unutar svake stavke */
+margin-bottom: 0.2rem; /* Razmak između stavki */
+  background: var(--secondary-color); /* Pozadina slična Settings meniju */
+  border: 1px solid var(--border-color); /* Obrub stavki */
+  border-radius: 5px; /* Zaobljeni uglovi */
+  cursor: pointer; /* Dodaj indikator klikabilnosti */
+  transition: background-color 0.2s; /* Efekat prelaza za hover */
 }
 #rearrange-modal li button {
   background: none;
@@ -251,12 +252,27 @@ nav .menu button:hover {
 #sortable-list li {
   cursor: move;
 }
-#rearrange-modal li button:hover {
-  color: var(--primary-color); /* Promeni boju na hover */
+#rearrange-modal li:hover {
+  background-color: #f0f0f0; /* Svetlija pozadina na hover */
 }
 
 [data-theme="dark"] #rearrange-modal li:hover {
   background-color: #333333; /* Tamnija pozadina na hover za dark mode */
+}
+
+#close-modal {
+  background: var(--primary-color); /* Zeleno dugme */
+  color: #ffffff; /* Bela boja teksta */
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 1rem;
+  font-size: 1rem;
+}
+
+#close-modal:hover {
+  background: #028a5e; /* Tamnija nijansa zelene na hover */
 }
 
 
