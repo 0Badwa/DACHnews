@@ -42,7 +42,7 @@ settingsButton.addEventListener('click', (e) => {
 
 document.addEventListener('click', (e) => {
   if (!settingsButton.contains(e.target) && !menuContainer.contains(e.target)) {
-    menuContainer.style.display = 'none';
+    menuContent.style.display = 'none';
     settingsButton.setAttribute('aria-expanded', 'false');
   }
 });
