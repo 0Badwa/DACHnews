@@ -360,7 +360,7 @@ nav .menu button:hover {
 
 #change-font-size {
   display: flex;
-  flex-direction: column; /* Vertikalno slaganje dugmadi */
+  flex-direction: row; /* Horizontalno slaganje */
   justify-content: center;
   align-items: center;
   gap: 0.4rem; /* Razmak između dugmadi */
