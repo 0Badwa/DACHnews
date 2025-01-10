@@ -252,9 +252,10 @@ nav .menu button:hover {
 }
 
 #settings-button .dot {
-  width: 4px; /* Dužina linije */
-  height: 4px; /* Debljina linije */
+  width: 24px; /* Dužina linije */
+  height: 2px; /* Debljina linije */
   background-color: black; /* Boja tačke */
-  border-radius: 50%; /* Zaobljeni uglovi linije */
+   margin: 4px 0;         /* Spacing between bars */
+  /* border-radius: 50%; Zaobljeni uglovi linije */
 }
 
