@@ -346,7 +346,9 @@ nav .menu button:hover {
 .dropdown button:not(:last-child) {
   margin-bottom: 0.5rem;
 }
-
+.dropdown button:last-child {
+  margin-bottom: 0; /* Uklanja dodatni razmak ispod poslednje kartice */
+}
 
 @media (max-width: 768px) {
   .news-card img {
