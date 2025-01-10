@@ -74,16 +74,16 @@ nav .menu button:hover {
   position: absolute;
   top: 60px;
   left: 0;
-  background-color: #FFFFFF;
+  background-color: #007BFF;
   color: #000000;
   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-  border-radius: 3px;
+  border-radius: 5px;
   overflow: hidden;
   display: none;
   flex-direction: column;
   min-width: 200px;
   z-index: 1001;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
 }
 [data-theme="dark"] .dropdown {
   background-color: var(--secondary-color);
