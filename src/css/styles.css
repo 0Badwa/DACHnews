@@ -201,13 +201,16 @@ nav .menu button:hover {
   top: 60px; /* Kao i dropdown meni */
   left: 0;
    padding: 1.5rem;
-  background: var(--secondary-color); /* Isto kao dropdown meni */
+  background: rgba(0, 0, 0, 0.5); /* Poluprovidna pozadina */
   color: var(--text-color); /* Isto kao dropdown meni */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Dodaj senku */
   border-radius: 5px;
   overflow: hidden;
   text-align: center; /* Centriran tekst */
-  width: 400px; /* Širina kao dropdown meni */
+  align-items: center; /* Vertikalno centriranje */
+  justify-content: center; /* Horizontalno centriranje */
+  width: 100%;
+  height: 100%;
   z-index: 2000; /* Da ostane iznad svega */
 }
 #rearrange-modal .modal-content {
