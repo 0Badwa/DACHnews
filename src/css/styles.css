@@ -107,6 +107,23 @@ nav .menu button:hover {
   cursor: pointer;
   transition: background-color 0.2s;
   font-size: inherit;
+
+#change-font-size {
+    display: flex; /* Aktivira flexbox za prikaz dugmadi jedno pored drugog */
+    justify-content: space-between; /* Dodaje razmak između dugmadi */
+    align-items: center; /* Poravnava dugmad po vertikali */
+    width: 100%; /* Širina roditelja jednaka ostalim dugmadima */
+}
+
+#font-increase, #font-decrease {
+    flex: 1; /* Svako dugme zauzima jednaku širinu unutar roditelja */
+    max-width: 50%; /* Ograničenje na polovinu širine roditelja */
+    padding: 0.5rem; /* Smanjuje unutrašnji razmak */
+    text-align: center; /* Tekst centriran unutar dugmeta */
+    box-sizing: border-box; /* Padding i border ne utiču na ukupnu širinu */
+}
+
+  
 }
 .dropdown button:hover {
   background-color: #f0f0f0;
