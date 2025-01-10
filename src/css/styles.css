@@ -238,7 +238,7 @@ nav .menu button:hover {
 }
 
 #rearrange-modal h2 {
-  font-size: 1.5rem; /* Smanjuje veličinu fonta */
+  font-size: 1.2rem; /* Smanjuje veličinu fonta */
   margin-bottom: 1rem; /* Dodaje razmak ispod naslova */
   text-align: center; /* Opcionalno: Zadržava centriranje */
 }
