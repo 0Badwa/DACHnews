@@ -195,3 +195,48 @@ async function fetchFeeds() {
   lastCacheTime = now;
   return allFeeds;
 }
+
+async function loadHomeFeed() {
+  try {
+    // Poziv API-ja za preuzimanje feedova
+    const response = await fetch('/feeds');
+    if (!response.ok) {
+      throw new Error(`Server error: ${response.status}`);
+    }
+
+    // Parsiranje JSON odgovora
+    const feeds = await response.json();
+    console.log('Feeds loaded:', feeds);
+
+    // Pronađi feed sa naslovom 'Aktuell'
+    const homeFeed = feeds.find(feed => feed.title.toLowerCase() === 'aktuell');
+    const container = document.getElementById('home-feed');
+
+    // Provera da li postoji feed za 'Aktuell'
+    if (homeFeed && homeFeed.items.length > 0) {
+      container.innerHTML = ''; // Očisti prethodni sadržaj
+
+      // Iteracija kroz stavke feeda i kreiranje kartica
+      homeFeed.items.forEach(item => {
+        const newsCard = document.createElement('div');
+        newsCard.className = 'news-card';
+        newsCard.innerHTML = `
+          <img src="https://via.placeholder.com/125" alt="News Image"/>
+          <div>
+            <a href="${item.link}" class="news-title" target="_blank">${item.title}</a>
+            <p class="news-meta">Published: ${item.pubDate || 'Unknown'}</p>
+          </div>
+        `;
+        container.appendChild(newsCard);
+      });
+    } else {
+      // Prikaz poruke ako nema dostupnih stavki
+      container.innerHTML = '<p>No news available for the "Aktuell" category.</p>';
+    }
+  } catch (error) {
+    // Prikaz greške ako API nije dostupan ili dođe do druge greške
+    console.error('Error loading home feed:', error);
+    const container = document.getElementById('home-feed');
+    container.innerHTML = '<p>Error loading feeds. Please try again later.</p>';
+  }
+}
