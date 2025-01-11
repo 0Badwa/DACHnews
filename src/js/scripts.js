@@ -134,6 +134,43 @@ document.getElementById('about').addEventListener('click', () => {
   alert('about');
 });
 
+// Postavi interval osvežavanja u milisekundama (npr. 1 sat = 3600000 ms)
+const REFRESH_INTERVAL = 3600000; 
+
+// Funkcija za proveru i ažuriranje keša
+function checkAndUpdateCache() {
+    // Dohvati trenutni vremenski pečat
+    const now = Date.now();
+
+    // Dohvati poslednji vremenski pečat iz localStorage
+    const lastUpdate = localStorage.getItem('lastUpdate');
+
+    if (lastUpdate) {
+        // Proveri da li je prošao zadati interval
+        if (now - parseInt(lastUpdate, 10) > REFRESH_INTERVAL) {
+            console.log("Osvežavanje keša...");
+            refreshData(); // Funkcija za osvežavanje podataka
+        } else {
+            console.log("Keš je još uvek važeći.");
+        }
+    } else {
+        console.log("Keš nije pronađen, osvežavam podatke po prvi put...");
+        refreshData(); // Ako keš ne postoji, osveži podatke
+    }
+}
+
+// Funkcija za osvežavanje podataka i ažuriranje vremenskog pečata
+function refreshData() {
+    // Ovde dodaj logiku za osvežavanje podataka, npr. fetchovanje novih podataka
+    console.log("Podaci su osveženi.");
+
+    // Ažuriraj vremenski pečat u localStorage
+    localStorage.setItem('lastUpdate', Date.now());
+}
+
+// Pozovi funkciju pri učitavanju aplikacije
+checkAndUpdateCache();
+
 
 // Zatvaranje modala
 // document.getElementById('close-modal').addEventListener('click', () => {
