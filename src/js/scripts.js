@@ -1,3 +1,4 @@
+// scripts.js
 const tabs = document.querySelectorAll('.tab');
 const contents = document.querySelectorAll('.tab-content');
 
@@ -71,6 +72,9 @@ fontDecreaseButton.addEventListener('click', () => {
 async function loadHomeFeed() {
   try {
     const response = await fetch('/feeds'); // Poziv API-ja za keširane feedove
+    if (!response.ok) {
+      throw new Error(`Server error: ${response.status}`);
+    }
     const feeds = await response.json(); // Parsiranje JSON odgovora
 
     const homeFeed = feeds.find(feed => feed.title.toLowerCase() === 'aktuell'); // Pronađi feed za 'Aktuell'
