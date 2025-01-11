@@ -388,3 +388,33 @@ nav .menu button:hover {
   height: auto; /* Zadržava proporcije slike */
 }
 
+.color-strip {
+  display: flex;
+  height: 10px;
+  margin: 0;
+  padding: 0;
+}
+
+.color {
+  flex: 1; /* Sve boje zauzimaju jednaku širinu */
+  height: 100%;
+}
+
+.color.red {
+  background-color: red;
+}
+.color.orange {
+  background-color: orange;
+}
+.color.yellow {
+  background-color: yellow;
+}
+.color.green {
+  background-color: green;
+}
+.color.blue {
+  background-color: blue;
+}
+.color.purple {
+  background-color: purple;
+}
