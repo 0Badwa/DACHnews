@@ -108,32 +108,22 @@ closeModalBtn.addEventListener('click', () => {
 });
 
 window.addEventListener('load', () => {
-  // Pokušaj dohvatiti spremljenu temu iz localStorage
-  const savedTheme = localStorage.getItem('theme');
+  // Postavi tamnu temu kao podrazumevanu dok se ne učita korisnikov izbor
+  document.body.setAttribute('data-theme', 'dark');
 
-  // Ako nema spremljene teme, postavi 'dark' kao podrazumevanu
-  if (!savedTheme) {
-    document.body.setAttribute('data-theme', 'dark');
-    localStorage.setItem('theme', 'dark');
-  } else {
-    // Ako tema postoji, postavi tu temu
+  // Proveri da li korisnik ima spremljenu temu u localStorage
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme) {
     document.body.setAttribute('data-theme', savedTheme);
+  } else {
+    localStorage.setItem('theme', 'dark'); // Postavi tamnu kao podrazumevanu
   }
 
-  // Ažuriraj tekst dugmeta na osnovu trenutačne teme
+  // Ažuriraj tekst dugmeta za promenu teme
   const darkModeActive = document.body.getAttribute('data-theme') === 'dark';
   document.getElementById('toggle-dark-mode').innerText = darkModeActive ? 'Licht Modus' : 'Dunkel Modus';
+});
 
-  // Ukoliko postoji spremljeni redosled tabova
-  const savedOrder = localStorage.getItem('tabOrder');
-  if (savedOrder) {
-    const order = JSON.parse(savedOrder);
-    order.forEach(tabId => {
-      const tabButton = document.querySelector(`.tab[data-tab="${tabId}"]`);
-      if(tabButton) {
-        tabButton.parentNode.appendChild(tabButton);
-      }
-    });
   }
 }); // Završetak load event handlera
 
