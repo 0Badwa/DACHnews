@@ -149,6 +149,6 @@ document.getElementById('about').addEventListener('click', () => {
 
 
 // Zatvaranje modala
-document.getElementById('close-modal').addEventListener('click', () => {
-  rearrangeModal.style.display = 'none';
-});
+// document.getElementById('close-modal').addEventListener('click', () => {
+// rearrangeModal.style.display = 'none';
+// });
