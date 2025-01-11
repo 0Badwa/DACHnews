@@ -376,6 +376,8 @@ nav .menu button:hover {
 
 #font-increase,
 #font-decrease {
+  height: 2.5rem; /* Ista visina kao ostale kartice */
+  padding: 0.5rem 1.5rem; /* Unutrašnji razmak kao kod ostalih */
   margin-bottom: 0.5rem; /* Reset margine */
   flex: 0 1 auto; /* Zadržava širinu dugmadi bez pomeranja */
 }
