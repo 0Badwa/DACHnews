@@ -127,3 +127,32 @@ window.onload = () => {
     });
   }
 };
+
+async function fetchFeeds() {
+  const now = Date.now();
+
+  if (cachedFeeds && lastCacheTime && (now - lastCacheTime < CACHE_DURATION)) {
+    console.log('Serving feeds from cache');
+    return cachedFeeds;
+  }
+
+  console.log('Fetching new feeds...');
+  const allFeeds = [];
+  for (const url of rssLinks.feeds) {
+    try {
+      console.log(`Fetching feed from: ${url}`);
+      const feed = await parser.parseURL(url); // Parsiranje XML u JSON
+      console.log(`Successfully fetched feed: ${feed.title}`); // Log naslova feeda
+      allFeeds.push({
+        title: feed.title,
+        items: feed.items.map(item => ({ title: item.title, link: item.link }))
+      });
+    } catch (error) {
+      console.error(`Error fetching feed from ${url}:`, error.message);
+    }
+  }
+
+  cachedFeeds = allFeeds;
+  lastCacheTime = now;
+  return allFeeds;
+}
