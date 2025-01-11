@@ -24,8 +24,8 @@ const dropdownMenu = document.getElementById('dropdown-menu');
 settingsButton.addEventListener('click', (e) => {
   e.stopPropagation();
   const isExpanded = settingsButton.getAttribute('aria-expanded') === 'true';
-  settingsButton.setAttribute('aria-expanded', String(!isExpanded));
-  dropdownMenu.style.display = dropdownMenu.style.display === 'flex' ? 'none' : 'flex';
+  settingsButton.setAttribute('aria-expanded', !isExpanded);
+  dropdownMenu.style.display = isExpanded ? 'none' : 'flex';
 });
 
 document.addEventListener('click', (e) => {
@@ -80,4 +80,70 @@ document.getElementById('font-decrease').addEventListener('click', () => {
 document.querySelectorAll('#sortable-list .move-up').forEach(button => {
   button.addEventListener('click', () => {
     const li = button.parentElement.parentElement;
-    const prev = li.previousElementSi
+    const prev = li.previousElementSibling;
+    if (prev) {
+      li.parentNode.insertBefore(li, prev);
+    }
+  });
+});
+
+document.querySelectorAll('#sortable-list .move-down').forEach(button => {
+  button.addEventListener('click', () => {
+    const li = button.parentElement.parentElement;
+    const next = li.nextElementSibling;
+    if (next) {
+      li.parentNode.insertBefore(next, li);
+    }
+  });
+});
+
+const rearrangeTabsBtn = document.getElementById('rearrange-tabs');
+const rearrangeModal = document.getElementById('rearrange-modal');
+const closeModalBtn = document.getElementById('close-modal');
+const sortableList = document.getElementById('sortable-list');
+
+rearrangeTabsBtn.addEventListener('click', () => {
+  dropdownMenu.style.display = 'none';
+  settingsButton.setAttribute('aria-expanded', 'false');
+  rearrangeModal.style.display = 'flex';
+});
+
+closeModalBtn.addEventListener('click', () => {
+  rearrangeModal.style.display = 'none';
+  const newOrder = Array.from(sortableList.children).map(li => li.dataset.tab);
+  localStorage.setItem('tabOrder', JSON.stringify(newOrder));
+  newOrder.forEach(tabId => {
+    const tabButton = document.querySelector(`.tab[data-tab="${tabId}"]`);
+    if (tabButton) {
+      tabButton.parentNode.appendChild(tabButton);
+    }
+  });
+});
+
+window.addEventListener('load', () => {
+  const savedOrder = localStorage.getItem('tabOrder');
+  if (savedOrder) {
+    const order = JSON.parse(savedOrder);
+    order.forEach(tabId => {
+      const tabButton = document.querySelector(`.tab[data-tab="${tabId}"]`);
+      if (tabButton) {
+        tabButton.parentNode.appendChild(tabButton);
+      }
+    });
+  }
+});
+
+document.getElementById('block-source').addEventListener('click', () => {
+  alert('Quellen blockieren');
+});
+document.getElementById('kontakt').addEventListener('click', () => {
+  alert('Kontakt');
+});
+document.getElementById('about').addEventListener('click', () => {
+  alert('Über');
+});
+
+// Zatvaranje modala
+document.getElementById('close-modal').addEventListener('click', () => {
+  rearrangeModal.style.display = 'none';
+});
