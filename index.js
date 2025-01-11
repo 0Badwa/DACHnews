@@ -10,13 +10,26 @@ const PORT = process.env.PORT || 3000;
 // Učitavanje RSS linkova
 const rssLinks = JSON.parse(fs.readFileSync('rss_links.json', 'utf8'));
 
-// Parsiranje RSS feedova
+// Keširanje podataka
+let cachedFeeds = null;
+let lastCacheTime = null;
+const CACHE_DURATION = 60 * 60 * 1000; // Keš traje 1 sat
+
+// Parsiranje RSS feedova sa keširanjem
 async function fetchFeeds() {
+  const now = Date.now();
+
+  // Proveri da li je keš validan
+  if (cachedFeeds && lastCacheTime && (now - lastCacheTime < CACHE_DURATION)) {
+    console.log('Serving feeds from cache');
+    return cachedFeeds;
+  }
+
+  console.log('Fetching new feeds...');
   const allFeeds = [];
   for (const url of rssLinks.feeds) {
     try {
       const feed = await parser.parseURL(url);
-      console.log(`Feed Title: ${feed.title}`);
       allFeeds.push({
         title: feed.title,
         items: feed.items.map(item => ({ title: item.title, link: item.link }))
@@ -25,6 +38,11 @@ async function fetchFeeds() {
       console.error(`Error fetching feed from ${url}:`, error.message);
     }
   }
+
+  // Ažuriraj keš
+  cachedFeeds = allFeeds;
+  lastCacheTime = now;
+
   return allFeeds;
 }
 
