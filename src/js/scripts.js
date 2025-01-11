@@ -116,7 +116,7 @@ window.addEventListener('load', () => {
 
   // Ažuriraj tekst dugmeta na osnovu trenutačne teme
   const darkModeActive = document.body.getAttribute('data-theme') === 'dark';
-  document.getElementById('toggle-dark-mode').innerText = darkModeActive ? 'Light Mode' : 'Dark Mode';
+  document.getElementById('toggle-dark-mode').innerText = darkModeActive ? 'Licht Modus' : 'Dunkel Modus';
 });
     order.forEach(tabId => {
       const tabButton = document.querySelector(`.tab[data-tab="${tabId}"]`);
