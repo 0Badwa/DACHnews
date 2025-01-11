@@ -12,7 +12,7 @@ tabs.forEach(tab => {
     tab.classList.add('active');
     tab.setAttribute('aria-selected', 'true');
     const activeContent = document.getElementById(tab.dataset.tab);
-    if (activeContent) {
+    if(activeContent) {
       activeContent.classList.add('active');
     }
   });
@@ -24,8 +24,8 @@ const dropdownMenu = document.getElementById('dropdown-menu');
 settingsButton.addEventListener('click', (e) => {
   e.stopPropagation();
   const isExpanded = settingsButton.getAttribute('aria-expanded') === 'true';
-  settingsButton.setAttribute('aria-expanded', !isExpanded);
-  dropdownMenu.style.display = isExpanded ? 'none' : 'flex';
+  settingsButton.setAttribute('aria-expanded', String(!isExpanded));
+  dropdownMenu.style.display = dropdownMenu.style.display === 'flex' ? 'none' : 'flex';
 });
 
 document.addEventListener('click', (e) => {
@@ -35,44 +35,25 @@ document.addEventListener('click', (e) => {
   }
 });
 
-window.addEventListener('load', () => {
-  const savedTheme = localStorage.getItem('theme');
-
-  // Postavi podrazumevanu temu na dark mode ako nema sačuvane teme
-  if (!savedTheme) {
-    document.body.setAttribute('data-theme', 'dark');
-    localStorage.setItem('theme', 'dark');
-  } else {
-    document.body.setAttribute('data-theme', savedTheme);
-  }
-
-  // Ažuriraj tekst dugmeta na osnovu trenutne teme
-  const darkModeActive = document.body.getAttribute('data-theme') === 'dark';
-  document.getElementById('toggle-dark-mode').innerText = darkModeActive ? 'Heller Modus' : 'Dunkler Modus';
-});
-
 document.getElementById('toggle-dark-mode').addEventListener('click', () => {
   const body = document.body;
   const darkModeActive = body.getAttribute('data-theme') === 'dark';
-  const newTheme = darkModeActive ? 'light' : 'dark';
-
-  body.setAttribute('data-theme', newTheme);
-  localStorage.setItem('theme', newTheme);
-
-  // Ažuriraj tekst dugmeta za prebacivanje
-  document.getElementById('toggle-dark-mode').innerText = darkModeActive ? 'Dunkler Modus' : 'Heller Modus';
+  body.setAttribute('data-theme', darkModeActive ? 'light' : 'dark');
+  dropdownMenu.style.display = 'none';
+  settingsButton.setAttribute('aria-expanded', 'false');
+  document.getElementById('toggle-dark-mode').innerText = darkModeActive ? 'Dark Mode' : 'Light Mode';
 });
 
 document.getElementById('font-increase').addEventListener('click', () => {
   let currentSize = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--news-title-font-size'));
-  if (currentSize < 2.0) {
+  if(currentSize < 2.0) {
     document.documentElement.style.setProperty('--news-title-font-size', (currentSize + 0.1).toFixed(2) + 'rem');
   }
 });
 
 document.getElementById('font-decrease').addEventListener('click', () => {
   let currentSize = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--news-title-font-size'));
-  if (currentSize > 0.7) {
+  if(currentSize > 0.7) {
     document.documentElement.style.setProperty('--news-title-font-size', (currentSize - 0.1).toFixed(2) + 'rem');
   }
 });
@@ -81,7 +62,7 @@ document.querySelectorAll('#sortable-list .move-up').forEach(button => {
   button.addEventListener('click', () => {
     const li = button.parentElement.parentElement;
     const prev = li.previousElementSibling;
-    if (prev) {
+    if(prev) {
       li.parentNode.insertBefore(li, prev);
     }
   });
@@ -91,7 +72,7 @@ document.querySelectorAll('#sortable-list .move-down').forEach(button => {
   button.addEventListener('click', () => {
     const li = button.parentElement.parentElement;
     const next = li.nextElementSibling;
-    if (next) {
+    if(next) {
       li.parentNode.insertBefore(next, li);
     }
   });
@@ -114,7 +95,7 @@ closeModalBtn.addEventListener('click', () => {
   localStorage.setItem('tabOrder', JSON.stringify(newOrder));
   newOrder.forEach(tabId => {
     const tabButton = document.querySelector(`.tab[data-tab="${tabId}"]`);
-    if (tabButton) {
+    if(tabButton) {
       tabButton.parentNode.appendChild(tabButton);
     }
   });
@@ -122,11 +103,11 @@ closeModalBtn.addEventListener('click', () => {
 
 window.addEventListener('load', () => {
   const savedOrder = localStorage.getItem('tabOrder');
-  if (savedOrder) {
+  if(savedOrder) {
     const order = JSON.parse(savedOrder);
     order.forEach(tabId => {
       const tabButton = document.querySelector(`.tab[data-tab="${tabId}"]`);
-      if (tabButton) {
+      if(tabButton) {
         tabButton.parentNode.appendChild(tabButton);
       }
     });
@@ -134,14 +115,15 @@ window.addEventListener('load', () => {
 });
 
 document.getElementById('block-source').addEventListener('click', () => {
-  alert('Quellen blockieren');
+  alert('Blokiranje izvora');
 });
 document.getElementById('kontakt').addEventListener('click', () => {
   alert('Kontakt');
 });
 document.getElementById('about').addEventListener('click', () => {
-  alert('Über');
+  alert('about');
 });
+
 
 // Zatvaranje modala
 document.getElementById('close-modal').addEventListener('click', () => {
