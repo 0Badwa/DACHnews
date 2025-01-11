@@ -196,7 +196,7 @@ nav .menu button:hover {
   object-fit: cover;
 }
 .news-title {
-  font-size: var(--news-title-font-size);
+  font-size: var(--news-title-font-size, 1rem);
   color: var(--primary-color);
   text-decoration: none;
   margin: 0 0 0.5rem;
