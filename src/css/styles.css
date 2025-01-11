@@ -269,7 +269,7 @@ nav .menu button:hover {
   padding: 0.5rem 0.8rem; /* Prostor unutar stavki */
   margin-bottom: 0.2rem; /* Razmak između stavki */
   background: var(--secondary-color); /* Pozadina slična Settings meniju */
-  border: 1px solid var(--border-color); /* Obrub stavki */
+  border: 0.5px solid var(--border-color); /* Obrub stavki */
   border-radius: 5px; /* Zaobljeni uglovi */
   cursor: pointer; /* Dodaj indikator klikabilnosti */
   transition: background-color 0.2s; /* Efekat prelaza za hover */
