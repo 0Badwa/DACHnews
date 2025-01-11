@@ -71,3 +71,13 @@ app.get('/', (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
+
+app.get('/test-feed', async (req, res) => {
+  try {
+    const feed = await parser.parseURL('https://www.derstandard.at/rss');
+    res.json(feed); // Vraća JSON feed direktno
+  } catch (error) {
+    console.error('Error parsing feed:', error.message);
+    res.status(500).send('Error parsing feed.');
+  }
+});
