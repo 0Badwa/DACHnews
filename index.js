@@ -38,13 +38,13 @@ app.get('/feeds', async (req, res) => {
   }
 });
 
-// Posluživanje `index.html` za `/`
+// Posluživanje statičkih fajlova
+app.use('/src', express.static(path.join(__dirname, 'src')));
+
+// Posluživanje `index.html`
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
-
-// Posluživanje statičkih fajlova
-app.use('/src', express.static(path.join(__dirname, 'src')));
 
 // Pokretanje servera
 app.listen(PORT, () => {
