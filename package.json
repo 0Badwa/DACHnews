@@ -1,6 +1,7 @@
 {
   "dependencies": {
-    "rss-parser": "^3.13.0"
+    "rss-parser": "^3.13.0",
+    "express": "^4.18.2"
   },
   "name": "dachnews",
   "version": "1.0.0",
