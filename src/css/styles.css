@@ -388,9 +388,13 @@ nav .menu button:hover {
   height: auto; /* Zadržava proporcije slike */
 }
 
-.color-strip {
-  display: flex;
+display: flex;
   height: 10px;
+  position: fixed; /* Fiksira traku na vrhu stranice */
+  top: 0; /* Postavlja je na vrh */
+  left: 0;
+  width: 100%; /* Širina trake */
+  z-index: 1000; /* Osigurava da bude iznad ostalih elemenata */
   margin: 0;
   padding: 0;
 }
