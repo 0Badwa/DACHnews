@@ -41,7 +41,7 @@ document.getElementById('toggle-dark-mode').addEventListener('click', () => {
   body.setAttribute('data-theme', darkModeActive ? 'light' : 'dark');
   dropdownMenu.style.display = 'none';
   settingsButton.setAttribute('aria-expanded', 'false');
-  document.getElementById('toggle-dark-mode').innerText = darkModeActive ? 'Dark Mode' : 'Light Mode';
+  document.getElementById('toggle-dark-mode').innerText = darkModeActive ? 'Dunkel Modus' : 'Licht Modus';
 });
 
 document.getElementById('font-increase').addEventListener('click', () => {
