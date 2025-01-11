@@ -107,15 +107,7 @@ closeModalBtn.addEventListener('click', () => {
 
 window.addEventListener('load', () => {
    document.body.setAttribute('data-theme', 'dark');
-
-  // Ako nema spremljene teme, postavi 'dark' kao podrazumevanu
-  if (!savedTheme) {
     document.body.setAttribute('data-theme', 'dark');
-    localStorage.setItem('theme', 'dark');
-  } else {
-    document.body.setAttribute('data-theme', savedTheme);
-  }
-  const darkModeActive = document.body.getAttribute('data-theme') === 'dark';
   document.getElementById('toggle-dark-mode').innerText = darkModeActive ? 'Licht Modus' : 'Dunkel Modus';
 });
 
