@@ -1,6 +1,7 @@
 const tabs = document.querySelectorAll('.tab');
 const contents = document.querySelectorAll('.tab-content');
 
+// Tab navigacija
 tabs.forEach(tab => {
   tab.addEventListener('click', () => {
     tabs.forEach(t => {
@@ -12,12 +13,13 @@ tabs.forEach(tab => {
     tab.classList.add('active');
     tab.setAttribute('aria-selected', 'true');
     const activeContent = document.getElementById(tab.dataset.tab);
-    if(activeContent) {
+    if (activeContent) {
       activeContent.classList.add('active');
     }
   });
 });
 
+// Dropdown meni za podešavanja
 const settingsButton = document.getElementById('settings-button');
 const dropdownMenu = document.getElementById('dropdown-menu');
 
@@ -35,149 +37,37 @@ document.addEventListener('click', (e) => {
   }
 });
 
-document.getElementById('toggle-dark-mode').addEventListener('click', () => {
+// Tema: tamni i svetli režim
+const toggleDarkModeButton = document.getElementById('toggle-dark-mode');
+toggleDarkModeButton.addEventListener('click', () => {
   const body = document.body;
   const darkModeActive = body.getAttribute('data-theme') === 'dark';
   const newTheme = darkModeActive ? 'light' : 'dark';
-  // Primeni novu temu
   body.setAttribute('data-theme', newTheme);
-  // Zatvori dropdown meni ako je otvoren (ako je potrebno)
   dropdownMenu.style.display = 'none';
   settingsButton.setAttribute('aria-expanded', 'false');
-  // Ažuriraj tekst na dugmetu prema trenutnoj temi
-  document.getElementById('toggle-dark-mode').innerText = darkModeActive ? 'Dunkel Modus' : 'Licht Modus';
+  toggleDarkModeButton.innerText = darkModeActive ? 'Dunkel Modus' : 'Licht Modus';
 });
 
-document.getElementById('font-increase').addEventListener('click', () => {
+// Povećanje i smanjenje veličine fonta
+const fontIncreaseButton = document.getElementById('font-increase');
+const fontDecreaseButton = document.getElementById('font-decrease');
+
+fontIncreaseButton.addEventListener('click', () => {
   let currentSize = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--news-title-font-size'));
-  if(currentSize < 2.0) {
+  if (currentSize < 2.0) {
     document.documentElement.style.setProperty('--news-title-font-size', (currentSize + 0.1).toFixed(2) + 'rem');
   }
 });
 
-document.getElementById('font-decrease').addEventListener('click', () => {
+fontDecreaseButton.addEventListener('click', () => {
   let currentSize = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--news-title-font-size'));
-  if(currentSize > 0.7) {
+  if (currentSize > 0.7) {
     document.documentElement.style.setProperty('--news-title-font-size', (currentSize - 0.1).toFixed(2) + 'rem');
   }
 });
 
-document.querySelectorAll('#sortable-list .move-up').forEach(button => {
-  button.addEventListener('click', () => {
-    const li = button.parentElement.parentElement;
-    const prev = li.previousElementSibling;
-    if(prev) {
-      li.parentNode.insertBefore(li, prev);
-    }
-  });
-});
-
-document.querySelectorAll('#sortable-list .move-down').forEach(button => {
-  button.addEventListener('click', () => {
-    const li = button.parentElement.parentElement;
-    const next = li.nextElementSibling;
-    if(next) {
-      li.parentNode.insertBefore(next, li);
-    }
-  });
-});
-
-const rearrangeTabsBtn = document.getElementById('rearrange-tabs');
-const rearrangeModal = document.getElementById('rearrange-modal');
-const closeModalBtn = document.getElementById('close-modal');
-const sortableList = document.getElementById('sortable-list');
-
-rearrangeTabsBtn.addEventListener('click', () => {
-  dropdownMenu.style.display = 'none';
-  settingsButton.setAttribute('aria-expanded', 'false');
-  rearrangeModal.style.display = 'flex';
-});
-
-closeModalBtn.addEventListener('click', () => {
-  rearrangeModal.style.display = 'none';
-  const newOrder = Array.from(sortableList.children).map(li => li.dataset.tab);
-  localStorage.setItem('tabOrder', JSON.stringify(newOrder));
-  newOrder.forEach(tabId => {
-    const tabButton = document.querySelector(`.tab[data-tab="${tabId}"]`);
-    if(tabButton) {
-      tabButton.parentNode.appendChild(tabButton);
-    }
-  });
-});
-
-window.addEventListener('load', () => {
-  document.body.setAttribute('data-theme', 'dark');
-  const darkModeActive = document.body.getAttribute('data-theme') === 'dark';
-  document.getElementById('toggle-dark-mode').innerText = darkModeActive ? 'Licht Modus' : 'Dunkel Modus';
-
-  // Ukoliko postoji spremljeni redosled tabova
-  const savedOrder = localStorage.getItem('tabOrder');
-  if (savedOrder) {
-    const order = JSON.parse(savedOrder);
-    order.forEach(tabId => {
-      const tabButton = document.querySelector(`.tab[data-tab="${tabId}"]`);
-      if(tabButton) {
-        tabButton.parentNode.appendChild(tabButton);
-      }
-    });
-  }
-}); // Završetak load event handlera
-
-
-document.getElementById('block-source').addEventListener('click', () => {
-  alert('Blokiranje izvora');
-});
-document.getElementById('kontakt').addEventListener('click', () => {
-  alert('Kontakt');
-});
-document.getElementById('about').addEventListener('click', () => {
-  alert('about');
-});
-
-// Postavi interval osvežavanja u milisekundama (npr. 1 sat = 3600000 ms)
-const REFRESH_INTERVAL = 3600000; 
-
-// Funkcija za proveru i ažuriranje keša
-function checkAndUpdateCache() {
-    // Dohvati trenutni vremenski pečat
-    const now = Date.now();
-
-    // Dohvati poslednji vremenski pečat iz localStorage
-    const lastUpdate = localStorage.getItem('lastUpdate');
-
-    if (lastUpdate) {
-        // Proveri da li je prošao zadati interval
-        if (now - parseInt(lastUpdate, 10) > REFRESH_INTERVAL) {
-            console.log("Osvežavanje keša...");
-            refreshData(); // Funkcija za osvežavanje podataka
-        } else {
-            console.log("Keš je još uvek važeći.");
-        }
-    } else {
-        console.log("Keš nije pronađen, osvežavam podatke po prvi put...");
-        refreshData(); // Ako keš ne postoji, osveži podatke
-    }
-}
-
-// Funkcija za osvežavanje podataka i ažuriranje vremenskog pečata
-function refreshData() {
-    // Ovde dodaj logiku za osvežavanje podataka, npr. fetchovanje novih podataka
-    console.log("Podaci su osveženi.");
-
-    // Ažuriraj vremenski pečat u localStorage
-    localStorage.setItem('lastUpdate', Date.now());
-}
-
-// Pozovi funkciju pri učitavanju aplikacije
-checkAndUpdateCache();
-
-
-// Zatvaranje modala
-// document.getElementById('close-modal').addEventListener('click', () => {
-// rearrangeModal.style.display = 'none';
-// });
-
-
+// Dinamičko učitavanje feedova za kategoriju "Aktuell"
 async function loadHomeFeed() {
   try {
     const response = await fetch('/feeds'); // Poziv API-ja za keširane feedove
@@ -213,4 +103,23 @@ async function loadHomeFeed() {
 }
 
 // Automatsko učitavanje feedova za "Aktuell"
-window.onload = loadHomeFeed;
+window.onload = () => {
+  loadHomeFeed();
+
+  // Postavi početnu temu
+  document.body.setAttribute('data-theme', 'dark');
+  const darkModeActive = document.body.getAttribute('data-theme') === 'dark';
+  toggleDarkModeButton.innerText = darkModeActive ? 'Licht Modus' : 'Dunkel Modus';
+
+  // Proveri i primeni redosled tabova iz localStorage
+  const savedOrder = localStorage.getItem('tabOrder');
+  if (savedOrder) {
+    const order = JSON.parse(savedOrder);
+    order.forEach(tabId => {
+      const tabButton = document.querySelector(`.tab[data-tab="${tabId}"]`);
+      if (tabButton) {
+        tabButton.parentNode.appendChild(tabButton);
+      }
+    });
+  }
+};
