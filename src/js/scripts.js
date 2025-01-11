@@ -41,8 +41,6 @@ document.getElementById('toggle-dark-mode').addEventListener('click', () => {
   const newTheme = darkModeActive ? 'light' : 'dark';
   // Primeni novu temu
   body.setAttribute('data-theme', newTheme);
-  // Sačuvaj izbor u localStorage
-  localStorage.setItem('theme', newTheme);
   // Zatvori dropdown meni ako je otvoren (ako je potrebno)
   dropdownMenu.style.display = 'none';
   settingsButton.setAttribute('aria-expanded', 'false');
@@ -108,17 +106,18 @@ closeModalBtn.addEventListener('click', () => {
 });
 
 window.addEventListener('load', () => {
-  // Pokušaj dohvatiti spremljenu temu iz localStorage
-  const savedTheme = localStorage.getItem('theme');
+   document.body.setAttribute('data-theme', 'dark');
 
   // Ako nema spremljene teme, postavi 'dark' kao podrazumevanu
   if (!savedTheme) {
     document.body.setAttribute('data-theme', 'dark');
     localStorage.setItem('theme', 'dark');
   } else {
-    // Ako tema postoji, postavi tu temu
     document.body.setAttribute('data-theme', savedTheme);
   }
+  const darkModeActive = document.body.getAttribute('data-theme') === 'dark';
+  document.getElementById('toggle-dark-mode').innerText = darkModeActive ? 'Licht Modus' : 'Dunkel Modus';
+});
 
   // Ažuriraj tekst dugmeta na osnovu trenutačne teme
   const darkModeActive = document.body.getAttribute('data-theme') === 'dark';
