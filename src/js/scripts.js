@@ -38,9 +38,15 @@ document.addEventListener('click', (e) => {
 document.getElementById('toggle-dark-mode').addEventListener('click', () => {
   const body = document.body;
   const darkModeActive = body.getAttribute('data-theme') === 'dark';
-  body.setAttribute('data-theme', darkModeActive ? 'light' : 'dark');
+  const newTheme = darkModeActive ? 'light' : 'dark';
+  // Primeni novu temu
+  body.setAttribute('data-theme', newTheme);
+  // Sačuvaj izbor u localStorage
+  localStorage.setItem('theme', newTheme);
+  // Zatvori dropdown meni ako je otvoren (ako je potrebno)
   dropdownMenu.style.display = 'none';
   settingsButton.setAttribute('aria-expanded', 'false');
+  // Ažuriraj tekst na dugmetu prema trenutnoj temi
   document.getElementById('toggle-dark-mode').innerText = darkModeActive ? 'Dunkel Modus' : 'Licht Modus';
 });
 
