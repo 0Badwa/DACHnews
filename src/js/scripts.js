@@ -176,3 +176,41 @@ checkAndUpdateCache();
 // document.getElementById('close-modal').addEventListener('click', () => {
 // rearrangeModal.style.display = 'none';
 // });
+
+
+async function loadHomeFeed() {
+  try {
+    const response = await fetch('/feeds'); // Poziv API-ja za keširane feedove
+    const feeds = await response.json(); // Parsiranje JSON odgovora
+
+    const homeFeed = feeds.find(feed => feed.title.toLowerCase() === 'aktuell'); // Pronađi feed za 'Aktuell'
+    const container = document.getElementById('home-feed');
+
+    if (homeFeed && homeFeed.items.length > 0) {
+      container.innerHTML = ''; // Očisti prethodni sadržaj
+
+      // Dodaj svaki feed kao karticu
+      homeFeed.items.forEach(item => {
+        const newsCard = document.createElement('div');
+        newsCard.className = 'news-card';
+        newsCard.innerHTML = `
+          <img src="https://via.placeholder.com/125" alt="News Image"/>
+          <div>
+            <a href="${item.link}" class="news-title" target="_blank">${item.title}</a>
+            <p class="news-meta">Source | Published recently</p>
+          </div>
+        `;
+        container.appendChild(newsCard);
+      });
+    } else {
+      container.innerHTML = '<p>No news available for this category.</p>';
+    }
+  } catch (error) {
+    console.error('Error loading home feed:', error);
+    const container = document.getElementById('home-feed');
+    container.innerHTML = '<p>Error loading feeds. Please try again later.</p>';
+  }
+}
+
+// Automatsko učitavanje feedova za "Aktuell"
+window.onload = loadHomeFeed;
