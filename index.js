@@ -1,25 +1,22 @@
 const fs = require('fs');
 const RSSParser = require('rss-parser');
 const express = require('express');
+const path = require('path');
 
 const parser = new RSSParser();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Učitavanje RSS linkova iz JSON fajla
+// Učitavanje RSS linkova
 const rssLinks = JSON.parse(fs.readFileSync('rss_links.json', 'utf8'));
 
-// Parsiranje svih feedova
+// Parsiranje RSS feedova
 async function fetchFeeds() {
   const allFeeds = [];
   for (const url of rssLinks.feeds) {
     try {
       const feed = await parser.parseURL(url);
       console.log(`Feed Title: ${feed.title}`);
-      feed.items.forEach(item => {
-        console.log(`Title: ${item.title}`);
-        console.log(`Link: ${item.link}`);
-      });
       allFeeds.push({
         title: feed.title,
         items: feed.items.map(item => ({ title: item.title, link: item.link }))
@@ -31,7 +28,7 @@ async function fetchFeeds() {
   return allFeeds;
 }
 
-// API endpoint za dobijanje RSS feedova
+// Posluživanje RSS podataka
 app.get('/feeds', async (req, res) => {
   try {
     const feeds = await fetchFeeds();
@@ -41,7 +38,15 @@ app.get('/feeds', async (req, res) => {
   }
 });
 
+// Posluživanje `index.html` za `/`
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// Posluživanje statičkih fajlova
+app.use('/src', express.static(path.join(__dirname, 'src')));
+
 // Pokretanje servera
 app.listen(PORT, () => {
-  console.log(`Server sluša na portu ${PORT}`);
+  console.log(`Server is running on port ${PORT}`);
 });
