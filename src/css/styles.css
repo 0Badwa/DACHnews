@@ -127,7 +127,7 @@ nav .menu button:hover {
 }
 
 .tabs-container {
-  margin-top: 70px;
+  margin-top: 60px;
   background-color: var(--secondary-color);
   overflow-x: auto;
   white-space: nowrap;
@@ -378,47 +378,4 @@ nav .menu button:hover {
 #font-decrease {
   margin: 0; /* Reset margine */
   flex: 0 1 auto; /* Zadržava širinu dugmadi bez pomeranja */
-}
-
-
-.image-below-header {
-  display: block;
-  margin: 0px auto 0; /* 10px razmaka od vrha (od hedera) i centriranje */
-  max-width: 100%; /* Osigurava da slika ne prelazi širinu stranice */
-  height: auto; /* Zadržava proporcije slike */
-}
-
-display: flex;
-  height: 10px;
-  position: fixed; /* Fiksira traku na vrhu stranice */
-  top: 0; /* Postavlja je na vrh */
-  left: 0;
-  width: 100%; /* Širina trake */
-  z-index: 1011; /* Osigurava da bude iznad ostalih elemenata */
-  margin: 0;
-  padding: 0;
-}
-
-.color {
-  flex: 1; /* Sve boje zauzimaju jednaku širinu */
-  height: 100%;
-}
-
-.color.red {
-  background-color: red;
-}
-.color.orange {
-  background-color: orange;
-}
-.color.yellow {
-  background-color: yellow;
-}
-.color.green {
-  background-color: green;
-}
-.color.blue {
-  background-color: blue;
-}
-.color.purple {
-  background-color: purple;
 }
