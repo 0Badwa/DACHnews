@@ -376,6 +376,6 @@ nav .menu button:hover {
 
 #font-increase,
 #font-decrease {
-  margin: 0.4rem; /* Reset margine */
+  margin-bottom: 0.4rem; /* Reset margine */
   flex: 0 1 auto; /* Zadržava širinu dugmadi bez pomeranja */
 }
