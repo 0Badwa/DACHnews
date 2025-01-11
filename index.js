@@ -29,7 +29,9 @@ async function fetchFeeds() {
   const allFeeds = [];
   for (const url of rssLinks.feeds) {
     try {
+      console.log(`Fetching feed from: ${url}`);
       const feed = await parser.parseURL(url);
+      console.log(`Feed fetched successfully: ${feed.title}`);
       allFeeds.push({
         title: feed.title,
         items: feed.items.map(item => ({ title: item.title, link: item.link }))
@@ -52,6 +54,7 @@ app.get('/feeds', async (req, res) => {
     const feeds = await fetchFeeds();
     res.json(feeds);
   } catch (error) {
+    console.error('Error in /feeds route:', error.message);
     res.status(500).send('Error fetching feeds.');
   }
 });
