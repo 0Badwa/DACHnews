@@ -105,12 +105,12 @@ nav .menu button:hover {
   font-size: inherit; /* Nasleđuje veličinu fonta iz `.dropdown` */
     font-family: inherit; /* Nasleđuje font iz `.dropdown` */
   background: none;
-  border: none;
+  border: 1px;
   color: inherit;
   padding: 0.5 1.5rem;
   height: 2.5rem; /* Povećava visinu */
   margin-bottom: 0.5rem; /* Dodaj razmak između dugmadi */
-  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.12); /* Dodaj senku */
+  /* box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.12); Dodaj senku */
   text-align: left;
   width: calc(99%); /* Sprečava prelazak preko ivica */
   cursor: pointer;
