@@ -117,7 +117,11 @@ window.addEventListener('load', () => {
   // Ažuriraj tekst dugmeta na osnovu trenutačne teme
   const darkModeActive = document.body.getAttribute('data-theme') === 'dark';
   document.getElementById('toggle-dark-mode').innerText = darkModeActive ? 'Licht Modus' : 'Dunkel Modus';
-});
+
+  // Ukoliko postoji spremljeni redosled tabova
+  const savedOrder = localStorage.getItem('tabOrder');
+  if (savedOrder) {
+    const order = JSON.parse(savedOrder);
     order.forEach(tabId => {
       const tabButton = document.querySelector(`.tab[data-tab="${tabId}"]`);
       if(tabButton) {
@@ -125,7 +129,7 @@ window.addEventListener('load', () => {
       }
     });
   }
-});
+}); // Završetak load event handlera
 
 document.getElementById('block-source').addEventListener('click', () => {
   alert('Blokiranje izvora');
