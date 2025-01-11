@@ -24,6 +24,10 @@ body {
   font-size: var(--font-size);
   transition: background-color 0.3s, color 0.3s, font-size 0.3s;
 }
+
+[data-theme="light"] nav {
+  background-color: var(--primary-color);
+}
 nav {
   background-color: #1DB954;
   color: white;
