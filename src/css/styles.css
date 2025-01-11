@@ -105,7 +105,7 @@ nav .menu button:hover {
   font-size: inherit; /* Nasleđuje veličinu fonta iz `.dropdown` */
     font-family: inherit; /* Nasleđuje font iz `.dropdown` */
   background: none;
-  border: 1px;
+  border: 0.5px;
   color: inherit;
   padding: 0.5 1.5rem;
   height: 2.5rem; /* Povećava visinu */
