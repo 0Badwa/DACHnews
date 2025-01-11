@@ -14,3 +14,6 @@
   "author": "",
   "license": "ISC"
 }
+"scripts": {
+  "start": "node index.js"
+}
