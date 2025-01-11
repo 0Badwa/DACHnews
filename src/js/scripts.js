@@ -12,7 +12,7 @@ tabs.forEach(tab => {
     tab.classList.add('active');
     tab.setAttribute('aria-selected', 'true');
     const activeContent = document.getElementById(tab.dataset.tab);
-    if(activeContent) {
+    if (activeContent) {
       activeContent.classList.add('active');
     }
   });
@@ -38,7 +38,7 @@ document.addEventListener('click', (e) => {
 window.addEventListener('load', () => {
   const savedTheme = localStorage.getItem('theme');
 
-  // Set dark mode as default if no theme is saved
+  // Postavi podrazumevanu temu na dark mode ako nema sačuvane teme
   if (!savedTheme) {
     document.body.setAttribute('data-theme', 'dark');
     localStorage.setItem('theme', 'dark');
@@ -46,9 +46,9 @@ window.addEventListener('load', () => {
     document.body.setAttribute('data-theme', savedTheme);
   }
 
-  // Update toggle button text
+  // Ažuriraj tekst dugmeta na osnovu trenutne teme
   const darkModeActive = document.body.getAttribute('data-theme') === 'dark';
-  document.getElementById('toggle-dark-mode').innerText = darkModeActive ? 'Light Mode' : 'Dark Mode';
+  document.getElementById('toggle-dark-mode').innerText = darkModeActive ? 'Heller Modus' : 'Dunkler Modus';
 });
 
 document.getElementById('toggle-dark-mode').addEventListener('click', () => {
@@ -58,19 +58,26 @@ document.getElementById('toggle-dark-mode').addEventListener('click', () => {
 
   body.setAttribute('data-theme', newTheme);
   localStorage.setItem('theme', newTheme);
-  dropdownMenu.style.display = 'none';
-  settingsButton.setAttribute('aria-expanded', 'false');
-  document.getElementById('toggle-dark-mode').innerText = darkModeActive ? 'Dark Mode' : 'Light Mode';
+
+  // Ažuriraj tekst dugmeta za prebacivanje
+  document.getElementById('toggle-dark-mode').innerText = darkModeActive ? 'Dunkler Modus' : 'Heller Modus';
 });
 
 document.getElementById('font-increase').addEventListener('click', () => {
   let currentSize = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--news-title-font-size'));
-  if(currentSize < 2.0) {
+  if (currentSize < 2.0) {
     document.documentElement.style.setProperty('--news-title-font-size', (currentSize + 0.1).toFixed(2) + 'rem');
   }
 });
 
 document.getElementById('font-decrease').addEventListener('click', () => {
   let currentSize = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--news-title-font-size'));
-  if(currentSize > 0.7) {
-    document.documentElement.style.setProperty('
+  if (currentSize > 0.7) {
+    document.documentElement.style.setProperty('--news-title-font-size', (currentSize - 0.1).toFixed(2) + 'rem');
+  }
+});
+
+document.querySelectorAll('#sortable-list .move-up').forEach(button => {
+  button.addEventListener('click', () => {
+    const li = button.parentElement.parentElement;
+    const prev = li.previousElementSi
