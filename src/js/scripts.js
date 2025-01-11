@@ -106,12 +106,11 @@ closeModalBtn.addEventListener('click', () => {
 });
 
 window.addEventListener('load', () => {
-   document.body.setAttribute('data-theme', 'dark');
-  document.getElementById('toggle-dark-mode').innerText = darkModeActive ? 'Licht Modus' : 'Dunkel Modus';
-  // Ažuriraj tekst dugmeta na osnovu trenutačne teme
+  document.body.setAttribute('data-theme', 'dark');
   const darkModeActive = document.body.getAttribute('data-theme') === 'dark';
   document.getElementById('toggle-dark-mode').innerText = darkModeActive ? 'Licht Modus' : 'Dunkel Modus';
 });
+
   
   // Ukoliko postoji spremljeni redosled tabova
   const savedOrder = localStorage.getItem('tabOrder');
