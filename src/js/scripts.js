@@ -116,6 +116,7 @@ async function loadHomeFeed() {
         console.warn(`Feed not mapped to a category: ${feed.title}`);
       } else if (!categoryContainers[category]) {
         console.error(`No container found for category: ${category}`);
+            return;
       }
     });
   } catch (error) {
