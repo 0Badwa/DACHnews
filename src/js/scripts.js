@@ -12,7 +12,6 @@ tabsContainer.addEventListener('click', (event) => {
     t.setAttribute('aria-selected', 'false');
   });
  
-  if (!contents || contents.length === 0) return;
   contents.forEach(c => c.classList.remove('active'));
 
   tab.classList.add('active');
@@ -154,7 +153,7 @@ window.onload = () => {
 const body = document.body;
 let darkModeActive = body.getAttribute('data-theme') === 'dark'; // Prva deklaracija
 
-document.body.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
+document.body.setAttribute('data-theme', darkModeActive ? 'dark' : 'light');
 darkModeActive = document.body.getAttribute('data-theme') === 'dark'; // Ažuriranje vrednosti
 
 
