@@ -30,9 +30,11 @@ const dropdownMenu = document.getElementById('dropdown-menu');
 settingsButton.addEventListener('click', (e) => {
   e.stopPropagation();
   const isExpanded = settingsButton.getAttribute('aria-expanded') === 'true';
+  console.log('Settings menu state:', !isExpanded); // Dodaj ovo
   settingsButton.setAttribute('aria-expanded', String(!isExpanded));
   dropdownMenu.classList.toggle('visible', !isExpanded);
 });
+
 
 document.addEventListener('click', (e) => {
   if (!settingsButton.contains(e.target) && !dropdownMenu.contains(e.target)) {
