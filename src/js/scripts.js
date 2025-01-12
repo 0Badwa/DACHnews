@@ -21,9 +21,6 @@ tabsContainer.addEventListener('click', (event) => {
   }
 });
 
-const fontIncreaseButton = document.getElementById('font-increase');
-const fontDecreaseButton = document.getElementById('font-decrease');
-
 
 
 // Dropdown meni za podešavanja
@@ -64,6 +61,10 @@ const adjustFontSize = (adjustment) => {
     root.style.setProperty('--news-title-font-size', newSize + 'rem');
   }
 };
+
+const fontIncreaseButton = document.getElementById('font-increase');
+const fontDecreaseButton = document.getElementById('font-decrease');
+
 
 fontIncreaseButton.addEventListener('click', () => adjustFontSize(0.1));
 fontDecreaseButton.addEventListener('click', () => adjustFontSize(-0.1));
