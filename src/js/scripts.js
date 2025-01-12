@@ -228,34 +228,6 @@ function mapFeedToCategory(feed) {
 
 
 
-function displayFeed(feed, container) {
-  if (feed && feed.items && feed.items.length > 0) {
-    container.innerHTML = ''; 
-    feed.items.forEach(item => {
-      console.log('Adding item:', item);
-      const newsCard = document.createElement('div');
-      newsCard.className = 'news-card';
-      newsCard.innerHTML = `
-        <img src="/images/placeholder.png" alt="News Image"/>
-        <div>
-          <a href="${item.link}" class="news-title" target="_blank">${item.title}</a>
-          <p class="news-meta">Published recently</p>
-        </div>
-      `;
-      container.appendChild(newsCard);
-    });
-  } else {
-    console.warn('No items found for this feed:', feed);
-    container.innerHTML = '<p>No news available for this category.</p>';
-  }
-}
-
-
-
-
-
-
-
 const feedMappings = {
   'politik': 'Politik',
   'neueste': 'Neueste',
@@ -282,6 +254,6 @@ const feedMappings = {
   'diestandard': 'Neueste',
   'international': 'Neueste',
   'inland': 'Politik'
-};
+}
 
 
