@@ -366,7 +366,8 @@ nav .menu button:hover {
 @media (max-width: 768px) {
   .news-card img {
     width: 80px; /* Prilagodite veličinu slike */
-    height: 80px; /* Održavajte proporcije */
+    height: auto; /* Održavajte proporcije */
+    max-height: 80vh; /* Ograničite visinu */
   }
 }
 
@@ -385,3 +386,12 @@ nav .menu button:hover {
   margin-bottom: 0.5rem; /* Reset margine */
   flex: 0 1 auto; /* Zadržava širinu dugmadi bez pomeranja */
 }
+
+.tab-content {
+  display: none; /* Sakrivanje svih tabova */
+}
+
+.tab-content.active {
+  display: block; /* Prikaz samo aktivnog taba */
+}
+
