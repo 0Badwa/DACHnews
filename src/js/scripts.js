@@ -102,9 +102,12 @@ const politikContainer = document.getElementById('politik-feed');
             <a href="${item.link}" class="news-title" target="_blank">${item.title}</a>
             <p class="news-meta">Published recently</p>
           </div>
+        `;
+        container.appendChild(newsCard);
+      });
 
-          // Dodaj drugi feed kao karticu
-      politikFeed.items.forEach(item => {
+  // Dodaj drugi feed kao karticu
+      homeFeed.items.forEach(item => {
         const newsCard = document.createElement('div');
         newsCard.className = 'news-card';
         newsCard.innerHTML = `
@@ -116,6 +119,9 @@ const politikContainer = document.getElementById('politik-feed');
         `;
         container.appendChild(newsCard);
       });
+
+
+      
     } else {
       container.innerHTML = '<p>No news available for this category.</p>';
     }
