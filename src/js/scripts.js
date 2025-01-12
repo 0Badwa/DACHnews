@@ -110,7 +110,6 @@ async function loadHomeFeed() {
 };
 
 
- eeds.forE
 
 function displayFeed(feed, container) {
   if (feed && feed.items && feed.items.length > 0) {
@@ -159,9 +158,19 @@ darkModeActive = body.getAttribute('data-theme') === 'dark'; // Prva deklaracija
 
 
 
+// Koristiti feedMappings objekat umesto mapFeedToCategory funkcije
+// jer je to čistije i lakše za održavanje
 function mapFeedToCategory(feed) {
   const titleLower = feed.title.toLowerCase();
-
+  
+  for (const [key, value] of Object.entries(feedMappings)) {
+    if (titleLower.includes(key)) {
+      return value;
+    }
+  }
+  
+  return 'Aktuell'; // podrazumevana kategorija
+}
   if (
     titleLower.includes('politik') || 
     titleLower.includes('inland') || 
@@ -255,3 +264,4 @@ const feedMappings = {
   'international': 'Neueste',
   'inland': 'Politik'
 };
+  
