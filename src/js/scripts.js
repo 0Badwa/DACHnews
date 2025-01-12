@@ -261,3 +261,46 @@ function displayFeed(feed, container) {
   }
 }
 
+
+
+
+
+
+
+const feedMappings = {
+  'politik': 'Politik',
+  'neueste': 'Neueste',
+  'aktuell': 'Aktuell',
+  'sport': 'Sport',
+  'wirtschaft': 'Wirtschaft',
+  'kultur': 'Kultur',
+  'wissenschaft': 'Wissenschaft',
+  'gesundheit': 'Gesundheit',
+  'panorama': 'Panorama',
+  'gesellschaft': 'Gesellschaft',
+  'lgbt': 'LGBT+',
+  'reisen': 'Reisen',
+  'auto': 'Auto & Mobilität',
+  'mobilität': 'Auto & Mobilität',
+  'digital': 'Digital',
+  'kurioses': 'Kurioses',
+  'live': 'Neueste',
+  'video': 'Neueste',
+  'podcast': 'Neueste',
+  'recht': 'Neueste',
+  'falter': 'Kultur',
+  'die tageszeitung': 'Neueste',
+  'diestandard': 'Neueste',
+  'international': 'Neueste',
+  'inland': 'Politik'
+};
+
+function mapFeedToCategory(feed) {
+  const titleLower = feed.title.toLowerCase();
+  for (const [key, category] of Object.entries(feedMappings)) {
+    if (titleLower.includes(key)) {
+      return category;
+    }
+  }
+  return null; // Ako nije mapirano, vrati null
+}
