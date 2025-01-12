@@ -180,71 +180,69 @@ darkModeActive = document.body.getAttribute('data-theme') === 'dark'; // Ažurir
 function mapFeedToCategory(feed) {
   const titleLower = feed.title.toLowerCase();
 
-  if (titleLower.includes('politik')) return 'Politik';
-  if (titleLower.includes('neueste') || titleLower.includes('nachrichten')) return 'Neueste';
-  if (titleLower.includes('aktuell') || titleLower.includes('community')) return 'Aktuell';
-  if (titleLower.includes('sport')) return 'Sport';
-  if (titleLower.includes('kultur')) return 'Kultur';
-  if (titleLower.includes('wissenschaft')) return 'Wissenschaft';
-  if (titleLower.includes('gesundheit')) return 'Gesundheit';
-  if (titleLower.includes('panorama')) return 'Panorama';
-  if (titleLower.includes('gesellschaft')) return 'Gesellschaft';
-  if (titleLower.includes('lgbt')) return 'LGBT+';
-  if (titleLower.includes('reisen')) return 'Reisen';
-  if (titleLower.includes('auto') || titleLower.includes('mobilität')) return 'Auto & Mobilität';
-  if (titleLower.includes('digital')) return 'Digital';
-  if (titleLower.includes('kurioses')) return 'Kurioses';
-if (titleLower.includes('international')) return 'Neueste';
-  if (titleLower.includes('inland')) return 'Politik';
-  if (titleLower.includes('wirtschaft')) return 'Wirtschaft';
-  if (titleLower.includes('sport')) return 'Sport';
-  if (titleLower.includes('kultur')) return 'Kultur';
-  if (titleLower.includes('wissenschaft')) return 'Wissenschaft';
-  if (titleLower.includes('gesundheit')) return 'Gesundheit';
-  if (titleLower.includes('panorama')) return 'Panorama';
-  if (titleLower.includes('lifestyle')) return 'Gesellschaft';
-  if (titleLower.includes('karriere')) return 'Reisen';
-  if (titleLower.includes('immobilien')) return 'Auto & Mobilität';
-  if (titleLower.includes('diskurs')) return 'Neueste';
-  if (titleLower.includes('dieStandard')) return 'Neueste';
-  if (titleLower.includes('live')) return 'Neueste';
-  if (titleLower.includes('video')) return 'Neueste';
-  if (titleLower.includes('podcast')) return 'Neueste';
-  if (titleLower.includes('recht')) return 'Neueste';
-  if (titleLower.includes('neues deutschland')) return 'Politik';
-  if (titleLower.includes('international')) return 'Neueste';
-  if (titleLower.includes('inland')) return 'Politik';
-  if (titleLower.includes('wirtschaft')) return 'Wirtschaft';
-  if (titleLower.includes('web')) return 'Digital';
-  if (titleLower.includes('etat')) return 'Kultur';
-  if (titleLower.includes('lifestyle')) return 'Gesellschaft';
-  if (titleLower.includes('karriere')) return 'Reisen';
-  if (titleLower.includes('immobilien')) return 'Auto & Mobilität';
-  if (titleLower.includes('diskurs')) return 'Panorama';
-  if (titleLower.includes('dieStandard')) return 'Neueste';
-  if (titleLower.includes('live')) return 'Neueste';
-  if (titleLower.includes('video')) return 'Neueste';
-  if (titleLower.includes('podcast')) return 'Neueste';
-  if (titleLower.includes('recht')) return 'Neueste';
-  if (titleLower.includes('sport')) return 'Sport';
-  if (titleLower.includes('kultur')) return 'Kultur';
-  if (titleLower.includes('wissenschaft')) return 'Wissenschaft';
-  if (titleLower.includes('gesundheit')) return 'Gesundheit';
-  if (titleLower.includes('gesellschaft')) return 'Gesellschaft';
-  if (titleLower.includes('lgbt')) return 'LGBT+';
-  if (titleLower.includes('reisen')) return 'Reisen';
-  if (titleLower.includes('auto') || titleLower.includes('mobilität')) return 'Auto & Mobilität';
-  if (titleLower.includes('digital')) return 'Digital';
-  if (titleLower.includes('kurioses')) return 'Kurioses';
-  
-  // Dodaj specifične uslove za feedove
-  if (titleLower.includes('falter')) return 'Kultur';
-  if (titleLower.includes('die tageszeitung')) return 'Neueste';
-    if (titleLower.includes('diestandard')) return 'Neueste';
+  if (
+    titleLower.includes('politik') || 
+    titleLower.includes('inland') || 
+    titleLower.includes('neues deutschland')
+  ) return 'Politik';
 
+  if (
+    titleLower.includes('neueste') || 
+    titleLower.includes('nachrichten') || 
+    titleLower.includes('international') || 
+    titleLower.includes('diskurs') || 
+    titleLower.includes('dieStandard') || 
+    titleLower.includes('live') || 
+    titleLower.includes('video') || 
+    titleLower.includes('podcast') || 
+    titleLower.includes('recht') || 
+    titleLower.includes('die tageszeitung') || 
+    titleLower.includes('diestandard')
+  ) return 'Neueste';
+
+  if (titleLower.includes('sport')) return 'Sport';
+
+  if (
+    titleLower.includes('kultur') || 
+    titleLower.includes('etat') || 
+    titleLower.includes('falter')
+  ) return 'Kultur';
+
+  if (titleLower.includes('wissenschaft')) return 'Wissenschaft';
+
+  if (titleLower.includes('gesundheit')) return 'Gesundheit';
+
+  if (
+    titleLower.includes('panorama') || 
+    titleLower.includes('diskurs')
+  ) return 'Panorama';
+
+  if (
+    titleLower.includes('gesellschaft') || 
+    titleLower.includes('lifestyle')
+  ) return 'Gesellschaft';
+
+  if (
+    titleLower.includes('reisen') || 
+    titleLower.includes('karriere')
+  ) return 'Reisen';
+
+  if (
+    titleLower.includes('auto') || 
+    titleLower.includes('mobilität') || 
+    titleLower.includes('immobilien')
+  ) return 'Auto & Mobilität';
+
+  if (
+    titleLower.includes('digital') || 
+    titleLower.includes('web')
+  ) return 'Digital';
+
+  if (titleLower.includes('kurioses')) return 'Kurioses';
 
   return null; // Ako nije mapirano, vrati null
 }
+
 
 
 
