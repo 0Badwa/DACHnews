@@ -226,6 +226,8 @@ if (titleLower.includes('international')) return 'Neueste';
   // Dodaj specifične uslove za feedove
   if (titleLower.includes('falter')) return 'Kultur';
   if (titleLower.includes('die tageszeitung')) return 'Neueste';
+    if (titleLower.includes('diestandard')) return 'Neueste';
+
 
   return null; // Ako nije mapirano, vrati null
 }
