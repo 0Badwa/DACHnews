@@ -140,3 +140,12 @@ window.onload = () => {
     });
   }
 };
+
+
+function mapFeedToCategory(feed) {
+  const titleLower = feed.title.toLowerCase();
+  if (titleLower.includes('politik')) return 'Politik';
+  if (titleLower.includes('neueste')) return 'Neueste';
+  if (titleLower.includes('aktuell')) return 'Aktuell';
+  return null; // Preskoči feed ako ne pripada poznatoj kategoriji
+}
