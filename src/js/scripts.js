@@ -168,3 +168,65 @@ window.onload = () => {
   }
 };
 
+async function loadHomeFeed() {
+  try {
+    const response = await fetch('/feeds'); 
+    if (!response.ok) {
+      throw new Error(`Server error: ${response.status}`);
+    }
+    const feeds = await response.json();
+    console.log('Feeds loaded:', feeds);
+
+    // Pretpostavimo da su feedovi organizovani po indeksima:
+    const homeFeed = feeds[0];      // Aktuell
+    const latestFeed = feeds[1];    // Neueste Nachrichten
+    const politikFeed = feeds[2];   // Politik
+    // Dodajte više feedova prema strukturi feeds niza
+
+    // Selektovanje HTML kontejnera
+    const homeContainer = document.getElementById('home-feed');
+    const latestContainer = document.getElementById('latest-feed');
+    const politikContainer = document.getElementById('politik-feed');
+
+    // Funkcija za prikazivanje feeda u datom kontejneru
+    function displayFeed(feed, container) {
+      if (feed && feed.items && feed.items.length > 0) {
+        container.innerHTML = ''; // Očisti prethodni sadržaj
+        feed.items.forEach(item => {
+          const newsCard = document.createElement('div');
+          newsCard.className = 'news-card';
+          newsCard.innerHTML = `
+            <img src="https://via.placeholder.com/125" alt="News Image"/>
+            <div>
+              <a href="${item.link}" class="news-title" target="_blank">${item.title}</a>
+              <p class="news-meta">Published recently</p>
+            </div>
+          `;
+          container.appendChild(newsCard);
+        });
+      } else {
+        container.innerHTML = '<p>No news available for this category.</p>';
+      }
+    }
+
+    // Prikazivanje svakog feeda u odgovarajućem kontejneru
+    displayFeed(homeFeed, homeContainer);
+    displayFeed(latestFeed, latestContainer);
+    displayFeed(politikFeed, politikContainer);
+
+    // Ako imate više kategorija, nastavite sličnim pristupom...
+  } catch (error) {
+    console.error('Error loading feeds:', error);
+    const homeContainer = document.getElementById('home-feed');
+    homeContainer.innerHTML = '<p>Error loading feeds. Please try again later.</p>';
+  }
+}
+
+
+feeds.forEach(feed => {
+  if (feed.title.toLowerCase().includes('politik')) {
+    displayFeed(feed, politikContainer);
+  }
+  // Dodajte ostale uslove za druge kategorije
+});
+
