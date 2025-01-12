@@ -50,10 +50,9 @@ document.addEventListener('click', (e) => {
 const toggleDarkModeButton = document.getElementById('toggle-dark-mode');
 toggleDarkModeButton.addEventListener('click', () => {
   const body = document.body;
-  const darkModeActive = body.classList.toggle('dark-theme');
-  dropdownMenu.classList.remove('visible');
-  settingsButton.setAttribute('aria-expanded', 'false');
-  toggleDarkModeButton.innerText = darkModeActive ? 'Dunkel Modus' : 'Licht Modus';
+  const isDarkMode = body.classList.toggle('dark-theme');
+ document.body.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
+  toggleDarkModeButton.innerText = isDarkMode ? 'Dunkel Modus' : 'Licht Modus';
 });
 
 // Povećanje i smanjenje veličine fonta
