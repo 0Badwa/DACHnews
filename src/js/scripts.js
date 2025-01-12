@@ -102,6 +102,17 @@ const politikContainer = document.getElementById('politik-feed');
             <a href="${item.link}" class="news-title" target="_blank">${item.title}</a>
             <p class="news-meta">Published recently</p>
           </div>
+
+          // Dodaj drugi feed kao karticu
+      politikFeed.items.forEach(item => {
+        const newsCard = document.createElement('div');
+        newsCard.className = 'news-card';
+        newsCard.innerHTML = `
+          <img src="https://via.placeholder.com/125" alt="News Image"/>
+          <div>
+            <a href="${item.link}" class="news-title" target="_blank">${item.title}</a>
+            <p class="news-meta">Published recently</p>
+          </div>
         `;
         container.appendChild(newsCard);
       });
