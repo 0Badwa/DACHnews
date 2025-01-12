@@ -21,6 +21,11 @@ tabsContainer.addEventListener('click', (event) => {
   }
 });
 
+const fontIncreaseButton = document.getElementById('font-increase');
+const fontDecreaseButton = document.getElementById('font-decrease');
+
+
+
 // Dropdown meni za podešavanja
 const settingsButton = document.getElementById('settings-button');
 const dropdownMenu = document.getElementById('dropdown-menu');
