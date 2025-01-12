@@ -79,8 +79,10 @@ async function loadHomeFeed() {
     const feeds = await response.json(); // Parsiranje JSON odgovora
     console.log('Feeds loaded:', feeds); // Log za pregled odgovora
 
-    const homeFeed = feeds.find(feed => feed.title.toLowerCase().includes('nachrichten')); // Pronađi feed za 'Nachrichten'
-    console.log('Home Feed:', homeFeed);
+   //  const homeFeed = feeds.find(feed => feed.title.toLowerCase().includes('nachrichten')); // Pronađi feed za 'Nachrichten'
+    console.log('Home Feed:', homeFeed); //
+    const homeFeed = feeds[0]; // za testiranje
+
 
     const container = document.getElementById('home-feed');
 
