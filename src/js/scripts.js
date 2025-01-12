@@ -200,7 +200,26 @@ function mapFeedToCategory(feed) {
   if (titleLower.includes('auto') || titleLower.includes('mobilität')) return 'Auto & Mobilität';
   if (titleLower.includes('digital')) return 'Digital';
   if (titleLower.includes('kurioses')) return 'Kurioses';
+if (titleLower.includes('international')) return 'Neueste';
+  if (titleLower.includes('inland')) return 'Politik';
+  if (titleLower.includes('wirtschaft')) return 'Wirtschaft';
+  if (titleLower.includes('sport')) return 'Sport';
+  if (titleLower.includes('kultur')) return 'Kultur';
+  if (titleLower.includes('wissenschaft')) return 'Wissenschaft';
+  if (titleLower.includes('gesundheit')) return 'Gesundheit';
+  if (titleLower.includes('panorama')) return 'Panorama';
+  if (titleLower.includes('lifestyle')) return 'Gesellschaft';
+  if (titleLower.includes('karriere')) return 'Reisen';
+  if (titleLower.includes('immobilien')) return 'Auto & Mobilität';
+  if (titleLower.includes('diskurs')) return 'Neueste';
+  if (titleLower.includes('dieStandard')) return 'Neueste';
+  if (titleLower.includes('live')) return 'Neueste';
+  if (titleLower.includes('video')) return 'Neueste';
+  if (titleLower.includes('podcast')) return 'Neueste';
+  if (titleLower.includes('recht')) return 'Neueste';
+  if (titleLower.includes('neues deutschland')) return 'Politik';
 
+  
   // Dodaj specifične uslove za feedove
   if (titleLower.includes('falter')) return 'Kultur';
   if (titleLower.includes('die tageszeitung')) return 'Neueste';
