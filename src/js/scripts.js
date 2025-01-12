@@ -110,25 +110,7 @@ async function loadHomeFeed() {
 };
 
 
-  feeds.forEach(feed => {
-  const category = mapFeedToCategory(feed);
-  if (!category) {
-    console.warn(`Feed not mapped to a category: ${feed.title}`);
-  } else if (!categoryContainers[category]) {
-    console.error(`No container found for category: ${category}`);
-    return;
-  } else {
-    // Pozivanje funkcije za prikaz vesti u odgovarajućem kontejneru
-    displayFeed(feed, categoryContainers[category]);
-  }
-});
-
-  } catch (error) {
-    console.error('Error loading feeds:', error);
-    const homeContainer = document.getElementById('home-feed');
-    homeContainer.innerHTML = '<p>Error loading feeds. Please try again later.</p>';
-  }
-}
+ eeds.forE
 
 function displayFeed(feed, container) {
   if (feed && feed.items && feed.items.length > 0) {
