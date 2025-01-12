@@ -162,26 +162,6 @@ window.onload = () => {
   }
 };
 
-function mapFeedToCategory(feed) {
-  const titleLower = feed.title.toLowerCase();
-
-  if (titleLower.includes('politik')) return 'Politik';
-  if (titleLower.includes('neueste') || titleLower.includes('nachrichten')) return 'Neueste';
-  if (titleLower.includes('aktuell') || titleLower.includes('community')) return 'Aktuell';
-  if (titleLower.includes('sport')) return 'Sport';
-  if (titleLower.includes('kultur')) return 'Kultur';
-  if (titleLower.includes('wissenschaft')) return 'Wissenschaft';
-  if (titleLower.includes('gesundheit')) return 'Gesundheit';
-  if (titleLower.includes('panorama')) return 'Panorama';
-  if (titleLower.includes('wirtschaft')) return 'Wirtschaft';
-  if (titleLower.includes('neues deutschland')) return 'Politik'; // Dodaj pravilo za ovaj feed
-  if (titleLower.includes('derstandard')) return 'Neueste'; // Dodaj pravilo za ovaj feed
-
-  return null; // Ako nije mapirano, vrati null
-}
-
-
-
 
 function mapFeedToCategory(feed) {
   const titleLower = feed.title.toLowerCase();
