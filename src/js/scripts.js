@@ -5,21 +5,28 @@ tabsContainer.addEventListener('click', (event) => {
   const tab = event.target.closest('.tab');
   if (!tab) return;
 
+  if (!tabs || tabs.length === 0) return;
   const tabs = tabsContainer.querySelectorAll('.tab');
 
   tabs.forEach(t => {
     t.classList.remove('active');
     t.setAttribute('aria-selected', 'false');
   });
+ 
+  if (!contents || contents.length === 0) return;
   contents.forEach(c => c.classList.remove('active'));
 
   tab.classList.add('active');
 tab.setAttribute('aria-selected', 'true');
+  if (tab) tab.setAttribute('aria-selected', 'true');
+
+  
 const activeContent = document.getElementById(tab.dataset.tab);
 if (activeContent) {
   activeContent.classList.add('active');
 } else {
   console.warn('Active content not found for tab:', tab.dataset.tab);
+  return;
 }
 });
 
