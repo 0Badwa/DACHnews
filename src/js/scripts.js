@@ -153,7 +153,6 @@ window.onload = () => {
   if (initialTab) {
     initialTab.click(); // Simulira klik na prvi tab
   }
-};
   
 darkModeActive = body.getAttribute('data-theme') === 'dark'; // Prva deklaracija
   toggleDarkModeButton.innerText = darkModeActive ? 'Dunkel Modus' : 'Licht Modus';
@@ -168,6 +167,8 @@ darkModeActive = body.getAttribute('data-theme') === 'dark'; // Prva deklaracija
         tabButton.parentNode.appendChild(tabButton);
       }
     });
+    }
+  };
 
 
 
