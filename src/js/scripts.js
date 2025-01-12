@@ -77,10 +77,18 @@ async function loadHomeFeed() {
     const feeds = await response.json();
     console.log('Feeds loaded:', feeds);
 
-    // Pretpostavka rasporeda feedova po indeksima
-    const homeFeed = feeds[0];      
-    const latestFeed = feeds[1];    
-    const politikFeed = feeds[2];   
+    const categoryContainers = {
+  'Aktuell': document.getElementById('home-feed'),
+  'Neueste': document.getElementById('latest-feed'),
+  'Politik': document.getElementById('politik-feed')
+};
+feeds.forEach(feed => {
+  const category = mapFeedToCategory(feed);
+  if (category && categoryContainers[category]) {
+    displayFeed(feed, categoryContainers[category]);
+  }
+});
+
 
     // Selektovanje HTML kontejnera
     const homeContainer = document.getElementById('home-feed');
@@ -149,3 +157,6 @@ function mapFeedToCategory(feed) {
   if (titleLower.includes('aktuell')) return 'Aktuell';
   return null; // Preskoči feed ako ne pripada poznatoj kategoriji
 }
+
+const activeClass = 'active';
+const ariaSelected = 'aria-selected';
