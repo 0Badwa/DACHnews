@@ -148,6 +148,11 @@ function displayFeed(feed, container) {
 window.onload = () => {
   loadHomeFeed();
 
+const body = document.body;
+  const darkModeActive = body.getAttribute('data-theme') === 'dark';
+  toggleDarkModeButton.innerText = darkModeActive ? 'Licht Modus' : 'Dunkel Modus';
+
+  
   document.body.setAttribute('data-theme', 'dark');
   const darkModeActive = document.body.getAttribute('data-theme') === 'dark';
   toggleDarkModeButton.innerText = darkModeActive ? 'Licht Modus' : 'Dunkel Modus';
