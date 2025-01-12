@@ -168,8 +168,7 @@ darkModeActive = body.getAttribute('data-theme') === 'dark'; // Prva deklaracija
         tabButton.parentNode.appendChild(tabButton);
       }
     });
-  }
-};
+
 
 
 function mapFeedToCategory(feed) {
