@@ -85,6 +85,9 @@ async function loadHomeFeed() {
 
 
     const container = document.getElementById('home-feed');
+    const latestContainer = document.getElementById('latest-feed');
+const politikContainer = document.getElementById('politik-feed');
+
 
     if (homeFeed && homeFeed.items.length > 0) {
       container.innerHTML = ''; // Očisti prethodni sadržaj
