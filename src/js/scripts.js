@@ -46,7 +46,7 @@ toggleDarkModeButton.addEventListener('click', () => {
   body.setAttribute('data-theme', newTheme);
   dropdownMenu.style.display = 'none';
   settingsButton.setAttribute('aria-expanded', 'false');
-  toggleDarkModeButton.innerText = darkModeActive ? 'Dunkel Modus' : 'Licht Modus';
+  toggleDarkModeButton.innerText = darkModeActive ? 'Licht Modus' : 'Dunkel Modus';
 });
 
 // Povećanje i smanjenje veličine fonta
@@ -77,7 +77,9 @@ async function loadHomeFeed() {
     const feeds = await response.json(); // Parsiranje JSON odgovora
     console.log('Feeds loaded:', feeds); // Log za pregled odgovora
 
-    const homeFeed = feeds.find(feed => feed.title.toLowerCase() === 'aktuell'); // Pronađi feed za 'Aktuell'
+    const homeFeed = feeds.find(feed => feed.title.toLowerCase().includes('nachrichten')); // Pronađi feed za 'Nachrichten'
+    console.log('Home Feed:', homeFeed);
+
     const container = document.getElementById('home-feed');
 
     if (homeFeed && homeFeed.items.length > 0) {
@@ -91,7 +93,7 @@ async function loadHomeFeed() {
           <img src="https://via.placeholder.com/125" alt="News Image"/>
           <div>
             <a href="${item.link}" class="news-title" target="_blank">${item.title}</a>
-            <p class="news-meta">Source | Published recently</p>
+            <p class="news-meta">Published recently</p>
           </div>
         `;
         container.appendChild(newsCard);
