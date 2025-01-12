@@ -1,7 +1,6 @@
 const tabs = document.querySelectorAll('.tab');
 const contents = document.querySelectorAll('.tab-content');
 
-
 // Tab navigacija
 tabs.forEach(tab => {
   tab.addEventListener('click', () => {
@@ -68,106 +67,7 @@ fontDecreaseButton.addEventListener('click', () => {
   }
 });
 
-// Dinamičko učitavanje feedova za kategoriju "Aktuell"
-async function loadHomeFeed() {
-  try {
-    const response = await fetch('/feeds'); // Poziv API-ja za keširane feedove
-    if (!response.ok) {
-      throw new Error(`Server error: ${response.status}`);
-    }
-    const feeds = await response.json(); // Parsiranje JSON odgovora
-    console.log('Feeds loaded:', feeds); // Log za pregled odgovora
-
-   //  const homeFeed = feeds.find(feed => feed.title.toLowerCase().includes('nachrichten')); // 
-    const homeFeed = feeds[0];      // pretpostavimo da je prvi feed "Home"
-const latestFeed = feeds[1];    // pretpostavimo da je drugi feed "Latest"
-const politikFeed = feeds[2];   // pretpostavimo da je treći feed "Politik"
-
-
-
-    const container = document.getElementById('home-feed');
-    const latestContainer = document.getElementById('latest-feed');
-const politikContainer = document.getElementById('politik-feed');
-
-
-    if (homeFeed && homeFeed.items.length > 0) {
-      container.innerHTML = ''; // Očisti prethodni sadržaj
-
-      // Dodaj svaki feed kao karticu
-      homeFeed.items.forEach(item => {
-        const newsCard = document.createElement('div');
-        newsCard.className = 'news-card';
-        newsCard.innerHTML = `
-          <img src="https://via.placeholder.com/125" alt="News Image"/>
-          <div>
-            <a href="${item.link}" class="news-title" target="_blank">${item.title}</a>
-            <p class="news-meta">Published recently</p>
-          </div>
-        `;
-        container.appendChild(newsCard);
-      });
-
-  // Dodaj drugi feed kao karticu
-      latestFeed.items.forEach(item => {
-        const newsCard = document.createElement('div');
-        newsCard.className = 'news-card';
-        newsCard.innerHTML = `
-          <img src="https://via.placeholder.com/125" alt="News Image"/>
-          <div>
-            <a href="${item.link}" class="news-title" target="_blank">${item.title}</a>
-            <p class="news-meta">Published recently</p>
-          </div>
-        `;
-        container.appendChild(newsCard);
-      });
-
-  // Dodaj 3 feed kao karticu
-      politikFeed.items.forEach(item => {
-        const newsCard = document.createElement('div');
-        newsCard.className = 'news-card';
-        newsCard.innerHTML = `
-          <img src="https://via.placeholder.com/125" alt="News Image"/>
-          <div>
-            <a href="${item.link}" class="news-title" target="_blank">${item.title}</a>
-            <p class="news-meta">Published recently</p>
-          </div>
-        `;
-        container.appendChild(newsCard);
-      });
-
-            
-    } else {
-      container.innerHTML = '<p>No news available for this category.</p>';
-    }
-  } catch (error) {
-    console.error('Error loading home feed:', error);
-    const container = document.getElementById('home-feed');
-    container.innerHTML = '<p>greška loading feeds. Please try again later.</p>';
-  }
-}
-
-// Automatsko učitavanje feedova za "Aktuell"
-window.onload = () => {
-  loadHomeFeed();
-
-  // Postavi početnu temu
-  document.body.setAttribute('data-theme', 'dark');
-  const darkModeActive = document.body.getAttribute('data-theme') === 'dark';
-  toggleDarkModeButton.innerText = darkModeActive ? 'Licht Modus' : 'Dunkel Modus';
-
-  // Proveri i primeni redosled tabova iz localStorage
-  const savedOrder = localStorage.getItem('tabOrder');
-  if (savedOrder) {
-    const order = JSON.parse(savedOrder);
-    order.forEach(tabId => {
-      const tabButton = document.querySelector(`.tab[data-tab="${tabId}"]`);
-      if (tabButton) {
-        tabButton.parentNode.appendChild(tabButton);
-      }
-    });
-  }
-};
-
+// Dinamičko učitavanje feedova i prikazivanje po kategorijama
 async function loadHomeFeed() {
   try {
     const response = await fetch('/feeds'); 
@@ -177,11 +77,10 @@ async function loadHomeFeed() {
     const feeds = await response.json();
     console.log('Feeds loaded:', feeds);
 
-    // Pretpostavimo da su feedovi organizovani po indeksima:
-    const homeFeed = feeds[0];      // Aktuell
-    const latestFeed = feeds[1];    // Neueste Nachrichten
-    const politikFeed = feeds[2];   // Politik
-    // Dodajte više feedova prema strukturi feeds niza
+    // Pretpostavka rasporeda feedova po indeksima
+    const homeFeed = feeds[0];      
+    const latestFeed = feeds[1];    
+    const politikFeed = feeds[2];   
 
     // Selektovanje HTML kontejnera
     const homeContainer = document.getElementById('home-feed');
@@ -191,7 +90,7 @@ async function loadHomeFeed() {
     // Funkcija za prikazivanje feeda u datom kontejneru
     function displayFeed(feed, container) {
       if (feed && feed.items && feed.items.length > 0) {
-        container.innerHTML = ''; // Očisti prethodni sadržaj
+        container.innerHTML = ''; 
         feed.items.forEach(item => {
           const newsCard = document.createElement('div');
           newsCard.className = 'news-card';
@@ -214,7 +113,7 @@ async function loadHomeFeed() {
     displayFeed(latestFeed, latestContainer);
     displayFeed(politikFeed, politikContainer);
 
-    // Ako imate više kategorija, nastavite sličnim pristupom...
+    // Ako imate dodatne kategorije, nastavite sličnim pristupom...
   } catch (error) {
     console.error('Error loading feeds:', error);
     const homeContainer = document.getElementById('home-feed');
@@ -222,11 +121,22 @@ async function loadHomeFeed() {
   }
 }
 
+// Automatsko učitavanje feedova kada se stranica učita
+window.onload = () => {
+  loadHomeFeed();
 
-feeds.forEach(feed => {
-  if (feed.title.toLowerCase().includes('politik')) {
-    displayFeed(feed, politikContainer);
+  document.body.setAttribute('data-theme', 'dark');
+  const darkModeActive = document.body.getAttribute('data-theme') === 'dark';
+  toggleDarkModeButton.innerText = darkModeActive ? 'Licht Modus' : 'Dunkel Modus';
+
+  const savedOrder = localStorage.getItem('tabOrder');
+  if (savedOrder) {
+    const order = JSON.parse(savedOrder);
+    order.forEach(tabId => {
+      const tabButton = document.querySelector(`.tab[data-tab="${tabId}"]`);
+      if (tabButton) {
+        tabButton.parentNode.appendChild(tabButton);
+      }
+    });
   }
-  // Dodajte ostale uslove za druge kategorije
-});
-
+};
