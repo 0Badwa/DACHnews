@@ -254,6 +254,4 @@ const feedMappings = {
   'diestandard': 'Neueste',
   'international': 'Neueste',
   'inland': 'Politik'
-}
-
-
+};
