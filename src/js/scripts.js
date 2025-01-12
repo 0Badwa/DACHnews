@@ -87,6 +87,10 @@ async function loadHomeFeed() {
       'Aktuell': document.getElementById('home-feed'),
       'Neueste': document.getElementById('latest-feed'),
       'Politik': document.getElementById('politik-feed'),
+      'Sport': document.getElementById('sport-feed'),
+  'Kultur': document.getElementById('kultur-feed'),
+  'Wissenschaft': document.getElementById('wissenschaft-feed'),
+  'Gesundheit': document.getElementById('gesundheit-feed'),
     };
 
     feeds.forEach(feed => {
