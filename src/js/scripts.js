@@ -106,7 +106,7 @@ const politikContainer = document.getElementById('politik-feed');
       });
 
   // Dodaj drugi feed kao karticu
-      homeFeed.items.forEach(item => {
+      latestFeed.items.forEach(item => {
         const newsCard = document.createElement('div');
         newsCard.className = 'news-card';
         newsCard.innerHTML = `
