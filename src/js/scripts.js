@@ -129,3 +129,14 @@ window.onload = () => {
     });
   }
 };
+
+const testData = [
+  {
+    title: "derStandard.at | Nachrichten, Kommentare & Community",
+    items: [
+      { title: "Test Article 1", link: "https://example.com/1" },
+      { title: "Test Article 2", link: "https://example.com/2" }
+    ]
+  }
+];
+console.log('Testing Data:', testData);
