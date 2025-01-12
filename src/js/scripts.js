@@ -1,7 +1,6 @@
 const tabs = document.querySelectorAll('.tab');
 const contents = document.querySelectorAll('.tab-content');
-const cors = require('cors');
-app.use(cors());
+
 
 // Tab navigacija
 tabs.forEach(tab => {
