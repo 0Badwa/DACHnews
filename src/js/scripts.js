@@ -80,8 +80,8 @@ async function loadHomeFeed() {
     console.log('Feeds loaded:', feeds); // Log za pregled odgovora
 
    //  const homeFeed = feeds.find(feed => feed.title.toLowerCase().includes('nachrichten')); // Pronađi feed za 'Nachrichten'
+       const homeFeed = feeds[0]; // za testiranje
     console.log('Home Feed:', homeFeed); //
-    const homeFeed = feeds[0]; // za testiranje
 
 
     const container = document.getElementById('home-feed');
