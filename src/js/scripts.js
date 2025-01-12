@@ -1,22 +1,24 @@
-const tabs = document.querySelectorAll('.tab');
+const tabsContainer = document.querySelector('.tabs-container');
 const contents = document.querySelectorAll('.tab-content');
 
-// Tab navigacija
-tabs.forEach(tab => {
-  tab.addEventListener('click', () => {
-    tabs.forEach(t => {
-      t.classList.remove('active');
-      t.setAttribute('aria-selected', 'false');
-    });
-    contents.forEach(c => c.classList.remove('active'));
+tabsContainer.addEventListener('click', (event) => {
+  const tab = event.target.closest('.tab');
+  if (!tab) return;
 
-    tab.classList.add('active');
-    tab.setAttribute('aria-selected', 'true');
-    const activeContent = document.getElementById(tab.dataset.tab);
-    if (activeContent) {
-      activeContent.classList.add('active');
-    }
+  const tabs = tabsContainer.querySelectorAll('.tab');
+
+  tabs.forEach(t => {
+    t.classList.remove('active');
+    t.setAttribute('aria-selected', 'false');
   });
+  contents.forEach(c => c.classList.remove('active'));
+
+  tab.classList.add('active');
+  tab.setAttribute('aria-selected', 'true');
+  const activeContent = document.getElementById(tab.dataset.tab);
+  if (activeContent) {
+    activeContent.classList.add('active');
+  }
 });
 
 // Dropdown meni za podešavanja
@@ -27,54 +29,52 @@ settingsButton.addEventListener('click', (e) => {
   e.stopPropagation();
   const isExpanded = settingsButton.getAttribute('aria-expanded') === 'true';
   settingsButton.setAttribute('aria-expanded', String(!isExpanded));
-  dropdownMenu.style.display = dropdownMenu.style.display === 'flex' ? 'none' : 'flex';
+  dropdownMenu.classList.toggle('visible', !isExpanded);
 });
 
 document.addEventListener('click', (e) => {
   if (!settingsButton.contains(e.target) && !dropdownMenu.contains(e.target)) {
-    dropdownMenu.style.display = 'none';
+    dropdownMenu.classList.remove('visible');
     settingsButton.setAttribute('aria-expanded', 'false');
   }
 });
+
 
 // Tema: tamni i svetli režim
 const toggleDarkModeButton = document.getElementById('toggle-dark-mode');
 toggleDarkModeButton.addEventListener('click', () => {
   const body = document.body;
-  const darkModeActive = body.getAttribute('data-theme') === 'dark';
-  const newTheme = darkModeActive ? 'light' : 'dark';
-  body.setAttribute('data-theme', newTheme);
-  dropdownMenu.style.display = 'none';
+  const darkModeActive = body.classList.toggle('dark-theme');
+  dropdownMenu.classList.remove('visible');
   settingsButton.setAttribute('aria-expanded', 'false');
-  toggleDarkModeButton.innerText = darkModeActive ? 'Licht Modus' : 'Dunkel Modus';
+  toggleDarkModeButton.innerText = darkModeActive ? 'Dunkel Modus' : 'Licht Modus';
 });
 
 // Povećanje i smanjenje veličine fonta
-const fontIncreaseButton = document.getElementById('font-increase');
-const fontDecreaseButton = document.getElementById('font-decrease');
-
-fontIncreaseButton.addEventListener('click', () => {
-  let currentSize = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--news-title-font-size'));
-  if (currentSize < 2.0) {
-    document.documentElement.style.setProperty('--news-title-font-size', (currentSize + 0.1).toFixed(2) + 'rem');
+const adjustFontSize = (adjustment) => {
+  const root = document.documentElement;
+  let currentSize = parseFloat(getComputedStyle(root).getPropertyValue('--news-title-font-size'));
+  const newSize = (currentSize + adjustment).toFixed(2);
+  if (newSize >= 0.7 && newSize <= 2.0) {
+    root.style.setProperty('--news-title-font-size', newSize + 'rem');
   }
-});
+};
 
-fontDecreaseButton.addEventListener('click', () => {
-  let currentSize = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--news-title-font-size'));
-  if (currentSize > 0.7) {
-    document.documentElement.style.setProperty('--news-title-font-size', (currentSize - 0.1).toFixed(2) + 'rem');
-  }
-});
+fontIncreaseButton.addEventListener('click', () => adjustFontSize(0.1));
+fontDecreaseButton.addEventListener('click', () => adjustFontSize(-0.1));
 
 // Dinamičko učitavanje feedova i prikazivanje po kategorijama
+async function fetchFeeds(url) {
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Server error: ${response.status}`);
+  }
+  return response.json();
+}
+
 async function loadHomeFeed() {
   try {
-    const response = await fetch('/feeds'); 
-    if (!response.ok) {
-      throw new Error(`Server error: ${response.status}`);
-    }
-    const feeds = await response.json();
+    const feeds = await fetchFeeds('/feeds');
     console.log('Feeds loaded:', feeds);
 
     const categoryContainers = {
