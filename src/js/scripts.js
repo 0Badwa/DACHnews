@@ -51,6 +51,7 @@ document.addEventListener('click', (e) => {
 
 // Tema: tamni i svetli režim
 const toggleDarkModeButton = document.getElementById('toggle-dark-mode');
+const body = document.body;
 let darkModeActive = body.getAttribute('data-theme') === 'dark';
 
 toggleDarkModeButton.addEventListener('click', () => {
