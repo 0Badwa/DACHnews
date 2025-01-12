@@ -110,15 +110,19 @@ async function loadHomeFeed() {
 };
 
 
-   feeds.forEach(feed => {
-      const category = mapFeedToCategory(feed);
-      if (!category) {
-        console.warn(`Feed not mapped to a category: ${feed.title}`);
-      } else if (!categoryContainers[category]) {
-        console.error(`No container found for category: ${category}`);
-            return;
-      }
-    });
+  feeds.forEach(feed => {
+  const category = mapFeedToCategory(feed);
+  if (!category) {
+    console.warn(`Feed not mapped to a category: ${feed.title}`);
+  } else if (!categoryContainers[category]) {
+    console.error(`No container found for category: ${category}`);
+    return;
+  } else {
+    // Pozivanje funkcije za prikaz vesti u odgovarajućem kontejneru
+    displayFeed(feed, categoryContainers[category]);
+  }
+});
+
   } catch (error) {
     console.error('Error loading feeds:', error);
     const homeContainer = document.getElementById('home-feed');
@@ -298,12 +302,4 @@ const feedMappings = {
   'inland': 'Politik'
 };
 
-function mapFeedToCategory(feed) {
-  const titleLower = feed.title.toLowerCase();
-  for (const [key, category] of Object.entries(feedMappings)) {
-    if (titleLower.includes(key)) {
-      return category;
-    }
-  }
-  return null; // Ako nije mapirano, vrati null
-}
+
