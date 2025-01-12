@@ -151,7 +151,7 @@ window.onload = () => {
 
   const toggleDarkModeButton = document.getElementById('toggle-dark-mode');
 const body = document.body;
-let darkModeActive = body.getAttribute('data-theme') === 'dark'; // Prva deklaracija
+darkModeActive = body.getAttribute('data-theme') === 'dark'; // Prva deklaracija
 
 document.body.setAttribute('data-theme', darkModeActive ? 'dark' : 'light');
 darkModeActive = document.body.getAttribute('data-theme') === 'dark'; // Ažuriranje vrednosti
