@@ -194,12 +194,16 @@ function mapFeedToCategory(feed) {
   if (titleLower.includes('wissenschaft')) return 'Wissenschaft';
   if (titleLower.includes('gesundheit')) return 'Gesundheit';
   if (titleLower.includes('panorama')) return 'Panorama';
-  if (titleLower.includes('wirtschaft')) return 'Wirtschaft';
+  if (titleLower.includes('gesellschaft')) return 'Gesellschaft';
+  if (titleLower.includes('lgbt')) return 'LGBT+';
+  if (titleLower.includes('reisen')) return 'Reisen';
+  if (titleLower.includes('auto') || titleLower.includes('mobilität')) return 'Auto & Mobilität';
+  if (titleLower.includes('digital')) return 'Digital';
+  if (titleLower.includes('kurioses')) return 'Kurioses';
 
-  // Dodaj specifične uslove za feedove kao što su "falter" ili "die tageszeitung"
-  if (titleLower.includes('falter')) return 'Kultur'; // ili neka odgovarajuća kategorija
+  // Dodaj specifične uslove za feedove
+  if (titleLower.includes('falter')) return 'Kultur';
   if (titleLower.includes('die tageszeitung')) return 'Neueste';
 
-  // Ako nijedan uslov nije ispunjen, vrati null
-  return null;
+  return null; // Ako nije mapirano, vrati null
 }
