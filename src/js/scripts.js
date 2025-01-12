@@ -152,14 +152,13 @@ function displayFeed(feed, container) {
 window.onload = () => {
   loadHomeFeed();
 
+  const toggleDarkModeButton = document.getElementById('toggle-dark-mode');
 const body = document.body;
-  const darkModeActive = body.getAttribute('data-theme') === 'dark';
-  toggleDarkModeButton.innerText = darkModeActive ? 'Licht Modus' : 'Dunkel Modus';
+let darkModeActive = body.getAttribute('data-theme') === 'dark'; // Prva deklaracija
 
-  
-  document.body.setAttribute('data-theme', 'dark');
-  const darkModeActive = document.body.getAttribute('data-theme') === 'dark';
-  toggleDarkModeButton.innerText = darkModeActive ? 'Licht Modus' : 'Dunkel Modus';
+document.body.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
+darkModeActive = document.body.getAttribute('data-theme') === 'dark'; // Ažuriranje vrednosti
+
 
   const savedOrder = localStorage.getItem('tabOrder');
   if (savedOrder) {
