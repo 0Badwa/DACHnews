@@ -160,3 +160,5 @@ function mapFeedToCategory(feed) {
 
 const activeClass = 'active';
 const ariaSelected = 'aria-selected';
+
+console.log('Feeds:', feeds);
