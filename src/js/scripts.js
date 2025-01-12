@@ -4,8 +4,7 @@ const contents = document.querySelectorAll('.tab-content');
 tabsContainer.addEventListener('click', (event) => {
   const tab = event.target.closest('.tab');
   if (!tab) return;
-
-  if (!tabs || tabs.length === 0) return;
+  
   const tabs = tabsContainer.querySelectorAll('.tab');
 
   tabs.forEach(t => {
@@ -18,7 +17,6 @@ tabsContainer.addEventListener('click', (event) => {
 
   tab.classList.add('active');
 tab.setAttribute('aria-selected', 'true');
-  if (tab) tab.setAttribute('aria-selected', 'true');
 
   
 const activeContent = document.getElementById(tab.dataset.tab);
@@ -44,7 +42,6 @@ settingsButton.addEventListener('click', (e) => {
   dropdownMenu.classList.toggle('visible', !isExpanded);
 });
 
-
 document.addEventListener('click', (e) => {
   if (!settingsButton.contains(e.target) && !dropdownMenu.contains(e.target)) {
     dropdownMenu.classList.remove('visible');
@@ -55,11 +52,13 @@ document.addEventListener('click', (e) => {
 
 // Tema: tamni i svetli režim
 const toggleDarkModeButton = document.getElementById('toggle-dark-mode');
+const body = document.body;
+let darkModeActive = body.getAttribute('data-theme') === 'dark';
+
 toggleDarkModeButton.addEventListener('click', () => {
-  const body = document.body;
-  const isDarkMode = body.classList.toggle('dark-theme');
- document.body.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
-  toggleDarkModeButton.innerText = isDarkMode ? 'Dunkel Modus' : 'Licht Modus';
+  darkModeActive = body.classList.toggle('dark-theme');
+  document.body.setAttribute('data-theme', darkModeActive ? 'dark' : 'light');
+  toggleDarkModeButton.innerText = darkModeActive ? 'Dunkel Modus' : 'Licht Modus';
 });
 
 // Povećanje i smanjenje veličine fonta
@@ -112,14 +111,13 @@ async function loadHomeFeed() {
 };
 
 
-    feeds.forEach(feed => {
+   feeds.forEach(feed => {
       const category = mapFeedToCategory(feed);
-     if (!category) {
-  console.warn(`Feed not mapped to a category: ${feed.title}`);
-} else if (!categoryContainers[category]) {
-  console.error(`No container found for category: ${category}`);
-}
-
+      if (!category) {
+        console.warn(`Feed not mapped to a category: ${feed.title}`);
+      } else if (!categoryContainers[category]) {
+        console.error(`No container found for category: ${category}`);
+      }
     });
   } catch (error) {
     console.error('Error loading feeds:', error);
