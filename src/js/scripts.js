@@ -119,7 +119,7 @@ const politikContainer = document.getElementById('politik-feed');
         container.appendChild(newsCard);
       });
 
-  // Dodaj drugi feed kao karticu
+  // Dodaj 3 feed kao karticu
       politikFeed.items.forEach(item => {
         const newsCard = document.createElement('div');
         newsCard.className = 'news-card';
@@ -133,15 +133,14 @@ const politikContainer = document.getElementById('politik-feed');
         container.appendChild(newsCard);
       });
 
-      
-      
+            
     } else {
       container.innerHTML = '<p>No news available for this category.</p>';
     }
   } catch (error) {
     console.error('Error loading home feed:', error);
     const container = document.getElementById('home-feed');
-    container.innerHTML = '<p>Error loading feeds. Please try again later.</p>';
+    container.innerHTML = '<p>greška loading feeds. Please try again later.</p>';
   }
 }
 
