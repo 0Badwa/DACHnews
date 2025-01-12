@@ -90,11 +90,7 @@ feeds.forEach(feed => {
 });
 
 
-    // Selektovanje HTML kontejnera
-    const homeContainer = document.getElementById('home-feed');
-    const latestContainer = document.getElementById('latest-feed');
-    const politikContainer = document.getElementById('politik-feed');
-
+   
     // Funkcija za prikazivanje feeda u datom kontejneru
     function displayFeed(feed, container) {
       if (feed && feed.items && feed.items.length > 0) {
@@ -158,4 +154,3 @@ function mapFeedToCategory(feed) {
 const activeClass = 'active';
 const ariaSelected = 'aria-selected';
 
-console.log('Feeds:', feeds);
