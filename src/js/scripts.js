@@ -83,15 +83,24 @@ async function loadHomeFeed() {
     const feeds = await fetchFeeds('/feeds');
     console.log('Feeds loaded:', feeds);
 
-    const categoryContainers = {
-      'Aktuell': document.getElementById('home-feed'),
-      'Neueste': document.getElementById('latest-feed'),
-      'Politik': document.getElementById('politik-feed'),
-      'Sport': document.getElementById('sport-feed'),
+   const categoryContainers = {
+  'Aktuell': document.getElementById('home-feed'),
+  'Neueste': document.getElementById('latest-feed'),
+  'Politik': document.getElementById('politik-feed'),
+  'Sport': document.getElementById('sport-feed'),
+  'Wirtschaft': document.getElementById('wirtschaft-feed'),
   'Kultur': document.getElementById('kultur-feed'),
   'Wissenschaft': document.getElementById('wissenschaft-feed'),
   'Gesundheit': document.getElementById('gesundheit-feed'),
-    };
+  'Gesellschaft': document.getElementById('gesellschaft-feed'),
+  'Panorama': document.getElementById('panorama-feed'),
+  'LGBT+': document.getElementById('lgbt-feed'),
+  'Reisen': document.getElementById('reisen-feed'),
+  'Auto & Mobilität': document.getElementById('auto-mobilitaet-feed'),
+  'Digital': document.getElementById('digital-feed'),
+  'Kurioses': document.getElementById('kurioses-feed')
+};
+
 
     feeds.forEach(feed => {
       const category = mapFeedToCategory(feed);
