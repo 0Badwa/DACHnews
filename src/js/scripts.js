@@ -51,12 +51,11 @@ document.addEventListener('click', (e) => {
 
 // Tema: tamni i svetli režim
 const toggleDarkModeButton = document.getElementById('toggle-dark-mode');
-const body = document.body;
 let darkModeActive = body.getAttribute('data-theme') === 'dark';
 
 toggleDarkModeButton.addEventListener('click', () => {
   darkModeActive = body.classList.toggle('dark-theme');
-  document.body.setAttribute('data-theme', darkModeActive ? 'dark' : 'light');
+  body.setAttribute('data-theme', darkModeActive ? 'dark' : 'light');
   toggleDarkModeButton.innerText = darkModeActive ? 'Dunkel Modus' : 'Licht Modus';
 });
 
@@ -157,9 +156,7 @@ window.onload = () => {
 };
   
 darkModeActive = body.getAttribute('data-theme') === 'dark'; // Prva deklaracija
-
-document.body.setAttribute('data-theme', darkModeActive ? 'dark' : 'light');
-darkModeActive = document.body.getAttribute('data-theme') === 'dark'; // Ažuriranje vrednosti
+  toggleDarkModeButton.innerText = darkModeActive ? 'Dunkel Modus' : 'Licht Modus';
 
 
   const savedOrder = localStorage.getItem('tabOrder');
