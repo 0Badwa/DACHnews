@@ -156,7 +156,6 @@ window.onload = () => {
   }
 };
   
-  const toggleDarkModeButton = document.getElementById('toggle-dark-mode');
 const body = document.body;
 darkModeActive = body.getAttribute('data-theme') === 'dark'; // Prva deklaracija
 
