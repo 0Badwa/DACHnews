@@ -149,6 +149,12 @@ function displayFeed(feed, container) {
 window.onload = () => {
   loadHomeFeed();
 
+ const initialTab = document.querySelector('.tab[data-tab="home-feed"]');
+  if (initialTab) {
+    initialTab.click(); // Simulira klik na prvi tab
+  }
+};
+  
   const toggleDarkModeButton = document.getElementById('toggle-dark-mode');
 const body = document.body;
 darkModeActive = body.getAttribute('data-theme') === 'dark'; // Prva deklaracija
