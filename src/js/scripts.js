@@ -116,10 +116,7 @@ feeds.forEach(feed => {
       }
     }
 
-    // Prikazivanje svakog feeda u odgovarajućem kontejneru
-    displayFeed(homeFeed, homeContainer);
-    displayFeed(latestFeed, latestContainer);
-    displayFeed(politikFeed, politikContainer);
+  
 
     // Ako imate dodatne kategorije, nastavite sličnim pristupom...
   } catch (error) {
