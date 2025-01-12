@@ -14,11 +14,13 @@ tabsContainer.addEventListener('click', (event) => {
   contents.forEach(c => c.classList.remove('active'));
 
   tab.classList.add('active');
-  tab.setAttribute('aria-selected', 'true');
-  const activeContent = document.getElementById(tab.dataset.tab);
-  if (activeContent) {
-    activeContent.classList.add('active');
-  }
+tab.setAttribute('aria-selected', 'true');
+const activeContent = document.getElementById(tab.dataset.tab);
+if (activeContent) {
+  activeContent.classList.add('active');
+} else {
+  console.warn('Active content not found for tab:', tab.dataset.tab);
+}
 });
 
 
