@@ -95,6 +95,10 @@ nav .menu button:hover {
   margin: 0; /* Uklonite spoljašnje razmake */
 }
 
+#dropdown-menu.visible {
+  display: block; /* Menja "display: none;" */
+}
+
 #dropdown-menu {
   padding: 0.5rem;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Senka za okvir menija */
