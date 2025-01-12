@@ -108,16 +108,12 @@ async function loadHomeFeed() {
 
     feeds.forEach(feed => {
       const category = mapFeedToCategory(feed);
-      if (!category) {
-        console.warn(`Feed not mapped to a category: ${feed.title}`);
-        return;
-      }
-      const container = categoryContainers[category];
-      if (container) {
-        displayFeed(feed, container);
-      } else {
-        console.warn(`No container found for category: ${category}`);
-      }
+     if (!category) {
+  console.warn(`Feed not mapped to a category: ${feed.title}`);
+} else if (!categoryContainers[category]) {
+  console.error(`No container found for category: ${category}`);
+}
+
     });
   } catch (error) {
     console.error('Error loading feeds:', error);
