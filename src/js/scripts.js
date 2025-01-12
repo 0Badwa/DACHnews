@@ -156,7 +156,6 @@ window.onload = () => {
   }
 };
   
-const body = document.body;
 darkModeActive = body.getAttribute('data-theme') === 'dark'; // Prva deklaracija
 
 document.body.setAttribute('data-theme', darkModeActive ? 'dark' : 'light');
