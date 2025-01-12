@@ -1,13 +1,13 @@
-const fs = require('fs');
-const RSSParser = require('rss-parser');
 const express = require('express');
 const path = require('path');
+const RSSParser = require('rss-parser');
+const fs = require('fs');
 
-const parser = new RSSParser();
 const app = express();
+const parser = new RSSParser();
 const PORT = process.env.PORT || 3000;
 
-// Učitavanje RSS linkova
+// Učitavanje RSS linkova iz JSON fajla
 const rssLinks = JSON.parse(fs.readFileSync('rss_links.json', 'utf8'));
 
 // Keširanje podataka
@@ -15,7 +15,7 @@ let cachedFeeds = null;
 let lastCacheTime = null;
 const CACHE_DURATION = 60 * 60 * 1000; // Keš traje 1 sat
 
-// Parsiranje RSS feedova sa keširanjem
+// Funkcija za parsiranje RSS feedova sa keširanjem
 async function fetchFeeds() {
   const now = Date.now();
 
@@ -29,9 +29,7 @@ async function fetchFeeds() {
   const allFeeds = [];
   for (const url of rssLinks.feeds) {
     try {
-      console.log(`Fetching feed from: ${url}`);
       const feed = await parser.parseURL(url);
-      console.log(`Feed fetched successfully: ${feed.title}`);
       allFeeds.push({
         title: feed.title,
         items: feed.items.map(item => ({ title: item.title, link: item.link }))
@@ -44,17 +42,15 @@ async function fetchFeeds() {
   // Ažuriraj keš
   cachedFeeds = allFeeds;
   lastCacheTime = now;
-
   return allFeeds;
 }
 
-// Posluživanje RSS podataka
+// Ruta za vraćanje RSS feedova
 app.get('/feeds', async (req, res) => {
   try {
     const feeds = await fetchFeeds();
     res.json(feeds);
   } catch (error) {
-    console.error('Error in /feeds route:', error.message);
     res.status(500).send('Error fetching feeds.');
   }
 });
@@ -70,14 +66,4 @@ app.get('/', (req, res) => {
 // Pokretanje servera
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
-});
-
-app.get('/test-feed', async (req, res) => {
-  try {
-    const feed = await parser.parseURL('https://www.derstandard.at/rss');
-    res.json(feed); // Vraća JSON feed direktno
-  } catch (error) {
-    console.error('Error parsing feed:', error.message);
-    res.status(500).send('Error parsing feed.');
-  }
 });
