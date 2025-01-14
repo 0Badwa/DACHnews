@@ -4,271 +4,258 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>DACH.news</title>
-
-<link rel="stylesheet" type="text/css" href="src/css/styles.css?v=123">
-
+  <link rel="stylesheet" type="text/css" href="src/css/styles.css?v=123">
 </head>
 <body data-theme="dark">
   <nav>
     <div class="menu">
-      <button id="settings-button" aria-expanded="false" aria-label="Menu">
-  <div class="rainbow-line black"></div>
-  <div class="rainbow-line black"></div>
-  <div class="rainbow-line black"></div>
-
-</button>
-
-      <div id="dropdown-menu" class="dropdown" role="menu" aria-label="Settings menu">
-        <button id="toggle-dark-mode">Dunkler Modus</button>
-        <div id="change-font-size" style="display:flex; justify-content: space-around;">
-          <button id="font-increase">A+</button>
-          <button id="font-decrease">A-</button>
-        </div>
-        <button id="rearrange-tabs">Tabs anordnen</button>
-        <button id="block-source">Quellen blockieren</button>
-         <button id="kontakt">Kontankt</button>
-         <button id="about">Über</button>
+      <button id="menu-button" class="menu-button">☰</button>
+      <div class="dropdown" id="dropdown-menu">
+        <!-- Uklonjeni duplicirani gumbi za otvaranje modala -->
+        <button id="theme-toggle">Dark Modus</button>
+        <button id="font-increase">Schrift vergrößern</button>
+        <button id="font-decrease">Schrift verkleinern</button>
       </div>
     </div>
-    <img src="dachnewslogo.png" alt="Dach News Logo" />
+    <img src="./src/dachnewslogo.png" alt="Dach.news Logo" />
   </nav>
 
   <div class="tabs-container" role="tablist">
     <button class="tab active" data-tab="home" role="tab" aria-selected="true">🏠</button>
     <button class="tab" data-tab="latest" role="tab" aria-selected="false">⏰</button>
     <button class="tab" data-tab="politik" role="tab" aria-selected="false">Politik</button>
-        <button class="tab" data-tab="sport" role="tab" aria-selected="false">Sport</button>
+    <button class="tab" data-tab="sport" role="tab" aria-selected="false">Sport</button>
     <button class="tab" data-tab="wirtschaft" role="tab" aria-selected="false">Wirtschaft</button>
     <button class="tab" data-tab="kultur" role="tab" aria-selected="false">Kultur</button>
     <button class="tab" data-tab="wissenschaft" role="tab" aria-selected="false">Wissenschaft</button>
-    <button class="tab" data-tab="gesellschaft" role="tab" aria-selected="false">Gesellschaft</button>
-    <button class="tab" data-tab="panorama" role="tab" aria-selected="false">Panorama</button>
-    <button class="tab" data-tab="gesundheit" role="tab" aria-selected="false">Gesundheit</button>
+    <button class="tab" data-tab="technologie" role="tab" aria-selected="false">Technologie</button>
+    <button class="tab" data-tab="unterhaltung" role="tab" aria-selected="false">Unterhaltung</button>
+    <button class="tab" data-tab="welt" role="tab" aria-selected="false">Welt</button>
+    <button class="tab" data-tab="mode" role="tab" aria-selected="false">Mode</button>
+    <button class="tab" data-tab="haustiere" role="tab" aria-selected="false">Haustiere</button>
     <button class="tab" data-tab="lgbt" role="tab" aria-selected="false">LGBT+</button>
     <button class="tab" data-tab="reisen" role="tab" aria-selected="false">Reisen</button>
-    <button class="tab" data-tab="auto-mobilitaet" role="tab" aria-selected="false">Auto &amp; Mobilität</button>
-    <button class="tab" data-tab="digital" role="tab" aria-selected="false">Digital</button>
-    <button class="tab" data-tab="kurioses" role="tab" aria-selected="false">Kurioses</button>
   </div>
 
-  <div id="rearrange-modal">
-    <div class="modal-content">
-      <h2>Tabs anordnen</h2>
-      <ul id="sortable-list">
-        <li draggable="true" data-tab="politik">
-          Politik
-          <span>
-            <button class="move-up">↑</button>
-            <button class="move-down">↓</button>
-          </span>
-        </li>
-        <li draggable="true" data-tab="wirtschaft">
-          Wirtschaft
-          <span>
-            <button class="move-up">↑</button>
-            <button class="move-down">↓</button>
-          </span>
-        </li>
-        <li draggable="true" data-tab="sport">
-          Sport
-          <span>
-            <button class="move-up">↑</button>
-            <button class="move-down">↓</button>
-          </span>
-        </li>
-        <li draggable="true" data-tab="kultur">
-          Kultur
-          <span>
-            <button class="move-up">↑</button>
-            <button class="move-down">↓</button>
-          </span>
-        </li>
-        <li draggable="true" data-tab="wissenschaft">
-          Wissenschaft
-          <span>
-            <button class="move-up">↑</button>
-            <button class="move-down">↓</button>
-          </span>
-        </li>
-        <li draggable="true" data-tab="gesellschaft">
-          Gesellschaft
-          <span>
-            <button class="move-up">↑</button>
-            <button class="move-down">↓</button>
-          </span>
-        </li>
-        <li draggable="true" data-tab="panorama">
-          Panorama
-          <span>
-            <button class="move-up">↑</button>
-            <button class="move-down">↓</button>
-          </span>
-        </li>
-        <li draggable="true" data-tab="gesundheit">
-          Gesundheit
-          <span>
-            <button class="move-up">↑</button>
-            <button class="move-down">↓</button>
-          </span>
-        </li>
-        <li draggable="true" data-tab="lgbt">
-          LGBT+
-          <span>
-            <button class="move-up">↑</button>
-            <button class="move-down">↓</button>
-          </span>
-        </li>
-        <li draggable="true" data-tab="reisen">
-          Reisen
-          <span>
-            <button class="move-up">↑</button>
-            <button class="move-down">↓</button>
-          </span>
-        </li>
-        <li draggable="true" data-tab="auto-mobilitaet">
-          Auto &amp; Mobilität
-          <span>
-            <button class="move-up">↑</button>
-            <button class="move-down">↓</button>
-          </span>
-        </li>
-        <li draggable="true" data-tab="digital">
-          Digital
-          <span>
-            <button class="move-up">↑</button>
-            <button class="move-down">↓</button>
-          </span>
-        </li>
-        <li draggable="true" data-tab="kurioses">
-          Kurioses
-          <span>
-            <button class="move-up">↑</button>
-            <button class="move-down">↓</button>
-          </span>
-        </li>
-      </ul>
-      <button id="close-modal">Zatvori</button>
+  <!-- Modal za Tabs anordnen -->
+  <div id="rearrange-modal" class="modal" style="display: none;">
+    <div class="rearrange-modal-content">
+      <div class="modal-title">Tabs anordnen</div>
+      <div class="rearrange-list">
+        <div class="rearrange-item" draggable="true"><span>Politik</span></div>
+        <div class="rearrange-item" draggable="true"><span>Wirtschaft</span></div>
+        <div class="rearrange-item" draggable="true"><span>Web</span></div>
+        <div class="rearrange-item" draggable="true"><span>Sport</span></div>
+        <div class="rearrange-item" draggable="true"><span>Panorama</span></div>
+        <div class="rearrange-item" draggable="true"><span>Etat</span></div>
+      </div>
+      <div class="modal-buttons">
+        <button class="save-button" id="close-rearrange">Schließen</button>
+      </div>
     </div>
   </div>
 
-
   <!-- Tab sadržaji -->
-  <!-- Dinamički sadržaj za svaku kategoriju -->
-<!-- Za "Neueste" sekciju: -->
-<div id="latest-feed-container" class="tab-content">
-  <div class="container">
-    <div class="tab-name-box">Neueste</div>
-    <div id="latest-feed" class="feed-content"></div>
+  <div id="home" class="tab-content">
+    <div class="container">
+      <div class="tab-name-box">Home</div>
+      <div id="home-feed" class="feed-content"></div>
+    </div>
   </div>
-</div>
+  <div id="latest" class="tab-content">
+    <div class="container">
+      <div class="tab-name-box">Neueste</div>
+      <div id="latest-feed" class="feed-content"></div>
+    </div>
+  </div>
 
-<!-- Za "Wirtschaft" sekciju: -->
-<div id="wirtschaft-feed-container" class="tab-content">
-  <div class="container">
-    <div class="tab-name-box">Wirtschaft</div>
-    <div id="wirtschaft-feed" class="feed-content"></div>
+  <div id="politik" class="tab-content">
+    <div class="container">
+      <div class="tab-name-box">Politik</div>
+      <div id="politik-feed" class="feed-content"></div>
+    </div>
   </div>
-</div>
-<!-- Za "Politik" sekciju -->
-<div id="politik-feed-container" class="tab-content">
-  <div class="container">
-    <div class="tab-name-box">Politik</div>
-    <div id="politik-feed" class="feed-content"></div>
-  </div>
-</div>
 
-
-<!-- Za "Kultur" sekciju: -->
-<div id="kultur-feed-container" class="tab-content">
-  <div class="container">
-    <div class="tab-name-box">Kultur</div>
-    <div id="kultur-feed" class="feed-content"></div>
+  <!-- Za "Wirtschaft" sekciju: -->
+  <div id="wirtschaft" class="tab-content">
+    <div class="container">
+      <div class="tab-name-box">Wirtschaft</div>
+      <div id="wirtschaft-feed" class="feed-content"></div>
+    </div>
   </div>
-</div>
 
-<!-- Za "Wissenschaft" sekciju: -->
-<div id="wissenschaft-feed-container" class="tab-content">
-  <div class="container">
-    <div class="tab-name-box">Wissenschaft</div>
-    <div id="wissenschaft-feed" class="feed-content"></div>
+  <!-- Za "Kultur" sekciju: -->
+  <div id="kultur" class="tab-content">
+    <div class="container">
+      <div class="tab-name-box">Kultur</div>
+      <div id="kultur-feed" class="feed-content"></div>
+    </div>
   </div>
-</div>
 
-<!-- Za "Gesundheit" sekciju: -->
-<div id="gesundheit-feed-container" class="tab-content">
-  <div class="container">
-    <div class="tab-name-box">Gesundheit</div>
-    <div id="gesundheit-feed" class="feed-content"></div>
+  <!-- Za "Wissenschaft" sekciju: -->
+  <div id="wissenschaft" class="tab-content">
+    <div class="container">
+      <div class="tab-name-box">Wissenschaft</div>
+      <div id="wissenschaft-feed" class="feed-content"></div>
+    </div>
   </div>
-</div>
+
+  <!-- Za "Gesundheit" sekciju: -->
+  <div id="gesundheit" class="tab-content">
+    <div class="container">
+      <div class="tab-name-box">Gesundheit</div>
+      <div id="gesundheit-feed" class="feed-content"></div>
+    </div>
+  </div>
   
   <!-- Za "Sport" sekciju: -->
-<div id="sport-feed-container" class="tab-content">
-  <div class="container">
-    <div class="tab-name-box">Sport</div>
-    <div id="sport-feed" class="feed-content"></div>
+  <div id="sport" class="tab-content">
+    <div class="container">
+      <div class="tab-name-box">Sport</div>
+      <div id="sport-feed" class="feed-content"></div>
+    </div>
   </div>
-</div>
 
-<!-- Za "Gesellschaft" sekciju: -->
-<div id="gesellschaft-feed-container" class="tab-content">
-  <div class="container">
-    <div class="tab-name-box">Gesellschaft</div>
-    <div id="gesellschaft-feed" class="feed-content"></div>
+  <!-- Za "Gesellschaft" sekciju: -->
+  <div id="gesellschaft" class="tab-content">
+    <div class="container">
+      <div class="tab-name-box">Gesellschaft</div>
+      <div id="gesellschaft-feed" class="feed-content"></div>
+    </div>
   </div>
-</div>
 
-<!-- Za "Panorama" sekciju: -->
-<div id="panorama-feed-container" class="tab-content">
-  <div class="container">
-    <div class="tab-name-box">Panorama</div>
-    <div id="panorama-feed" class="feed-content"></div>
+  <!-- Za "Panorama" sekciju: -->
+  <div id="panorama" class="tab-content">
+    <div class="container">
+      <div class="tab-name-box">Panorama</div>
+      <div id="panorama-feed" class="feed-content"></div>
+    </div>
   </div>
-</div>
 
-<!-- Za "LGBT+" sekciju: -->
-<div id="lgbt-feed-container" class="tab-content">
-  <div class="container">
-    <div class="tab-name-box">LGBT+</div>
-    <div id="lgbt-feed" class="feed-content"></div>
+  <!-- Za "LGBT+" sekciju: -->
+  <div id="lgbt" class="tab-content">
+    <div class="container">
+      <div class="tab-name-box">LGBT+</div>
+      <div id="lgbt-feed" class="feed-content"></div>
+    </div>
   </div>
-</div>
 
-<!-- Za "Reisen" sekciju: -->
-<div id="reisen-feed-container" class="tab-content">
-  <div class="container">
-    <div class="tab-name-box">Reisen</div>
-    <div id="reisen-feed" class="feed-content"></div>
+  <!-- Za "Reisen" sekciju: -->
+  <div id="reisen" class="tab-content">
+    <div class="container">
+      <div class="tab-name-box">Reisen</div>
+      <div id="reisen-feed" class="feed-content"></div>
+    </div>
   </div>
-</div>
 
-<!-- Za "Auto & Mobilität" sekciju: -->
-<div id="auto-mobilitaet-feed-container" class="tab-content">
-  <div class="container">
-    <div class="tab-name-box">Auto & Mobilität</div>
-    <div id="auto-mobilitaet-feed" class="feed-content"></div>
+  <!-- Za "Auto & Mobilität" sekciju: -->
+  <div id="auto-mobilitaet" class="tab-content">
+    <div class="container">
+      <div class="tab-name-box">Auto & Mobilität</div>
+      <div id="auto-mobilitaet-feed" class="feed-content"></div>
+    </div>
   </div>
-</div>
 
-<!-- Za "Digital" sekciju: -->
-<div id="digital-feed-container" class="tab-content">
-  <div class="container">
-    <div class="tab-name-box">Digital</div>
-    <div id="digital-feed" class="feed-content"></div>
+  <!-- Za "Digital" sekciju: -->
+  <div id="digital" class="tab-content">
+    <div class="container">
+      <div class="tab-name-box">Digital</div>
+      <div id="digital-feed" class="feed-content"></div>
+    </div>
   </div>
-</div>
 
-<!-- Za "Kurioses" sekciju: -->
-<div id="kurioses-feed-container" class="tab-content">
-  <div class="container">
-    <div class="tab-name-box">Kurioses</div>
-    <div id="kurioses-feed" class="feed-content"></div>
+  <!-- Za "Kurioses" sekciju: -->
+  <div id="kurioses" class="tab-content">
+    <div class="container">
+      <div class="tab-name-box">Kurioses</div>
+      <div id="kurioses-feed" class="feed-content"></div>
+    </div>
   </div>
-</div>
 
+  <!-- Novi tab sadržaji -->
+  <div id="technologie" class="tab-content">
+    <div class="container">
+        <div class="tab-name-box">Technologie</div>
+        <div id="technologie-feed" class="feed-content"></div>
+    </div>
+  </div>
 
+  <div id="unterhaltung" class="tab-content">
+    <div class="container">
+        <div class="tab-name-box">Unterhaltung</div>
+        <div id="unterhaltung-feed" class="feed-content"></div>
+    </div>
+  </div>
 
-<script src="src/js/scripts.js"></script>
+  <div id="welt" class="tab-content">
+    <div class="container">
+        <div class="tab-name-box">Welt</div>
+        <div id="welt-feed" class="feed-content"></div>
+    </div>
+  </div>
 
+  <div id="mode" class="tab-content">
+    <div class="container">
+        <div class="tab-name-box">Mode</div>
+        <div id="mode-feed" class="feed-content"></div>
+    </div>
+  </div>
+
+  <div id="haustiere" class="tab-content">
+    <div class="container">
+        <div class="tab-name-box">Haustiere</div>
+        <div id="haustiere-feed" class="feed-content"></div>
+    </div>
+  </div>
+
+  <!-- Modal za blokiranje izvora -->
+  <div id="block-sources-modal" class="modal" style="display: none;">
+    <div class="rearrange-modal-content">
+      <div class="modal-title">Quellen blockieren</div>
+      <!-- Dodajte ovde sadržaj specifičan za blokiranje izvora, npr. listu izvora -->
+      <div class="modal-buttons">
+        <button class="save-button" id="close-block-sources">Schließen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal za settings -->
+  <div id="settings-modal" class="modal" style="display: none;">
+    <div class="rearrange-modal-content">
+      <div class="modal-title">Einstellungen</div>
+      <div class="settings-list">
+        <div class="settings-item">
+          <span>Quellen blockieren</span>
+          <button id="block-sources" class="settings-action-button">Öffnen</button>
+        </div>
+        <div class="settings-item">
+          <span>Kategorie blockieren</span>
+          <button id="block-categories" class="settings-action-button">Öffnen</button>
+        </div>
+        <div class="settings-item">
+          <span>Tabs anordnen</span>
+          <button id="rearrange-tabs" class="settings-action-button">Öffnen</button>
+        </div>
+        <div class="settings-item">
+          <span>Dark Modus</span>
+          <button id="theme-toggle" class="settings-action-button">Aktivieren</button>
+        </div>
+        <div class="settings-item">
+          <span>Schriftgröße</span>
+          <div class="font-size-buttons">
+            <button type="button" id="font-decrease" class="font-button" style="width: 22px; height: 28px;">-</button>
+            <button type="button" id="font-increase" class="font-button" style="width: 22px; height: 28px;">+</button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-buttons">
+        <button class="save-button" id="close-settings">Schließen</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="block-categories-modal"></div>
+
+  <script src="src/js/scripts.js"></script>
 </body>
 </html>
