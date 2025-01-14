@@ -5,15 +5,25 @@
   --secondary-color: #f4f4f4;
   --border-color: #ddd;
   --font-size: 16px;
-  --news-title-font-size: 0.9rem;
+  --news-title-font-size: 1rem;
 }
-[data-theme="dark"] {
+
+:root[data-theme="dark"] {
   --background-color: #121212;
   --text-color: #ffffff;
   --primary-color: #1DB954;
   --secondary-color: #1c1c1c;
   --border-color: #333;
 }
+
+:root[data-theme="light"] {
+  --background-color: #ffffff;
+  --text-color: #000000;
+  --primary-color: #04AA6D;
+  --secondary-color: #f4f4f4;
+  --border-color: #ddd;
+}
+
 body {
   background-color: var(--background-color);
   color: var(--text-color);
@@ -23,23 +33,22 @@ body {
   padding: 0;
   font-size: var(--font-size);
   transition: background-color 0.3s, color 0.3s, font-size 0.3s;
+  -webkit-tap-highlight-color: transparent;
+  overflow-x: hidden;
 }
 
 [data-theme="light"] nav {
   background-color: var(--primary-color);
 }
 nav {
-  background-color: #1DB954;
+  position: relative;
+  background-color: var(--primary-color);
   color: white;
   height: 60px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 0 1rem;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
   z-index: 1000;
 }
 nav img {
@@ -75,13 +84,13 @@ nav .menu button:hover {
   transform: scale(1.05);
 }
 .dropdown {
-   font-size: 0.8rem; /* Veličina fonta iz kategorija */
-    font-family: Arial, sans-serif; /* Font iz kategorija */
+  font-size: 0.8rem;
+  font-family: Arial, sans-serif;
   position: absolute;
-  top: 60px;
+  top: 100%;
   left: 0;
-  background-color: rgba(255, 255, 255, 0.5); /* Bela sa 50% providnosti */
-    backdrop-filter: blur(10px); /* Blur efekat */
+  background-color: var(--background-color);
+  z-index: 1001;
   color: #000000;
   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
   border-radius: 2px;
@@ -89,10 +98,8 @@ nav .menu button:hover {
   display: none;
   flex-direction: column;
   min-width: 150px;
-  z-index: 1001;
-  font-size: 0.8rem;
-  padding: 0.5rem; /* Unutrašnja belina */
-  margin: 0; /* Uklonite spoljašnje razmake */
+  padding: 0.5rem;
+  margin: 0;
 }
 
 #dropdown-menu.visible {
@@ -110,32 +117,31 @@ nav .menu button:hover {
   color: var(--text-color);
 }
 .dropdown button {
-  font-size: inherit; /* Nasleđuje veličinu fonta iz `.dropdown` */
-    font-family: inherit; /* Nasleđuje font iz `.dropdown` */
+  font-size: inherit;
+  font-family: inherit;
   background: none;
   border: 0.5px;
-  color: inherit;
+  color: #000000 !important;
   padding: 0.5 1.5rem;
-  height: 2.5rem; /* Povećava visinu */
-  margin-bottom: 0.5rem; /* Dodaj razmak između dugmadi */
-  /* box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.12); Dodaj senku */
+  height: 2.5rem;
+  margin-bottom: 0.5rem;
   text-align: left;
-  width: calc(99%); /* Sprečava prelazak preko ivica */
+  width: calc(99%);
   cursor: pointer;
   transition: background-color 0.2s;
 }
 .dropdown button:hover {
-  background-color: #e0fae0; /* Svetlozelena pozadina na hover */
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2); /* Hover senka */
-  outline: none; /* Sprečava prelazak linije */
-  overflow: hidden; /* Sprečava prelazak sadržaja */
+  background-color: #e0fae0;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+  outline: none;
+  overflow: hidden;
 }
-[data-theme="dark"] .dropdown button:hover {
-  background-color: #333333;
+[data-theme="dark"] .dropdown button {
+  color: #ffffff !important;
 }
 
 .tabs-container {
-  margin-top: 60px;
+  margin-top: 0;
   background-color: var(--secondary-color);
   overflow-x: auto;
   white-space: nowrap;
@@ -167,7 +173,7 @@ nav .menu button:hover {
 }
 .container {
   padding: 0;
-  margin-top: 0;
+  margin: 0;
 }
 .tab-name-box {
   display: block;
@@ -180,31 +186,98 @@ nav .menu button:hover {
   font-size: 1rem;
 }
 .news-card {
-  background-color: var(--secondary-color);
-  border: 1px solid var(--border-color);
-  border-radius: 5px;
-  padding: 0.3rem;
-  margin-bottom: 0.1rem;
   display: flex;
-  align-items: flex-start;
-  transition: transform 0.2s;
+  margin: 0;
+  padding: 0;
+  background: var(--background-color);
+  border-radius: 8px;
 }
-.news-card:hover {
-  transform: scale(1.02);
+
+.news-card-content,
+.news-card-image {
+  position: relative;
+  margin-top: 0px;
+  margin-bottom: 2px;
+
 }
-.news-card img {
-  border-radius: 5px;
-  margin-right: 0.8rem;
-  width: 75px;
-  height: 75px;
+
+/* Uklanjanje underline-a iz linkova */
+.news-card h3 a,
+.news-card h3 a:visited,
+.news-card h3 a:hover,
+.news-card h3 a:active,
+.news-card h3 a:focus {
+  color: inherit;
+  text-decoration: none !important;
+}
+
+.news-card h3 {
+  margin: 0;
+  padding: 0;
+  font-size: var(--news-title-font-size);
+  color: var(--text-color);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
+  max-height: 3.9em;
+}
+
+.news-card-source {
+  font-size: 0.8rem;
+  color: var(--secondary-text-color);
+  margin: 0;
+  padding: 0;
+}
+
+.news-card-meta {
+  font-size: 0.8rem;
+  color: var(--secondary-text-color);
+  margin-bottom: 5px;
+}
+
+.news-card-description {
+  color: var(--text-color);
+  margin-bottom: 5px;
+}
+
+.news-card-image {
+  width: 100%;
+  height: 200px;
   object-fit: cover;
+  border-radius: 4px;
+  margin-bottom: 2px;
+  margin-top: 0px;
+}
+
+.news-card-link {
+  color: var(--link-color);
+  text-decoration: none;
+}
+
+.news-card-link:hover {
+  text-decoration: underline;
 }
 .news-title {
-  font-size: var(--news-title-font-size, 1rem);
+  font-size: var(--news-title-font-size);
   color: var(--primary-color);
   text-decoration: none;
   margin: 0 0 0.5rem;
   font-weight: bold;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
+  max-height: 3.9em;
+  padding-top: 5px;
+ }
+ .news-card .news-title {
+  position: relative;
+  top: 5px; /* Pomeranje na dole */
 }
 .news-title:hover {
   text-decoration: underline;
@@ -222,44 +295,142 @@ nav .menu button:hover {
 }
 /* Modal */
 #rearrange-modal {
-  display: none; /* Modal je sakriven po učitavanju */
+  display: none;
   position: fixed;
-  top: 60px; /* Kao i dropdown meni */
+  top: 0;
   left: 0;
-   padding: 1rem;
-  background: rgba(255, 255, 255, 0.5); /* Bela boja sa 50% transparentnošću */
-    backdrop-filter: blur(10px); /* Blur efekat */
-    -webkit-backdrop-filter: blur(10px); /* Podrška za Safari */
-  color: var(--text-color); /* Isto kao dropdown meni */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Dodaj senku */
-  border-radius: 5px;
-  overflow: hidden;
-  text-align: center; /* Centriran tekst */
-  align-items: center; /* Vertikalno centriranje */
-  justify-content: center; /* Horizontalno centriranje */
-  width: 300px; /* Širina modala */
-    max-width: 90%; /* Prilagodljiva širina za manje ekrane */
-  height: 80%;
-  z-index: 9999; /* Da ostane iznad svega */
-}
-#rearrange-modal .modal-content {
-  background: #ffffff; /* Bela pozadina */
-  color: var(--text-color); /* Tekst u skladu sa temom */
-  padding: 1.5rem 1.5rem 1.5rem 20px; /* Dodajte razmak od 20px sa leve strane */
- border: 2px solid var(--primary-color); /* Zeleni outline */
-  border-radius: 5px; /* Zaobljeni uglovi */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Blaga senka */
-  max-width: 450px; /* Maksimalna širina */
-  width: 90%; /* Prilagodljiva širina */
-  max-height: 80vh; /* Maksimalna visina (80% visine ekrana) */
-  overflow-y: auto; /* Omogućava vertikalno skrolovanje */
-  text-align: left; /* Centriran tekst */
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.75);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
 }
 
-#rearrange-modal h2 {
-  font-size: 1.2rem; /* Smanjuje veličinu fonta */
-  margin-bottom: 1rem; /* Dodaje razmak ispod naslova */
-  text-align: center; /* Opcionalno: Zadržava centriranje */
+.rearrange-modal-content {
+  background-color: var(--background-color);
+  padding: 1.5rem;
+  border-radius: 12px;
+  width: 60%;
+  max-width: 280px;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.tabs-list {
+  margin-bottom: 1.5rem;
+}
+
+.tab-item {
+  padding: 1rem;
+  margin: 0.5rem 0;
+  background-color: var(--secondary-color);
+  border-radius: 8px;
+  cursor: move;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 1rem;
+  transition: transform 0.2s ease;
+}
+
+.tab-item:active {
+  transform: scale(0.98);
+}
+
+.tab-item::before {
+  content: "☰";
+  margin-right: 10px;
+  color: var(--text-color);
+  opacity: 0.5;
+}
+
+.save-button,
+.cancel-button {
+  padding: 0.8rem 1.5rem;
+  margin: 0.5rem;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: transform 0.2s ease;
+  width: calc(50% - 1rem);
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.save-button {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.cancel-button {
+  background-color: var(--secondary-color);
+  color: var(--text-color);
+}
+
+.save-button:active,
+.cancel-button:active {
+  transform: scale(0.95);
+}
+
+/* Container za dugmad */
+.modal-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1.5rem;
+  align-items: center;
+}
+
+/* Stil za naslov modala */
+.modal-title {
+  font-size: 1.2rem;
+  font-weight: 500;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  color: var(--text-color);
+}
+
+/* Scrollbar stilizacija */
+.rearrange-modal-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.rearrange-modal-content::-webkit-scrollbar-track {
+  background: var(--secondary-color);
+  border-radius: 4px;
+}
+
+.rearrange-modal-content::-webkit-scrollbar-thumb {
+  background: var(--primary-color);
+  border-radius: 4px;
+}
+
+/* Media query za mobilne uređaje */
+@media (max-width: 768px) {
+  .rearrange-modal-content {
+    width: 65%;
+    max-height: 70vh;
+    padding: 1rem;
+  }
+  
+  .tab-item {
+    padding: 0.8rem;
+    font-size: 0.9rem;
+  }
+  
+  .save-button,
+  .cancel-button {
+    padding: 0.7rem 1rem;
+    font-size: 0.9rem;
+  }
 }
 
 [data-theme="dark"] #rearrange-modal h2 {
@@ -367,11 +538,13 @@ nav .menu button:hover {
   margin-bottom: 0; /* Uklanja dodatni razmak ispod poslednje kartice */
 }
 
-@media (max-width: 768px) {
   .news-card img {
-    width: 80px; /* Prilagodite veličinu slike */
-    height: auto; /* Održavajte proporcije */
-    max-height: 80vh; /* Ograničite visinu */
+    width: 75px; /* Prilagodite veličinu slike */
+    height: 75px; /* Održavajte proporcije */
+    max-height: 75vh; /* Ograničite visinu */
+    margin-right: 10px;
+    margin-left: 5px;
+    margin-top: 5px;
   }
 }
 
@@ -397,5 +570,818 @@ nav .menu button:hover {
 
 .tab-content.active {
   display: block; /* Prikaz samo aktivnog taba */
+}
+
+.news-card::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.5);
+  opacity: 0;
+  border-radius: 100%;
+  transform: scale(1, 1) translate(-50%);
+  transform-origin: 50% 50%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.news-card:active::after {
+  animation: ripple 0.4s ease-out;
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0, 0);
+    opacity: 0.5;
+  }
+  20% {
+    transform: scale(17.5, 17.5);
+    opacity: 0.3;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(28, 28);
+  }
+}
+
+.news-card:active {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="dark"] .news-card:active {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Sprečavanje propagacije efekta */
+.news-card-content,
+.news-card-image {
+  position: relative;
+  z-index: 2;
+}
+
+/* Izolacija ripple efekta */
+.news-card {
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+}
+
+/* Uklanjamo globalne highlight efekte */
+* {
+  -webkit-tap-highlight-color: transparent !important;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Dozvoljavamo selekciju teksta samo gde je potrebno */
+p, h1, h2, h3, h4, h5, h6 {
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+/* Stabilizacija celog dokumenta */
+html, body {
+  overflow-x: hidden;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Container za sadržaj */
+.container {
+  padding: 0;
+  margin: 0;
+}
+
+/* Ripple efekat */
+.news-card {
+  display: flex;
+  margin: 0;
+  padding: 0;
+  background: var(--background-color);
+  border-radius: 8px;
+}
+
+.news-card::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  background: rgba(0, 0, 0, 0.1); /* Sivi krug */
+  opacity: 0;
+  border-radius: 100%;
+  transform: scale(1, 1) translate(-50%);
+  transform-origin: 50% 50%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.news-card:active::after {
+  animation: ripple 0.4s ease-out;
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0, 0);
+    opacity: 0.5;
+  }
+  20% {
+    transform: scale(17.5, 17.5);
+    opacity: 0.3;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(28, 28);
+  }
+}
+
+/* Sprečavanje propagacije */
+.news-card-content,
+.news-card-image {
+  position: relative;
+  z-index: 2;
+}
+
+/* Globalna podešavanja */
+* {
+  -webkit-tap-highlight-color: transparent !important;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Dozvola selekcije teksta */
+p, h1, h2, h3, h4, h5, h6 {
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+/* Tab content */
+.tab-content {
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* Stabilizacija stranice */
+html, body {
+  overflow-x: hidden;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  -webkit-overflow-scrolling: touch;
+}
+
+.news-card {
+  display: flex;
+  margin: 0;
+  padding: 0;
+  background: var(--background-color);
+  border-radius: 8px;
+}
+
+.news-card-content,
+.news-card-image {
+  position: relative;
+}
+
+/* Uklanjanje underline-a iz linkova */
+.news-card h3 a,
+.news-card h3 a:visited,
+.news-card h3 a:hover,
+.news-card h3 a:active,
+.news-card h3 a:focus {
+  color: inherit;
+  text-decoration: none !important;
+}
+
+.news-card:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+[data-theme="dark"] .news-card:hover {
+  box-shadow: none;
+}
+
+/* Settings dugmad - osnovni stil za light mode */
+.dropdown button {
+  font-size: inherit;
+  font-family: inherit;
+  background: none;
+  border: 0.5px;
+  color: #000000 !important;
+  padding: 0.5 1.5rem;
+  height: 2.5rem;
+  margin-bottom: 0.5rem;
+  text-align: left;
+  width: calc(99%);
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+/* Hover efekat za light mode */
+.dropdown button:hover {
+  background-color: #e0fae0;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+  outline: none;
+  overflow: hidden;
+}
+
+/* Dark mode stilovi - primenjuju se samo kada je data-theme="dark" */
+[data-theme="dark"] .dropdown {
+  background-color: var(--secondary-color);
+  color: var(--text-color);
+}
+
+[data-theme="dark"] .dropdown button {
+  color: #ffffff !important;
+}
+
+/* Dropdown container */
+.dropdown {
+  font-size: 0.8rem;
+  font-family: Arial, sans-serif;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: var(--background-color);
+  box-shadow: none;
+  color: #000000;
+  border-radius: 2px;
+  overflow: hidden;
+  display: none;
+  flex-direction: column;
+  min-width: 150px;
+  z-index: 1001;
+  padding: 0.5rem;
+  margin: 0;
+}
+
+/* Uklanjamo sve moguće nasleđene stilove */
+nav .menu button,
+nav .menu button:hover,
+nav .menu button:active,
+nav .menu button:focus {
+  color: #000000 !important;
+}
+
+[data-theme="dark"] nav .menu button,
+[data-theme="dark"] nav .menu button:hover,
+[data-theme="dark"] nav .menu button:active,
+[data-theme="dark"] nav .menu button:focus {
+  color: #ffffff !important;
+}
+
+/* Light mode stilovi */
+[data-theme="light"] .dropdown,
+[data-theme="light"] .dropdown button {
+  color: var(--text-color) !important;
+}
+
+/* Dark mode stilovi */
+[data-theme="dark"] .dropdown,
+[data-theme="dark"] .dropdown button {
+  color: var(--text-color) !important;
+}
+
+/* Osnovni stilovi za dropdown */
+.dropdown {
+  font-size: 0.8rem;
+  font-family: Arial, sans-serif;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: var(--background-color);
+  box-shadow: none;
+  color: #000000;
+  border-radius: 2px;
+  overflow: hidden;
+  display: none;
+  flex-direction: column;
+  min-width: 150px;
+  z-index: 1001;
+  padding: 0.5rem;
+  margin: 0;
+}
+
+/* Osnovni stilovi za dugmad */
+.dropdown button {
+  font-size: inherit;
+  font-family: inherit;
+  background: none;
+  border: 0.5px;
+  padding: 0.5 1.5rem;
+  height: 2.5rem;
+  margin-bottom: 0.5rem;
+  text-align: left;
+  width: calc(99%);
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+/* Hover efekat */
+.dropdown button:hover {
+  background-color: #e0fae0;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+  outline: none;
+  overflow: hidden;
+}
+
+/* Proveravamo sve selektore koji bi mogli uticati na boju */
+nav .dropdown,
+nav .menu .dropdown,
+#dropdown-menu,
+.menu .dropdown {
+  color: var(--text-color) !important;
+}
+
+/* Proveravamo i dugmad */
+nav .dropdown button,
+.dropdown button,
+#dropdown-menu button {
+  color: var(--text-color) !important;
+}
+
+/* Osiguravamo da dark mode ne utiče na light mode */
+[data-theme="light"] nav .dropdown,
+[data-theme="light"] nav .dropdown button {
+  color: var(--text-color) !important;
+}
+
+/* Dark mode ostaje kako je bio */
+[data-theme="dark"] nav .dropdown,
+[data-theme="dark"] nav .dropdown button {
+  color: var(--text-color) !important;
+}
+
+/* Globalno isključivanje tranzicija i efekata */
+* {
+  -webkit-tap-highlight-color: transparent !important;
+  transition: none !important;
+  animation: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Osnovni stilovi za kartice bez efekata */
+.news-card {
+  display: flex;
+  margin: 0;
+  padding: 0;
+  background: var(--background-color);
+  border-radius: 8px;
+}
+
+/* Uklanjanje svih hover efekata */
+.news-card:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+/* Uklanjanje blur efekta iz dropdown menija */
+.dropdown {
+  background-color: var(--background-color);
+  box-shadow: none;
+}
+
+/* Uklanjanje efekata sa linkova */
+.news-card h3 a,
+.news-card h3 a:visited,
+.news-card h3 a:hover,
+.news-card h3 a:active,
+.news-card h3 a:focus {
+  color: inherit;
+  text-decoration: none !important;
+}
+
+/* Settings dugmad - hover u dark modu */
+[data-theme="dark"] .dropdown button:hover {
+  background-color: rgba(255, 255, 255, 0.9);
+  color: #000000 !important;
+  transition: all 0.2s ease;
+}
+
+/* Osnovni stilovi za dropdown dugmad */
+.dropdown button {
+  font-size: inherit;
+  font-family: inherit;
+  background: none;
+  border: 0.5px;
+  padding: 0.5 1.5rem;
+  height: 2.5rem;
+  margin-bottom: 0.5rem;
+  text-align: left;
+  width: calc(99%);
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+/* Light mode hover ostaje nepromenjen */
+[data-theme="light"] .dropdown button:hover {
+  background-color: #e0fae0;
+}
+
+/* Stilovi za search input */
+.search-sources {
+  width: 100%;
+  padding: 0.8rem;
+  margin-bottom: 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  font-size: 0.9rem;
+}
+
+/* Lista izvora */
+.sources-list {
+  margin-bottom: 1.5rem;
+}
+
+.source-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  margin: 0.5rem 0;
+  background-color: var(--secondary-color);
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.block-button {
+  background-color: #ff4444;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 0.4rem 0.8rem;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.unblock-button {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 0.4rem 0.8rem;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+/* Dodajte ove stilove za novi modal */
+#block-sources-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.75);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+#block-sources-modal .rearrange-modal-content {
+  background-color: var(--background-color);
+  padding: 1.5rem;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 450px;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Media query za mobilne uređaje */
+@media (max-width: 768px) {
+  #block-sources-modal .rearrange-modal-content {
+    width: 90%;
+    max-height: 70vh;
+    padding: 1rem;
+  }
+}
+
+/* Stilovi za settings menu */
+.dropdown {
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background-color: var(--background-color);
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 0.5rem;
+  z-index: 1000;
+}
+
+.dropdown.visible {
+  display: block;
+}
+
+.dropdown button {
+  display: block;
+  width: 100%;
+  padding: 0.8rem 1.2rem;
+  margin: 0.2rem 0;
+  border: none;
+  background: none;
+  color: var(--text-color);
+  text-align: left;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background-color 0.2s;
+}
+
+.dropdown button:hover {
+  background-color: var(--secondary-color);
+}
+
+/* Modal za blokiranje kategorija */
+#block-categories-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.75);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+#block-categories-modal .rearrange-modal-content {
+  background-color: var(--background-color);
+  padding: 1.5rem;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 450px;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Settings button */
+.settings-button {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0.5rem;
+}
+
+/* Settings modal */
+#settings-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.75);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+#settings-modal .rearrange-modal-content {
+    background-color: var(--background-color);
+    padding: 0;
+    border-radius: 12px;
+    width: 90vw;
+    min-width: 90%;
+    max-width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    position: relative;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Media query za mobilne uređaje */
+@media (max-width: 768px) {
+    #settings-modal .rearrange-modal-content {
+        width: 90vw;
+        min-width: 90%;
+        max-width: 90%;
+    }
+}
+
+/* Settings list */
+.settings-list {
+    margin-bottom: 0;
+}
+
+.settings-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    margin: 0;
+    background-color: var(--secondary-color);
+    border-radius: 0;
+    font-size: 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.settings-item:last-child {
+    border-bottom: none;
+}
+
+.settings-action-button {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 0;
+    cursor: pointer;
+    font-size: 0.9rem;
+    height: 28px;
+    width: 80px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-left: auto;
+}
+
+.font-size-buttons {
+    display: flex;
+    gap: 0.2rem;
+    margin-left: auto;
+    width: 80px;
+    justify-content: flex-end;
+}
+
+/* Nova klasa specifično za + i - dugmiće */
+.font-button {
+    width: 22px !important;
+    height: 28px !important;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.9rem;
+}
+
+/* Modal title */
+.modal-title {
+    padding: 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* Modal buttons container */
+.modal-buttons {
+    padding: 20px;
+    border-top: 1px solid var(--border-color);
+}
+
+/* Osiguravamo da sva akcijska dugmad imaju istu širinu */
+.settings-action-button,
+.font-size-buttons {
+    width: 80px; /* Fiksna širina za sva dugmad */
+}
+
+/* Specifično za rearrange modal, sakrivamo ikonice */
+#rearrange-modal .rearrange-item::before {
+    display: none !important;
+}
+
+#rearrange-modal .rearrange-item {
+    padding-left: 1rem !important; /* Uklanjamo padding za ikonicu */
+}
+
+/* Ostali stilovi ostaju isti */
+.rearrange-item {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    margin: 0.5rem 0;
+    background-color: var(--secondary-color);
+    border-radius: 8px;
+    cursor: move;
+}
+
+.rearrange-list {
+    margin: 1rem 0;
+}
+
+/* Stilovi za dugme Schließen */
+#close-rearrange {
+    width: 100px; /* 25% veće od standardnih 80px */
+    height: 28px;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Container za dugme */
+.modal-buttons {
+    display: flex;
+    justify-content: center; /* Centriranje dugmeta */
+    padding: 1rem;
+    width: 100%;
+}
+
+.article-image {
+    width: 75px !important;
+    height: 75px !important;
+    object-fit: cover;
+    border-radius: 4px;
+    margin-left: 5px !important;
+    margin-right: 10px !important;
+}
+
+/* Osigurajmo da container ne dozvoli slikama da budu veće */
+.article-image-container {
+    width: 75px;
+    height: 75px;
+    flex-shrink: 0;
+    padding: 0;
+    margin: 0;
+}
+
+/* Za mobile view možemo smanjiti još više */
+@media (max-width: 768px) {
+    .article-image {
+        max-height: 200px;
+    }
+}
+
+.article-item {
+    display: flex;
+    padding: 0;
+    margin: 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.article-image-container {
+    width: 75px;
+    height: 75px;
+    flex-shrink: 0;
+    padding: 0;
+}
+
+.article-image {
+    width: 75px !important;
+    height: 75px !important;
+    object-fit: cover;
+    border-radius: 4px;
+    margin-right: 10px;
+    margin-left: 5px;
+    display: block;
+}
+
+.feed-content {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px; /* Kontrolišemo razmak između kartica */
+}
+
+.article-item {
+    display: flex;
+    padding: 0;
+    margin: 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.article-image-container {
+    width: 75px;
+    height: 75px;
+    flex-shrink: 0;
+    padding: 0;
+}
+
+.article-image {
+    width: 75px !important;
+    height: 75px !important;
+    object-fit: cover;
+    border-radius: 4px;
+    margin-right: 10px;
 }
 

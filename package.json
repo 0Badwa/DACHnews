@@ -1,13 +1,16 @@
 {
   "dependencies": {
-    "rss-parser": "^3.13.0",
-    "express": "^4.18.2"
+    "body-parser": "^1.20.3",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "node-fetch": "^3.3.2",
+    "redis": "^4.7.0",
+    "rss-parser": "^3.13.0"
   },
   "name": "dachnews",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "devDependencies": {},
   "scripts": {
     "start": "node index.js"
   },
