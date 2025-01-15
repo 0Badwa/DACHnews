@@ -4,35 +4,44 @@ const express = require('express');
 const { createClient } = require('redis');
 const helmet = require('helmet');
 const path = require('path');
+const fetch = require('node-fetch');  // Ako si na Node < 18
 require('dotenv').config();
+
+const { categorize } = require('./gptApi');
+
+// Proverno ispisujemo ključeve radi debug-a (po želji)
 console.log('API ključ:', process.env.OPENAI_API_KEY);
-
-const { categorize } = require('./gptApi');  // Uvoz GPT API funkcija
-
 console.log('REDIS_URL:', process.env.REDIS_URL);
 
 // Kreiraj Express aplikaciju
 const app = express();
 
-// -------------------------------------
-// Podesi Content Security Policy
-// -------------------------------------
+// --------------------------------------------------------
+// Konfigurisani Helmet da dozvoli konekcije ka spoljnim API-jevima (RSS, OpenAI)
+// i da dozvoli učitavanje slika sa HTTPS domena (npr. example.com).
+// --------------------------------------------------------
 app.use(
-  helmet.contentSecurityPolicy({
-    directives: {
-      // Uzimamo podrazumevane direktive:
-      ...helmet.contentSecurityPolicy.getDefaultDirectives(),
-      // dozvoljavamo connect ka samom serveru ('self') i RSS izvoru
-      'connect-src': ["'self'", "https://rss.app"],
-      // Ako ćeš i ka OpenAI, dodaj i https://api.openai.com
-      'connect-src': ["'self'", "https://rss.app", "https://api.openai.com"],
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+        // dozvoli fetch ("connect-src") ka samom sajtu + RSS + OpenAI
+        'connect-src': ["'self'", "https://rss.app", "https://api.openai.com"],
+        // dozvoli učitavanje slika sa 'self', data: i bilo kog https domena
+        'img-src': ["'self'", "data:", "https:"],
+      },
     },
   })
 );
 
-// Ostali middleware
+// Middleware za parsiranje JSON podataka
 app.use(express.json());
-app.use('/src', express.static(path.join(__dirname, 'src'))); // Statički fajlovi (CSS, JS)
+
+// Posluži statičke fajlove iz foldera "src"
+app.use('/src', express.static(path.join(__dirname, 'src')));
+
+// Serviraj favicon.ico ako ga dodaš u folder "public"
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Povezivanje sa Redis serverom
 const redisClient = createClient({
@@ -45,14 +54,14 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// Ruta za preuzimanje feedova
+// Ruta za preuzimanje feedova (ako želiš da RSS uzimaš preko backend-a)
 app.get('/api/feeds', async (req, res) => {
     const feedUrl = "https://rss.app/feeds/v1.1/tSylunkFT455Icoi.json";
     try {
         const cacheKey = 'rss_feeds';
         let data = await redisClient.get(cacheKey);
         if (!data) {
-            console.log('Preuzimanje feedova sa izvora...');
+            console.log('Preuzimanje feedova sa izvora...', feedUrl);
             const response = await fetch(feedUrl);
             data = await response.json();
             await redisClient.set(cacheKey, JSON.stringify(data), { EX: 3600 }); // Keširaj 1 sat
@@ -74,6 +83,7 @@ app.post('/api/categorize', async (req, res) => {
     }
 
     try {
+        // Pozivamo funkciju koja koristi OpenAI API
         const results = await Promise.all(feeds.map(feed => categorize(feed)));
         res.json(results);
     } catch (error) {
