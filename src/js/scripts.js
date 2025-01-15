@@ -34,7 +34,25 @@ function cacheFeeds(items) {
 // Slanje feedova na OpenAI API
 async function categorizeFeeds(feeds) {
     for (const feed of feeds) {
-        const prompt = `U koju kategoriju spada sledeći sadržaj: ${feed.content}`;
+        const prompt = `
+        Kao stručnjak za kategorizaciju vesti, analiziraj RSS feedove iz ulaznog JSON-a i za svaki feed precizno odredi jednu od sledećih kategorija:
+        "Technologie", "Gesundheit", "Sport", "Wirtschaft", "Kultur", "Auto", "Reisen", "Lifestyle", "Panorama", "Politik", "Unterhaltung", "Welt", "LGBT".
+
+        Odaberi kategoriju koja najbolje odgovara temi vesti. Vrati JSON sa podacima.
+
+        Primeri ulaznog feed-a:
+        {
+          "id": "${feed.id}",
+          "content": "${feed.content}"
+        }
+
+        Rezultat:
+        {
+          "id": "${feed.id}", "kategorija": "Odabrana kategorija"
+        }
+
+        Pobrini se da svaka vest dobije tačnu kategoriju.
+        `;
         
         try {
             const response = await fetch("https://api.openai.com/v1/completions", {
@@ -44,9 +62,9 @@ async function categorizeFeeds(feeds) {
                     "Authorization": `Bearer ${apiKey}`
                 },
                 body: JSON.stringify({
-                    model: "gpt-4o-mini",  // Koristite validan model prema vašim potrebama
+                    model: "gpt-4o-mini", // Koristite validan model prema vašim potrebama
                     prompt: prompt,
-                    max_tokens: 50
+                    max_tokens: 100
                 })
             });
 
