@@ -20,19 +20,19 @@ const app = express();
 // Konfigurisani Helmet da dozvoli konekcije ka spoljnim API-jevima (RSS, OpenAI)
 // i da dozvoli učitavanje slika sa HTTPS domena (npr. example.com).
 // --------------------------------------------------------
-app.use(
-  helmet({
-    contentSecurityPolicy: {
-      directives: {
-        ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+// app.use(
+//   helmet({
+   //  contentSecurityPolicy: {
+      // directives: {
+        // ...helmet.contentSecurityPolicy.getDefaultDirectives(),
         // dozvoli fetch ("connect-src") ka samom sajtu + RSS + OpenAI
-        'connect-src': ["'self'", "https://rss.app", "https://api.openai.com"],
+        // 'connect-src': ["'self'", "https://rss.app", "https://api.openai.com"],
         // dozvoli učitavanje slika sa 'self', data: i bilo kog https domena
-        'img-src': ["'self'", "data:", "https:"],
-      },
-    },
-  })
-);
+        // 'img-src': ["'self'", "data:", "https:"],
+     //  },
+  //   },
+//   })
+// );
 
 // Middleware za parsiranje JSON podataka
 app.use(express.json());
