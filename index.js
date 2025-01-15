@@ -31,7 +31,7 @@ app.get('/', (req, res) => {
 
 // Ruta za preuzimanje feedova
 app.get('/api/feeds', async (req, res) => {
-    const feedUrl = "https://rss.app/feeds/v1.1/_sf1gbLo1ZadJmc5e.json";
+    const feedUrl = "https://rss.app/feeds/v1.1/tSylunkFT455Icoi.json";
     try {
         const cacheKey = 'rss_feeds';
         let data = await redisClient.get(cacheKey);
