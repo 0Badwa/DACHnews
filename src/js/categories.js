@@ -1,4 +1,6 @@
-// Definišemo kategorije
+// Ovo je deo klijentskog koda, pretpostavljamo da se učitava u browseru
+// (npr. <script src="src/js/categories.js" defer></script>)
+
 const categories = [
     "Technologie",
     "Gesundheit",
