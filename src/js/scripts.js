@@ -1,4 +1,5 @@
 // scripts.js
+
 // import dotenv from 'dotenv';
 // dotenv.config();
 
@@ -99,3 +100,38 @@ async function main() {
 
 // Pokreni glavnu funkciju
 main();
+
+
+// Funkcija za prikaz kartice (news-card)
+async function displayNewsCard(news) {
+  const newsCard = document.getElementById('news-card');
+  
+  // Popunjavanje kartice podacima
+  const titleElement = newsCard.querySelector('.news-title');
+  const categoryElement = newsCard.querySelector('.news-category');
+  const dateElement = newsCard.querySelector('.news-date');
+  const imageElement = newsCard.querySelector('.news-image');
+  const contentElement = newsCard.querySelector('.news-content');
+  const linkElement = newsCard.querySelector('.news-link');
+
+  titleElement.textContent = news.title;
+  categoryElement.textContent = news.category;
+  dateElement.textContent = new Date(news.date).toLocaleDateString();
+  imageElement.src = news.image || 'placeholder.jpg'; // Ako nema slike, koristi placeholder
+  imageElement.alt = news.title;
+  contentElement.textContent = news.content;
+  linkElement.href = news.url;
+}
+
+// Primer poziva sa dobijenim podacima od API-ja
+const exampleNews = {
+  title: "Primer naslova vesti",
+  category: "Technologie",
+  date: "2025-01-15T10:00:00Z",
+  image: "https://example.com/news-image.jpg",
+  content: "Ovo je sadržaj vesti koji je generisan.",
+  url: "https://example.com/full-article"
+};
+
+// Prikazivanje primera
+displayNewsCard(exampleNews);
