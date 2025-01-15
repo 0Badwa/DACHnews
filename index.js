@@ -4,6 +4,7 @@ const { createClient } = require('redis');
 const helmet = require('helmet');
 const path = require('path');
 require('dotenv').config();
+console.log('API ključ:', process.env.OPENAI_API_KEY);
 
 const { categorize } = require('./gptApi');  // Uvoz GPT API funkcija
 
