@@ -1,6 +1,6 @@
 // gptApi.js
 
-const fetch = require('node-fetch');  // ako si na Node 18+, možeš i bez ovoga
+// const fetch = require('node-fetch');  // ako si na Node 18+, možeš i bez ovoga
 require('dotenv').config();
 
 const CHATGPT_API_URL = 'https://api.openai.com/v1/completions';
@@ -17,7 +17,7 @@ async function categorize(feed) {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'gpt-4o',
+      model: 'gpt-4o-mini',
       prompt: `Odredi kategoriju za sledeću vest: ${feed.content}`,
       max_tokens: 100,
     }),
