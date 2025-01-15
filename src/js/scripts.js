@@ -1,5 +1,6 @@
-// Učitaj .env fajl i konfiguraciju iz njega
-require('dotenv').config();
+// scripts.js
+import dotenv from 'dotenv';
+dotenv.config();
 
 // Uvezi potrebne module
 const fetch = require('node-fetch');
