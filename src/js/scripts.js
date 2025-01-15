@@ -1,16 +1,6 @@
 // scripts.js
 
-// import dotenv from 'dotenv';
-// dotenv.config();
-
-// Uvezi potrebne module
-const fetch = require('node-fetch');
-
-// Preuzmi API ključ iz okruženja
-const apiKey = process.env.OPENAI_API_KEY;
-console.log('API ključ učitan iz .env:', apiKey);
-
-// URL feed-a
+// URL feed-a (možeš ostaviti kako jeste ili menjati)
 const feedUrl = "https://rss.app/feeds/v1.1/_sf1gbLo1ZadJmc5e.json";
 
 // Preuzimanje feedova
@@ -36,53 +26,33 @@ function cacheFeeds(items) {
     return newItems;
 }
 
-// Slanje feedova na OpenAI API
+// -----------------------------------------------------------------------------------
+// Funkcija za slanje feed-ova ka serveru radi kategorizacije (umesto direktno GPT API).
+// -----------------------------------------------------------------------------------
 async function categorizeFeeds(feeds) {
-    for (const feed of feeds) {
-        const prompt = `
-Kao stručnjak za kategorizaciju vesti, analiziraj RSS feedove iz ulaznog JSON-a i za svaki feed precizno odredi jednu od sledećih kategorija:
-"Technologie", "Gesundheit", "Sport", "Wirtschaft", "Kultur", "Auto", "Reisen", "Lifestyle", "Panorama", "Politik", "Unterhaltung", "Welt", "LGBT".
+    try {
+        // Pozivamo našu Express rutu na serveru: "/api/categorize"
+        const response = await fetch("/api/categorize", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ feeds })  // šaljemo {feeds: [ ... ]}
+        });
 
-Odaberi kategoriju koja najbolje odgovara temi vesti. Vrati JSON sa podacima.
-
-Primeri ulaznog feed-a:
-{
-  "id": "${feed.id}",
-  "content": "${feed.content}"
-}
-
-Rezultat:
-{
-  "id": "${feed.id}", "kategorija": "Odabrana kategorija"
-}
-
-Pobrini se da svaka vest dobije tačnu kategoriju.
-        `;
-
-        try {
-            const response = await fetch("https://api.openai.com/v1/completions", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${apiKey}`
-                },
-                body: JSON.stringify({
-                    model: "gpt-4o-mini",  // Koristi validan model
-                    prompt: prompt,
-                    max_tokens: 100
-                })
-            });
-
-            if (!response.ok) {
-                throw new Error(`API greška: ${response.status} ${response.statusText}`);
-            }
-
-            const result = await response.json();
-            const category = result.choices?.[0]?.text?.trim() || "Nepoznata kategorija";
-            console.log(`Stavka '${feed.title}' spada u kategoriju: ${category}`);
-        } catch (error) {
-            console.error("Greška prilikom slanja feedova na OpenAI API:", error);
+        if (!response.ok) {
+            throw new Error(`API greška: ${response.status} ${response.statusText}`);
         }
+
+        // Rezultat će biti niz objekata { id, category }
+        const results = await response.json();
+
+        // Loguj rezultate, ili uradi nešto drugo sa njima
+        results.forEach(result => {
+            console.log(`Stavka '${result.id}' spada u kategoriju: ${result.category}`);
+        });
+    } catch (error) {
+        console.error("Greška prilikom slanja feedova na OpenAI API (server-side):", error);
     }
 }
 
@@ -135,3 +105,71 @@ const exampleNews = {
 
 // Prikazivanje primera
 displayNewsCard(exampleNews);
+
+
+// ---------------------------------------------------------
+// Ostatak koda za rad sa kategorijama (Local Storage):
+// ---------------------------------------------------------
+const categories = [
+    "Technologie",
+    "Gesundheit",
+    "Sport",
+    "Wirtschaft",
+    "Kultur",
+    "Auto",
+    "Reisen",
+    "Lifestyle",
+    "Panorama",
+    "Politik",
+    "Unterhaltung",
+    "Welt",
+    "LGBT"
+];
+
+// Funkcija za čuvanje kategorija u Local Storage
+function saveCategories() {
+    localStorage.setItem('categories', JSON.stringify(categories));
+    console.log("Kategorije su sačuvane lokalno.");
+}
+
+// Funkcija za učitavanje kategorija iz Local Storage-a
+function loadCategories() {
+    const savedCategories = localStorage.getItem('categories');
+    if (savedCategories) {
+        console.log("Učitane kategorije:", JSON.parse(savedCategories));
+        return JSON.parse(savedCategories);
+    } else {
+        console.log("Nema sačuvanih kategorija. Koristimo podrazumevane.");
+        saveCategories();
+        return categories;
+    }
+}
+
+// Funkcija za dodavanje novih kategorija
+function addCategory(newCategory) {
+    const currentCategories = loadCategories();
+    if (!currentCategories.includes(newCategory)) {
+        currentCategories.push(newCategory);
+        localStorage.setItem('categories', JSON.stringify(currentCategories));
+        console.log(`Kategorija '${newCategory}' je dodata.`);
+    } else {
+        console.log(`Kategorija '${newCategory}' već postoji.`);
+    }
+}
+
+// Funkcija za brisanje kategorije
+function removeCategory(category) {
+    const currentCategories = loadCategories();
+    const index = currentCategories.indexOf(category);
+    if (index > -1) {
+        currentCategories.splice(index, 1);
+        localStorage.setItem('categories', JSON.stringify(currentCategories));
+        console.log(`Kategorija '${category}' je obrisana.`);
+    } else {
+        console.log(`Kategorija '${category}' ne postoji.`);
+    }
+}
+
+// Pokrećemo inicijalno učitavanje kategorija
+const loadedCategories = loadCategories();
+console.log("Sve kategorije:", loadedCategories);
