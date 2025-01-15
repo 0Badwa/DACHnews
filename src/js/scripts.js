@@ -1,6 +1,6 @@
 // scripts.js
-import dotenv from 'dotenv';
-dotenv.config();
+// import dotenv from 'dotenv';
+// dotenv.config();
 
 // Uvezi potrebne module
 const fetch = require('node-fetch');
