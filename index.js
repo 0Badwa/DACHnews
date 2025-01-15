@@ -1,9 +1,13 @@
+// index.js
 const express = require('express');
 const { createClient } = require('redis');
-const fetch = require('node-fetch');
 const helmet = require('helmet');
 const path = require('path');
 require('dotenv').config();
+
+const { categorize } = require('./gptApi');  // Uvoz GPT API funkcija
+
+console.log('REDIS_URL:', process.env.REDIS_URL);
 
 // Kreiraj Express aplikaciju
 const app = express();
@@ -53,32 +57,9 @@ app.post('/api/categorize', async (req, res) => {
         return res.status(400).send('Invalid input');
     }
 
-    const CHATGPT_API_URL = 'https://api.openai.com/v1/completions';
-    const CHATGPT_API_KEY = process.env.OPENAI_API_KEY;
-
     try {
         const results = await Promise.all(
-            feeds.map(async (feed) => {
-                const response = await fetch(CHATGPT_API_URL, {
-                    method: 'POST',
-                    headers: {
-                        Authorization: `Bearer ${CHATGPT_API_KEY}`,
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        model: 'gpt-4o-mini',  // Koristi validan model
-                        prompt: `Odredi kategoriju za sledeću vest: ${feed.content}`,
-                        max_tokens: 100,
-                    }),
-                });
-
-                if (!response.ok) {
-                    throw new Error(`OpenAI API greška: ${response.status} ${response.statusText}`);
-                }
-
-                const data = await response.json();
-                return { id: feed.id, category: data.choices[0].text.trim() };
-            })
+            feeds.map(feed => categorize(feed))
         );
         res.json(results);
     } catch (error) {
