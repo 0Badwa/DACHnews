@@ -17,7 +17,7 @@ async function categorize(feed) {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'gpt-4o-mini',
+      model: 'gpt-4o mini',
       prompt: `Odredi kategoriju za sledeću vest: ${feed.content}`,
       max_tokens: 100,
     }),
