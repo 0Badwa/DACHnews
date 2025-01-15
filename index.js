@@ -14,8 +14,23 @@ console.log('REDIS_URL:', process.env.REDIS_URL);
 // Kreiraj Express aplikaciju
 const app = express();
 
-// Middleware za sigurnost i parsiranje JSON podataka
-app.use(helmet());
+// -------------------------------------
+// Podesi Content Security Policy
+// -------------------------------------
+app.use(
+  helmet.contentSecurityPolicy({
+    directives: {
+      // Uzimamo podrazumevane direktive:
+      ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+      // dozvoljavamo connect ka samom serveru ('self') i RSS izvoru
+      'connect-src': ["'self'", "https://rss.app"],
+      // Ako ćeš i ka OpenAI, dodaj i https://api.openai.com
+      'connect-src': ["'self'", "https://rss.app", "https://api.openai.com"],
+    },
+  })
+);
+
+// Ostali middleware
 app.use(express.json());
 app.use('/src', express.static(path.join(__dirname, 'src'))); // Statički fajlovi (CSS, JS)
 
@@ -23,7 +38,6 @@ app.use('/src', express.static(path.join(__dirname, 'src'))); // Statički fajlo
 const redisClient = createClient({
     url: process.env.REDIS_URL,
 });
-
 redisClient.connect().catch((err) => console.error('Redis greška:', err));
 
 // Ruta za osnovni URL
@@ -60,9 +74,7 @@ app.post('/api/categorize', async (req, res) => {
     }
 
     try {
-        const results = await Promise.all(
-            feeds.map(feed => categorize(feed))
-        );
+        const results = await Promise.all(feeds.map(feed => categorize(feed)));
         res.json(results);
     } catch (error) {
         console.error('Greška pri kategorizaciji:', error);
