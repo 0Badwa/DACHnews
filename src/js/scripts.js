@@ -1,6 +1,6 @@
 // scripts.js
 
-// URL feed-a (možeš ostaviti kako jeste ili menjati)
+// URL feed-a (ako želiš da preuzimaš direkto iz browsera)
 const feedUrl = "https://rss.app/feeds/v1.1/_sf1gbLo1ZadJmc5e.json";
 
 // Preuzimanje feedova
@@ -26,28 +26,22 @@ function cacheFeeds(items) {
     return newItems;
 }
 
-// -----------------------------------------------------------------------------------
-// Funkcija za slanje feed-ova ka serveru radi kategorizacije (umesto direktno GPT API).
-// -----------------------------------------------------------------------------------
+// Slanje feedova na server (koji onda zove OpenAI)
 async function categorizeFeeds(feeds) {
     try {
-        // Pozivamo našu Express rutu na serveru: "/api/categorize"
         const response = await fetch("/api/categorize", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({ feeds })  // šaljemo {feeds: [ ... ]}
+            body: JSON.stringify({ feeds })
         });
 
         if (!response.ok) {
             throw new Error(`API greška: ${response.status} ${response.statusText}`);
         }
 
-        // Rezultat će biti niz objekata { id, category }
         const results = await response.json();
-
-        // Loguj rezultate, ili uradi nešto drugo sa njima
         results.forEach(result => {
             console.log(`Stavka '${result.id}' spada u kategoriju: ${result.category}`);
         });
@@ -93,7 +87,7 @@ async function displayNewsCard(news) {
   linkElement.href = news.url;
 }
 
-// Primer poziva sa dobijenim podacima od API-ja
+// Primer poziva sa dobijenim podacima
 const exampleNews = {
   title: "Primer naslova vesti",
   category: "Technologie",
@@ -108,7 +102,7 @@ displayNewsCard(exampleNews);
 
 
 // ---------------------------------------------------------
-// Ostatak koda za rad sa kategorijama (Local Storage):
+// Ostatak koda za kategorije (Local Storage):
 // ---------------------------------------------------------
 const categories = [
     "Technologie",
