@@ -44,7 +44,7 @@ async function categorizeFeeds(feeds) {
                     "Authorization": `Bearer ${apiKey}`
                 },
                 body: JSON.stringify({
-                    model: "gpt-4",  // Koristite validan model prema vašim potrebama
+                    model: "gpt-4o-mini",  // Koristite validan model prema vašim potrebama
                     prompt: prompt,
                     max_tokens: 50
                 })
