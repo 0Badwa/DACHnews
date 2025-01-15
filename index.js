@@ -2,6 +2,7 @@ const express = require('express');
 const { createClient } = require('redis');
 const fetch = require('node-fetch');
 const helmet = require('helmet');
+const path = require('path');
 require('dotenv').config();
 
 console.log('Učitavanje environment promenljivih:');
@@ -96,6 +97,12 @@ async function getCachedResponse(key) {
         return null;
     }
 }
+
+// Ruta za osnovni URL - otvara index.html iz root direktorijuma
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
 
 // Ruta za obradu RSS feedova
 app.post('/process-feeds', async (req, res) => {
