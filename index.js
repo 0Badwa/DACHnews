@@ -5,6 +5,13 @@ const helmet = require('helmet');
 const path = require('path');
 require('dotenv').config();
 
+
+// Kreiraj Express aplikaciju
+const app = express();
+// Serviraj statičke fajlove iz direktorijuma 'src'
+app.use('/src', express.static(path.join(__dirname, 'src')));
+
+
 console.log('Učitavanje environment promenljivih:');
 console.log('REDIS_URL:', process.env.REDIS_URL);
 console.log('OPENAI_API_KEY:', process.env.OPENAI_API_KEY);
@@ -21,8 +28,6 @@ if (!process.env.OPENAI_API_KEY) {
     process.exit(1);
 }
 
-// Kreiraj Express aplikaciju
-const app = express();
 
 // Middleware za sigurnost i parsiranje JSON podataka
 app.use(helmet());
@@ -98,11 +103,11 @@ async function getCachedResponse(key) {
     }
 }
 
+
 // Ruta za osnovni URL - otvara index.html iz root direktorijuma
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
-
 
 // Ruta za obradu RSS feedova
 app.post('/process-feeds', async (req, res) => {
