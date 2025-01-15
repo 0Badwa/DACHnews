@@ -1,32 +1,51 @@
 const express = require('express');
-const redis = require('redis');
+const { createClient } = require('redis');
 const fetch = require('node-fetch');
-const bodyParser = require('body-parser');
+const helmet = require('helmet');
+require('dotenv').config();
+
+console.log('Učitavanje environment promenljivih:');
+console.log('REDIS_URL:', process.env.REDIS_URL);
+console.log('OPENAI_API_KEY:', process.env.OPENAI_API_KEY);
+
+
+// Provera environment varijabli
+if (!process.env.REDIS_URL) {
+    console.error('REDIS_URL nije definisan u environment varijablama.');
+    process.exit(1);
+}
+
+if (!process.env.OPENAI_API_KEY) {
+    console.error('OPENAI_API_KEY nije definisan u environment varijablama.');
+    process.exit(1);
+}
 
 // Kreiraj Express aplikaciju
 const app = express();
 
-// Middleware za parsiranje JSON podataka
-app.use(bodyParser.json());
+// Middleware za sigurnost i parsiranje JSON podataka
+app.use(helmet());
+app.use(express.json());
 
-// Povezivanje Redis servera (Render.com)
-const redisClient = redis.createClient({
-    socket: {
-        host: 'redis://red-ctsqli3v2p9s738dmv50:6379', // Host iz Internal Redis URL
-        port: 6379                        // Port iz Internal Redis URL
-    }
+// Povezivanje sa Redis serverom
+const redisClient = createClient({
+    url: process.env.REDIS_URL
 });
 
+redisClient.on('error', (err) => console.error('Greška pri povezivanju sa Redis serverom:', err));
+redisClient.on('connect', () => console.log('Povezan na Redis server.'));
+redisClient.on('ready', () => console.log('Redis spreman za upotrebu.'));
+redisClient.on('end', () => console.log('Redis konekcija zatvorena.'));
+
 redisClient.connect()
-    .then(() => console.log('Povezan na Redis server na Render.com!'))
-    .catch(err => console.error('Greška pri povezivanju sa Redis serverom:', err));
+    .catch((err) => {
+        console.error('Greška pri povezivanju sa Redis serverom:', err);
+        process.exit(1);
+    });
 
 // ChatGPT API podaci
-require('dotenv').config();
 const CHATGPT_API_KEY = process.env.OPENAI_API_KEY;
-
 const CHATGPT_API_URL = 'https://api.openai.com/v1/chat/completions';
-
 
 // Funkcija za slanje zahteva ChatGPT API-ju
 async function fetchChatGPTResponse(jsonData) {
@@ -38,7 +57,7 @@ async function fetchChatGPTResponse(jsonData) {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                model: 'gpt-4-turbo-4omini', // Koristi 4omini model
+                model: 'gpt-4-turbo-4omini',
                 messages: [
                     { role: 'system', content: 'Ti si pomoćnik za analizu RSS feedova.' },
                     { role: 'user', content: `Obradi sledeći JSON: ${JSON.stringify(jsonData)}` }
@@ -98,7 +117,10 @@ app.post('/process-feeds', async (req, res) => {
 
         res.json({ data: responseData });
     } catch (error) {
-        res.status(500).send('Greška pri obradi feedova.');
+        res.status(500).json({
+            message: 'Greška pri obradi feedova.',
+            error: error.message
+        });
     }
 });
 
@@ -116,7 +138,7 @@ app.get('/feeds', async (req, res) => {
 });
 
 // Pokretanje servera
-const PORT = 10000; // Render koristi port 10000 za tvoju aplikaciju
+const PORT = process.env.PORT || 10000; // Koristi port iz environment varijable ili podrazumevani 10000
 app.listen(PORT, () => {
     console.log(`Server pokrenut na portu ${PORT}`);
 });
