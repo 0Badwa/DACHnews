@@ -17,6 +17,7 @@ app.use('/src', express.static(path.join(__dirname, 'src'))); // Statički fajlo
 const redisClient = createClient({
     url: process.env.REDIS_URL,
 });
+
 redisClient.connect().catch((err) => console.error('Redis greška:', err));
 
 // Ruta za osnovni URL
@@ -65,11 +66,16 @@ app.post('/api/categorize', async (req, res) => {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        model: 'gpt-4-turbo',
+                        model: 'gpt-4o-mini',  // Koristi validan model
                         prompt: `Odredi kategoriju za sledeću vest: ${feed.content}`,
                         max_tokens: 100,
                     }),
                 });
+
+                if (!response.ok) {
+                    throw new Error(`OpenAI API greška: ${response.status} ${response.statusText}`);
+                }
+
                 const data = await response.json();
                 return { id: feed.id, category: data.choices[0].text.trim() };
             })
