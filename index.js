@@ -4,7 +4,6 @@ const express = require('express');
 const { createClient } = require('redis');
 const helmet = require('helmet');
 const path = require('path');
-const fetch = require('node-fetch');  // Ako si na Node < 18
 require('dotenv').config();
 
 const { categorize } = require('./gptApi');
