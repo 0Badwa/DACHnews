@@ -1,6 +1,9 @@
 // Učitaj .env fajl i konfiguraciju iz njega
 require('dotenv').config();
 
+// Uvezi potrebne module
+const fetch = require('node-fetch');
+
 // Preuzmi API ključ iz okruženja
 const apiKey = process.env.OPENAI_API_KEY;
 console.log('API ključ učitan iz .env:', apiKey);
@@ -35,25 +38,25 @@ function cacheFeeds(items) {
 async function categorizeFeeds(feeds) {
     for (const feed of feeds) {
         const prompt = `
-        Kao stručnjak za kategorizaciju vesti, analiziraj RSS feedove iz ulaznog JSON-a i za svaki feed precizno odredi jednu od sledećih kategorija:
-        "Technologie", "Gesundheit", "Sport", "Wirtschaft", "Kultur", "Auto", "Reisen", "Lifestyle", "Panorama", "Politik", "Unterhaltung", "Welt", "LGBT".
+Kao stručnjak za kategorizaciju vesti, analiziraj RSS feedove iz ulaznog JSON-a i za svaki feed precizno odredi jednu od sledećih kategorija:
+"Technologie", "Gesundheit", "Sport", "Wirtschaft", "Kultur", "Auto", "Reisen", "Lifestyle", "Panorama", "Politik", "Unterhaltung", "Welt", "LGBT".
 
-        Odaberi kategoriju koja najbolje odgovara temi vesti. Vrati JSON sa podacima.
+Odaberi kategoriju koja najbolje odgovara temi vesti. Vrati JSON sa podacima.
 
-        Primeri ulaznog feed-a:
-        {
-          "id": "${feed.id}",
-          "content": "${feed.content}"
-        }
+Primeri ulaznog feed-a:
+{
+  "id": "${feed.id}",
+  "content": "${feed.content}"
+}
 
-        Rezultat:
-        {
-          "id": "${feed.id}", "kategorija": "Odabrana kategorija"
-        }
+Rezultat:
+{
+  "id": "${feed.id}", "kategorija": "Odabrana kategorija"
+}
 
-        Pobrini se da svaka vest dobije tačnu kategoriju.
+Pobrini se da svaka vest dobije tačnu kategoriju.
         `;
-        
+
         try {
             const response = await fetch("https://api.openai.com/v1/completions", {
                 method: "POST",
@@ -62,7 +65,7 @@ async function categorizeFeeds(feeds) {
                     "Authorization": `Bearer ${apiKey}`
                 },
                 body: JSON.stringify({
-                    model: "gpt-4o-mini", // Koristite validan model prema vašim potrebama
+                    model: "gpt-4o-mini",  // Koristi validan model
                     prompt: prompt,
                     max_tokens: 100
                 })
