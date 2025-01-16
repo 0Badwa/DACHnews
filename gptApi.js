@@ -3,7 +3,7 @@
 // const fetch = require('node-fetch');  // ako si na Node 18+, možeš i bez ovoga
 require('dotenv').config();
 
-const CHATGPT_API_URL = 'https://api.openai.com/v1/completions';
+const CHATGPT_API_URL = 'https://api.openai.com/v1/chat/completions';
 const CHATGPT_API_KEY = process.env.OPENAI_API_KEY;
 
 async function categorize(feed) {
