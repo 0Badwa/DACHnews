@@ -2,7 +2,7 @@
  * scripts.js
  ************************************************/
 
-// Globalna promenljiva za feedove (neka ostane na vrhu)
+// Globalna promenljiva za feedove
 let feeds = [];
 
 // URL feed-a
@@ -106,8 +106,16 @@ async function main() {
     }
 }
 
+// Pomoćna funkcija da uklonimo 'active' klasu sa svih tabova
+function removeActiveClass() {
+    const allTabs = document.querySelectorAll('.tab');
+    allTabs.forEach(tab => {
+        tab.classList.remove('active');
+        tab.setAttribute('aria-selected', 'false');
+    });
+}
+
 // Funkcija koja generiše HTML karticu za pojedinačan feed
-// (koristimo je unutar funkcija displayAllFeeds, displayNewsCardsByCategory, displayLatestFeeds itd.)
 function createNewsCard(feed) {
     const newsCard = document.createElement('div');
     newsCard.className = 'news-card';
@@ -133,9 +141,8 @@ function displayNewsCardsByCategory(category) {
 
     // Filtriraj feedove po odabranoj kategoriji
     const filteredFeeds = feeds.filter(feed => {
-        // Ako feed ima kategoriju i poklapa se sa prosleđenom,
-        // ili feed nema kategoriju, a tražena je "Uncategorized"
-        return (feed.category === category) || (!feed.category && category === "Uncategorized");
+        // feed.category mora da se poklapa, ili ako nije definisana kategorija feed-a, prikazujemo u "Uncategorized"
+        return feed.category === category || (!feed.category && category === "Uncategorized");
     });
 
     console.log("Filtrirani feedovi za kategoriju:", category, filteredFeeds);
@@ -158,62 +165,6 @@ function displayAllFeeds() {
 
     container.innerHTML = ''; // Očisti prethodni sadržaj
 
-    // Prikaži sve feedove
     feeds.forEach(feed => {
         const newsCard = createNewsCard(feed);
-        container.appendChild(newsCard);
-    });
-
-    if (feeds.length === 0) {
-        container.innerHTML = '<p>Nema vesti za prikaz.</p>';
-    }
-}
-
-// Prikaz feedova sortiranih po datumu (za "Latest")
-function displayLatestFeeds() {
-    const container = document.getElementById('news-container');
-    if (!container) return;
-
-    container.innerHTML = ''; // Očisti prethodni sadržaj
-
-    // Sortiramo kopiju niza feedova po datumu objave (opadajući)
-    const sortedFeeds = [...feeds].sort((a, b) => {
-        const dateA = new Date(a.date_published).getTime() || 0;
-        const dateB = new Date(b.date_published).getTime() || 0;
-        return dateB - dateA;
-    });
-
-    sortedFeeds.forEach(feed => {
-        const newsCard = createNewsCard(feed);
-        container.appendChild(newsCard);
-    });
-
-    if (sortedFeeds.length === 0) {
-        container.innerHTML = '<p>Nema vesti za prikaz.</p>';
-    }
-}
-
-// Pokretanje aplikacije
-// Pozvaćemo prvo main() da učita feedove, pa nakon toga prikažemo sve feedove (Home).
-main().then(() => {
-    // Odmah nakon što su feedovi učitani i keširani, prikaži sve feedove:
-    displayAllFeeds();
-
-    // Event listener za klik na "Home" tab
-    const homeTab = document.querySelector('[data-tab="home"]');
-    if (homeTab) {
-        homeTab.addEventListener('click', () => {
-            // Aktiviraj "Home" prikaz
-            displayAllFeeds();
-        });
-    }
-
-    // Event listener za klik na "Latest" tab
-    const latestTab = document.querySelector('[data-tab="latest"]');
-    if (latestTab) {
-        latestTab.addEventListener('click', () => {
-            // Aktiviraj "Latest" prikaz
-            displayLatestFeeds();
-        });
-    }
-});
+        container.appendChild(newsC
