@@ -90,8 +90,26 @@ function cacheFeedsLocally(items) {
     return newFeeds;
 }
 
+// Definišite globalnu varijablu
+let feeds = [];
+
+// Glavna funkcija
+async function main() {
+    feeds = await fetchFeeds(); // Učitaj feedove i sačuvaj u globalnoj varijabli
+    console.log("Keširani feedovi:", feeds);
+    const newFeeds = cacheFeedsLocally(feeds);
+
+    if (newFeeds.length > 0) {
+        console.log(`Pronađeno ${newFeeds.length} novih feedova.`);
+    } else {
+        console.log("Nema novih feedova za kategorizaciju.");
+    }
+
+    generateTabs();
+}
+
 // Prikaz feedova po kategoriji
-function displayNewsCardsByCategory(feeds, category) {
+function displayNewsCardsByCategory(category) {
     const container = document.getElementById('news-container');
     if (!container) return;
 
@@ -99,7 +117,7 @@ function displayNewsCardsByCategory(feeds, category) {
 
     // Filtriraj feedove po odabranoj kategoriji
     const filteredFeeds = feeds.filter(feed => feed.category === category || (!feed.category && category === "Uncategorized"));
-    console.log("Filtrirani feedovi za kategoriju:", category, filteredFeeds); // Provera filtriranih feedova
+    console.log("Filtrirani feedovi za kategoriju:", category, filteredFeeds);
 
     // Generiši kartice
     filteredFeeds.forEach(feed => {
@@ -119,47 +137,6 @@ function displayNewsCardsByCategory(feeds, category) {
     if (filteredFeeds.length === 0) {
         container.innerHTML = '<p>Nema vesti za ovu kategoriju.</p>';
     }
-}
-
-// Generisanje tabova
-function generateTabs() {
-    const tabsContainer = document.getElementById('tabs-container');
-    if (!tabsContainer) return;
-
-    categories.forEach(category => {
-        if (category.toLowerCase() === 'home' || category.toLowerCase() === 'latest') {
-            return;
-        }
-
-        const tabButton = document.createElement('button');
-        tabButton.className = 'tab';
-        tabButton.setAttribute('data-tab', category.toLowerCase());
-        tabButton.textContent = category;
-        tabsContainer.appendChild(tabButton);
-
-        tabButton.addEventListener('click', () => {
-            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-            tabButton.classList.add('active');
-            displayNewsCardsByCategory(cachedFeeds, category);
-        });
-    });
-
-    console.log("Tabovi generisani za kategorije:", categories); // Provera kreiranih tabova
-}
-
-// Glavna funkcija
-let cachedFeeds = [];
-async function main() {
-    cachedFeeds = await fetchFeeds();
-    console.log("Cached feeds:", cachedFeeds); // Provera keširanih feedova
-    const newFeeds = cacheFeedsLocally(cachedFeeds);
-
-    if (newFeeds.length > 0) {
-        console.log(`Pronađeno ${newFeeds.length} novih feedova.`);
-    } else {
-        console.log("Nema novih feedova za kategorizaciju.");
-    }
-    generateTabs();
 }
 
 // Pokretanje aplikacije
