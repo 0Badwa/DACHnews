@@ -24,24 +24,27 @@
         <img src="src/icons/dachnewslogo.png" alt="DACH.news" />
   </nav>
 
- <!-- TABS: samo Home i Latest + 13 novih kategorija (ukupno 15) -->
-  <div class="tabs-container" role="tablist">
-    <button class="tab active" data-tab="home" role="tab" aria-selected="true">🏠</button>
-    <button class="tab" data-tab="latest" role="tab" aria-selected="false">⏰</button>
-    <button class="tab" data-tab="technologie" role="tab" aria-selected="false">Technologie</button>
-    <button class="tab" data-tab="gesundheit" role="tab" aria-selected="false">Gesundheit</button>
-    <button class="tab" data-tab="sport" role="tab" aria-selected="false">Sport</button>
-    <button class="tab" data-tab="wirtschaft" role="tab" aria-selected="false">Wirtschaft</button>
-    <button class="tab" data-tab="kultur" role="tab" aria-selected="false">Kultur</button>
-    <button class="tab" data-tab="auto" role="tab" aria-selected="false">Auto</button>
-    <button class="tab" data-tab="reisen" role="tab" aria-selected="false">Reisen</button>
-    <button class="tab" data-tab="lifestyle" role="tab" aria-selected="false">Lifestyle</button>
-    <button class="tab" data-tab="panorama" role="tab" aria-selected="false">Panorama</button>
-    <button class="tab" data-tab="politik" role="tab" aria-selected="false">Politik</button>
-    <button class="tab" data-tab="unterhaltung" role="tab" aria-selected="false">Unterhaltung</button>
-    <button class="tab" data-tab="welt" role="tab" aria-selected="false">Welt</button>
-    <button class="tab" data-tab="lgbt" role="tab" aria-selected="false">LGBT</button>
-  </div>
+<!-- TABS: Home, Latest i 13 novih kategorija (ukupno 15) -->
+<div class="tabs-container" role="tablist">
+  <!-- Home -->
+  <button class="tab active" data-tab="home" role="tab" aria-selected="true" aria-label="Home">
+    <span>🏠</span>
+  </button>
+  <!-- Latest -->
+  <button class="tab" data-tab="latest" role="tab" aria-selected="false" aria-label="Latest">
+    <span>⏰</span>
+  </button>
+  <!-- Dinamički generisane kategorije -->
+  ${categories
+    .map(
+      category => `
+      <button class="tab" data-tab="${category.toLowerCase()}" role="tab" aria-selected="false">
+        ${category}
+      </button>`
+    )
+    .join('')}
+</div>
+
 
   <!-- Dinamički generisane kartice feedova -->  
   <div class="tab-content active" id="home">
