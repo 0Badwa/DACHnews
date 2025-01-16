@@ -15,7 +15,7 @@ const categories = [
     "Politik",
     "Unterhaltung",
     "Welt",
-    "LGBT"
+    "LGBT+"
 ];
 
 // Funkcija za čuvanje kategorija u Local Storage
@@ -162,3 +162,41 @@ document.querySelectorAll('.tabs-container button').forEach((button) => {
     }
   });
 });
+
+
+
+const categories = [
+  "Technologie",
+  "Gesundheit",
+  "Sport",
+  "Wirtschaft",
+  "Kultur",
+  "Auto",
+  "Reisen",
+  "Lifestyle",
+  "Panorama",
+  "Politik",
+  "Unterhaltung",
+  "Welt",
+  "LGBT"
+];
+
+// Funkcija za generisanje kategorija
+function generateTabs() {
+  const tabsContainer = document.getElementById('tabs-container');
+  if (!tabsContainer) return;
+
+  categories.forEach(category => {
+    const tabButton = document.createElement('button');
+    tabButton.className = 'tab';
+    tabButton.setAttribute('data-tab', category.toLowerCase());
+    tabButton.setAttribute('role', 'tab');
+    tabButton.setAttribute('aria-selected', 'false');
+    tabButton.textContent = category;
+
+    tabsContainer.appendChild(tabButton);
+  });
+}
+
+// Pozovi funkciju za generisanje tabova
+generateTabs();
