@@ -133,6 +133,11 @@ function generateTabs() {
     if (!tabsContainer) return;
 
     categories.forEach(category => {
+        // Preskoči statički definisane tabove
+        if (category.toLowerCase() === 'home' || category.toLowerCase() === 'latest') {
+            return;
+        }
+
         const tabButton = document.createElement('button');
         tabButton.className = 'tab';
         tabButton.setAttribute('data-tab', category.toLowerCase());
