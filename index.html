@@ -24,26 +24,12 @@
         <img src="src/icons/dachnewslogo.png" alt="DACH.news" />
   </nav>
 
-<!-- TABS: Home, Latest i 13 novih kategorija (ukupno 15) -->
-<div class="tabs-container" role="tablist">
-  <!-- Home -->
-  <button class="tab active" data-tab="home" role="tab" aria-selected="true" aria-label="Home">
-    <span>🏠</span>
-  </button>
-  <!-- Latest -->
-  <button class="tab" data-tab="latest" role="tab" aria-selected="false" aria-label="Latest">
-    <span>⏰</span>
-  </button>
-  <!-- Dinamički generisane kategorije -->
-  ${categories
-    .map(
-      category => `
-      <button class="tab" data-tab="${category.toLowerCase()}" role="tab" aria-selected="false">
-        ${category}
-      </button>`
-    )
-    .join('')}
+<!-- TABS: Home, Latest -->
+<div class="tabs-container" role="tablist" id="tabs-container">
+  <button class="tab active" data-tab="home" role="tab" aria-selected="true">🏠</button>
+  <button class="tab" data-tab="latest" role="tab" aria-selected="false">⏰</button>
 </div>
+
 
 
   <!-- Dinamički generisane kartice feedova -->  
