@@ -19,7 +19,7 @@ const categories = [
     "Politik",
     "Unterhaltung",
     "Welt",
-    "LGBT+"
+    "LGBT+",
     "Uncategorized" // Nova kategorija za feedove bez definisane kategorije
 ];
 
