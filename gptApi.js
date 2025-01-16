@@ -18,7 +18,16 @@ async function categorize(feed) {
     },
     body: JSON.stringify({
       model: 'gpt-4o-mini',
-      prompt: `Odredi kategoriju za sledeću vest: ${feed.content}`,
+ messages: [
+    {
+      role: 'system',
+      content: 'Ti si AI koji pomaže u određivanju kategorije za vesti.',
+    },
+    {
+      role: 'user',
+      content: `Odredi kategoriju za sledeću vest: ${feed.content}`,
+    },
+  ],
       max_tokens: 100,
     }),
   });
