@@ -7,9 +7,8 @@
   <!-- Dodajemo link ka favicon u /src/icons -->
   <link rel="icon" href="src/icons/favicon.ico" type="image/x-icon" />
 
-  <title>DACH.news</title>
+ <title>DACH.news</title>
   <link rel="stylesheet" type="text/css" href="src/css/styles.css?v=123">
-  
 </head>
 <body data-theme="dark">
   <nav>
@@ -25,42 +24,29 @@
         <img src="src/icons/dachnewslogo.png" alt="DACH.news" />
   </nav>
 
-  <!-- TABS: samo Home i Latest + 13 novih kategorija (ukupno 15) -->
+ <!-- TABS: samo Home i Latest + 13 novih kategorija (ukupno 15) -->
   <div class="tabs-container" role="tablist">
-    <!-- 1. Home -->
     <button class="tab active" data-tab="home" role="tab" aria-selected="true">🏠</button>
-    <!-- 2. Latest -->
     <button class="tab" data-tab="latest" role="tab" aria-selected="false">⏰</button>
-    <!-- 3. Technologie -->
     <button class="tab" data-tab="technologie" role="tab" aria-selected="false">Technologie</button>
-    <!-- 4. Gesundheit -->
     <button class="tab" data-tab="gesundheit" role="tab" aria-selected="false">Gesundheit</button>
-    <!-- 5. Sport -->
     <button class="tab" data-tab="sport" role="tab" aria-selected="false">Sport</button>
-    <!-- 6. Wirtschaft -->
     <button class="tab" data-tab="wirtschaft" role="tab" aria-selected="false">Wirtschaft</button>
-    <!-- 7. Kultur -->
     <button class="tab" data-tab="kultur" role="tab" aria-selected="false">Kultur</button>
-    <!-- 8. Auto -->
     <button class="tab" data-tab="auto" role="tab" aria-selected="false">Auto</button>
-    <!-- 9. Reisen -->
     <button class="tab" data-tab="reisen" role="tab" aria-selected="false">Reisen</button>
-    <!-- 10. Lifestyle -->
     <button class="tab" data-tab="lifestyle" role="tab" aria-selected="false">Lifestyle</button>
-    <!-- 11. Panorama -->
     <button class="tab" data-tab="panorama" role="tab" aria-selected="false">Panorama</button>
-    <!-- 12. Politik -->
     <button class="tab" data-tab="politik" role="tab" aria-selected="false">Politik</button>
-    <!-- 13. Unterhaltung -->
     <button class="tab" data-tab="unterhaltung" role="tab" aria-selected="false">Unterhaltung</button>
-    <!-- 14. Welt -->
     <button class="tab" data-tab="welt" role="tab" aria-selected="false">Welt</button>
-    <!-- 15. LGBT -->
     <button class="tab" data-tab="lgbt" role="tab" aria-selected="false">LGBT</button>
   </div>
 
-<!-- Dinamički generisane kartice feedova -->  
-<div id="news-container"></div>
+  <!-- Dinamički generisane kartice feedova -->  
+  <div id="news-container" class="feed-content">
+    <!-- Kartice sa vestima će biti dinamički dodate ovde putem JavaScript-a -->
+  </div>
 
 
   
