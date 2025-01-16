@@ -74,23 +74,43 @@ app.get('/api/feeds', async (req, res) => {
     }
 });
 
-// Ruta za kategorizaciju feedova
+// Pokreni server
+const PORT = process.env.PORT || 10000;
+app.listen(PORT, () => console.log(`Server pokrenut na portu ${PORT}`));
+
+
+
 app.post('/api/categorize', async (req, res) => {
     const { feeds } = req.body;
+
     if (!feeds || !Array.isArray(feeds)) {
         return res.status(400).send('Invalid input');
     }
 
+    // Filtriraj feedove koji imaju validne naslove i sadržaj
+    const validFeeds = feeds.filter(feed => 
+        feed.id && 
+        feed.title && 
+        feed.content_text &&
+        feed.content_text.trim().length > 0
+    );
+
+    if (validFeeds.length === 0) {
+        return res.status(400).send('Nema validnih feedova za analizu.');
+    }
+
     try {
-        // Pozivamo funkciju koja koristi OpenAI API
-        const results = await Promise.all(feeds.map(feed => categorize(feed)));
-        res.json(results);
+        // Obradi svaki feed i pošalji ga GPT API-ju
+        const results = await Promise.all(validFeeds.map(feed => 
+            categorize({
+                id: feed.id,
+                content: `${feed.title}. ${feed.content_text}`, // Kombinuj title i content_text
+            })
+        ));
+
+        res.json(results); // Vrati rezultat
     } catch (error) {
         console.error('Greška pri kategorizaciji:', error);
         res.status(500).send('Server error');
     }
 });
-
-// Pokreni server
-const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => console.log(`Server pokrenut na portu ${PORT}`));
