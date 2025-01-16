@@ -22,30 +22,28 @@ function cacheFeedsLocally(items) {
 }
 
 // Prikaz feedova
-function displayNewsCards(feeds) {
-    const container = document.getElementById('news-container');
-    if (!container) {
-        console.error('Element "news-container" nije pronađen u DOM-u.');
-        return;
-    }
+function displayNewsCardsByCategory(feeds, category) {
+  const container = document.getElementById(`${category}-feed`);
+  if (!container) return;
 
-    // Očisti prethodni sadržaj
-    container.innerHTML = '';
-
-    feeds.forEach(feed => {
-        const newsCard = document.createElement('div');
-        newsCard.className = 'news-card';
-        newsCard.innerHTML = `
-            <h3 class="news-title">${feed.title}</h3>
-            <p class="news-category">${feed.category}</p>
-            <p class="news-date">${new Date(feed.date_published).toLocaleDateString()}</p>
-            <img class="news-image" src="${feed.image || 'placeholder.jpg'}" alt="${feed.title}">
-            <p class="news-content">${feed.content_text}</p>
-            <a class="news-link" href="${feed.url}" target="_blank">Pročitaj više</a>
-        `;
-        container.appendChild(newsCard);
+  container.innerHTML = '';
+  feeds
+    .filter(feed => feed.category === category)
+    .forEach(feed => {
+      const newsCard = document.createElement('div');
+      newsCard.className = 'news-card';
+      newsCard.innerHTML = `
+        <h3 class="news-title">${feed.title}</h3>
+        <p class="news-category">${feed.category}</p>
+        <p class="news-date">${new Date(feed.date_published).toLocaleDateString()}</p>
+        <img class="news-image" src="${feed.image || 'placeholder.jpg'}" alt="${feed.title}">
+        <p class="news-content">${feed.content_text}</p>
+        <a class="news-link" href="${feed.url}" target="_blank">Pročitaj više</a>
+      `;
+      container.appendChild(newsCard);
     });
 }
+
 
 // Glavna funkcija
 async function main() {
