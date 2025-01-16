@@ -165,22 +165,6 @@ document.querySelectorAll('.tabs-container button').forEach((button) => {
 
 
 
-const categories = [
-  "Technologie",
-  "Gesundheit",
-  "Sport",
-  "Wirtschaft",
-  "Kultur",
-  "Auto",
-  "Reisen",
-  "Lifestyle",
-  "Panorama",
-  "Politik",
-  "Unterhaltung",
-  "Welt",
-  "LGBT"
-];
-
 // Funkcija za generisanje kategorija
 function generateTabs() {
   const tabsContainer = document.getElementById('tabs-container');
