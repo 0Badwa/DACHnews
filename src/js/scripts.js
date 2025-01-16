@@ -1,5 +1,9 @@
 // URL feed-a
 const feedUrl = "https://rss.app/feeds/v1.1/_sf1gbLo1ZadJmc5e.json";
+// Filtriraj feedove po odabranoj kategoriji, ako category nije definisan, koristi "Uncategorized".
+const filteredFeeds = feeds.filter(feed => feed.category === category || (!feed.category && category === "Uncategorized"));
+
+
 
 // Definicija kategorija
 const categories = [
@@ -16,7 +20,9 @@ const categories = [
     "Unterhaltung",
     "Welt",
     "LGBT+"
+    "Uncategorized" // Nova kategorija za feedove bez definisane kategorije
 ];
+
 
 // Funkcija za čuvanje kategorija u Local Storage
 function saveCategories() {
@@ -67,7 +73,7 @@ async function fetchFeeds() {
     try {
         const response = await fetch(feedUrl);
         const data = await response.json();
-        console.log("Preuzeti feedovi:", data); // Dodajte ovo za debagovanje
+        console.log("Preuzeti feedovi:", data.items); // Provera preuzetih feedova
         return data.items || [];
     } catch (error) {
         console.error("Greška prilikom preuzimanja feedova:", error);
@@ -80,6 +86,7 @@ function cacheFeedsLocally(items) {
     const cachedFeeds = JSON.parse(localStorage.getItem('feeds') || '[]');
     const newFeeds = items.filter(item => !cachedFeeds.some(cached => cached.id === item.id));
     localStorage.setItem('feeds', JSON.stringify([...cachedFeeds, ...newFeeds]));
+    console.log("Novi feedovi za keširanje:", newFeeds); // Provera novih feedova za keširanje
     return newFeeds;
 }
 
@@ -91,7 +98,8 @@ function displayNewsCardsByCategory(feeds, category) {
     container.innerHTML = ''; // Očisti prethodni sadržaj
 
     // Filtriraj feedove po odabranoj kategoriji
-    const filteredFeeds = feeds.filter(feed => feed.category === category);
+    const filteredFeeds = feeds.filter(feed => feed.category === category || (!feed.category && category === "Uncategorized"));
+    console.log("Filtrirani feedovi za kategoriju:", category, filteredFeeds); // Provera filtriranih feedova
 
     // Generiši kartice
     filteredFeeds.forEach(feed => {
@@ -113,27 +121,12 @@ function displayNewsCardsByCategory(feeds, category) {
     }
 }
 
-// Glavna funkcija
-let cachedFeeds = [];
-async function main() {
-    cachedFeeds = await fetchFeeds();
-    const newFeeds = cacheFeedsLocally(cachedFeeds);
-
-    if (newFeeds.length > 0) {
-        console.log(`Pronađeno ${newFeeds.length} novih feedova.`);
-    } else {
-        console.log("Nema novih feedova za kategorizaciju.");
-    }
-    generateTabs();
-}
-
 // Generisanje tabova
 function generateTabs() {
     const tabsContainer = document.getElementById('tabs-container');
     if (!tabsContainer) return;
 
     categories.forEach(category => {
-        // Preskoči statički definisane tabove
         if (category.toLowerCase() === 'home' || category.toLowerCase() === 'latest') {
             return;
         }
@@ -150,6 +143,23 @@ function generateTabs() {
             displayNewsCardsByCategory(cachedFeeds, category);
         });
     });
+
+    console.log("Tabovi generisani za kategorije:", categories); // Provera kreiranih tabova
+}
+
+// Glavna funkcija
+let cachedFeeds = [];
+async function main() {
+    cachedFeeds = await fetchFeeds();
+    console.log("Cached feeds:", cachedFeeds); // Provera keširanih feedova
+    const newFeeds = cacheFeedsLocally(cachedFeeds);
+
+    if (newFeeds.length > 0) {
+        console.log(`Pronađeno ${newFeeds.length} novih feedova.`);
+    } else {
+        console.log("Nema novih feedova za kategorizaciju.");
+    }
+    generateTabs();
 }
 
 // Pokretanje aplikacije
