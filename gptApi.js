@@ -34,6 +34,8 @@ async function categorize(feed) {
     }
 
     const data = await response.json();
+    // Dodajemo debug liniju (ovde vidite ceo JSON koji stiže od GPT-a):
+        console.log("OpenAI GPT API response:", data);
     const validCategories = [
       "Technologie", "Gesundheit", "Sport", "Wirtschaft", "Kultur",
       "Auto", "Reisen", "Lifestyle", "Panorama", "Politik",
