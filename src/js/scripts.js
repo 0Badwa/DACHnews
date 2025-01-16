@@ -1,9 +1,5 @@
 // URL feed-a
 const feedUrl = "https://rss.app/feeds/v1.1/_sf1gbLo1ZadJmc5e.json";
-// Filtriraj feedove po odabranoj kategoriji, ako category nije definisan, koristi "Uncategorized".
-const filteredFeeds = feeds.filter(feed => feed.category === category || (!feed.category && category === "Uncategorized"));
-
-
 
 // Definicija kategorija
 const categories = [
@@ -22,7 +18,6 @@ const categories = [
     "LGBT+",
     "Uncategorized" // Nova kategorija za feedove bez definisane kategorije
 ];
-
 
 // Funkcija za čuvanje kategorija u Local Storage
 function saveCategories() {
@@ -72,6 +67,7 @@ function removeCategory(category) {
 async function fetchFeeds() {
     try {
         const response = await fetch(feedUrl);
+        if (!response.ok) throw new Error("Neuspešno preuzimanje feedova.");
         const data = await response.json();
         console.log("Preuzeti feedovi:", data.items); // Provera preuzetih feedova
         return data.items || [];
@@ -104,8 +100,6 @@ async function main() {
     } else {
         console.log("Nema novih feedova za kategorizaciju.");
     }
-
-    generateTabs();
 }
 
 // Prikaz feedova po kategoriji
@@ -125,10 +119,10 @@ function displayNewsCardsByCategory(category) {
         newsCard.className = 'news-card';
         newsCard.innerHTML = `
             <h3 class="news-title">${feed.title}</h3>
-            <p class="news-category">${feed.category}</p>
+            <p class="news-category">${feed.category || 'Uncategorized'}</p>
             <p class="news-date">${new Date(feed.date_published).toLocaleDateString()}</p>
             <img class="news-image" src="${feed.image || 'https://via.placeholder.com/150'}" alt="${feed.title}">
-            <p class="news-content">${feed.content_text}</p>
+            <p class="news-content">${feed.content_text || ''}</p>
             <a class="news-link" href="${feed.url}" target="_blank">Pročitaj više</a>
         `;
         container.appendChild(newsCard);
