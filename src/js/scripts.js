@@ -1,3 +1,6 @@
+// Definišite globalnu varijablu (pomerena iznad svega)
+let feeds = [];
+
 // URL feed-a
 const feedUrl = "https://rss.app/feeds/v1.1/_sf1gbLo1ZadJmc5e.json";
 
@@ -85,9 +88,6 @@ function cacheFeedsLocally(items) {
     console.log("Novi feedovi za keširanje:", newFeeds); // Provera novih feedova za keširanje
     return newFeeds;
 }
-
-// Definišite globalnu varijablu
-let feeds = [];
 
 // Glavna funkcija
 async function main() {
