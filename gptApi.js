@@ -1,5 +1,3 @@
-// gptApi.js
-
 async function categorize(feed) {
   try {
     // Validacija ulaznih podataka
@@ -19,7 +17,7 @@ async function categorize(feed) {
         messages: [
           {
             role: 'system',
-            content: 'Ti si stručnjal za određivanju kategorije za vesti.',
+            content: 'Ti si stručnjak za određivanje kategorija za vesti.',
           },
           {
             role: 'user',
@@ -37,8 +35,8 @@ async function categorize(feed) {
 
     const data = await response.json();
     const validCategories = [
-      "Technologie", "Gesundheit", "Sport", "Wirtschaft", "Kultur", 
-      "Auto", "Reisen", "Lifestyle", "Panorama", "Politik", 
+      "Technologie", "Gesundheit", "Sport", "Wirtschaft", "Kultur",
+      "Auto", "Reisen", "Lifestyle", "Panorama", "Politik",
       "Unterhaltung", "Welt", "LGBT"
     ];
 
