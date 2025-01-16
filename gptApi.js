@@ -1,3 +1,5 @@
+// gptApi.js
+
 async function categorize(feed) {
   try {
     // Validacija ulaznih podataka
