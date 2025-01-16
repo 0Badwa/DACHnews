@@ -67,6 +67,7 @@ async function fetchFeeds() {
     try {
         const response = await fetch(feedUrl);
         const data = await response.json();
+        console.log("Preuzeti feedovi:", data); // Dodajte ovo za debagovanje
         return data.items || [];
     } catch (error) {
         console.error("Greška prilikom preuzimanja feedova:", error);
@@ -84,103 +85,67 @@ function cacheFeedsLocally(items) {
 
 // Prikaz feedova po kategoriji
 function displayNewsCardsByCategory(feeds, category) {
-    const container = document.getElementById(`${category}-feed`);
+    const container = document.getElementById('news-container');
     if (!container) return;
 
-    container.innerHTML = '';
-    feeds
-        .filter(feed => feed.category === category)
-        .forEach(feed => {
-            const newsCard = document.createElement('div');
-            newsCard.className = 'news-card';
-            newsCard.innerHTML = `
-                <h3 class="news-title">${feed.title}</h3>
-                <p class="news-category">${feed.category}</p>
-                <p class="news-date">${new Date(feed.date_published).toLocaleDateString()}</p>
-                <img class="news-image" src="${feed.image || 'https://via.placeholder.com/150'}" alt="${feed.title}">
-                <p class="news-content">${feed.content_text}</p>
-                <a class="news-link" href="${feed.url}" target="_blank">Pročitaj više</a>
-            `;
-            container.appendChild(newsCard);
-        });
+    container.innerHTML = ''; // Očisti prethodni sadržaj
+
+    // Filtriraj feedove po odabranoj kategoriji
+    const filteredFeeds = feeds.filter(feed => feed.category === category);
+
+    // Generiši kartice
+    filteredFeeds.forEach(feed => {
+        const newsCard = document.createElement('div');
+        newsCard.className = 'news-card';
+        newsCard.innerHTML = `
+            <h3 class="news-title">${feed.title}</h3>
+            <p class="news-category">${feed.category}</p>
+            <p class="news-date">${new Date(feed.date_published).toLocaleDateString()}</p>
+            <img class="news-image" src="${feed.image || 'https://via.placeholder.com/150'}" alt="${feed.title}">
+            <p class="news-content">${feed.content_text}</p>
+            <a class="news-link" href="${feed.url}" target="_blank">Pročitaj više</a>
+        `;
+        container.appendChild(newsCard);
+    });
+
+    if (filteredFeeds.length === 0) {
+        container.innerHTML = '<p>Nema vesti za ovu kategoriju.</p>';
+    }
 }
 
 // Glavna funkcija
+let cachedFeeds = [];
 async function main() {
-    const feeds = await fetchFeeds();
-    const newFeeds = cacheFeedsLocally(feeds);
+    cachedFeeds = await fetchFeeds();
+    const newFeeds = cacheFeedsLocally(cachedFeeds);
 
     if (newFeeds.length > 0) {
         console.log(`Pronađeno ${newFeeds.length} novih feedova.`);
-
-        try {
-            const response = await fetch("/api/categorize", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ feeds: newFeeds })
-            });
-
-            if (!response.ok) {
-                throw new Error(`API greška: ${response.status} ${response.statusText}`);
-            }
-
-            const categorizedFeeds = await response.json();
-
-            // Učitaj kategorije iz Local Storage-a
-            const loadedCategories = loadCategories();
-
-            // Prikaži feedove po kategorijama
-            loadedCategories.forEach(category => {
-                displayNewsCardsByCategory(categorizedFeeds, category);
-            });
-        } catch (error) {
-            console.error("Greška prilikom slanja feedova na OpenAI API:", error);
-        }
     } else {
         console.log("Nema novih feedova za kategorizaciju.");
     }
+    generateTabs();
+}
+
+// Generisanje tabova
+function generateTabs() {
+    const tabsContainer = document.getElementById('tabs-container');
+    if (!tabsContainer) return;
+
+    categories.forEach(category => {
+        const tabButton = document.createElement('button');
+        tabButton.className = 'tab';
+        tabButton.setAttribute('data-tab', category.toLowerCase());
+        tabButton.textContent = category;
+        tabsContainer.appendChild(tabButton);
+
+        tabButton.addEventListener('click', () => {
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            tabButton.classList.add('active');
+            displayNewsCardsByCategory(cachedFeeds, category);
+        });
+    });
 }
 
 // Pokretanje aplikacije
 main();
-
-
-
-document.querySelectorAll('.tabs-container button').forEach((button) => {
-  button.addEventListener('click', (event) => {
-    const selectedTab = event.currentTarget.getAttribute('data-tab');
-    
-    // Sakrij sve tabove
-    document.querySelectorAll('.tab-content').forEach((tab) => {
-      tab.classList.remove('active');
-    });
-    
-    // Prikaži samo aktivni tab
-    const activeTabContent = document.getElementById(selectedTab);
-    if (activeTabContent) {
-      activeTabContent.classList.add('active');
-    }
-  });
-});
-
-
-
-// Funkcija za generisanje kategorija
-function generateTabs() {
-  const tabsContainer = document.getElementById('tabs-container');
-  if (!tabsContainer) return;
-
-  categories.forEach(category => {
-    const tabButton = document.createElement('button');
-    tabButton.className = 'tab';
-    tabButton.setAttribute('data-tab', category.toLowerCase());
-    tabButton.setAttribute('role', 'tab');
-    tabButton.setAttribute('aria-selected', 'false');
-    tabButton.textContent = category;
-
-    tabsContainer.appendChild(tabButton);
-  });
-}
-
-// Pozovi funkciju za generisanje tabova
-generateTabs();
