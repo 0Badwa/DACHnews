@@ -7,7 +7,7 @@
   <!-- Dodajemo link ka favicon u /src/icons -->
   <link rel="icon" href="src/icons/favicon.ico" type="image/x-icon" />
 
- <title>DACH.news</title>
+  <title>DACH.news</title>
   <link rel="stylesheet" type="text/css" href="src/css/styles.css?v=123">
 </head>
 <body data-theme="dark">
@@ -21,47 +21,28 @@
         <button id="font-decrease">Schrift verkleinern</button>
       </div>
     </div>
-        <img src="src/icons/dachnewslogo.png" alt="DACH.news" />
+    <img src="src/icons/dachnewslogo.png" alt="DACH.news" />
   </nav>
 
-<!-- TABS: Home, Latest -->
-<div class="tabs-container" role="tablist" id="tabs-container">
-  <button class="tab active" data-tab="home" role="tab" aria-selected="true">🏠</button>
-  <button class="tab" data-tab="latest" role="tab" aria-selected="false">⏰</button>
+  <!-- Dinamički generisani tabovi -->
+ <div class="tabs-container" role="tablist" id="tabs-container">
+  <!-- Statički definisani tabovi -->
+  <button class="tab active" data-tab="home" role="tab" aria-selected="true">🏠 Home</button>
+  <button class="tab" data-tab="latest" role="tab" aria-selected="false">⏰ Latest</button>
 </div>
 
-
-
-  <!-- Dinamički generisane kartice feedova -->  
-  <div class="tab-content active" id="home">
-  <div class="container">
-    <div id="home-feed" class="feed-content"></div>
+    <!-- Tabovi će biti generisani putem JavaScript-a -->
   </div>
-</div>
 
-<div id="news-container"></div>
+  <!-- Dinamički generisane kartice feedova -->
+  <div id="news-container"></div>
 
-  
-  <!-- Modal za Tabs anordnen (prikazuje svih 15 kategorija u istom redosledu) -->
+  <!-- Modal za Tabs anordnen -->
   <div id="rearrange-modal" class="modal" style="display: none;">
     <div class="rearrange-modal-content">
       <div class="modal-title">Tabs anordnen</div>
       <div class="rearrange-list">
-        <div class="rearrange-item" draggable="true"><span>Home</span></div>
-        <div class="rearrange-item" draggable="true"><span>Latest</span></div>
-        <div class="rearrange-item" draggable="true"><span>Technologie</span></div>
-        <div class="rearrange-item" draggable="true"><span>Gesundheit</span></div>
-        <div class="rearrange-item" draggable="true"><span>Sport</span></div>
-        <div class="rearrange-item" draggable="true"><span>Wirtschaft</span></div>
-        <div class="rearrange-item" draggable="true"><span>Kultur</span></div>
-        <div class="rearrange-item" draggable="true"><span>Auto</span></div>
-        <div class="rearrange-item" draggable="true"><span>Reisen</span></div>
-        <div class="rearrange-item" draggable="true"><span>Lifestyle</span></div>
-        <div class="rearrange-item" draggable="true"><span>Panorama</span></div>
-        <div class="rearrange-item" draggable="true"><span>Politik</span></div>
-        <div class="rearrange-item" draggable="true"><span>Unterhaltung</span></div>
-        <div class="rearrange-item" draggable="true"><span>Welt</span></div>
-        <div class="rearrange-item" draggable="true"><span>LGBT</span></div>
+        <!-- Dinamički sadržaj modalne liste -->
       </div>
       <div class="modal-buttons">
         <button class="save-button" id="close-rearrange">Schließen</button>
@@ -69,20 +50,17 @@
     </div>
   </div>
 
- 
-
-  <!-- Modal za blokiranje izvora (ne menja se, osim uklanjanja starih kategorija ako ih je bilo) -->
+  <!-- Modal za blokiranje izvora -->
   <div id="block-sources-modal" class="modal" style="display: none;">
     <div class="rearrange-modal-content">
       <div class="modal-title">Quellen blockieren</div>
-      <!-- Dodajte ovde sadržaj specifičan za blokiranje izvora, npr. listu izvora -->
       <div class="modal-buttons">
         <button class="save-button" id="close-block-sources">Schließen</button>
       </div>
     </div>
   </div>
 
-  <!-- Modal za settings (ostaje kako jeste, samo nema starih kategorija) -->
+  <!-- Modal za settings -->
   <div id="settings-modal" class="modal" style="display: none;">
     <div class="rearrange-modal-content">
       <div class="modal-title">Einstellungen</div>
@@ -117,9 +95,6 @@
     </div>
   </div>
 
-  <div id="block-categories-modal"></div>
-  
-<script type="module" src="src/js/scripts.js"></script>
-  
+  <script type="module" src="src/js/scripts.js"></script>
 </body>
 </html>
