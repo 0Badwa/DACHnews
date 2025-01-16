@@ -143,3 +143,22 @@ async function main() {
 
 // Pokretanje aplikacije
 main();
+
+
+
+document.querySelectorAll('.tabs-container button').forEach((button) => {
+  button.addEventListener('click', (event) => {
+    const selectedTab = event.currentTarget.getAttribute('data-tab');
+    
+    // Sakrij sve tabove
+    document.querySelectorAll('.tab-content').forEach((tab) => {
+      tab.classList.remove('active');
+    });
+    
+    // Prikaži samo aktivni tab
+    const activeTabContent = document.getElementById(selectedTab);
+    if (activeTabContent) {
+      activeTabContent.classList.add('active');
+    }
+  });
+});
