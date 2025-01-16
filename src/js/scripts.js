@@ -167,4 +167,105 @@ function displayAllFeeds() {
 
     feeds.forEach(feed => {
         const newsCard = createNewsCard(feed);
-        container.appendChild(newsC
+        container.appendChild(newsCard);
+    });
+
+    if (feeds.length === 0) {
+        container.innerHTML = '<p>Nema vesti za prikaz.</p>';
+    }
+}
+
+// Prikaz feedova sortiranih po datumu (za "Latest")
+function displayLatestFeeds() {
+    const container = document.getElementById('news-container');
+    if (!container) return;
+
+    container.innerHTML = ''; // Očisti prethodni sadržaj
+
+    // Sortiramo kopiju niza feedova po datumu objave (opadajuće)
+    const sortedFeeds = [...feeds].sort((a, b) => {
+        const dateA = new Date(a.date_published).getTime() || 0;
+        const dateB = new Date(b.date_published).getTime() || 0;
+        return dateB - dateA;
+    });
+
+    sortedFeeds.forEach(feed => {
+        const newsCard = createNewsCard(feed);
+        container.appendChild(newsCard);
+    });
+
+    if (sortedFeeds.length === 0) {
+        container.innerHTML = '<p>Nema vesti za prikaz.</p>';
+    }
+}
+
+// Pokretanje aplikacije
+main().then(() => {
+    // Kad se feedovi preuzmu i keširaju, prikažemo "Home" (sve feedove) i markiramo Home tab
+    displayAllFeeds();
+
+    // Selektujemo statičke tabove
+    const homeTab = document.querySelector('[data-tab="home"]');
+    const latestTab = document.querySelector('[data-tab="latest"]');
+
+    // Klik na Home
+    if (homeTab) {
+        homeTab.addEventListener('click', (e) => {
+            removeActiveClass();
+            e.target.classList.add('active');
+            e.target.setAttribute('aria-selected', 'true');
+            displayAllFeeds();
+        });
+    }
+
+    // Klik na Latest
+    if (latestTab) {
+        latestTab.addEventListener('click', (e) => {
+            removeActiveClass();
+            e.target.classList.add('active');
+            e.target.setAttribute('aria-selected', 'true');
+            displayLatestFeeds();
+        });
+    }
+
+    // Dinamičko dodavanje tabova za ostale kategorije
+    // (ako želite da preskočite "Uncategorized", isključite ga iz niza)
+    const tabsContainer = document.getElementById('tabs-container');
+    if (tabsContainer) {
+        // Izbacujemo "Uncategorized" ako vam ne treba:
+        // const dynamicCategories = categories.filter(cat => cat !== "Uncategorized");
+
+        // Ako hoćete sve kategorije, samo uzmite "categories"
+        const dynamicCategories = categories;
+
+        // Nemojte da ponavljate "Home" i "Latest" ako su već statički u HTML-u
+        // Uklonite ih iz dynamicCategories ako su slučajno tu
+        // (ovde zapravo i nisu, ali da budemo sigurni)
+        const skipList = ["LGBT+", "Uncategorized"]; 
+        // primer: ako NE želite da prikažete "LGBT+" i "Uncategorized" u tabovima
+        // ako ipak želite i te tabove, izbrišite skipList ili ga ostavite praznim
+
+        dynamicCategories
+            .filter(cat => !skipList.includes(cat)) // preskače navedene
+            .forEach(cat => {
+                // Napravi dugme (tab) za svaku kategoriju
+                const btn = document.createElement('button');
+                btn.classList.add('tab');
+                btn.setAttribute('data-tab', cat);
+                btn.setAttribute('role', 'tab');
+                btn.setAttribute('aria-selected', 'false');
+                btn.textContent = cat;
+
+                // Na klik, prikazujemo feedove te kategorije
+                btn.addEventListener('click', (e) => {
+                    removeActiveClass();
+                    e.target.classList.add('active');
+                    e.target.setAttribute('aria-selected', 'true');
+                    displayNewsCardsByCategory(cat);
+                });
+
+                // Dodajemo tab u tabs-container
+                tabsContainer.appendChild(btn);
+            });
+    }
+});
