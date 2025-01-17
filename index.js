@@ -176,8 +176,9 @@ app.get('/api/feeds-by-category/:category', async (req, res) => {
 
 // Modifikovana main funkcija bez localStorage
 async function main() {
-    feeds = await fetchFeeds();
-    console.log("Preuzeti feedovi:", feeds);
+  // Use the correct function to fetch feeds
+  const feeds = await fetchRSSFeed();
+  console.log("Preuzeti feedovi:", feeds);
 }
 
 setInterval(processFeeds, 5 * 60 * 1000);
