@@ -58,7 +58,7 @@ async function sendBatchToGPT(feedBatch) {
       {
         role: "system",
         content:
-          "Klasifikuj vesti u sledeće kategorije: Technologie, Gesundheit, Sport, Wirtschaft, Kultur, Auto, Reisen, Lifestyle, Panorama, Politik, Unterhaltung, Welt, LGBT. Vrati rezultat u validnom JSON formatu gde je svaki element objekat sa poljima 'id' i 'category'."
+          "Ti si stručnjak za kategorizaciju vesti. Kategorizuj vesti u sledeće kategorije: Technologie, Gesundheit, Sport, Wirtschaft, Kultur, Auto, Reisen, Lifestyle, Panorama, Politik, Unterhaltung, Welt, LGBT+. Potrudi se da sve vesti sortiraš u neku kategoriju. Vrati rezultat u validnom JSON formatu gde je svaki element objekat sa poljima 'id' i 'category'."
       },
       {
         role: "user",
