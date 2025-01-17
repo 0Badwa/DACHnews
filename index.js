@@ -12,9 +12,6 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// ... ostatak koda ostaje isti, osim što ne možete koristiti CommonJS specifične funkcije
-
-
 // Kreiraj Express aplikaciju
 const app = express();
 
@@ -57,7 +54,8 @@ async function sendToGPT(title, description) {
     messages: [
       {
         role: "system",
-        content: "Vrati rezultat u formatu 'id=kategorija' za naslov i opis vesti. Dostupne kategorije su: Technologie, Gesundheit, Sport, Wirtschaft, Kultur, Auto, Reisen, Lifestyle, Panorama, Politik, Unterhaltung, Welt, LGBT."
+        content:
+          "Vrati rezultat u formatu 'id=kategorija' za naslov i opis vesti. Dostupne kategorije su: Technologie, Gesundheit, Sport, Wirtschaft, Kultur, Auto, Reisen, Lifestyle, Panorama, Politik, Unterhaltung, Welt, LGBT."
       },
       {
         role: "user",
@@ -71,8 +69,8 @@ async function sendToGPT(title, description) {
     const response = await axios.post(GPT_API_URL, payload, {
       headers: {
         Authorization: `Bearer ${process.env.CHATGPT_API_KEY}`,
-        "Content-Type": "application/json",
-      },
+        "Content-Type": "application/json"
+      }
     });
     return response.data.choices[0].message.content.trim();
   } catch (error) {
@@ -86,7 +84,8 @@ async function sendMultipleToGPT(feeds) {
   const messages = [
     {
       role: "system",
-      content: "Za svaku vest vrati rezultat u formatu 'id=kategorija'. Dostupne kategorije su: Technologie, Gesundheit, Sport, Wirtschaft, Kultur, Auto, Reisen, Lifestyle, Panorama, Politik, Unterhaltung, Welt, LGBT."
+      content:
+        "Za svaku vest vrati rezultat u formatu 'id=kategorija'. Dostupne kategorije su: Technologie, Gesundheit, Sport, Wirtschaft, Kultur, Auto, Reisen, Lifestyle, Panorama, Politik, Unterhaltung, Welt, LGBT."
     }
   ];
 
@@ -101,15 +100,15 @@ async function sendMultipleToGPT(feeds) {
   const payload = {
     model: "gpt-4o-mini",
     messages,
-    max_tokens: 500  // Podesite vrednost po potrebi
+    max_tokens: 500 // Podesite vrednost po potrebi
   };
 
   try {
     const response = await axios.post(GPT_API_URL, payload, {
       headers: {
         Authorization: `Bearer ${process.env.CHATGPT_API_KEY}`,
-        "Content-Type": "application/json",
-      },
+        "Content-Type": "application/json"
+      }
     });
     return response.data.choices[0].message.content.trim();
   } catch (error) {
@@ -135,29 +134,32 @@ async function processFeeds() {
     const result = await sendToGPT(title, description);
     if (result) {
       // Čuvaj rezultat u Redis-u
-      const [newsId, category] = result.split('=');
+      const [newsId, category] = result.split("=");
       if (newsId && category) {
         await redisClient.sAdd("processed_ids", id);
-        await redisClient.rPush(`category:${category}`, JSON.stringify({ id, title, description }));
+        await redisClient.rPush(
+          `category:${category}`,
+          JSON.stringify({ id, title, description })
+        );
       }
     }
   }
 }
 
 // Ruta za osnovni URL (učitava HTML stranicu)
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "index.html"));
 });
 
 // Ruta za preuzimanje i keširanje RSS feedova
-app.get('/api/feeds', async (req, res) => {
-  const cacheKey = 'rss_feeds';
+app.get("/api/feeds", async (req, res) => {
+  const cacheKey = "rss_feeds";
 
   try {
     let data = await redisClient.get(cacheKey);
 
     if (!data) {
-      console.log('Preuzimanje feedova sa izvora:', RSS_FEED_URL);
+      console.log("Preuzimanje feedova sa izvora:", RSS_FEED_URL);
       const response = await axios.get(RSS_FEED_URL);
       data = response.data;
       await redisClient.set(cacheKey, JSON.stringify(data), { EX: 3600 }); // Keširaj na 1 sat
@@ -167,59 +169,63 @@ app.get('/api/feeds', async (req, res) => {
 
     res.json(data);
   } catch (error) {
-    console.error('Greška pri preuzimanju feedova:', error);
-    res.status(500).send('Server error');
+    console.error("Greška pri preuzimanju feedova:", error);
+    res.status(500).send("Server error");
   }
 });
 
 // Ruta za kategorizaciju feedova putem GPT API-ja
-app.post('/api/categorize', async (req, res) => {
+app.post("/api/categorize", async (req, res) => {
   const { feeds } = req.body;
 
   if (!feeds || !Array.isArray(feeds)) {
-    return res.status(400).send('Invalid input');
+    return res.status(400).send("Invalid input");
   }
 
   const validFeeds = feeds.filter(
-    (feed) => feed.id && feed.title && feed.content_text && feed.content_text.trim().length > 0
+    feed =>
+      feed.id &&
+      feed.title &&
+      feed.content_text &&
+      feed.content_text.trim().length > 0
   );
 
   if (validFeeds.length === 0) {
-    return res.status(400).send('Nema validnih feedova za analizu.');
+    return res.status(400).send("Nema validnih feedova za analizu.");
   }
 
   try {
     const results = await Promise.all(
-      validFeeds.map((feed) =>
+      validFeeds.map(feed =>
         sendToGPT(feed.title, feed.content_text).then(category => ({
           id: feed.id,
           title: feed.title,
-          category,
+          category
         }))
       )
     );
 
     res.json(results);
   } catch (error) {
-    console.error('Greška pri kategorizaciji:', error);
-    res.status(500).send('Server error');
+    console.error("Greška pri kategorizaciji:", error);
+    res.status(500).send("Server error");
   }
 });
 
-// Primer korišćenja sendMultipleToGPT funkcije – možete kreirati rutu za testiranje
-app.post('/api/categorize-multiple', async (req, res) => {
+// Ruta za višestruku kategorizaciju pomoću sendMultipleToGPT
+app.post("/api/categorize-multiple", async (req, res) => {
   const { feeds } = req.body;
 
   if (!feeds || !Array.isArray(feeds)) {
-    return res.status(400).send('Invalid input');
+    return res.status(400).send("Invalid input");
   }
 
   try {
     const result = await sendMultipleToGPT(feeds);
     res.json({ result });
   } catch (error) {
-    console.error('Greška pri višestrukoj kategorizaciji:', error);
-    res.status(500).send('Server error');
+    console.error("Greška pri višestrukoj kategorizaciji:", error);
+    res.status(500).send("Server error");
   }
 });
 
