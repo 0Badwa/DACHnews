@@ -282,3 +282,4 @@ async function displayNewsCardsByCategory(category) {
     }
 }
 
+window.displayNewsCardsByCategory = displayNewsCardsByCategory;
