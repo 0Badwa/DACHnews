@@ -133,7 +133,8 @@ function createNewsCard(feed) {
         <h3 class="news-title">${feed.title}</h3>
         <p class="news-category">${feed.category || 'Uncategorized'}</p>
         <p class="news-date">
-          ${feed.date_published ? new Date(feed.date_published).toLocaleDateString() : 'N/A'}
+         ${feed.date_published ? new Date(feed.date_published).toLocaleDateString() : 'N/A'} 
+  ${feed.date_published ? new Date(feed.date_published).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
         </p>
         <img class="news-image" src="${feed.image || 'https://via.placeholder.com/150'}" alt="${feed.title}">
         <p class="news-content">${feed.content_text || ''}</p>
