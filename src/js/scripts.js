@@ -74,7 +74,7 @@ function removeCategory(category) {
 // Preuzimanje feedova
 async function fetchFeeds() {
     try {
-        const response = await fetch(/api/feeds);
+        const response = await fetch("/api/feeds");
         if (!response.ok) throw new Error("Neuspešno preuzimanje feedova.");
 const data = await response.json();
 // Recimo da data === { items: [...] } ili samo [...], u zavisnosti kako ste to poslali
