@@ -110,6 +110,11 @@ async function processFeeds() {
   console.log("GPT batch result:", gptResponse);
 
   if (gptResponse) {
+    // Ukloni Markdown oznake ako postoje
+    if (gptResponse.startsWith("```json")) {
+      gptResponse = gptResponse.replace(/^```json\n?/, '').replace(/```$/, '');
+    }
+
     let classifications;
     try {
       classifications = JSON.parse(gptResponse);
