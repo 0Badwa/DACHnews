@@ -106,7 +106,7 @@ async function processFeeds() {
 
   if (newItems.length === 0) return;
 
-  const gptResponse = await sendBatchToGPT(newItems);
+  let gptResponse = await sendBatchToGPT(newItems);
   console.log("GPT batch result:", gptResponse);
 
   if (gptResponse) {
