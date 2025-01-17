@@ -146,7 +146,6 @@ function createNewsCard(feed) {
 async function displayNewsCardsByCategory(category) {
     const container = document.getElementById('news-container');
     if (!container) return;
-                               console.log("Filtrirani feedovi za kategoriju:", category, parsedItems);
 
     container.innerHTML = ''; // Očisti prethodni sadržaj
 
