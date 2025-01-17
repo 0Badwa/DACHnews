@@ -6,7 +6,8 @@
 let feeds = [];
 
 // URL feed-a
-const feedUrl = "https://rss.app/feeds/v1.1/_sf1gbLo1ZadJmc5e.json";
+// const feedUrl = "https://rss.app/feeds/v1.1/_sf1gbLo1ZadJmc5e.json";
+const feedUrl = "/api/feeds";
 
 // Definicija kategorija
 const categories = [
