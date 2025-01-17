@@ -132,6 +132,7 @@ async function processFeeds() {
 
     // Pošalji podatke GPT API-ju
     const result = await sendToGPT(title, description);
+    console.log("GPT result:", result);   //ovo je privremeno za testiranje,................
     if (result) {
       // Čuvaj rezultat u Redis-u
       const [newsId, category] = result.split("=");
