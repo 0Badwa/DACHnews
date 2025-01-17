@@ -72,47 +72,9 @@ async function sendToGPT(title, description) {
         "Content-Type": "application/json"
       }
     });
-    return response.data.choices[0].message.content.trim();
+    return response.data.choices[0]?.message?.content?.trim();
   } catch (error) {
     console.error("Greška pri slanju GPT API-ju:", error);
-    return null;
-  }
-}
-
-// Nova funkcija za slanje više upita u jednom promptu
-async function sendMultipleToGPT(feeds) {
-  const messages = [
-    {
-      role: "system",
-      content:
-        "Za svaku vest vrati rezultat u formatu 'id=kategorija'. Dostupne kategorije su: Technologie, Gesundheit, Sport, Wirtschaft, Kultur, Auto, Reisen, Lifestyle, Panorama, Politik, Unterhaltung, Welt, LGBT."
-    }
-  ];
-
-  // Dodaj naslove i opise svih feedova kao korisničke poruke
-  feeds.forEach(feed => {
-    messages.push({
-      role: "user",
-      content: `Naslov: "${feed.title}". Opis: "${feed.description}".`
-    });
-  });
-
-  const payload = {
-    model: "gpt-4o-mini",
-    messages,
-    max_tokens: 500 // Podesite vrednost po potrebi
-  };
-
-  try {
-    const response = await axios.post(GPT_API_URL, payload, {
-      headers: {
-        Authorization: `Bearer ${process.env.CHATGPT_API_KEY}`,
-        "Content-Type": "application/json"
-      }
-    });
-    return response.data.choices[0].message.content.trim();
-  } catch (error) {
-    console.error("Greška pri slanju više upita GPT API-ju:", error);
     return null;
   }
 }
@@ -132,16 +94,19 @@ async function processFeeds() {
 
     // Pošalji podatke GPT API-ju
     const result = await sendToGPT(title, description);
-    console.log("GPT result:", result);   //ovo je privremeno za testiranje,................
+    console.log("GPT result:", result); // Log za testiranje
     if (result) {
-      // Čuvaj rezultat u Redis-u
       const [newsId, category] = result.split("=");
       if (newsId && category) {
+        // Dodavanje u Redis sa kategorijom
+        const newsItem = {
+          id,
+          title,
+          description,
+          category, // Dodajemo kategoriju
+        };
         await redisClient.sAdd("processed_ids", id);
-        await redisClient.rPush(
-          `category:${category}`,
-          JSON.stringify({ id, title, description })
-        );
+        await redisClient.rPush(`category:${category}`, JSON.stringify(newsItem));
       }
     }
   }
@@ -175,72 +140,7 @@ app.get("/api/feeds", async (req, res) => {
   }
 });
 
-// Ruta za kategorizaciju feedova putem GPT API-ja
-app.post("/api/categorize", async (req, res) => {
-  const { feeds } = req.body;
-
-  if (!feeds || !Array.isArray(feeds)) {
-    return res.status(400).send("Invalid input");
-  }
-
-  const validFeeds = feeds.filter(
-    feed =>
-      feed.id &&
-      feed.title &&
-      feed.content_text &&
-      feed.content_text.trim().length > 0
-  );
-
-  if (validFeeds.length === 0) {
-    return res.status(400).send("Nema validnih feedova za analizu.");
-  }
-
-  try {
-    const results = await Promise.all(
-      validFeeds.map(feed =>
-        sendToGPT(feed.title, feed.content_text).then(category => ({
-          id: feed.id,
-          title: feed.title,
-          category
-        }))
-      )
-    );
-
-    res.json(results);
-  } catch (error) {
-    console.error("Greška pri kategorizaciji:", error);
-    res.status(500).send("Server error");
-  }
-});
-
-// Ruta za višestruku kategorizaciju pomoću sendMultipleToGPT
-app.post("/api/categorize-multiple", async (req, res) => {
-  const { feeds } = req.body;
-
-  if (!feeds || !Array.isArray(feeds)) {
-    return res.status(400).send("Invalid input");
-  }
-
-  try {
-    const result = await sendMultipleToGPT(feeds);
-    res.json({ result });
-  } catch (error) {
-    console.error("Greška pri višestrukoj kategorizaciji:", error);
-    res.status(500).send("Server error");
-  }
-});
-
-// Pokreni proces osvežavanja svakih 5 minuta
-setInterval(processFeeds, 5 * 60 * 1000);
-processFeeds();
-
-// Pokreni server na portu određenom od strane Render-a ili lokalno na 3001
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-  console.log(`Server pokrenut na portu ${PORT}`);
-});
-
-
+// Ruta za feedove po kategoriji
 app.get('/api/feeds-by-category/:category', async (req, res) => {
   const category = req.params.category;
   try {
@@ -253,33 +153,29 @@ app.get('/api/feeds-by-category/:category', async (req, res) => {
   }
 });
 
-
-async function displayNewsCardsByCategory(category) {
-    const container = document.getElementById('news-container');
-    if (!container) return;
-
-    container.innerHTML = '<p>Učitavanje...</p>';
-
-    try {
-        const response = await fetch(`/api/feeds-by-category/${encodeURIComponent(category)}`);
-        const filteredFeeds = await response.json();
-
-        container.innerHTML = '';
-
-        console.log("Filtrirani feedovi za kategoriju:", category, filteredFeeds);
-
-        if (filteredFeeds.length === 0) {
-            container.innerHTML = '<p>Nema vesti za ovu kategoriju.</p>';
-        } else {
-            filteredFeeds.forEach(feed => {
-                const newsCard = createNewsCard(feed);
-                container.appendChild(newsCard);
-            });
-        }
-    } catch (error) {
-        console.error(`Greška pri dohvaćanju vesti za kategoriju ${category}:`, error);
-        container.innerHTML = '<p>Došlo je do greške prilikom učitavanja vesti.</p>';
-    }
+// Funkcija za kreiranje kartice za vest
+function createNewsCard(feed) {
+  const newsCard = document.createElement('div');
+  newsCard.className = 'news-card';
+  newsCard.innerHTML = `
+    <h3 class="news-title">${feed.title}</h3>
+    <p class="news-category">Kategorija: ${feed.category || 'Uncategorized'}</p>
+    <p class="news-date">
+      ${feed.date_published ? new Date(feed.date_published).toLocaleDateString() : 'N/A'}
+    </p>
+    <img class="news-image" src="${feed.image || 'https://via.placeholder.com/150'}" alt="${feed.title}">
+    <p class="news-content">${feed.description || ''}</p>
+    <a class="news-link" href="${feed.url}" target="_blank">Pročitaj više</a>
+  `;
+  return newsCard;
 }
 
-window.displayNewsCardsByCategory = displayNewsCardsByCategory;
+// Pokreni proces osvežavanja svakih 5 minuta
+setInterval(processFeeds, 5 * 60 * 1000);
+processFeeds();
+
+// Pokreni server na portu određenom od strane Render-a ili lokalno na 3001
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => {
+  console.log(`Server pokrenut na portu ${PORT}`);
+});
