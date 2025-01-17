@@ -239,3 +239,46 @@ const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Server pokrenut na portu ${PORT}`);
 });
+
+
+app.get('/api/feeds-by-category/:category', async (req, res) => {
+  const category = req.params.category;
+  try {
+    const feedItems = await redisClient.lRange(`category:${category}`, 0, -1);
+    const parsedItems = feedItems.map(item => JSON.parse(item));
+    res.json(parsedItems);
+  } catch (error) {
+    console.error(`Greška pri preuzimanju vesti za kategoriju ${category}:`, error);
+    res.status(500).send('Server error');
+  }
+});
+
+
+async function displayNewsCardsByCategory(category) {
+    const container = document.getElementById('news-container');
+    if (!container) return;
+
+    container.innerHTML = '<p>Učitavanje...</p>';
+
+    try {
+        const response = await fetch(`/api/feeds-by-category/${encodeURIComponent(category)}`);
+        const filteredFeeds = await response.json();
+
+        container.innerHTML = '';
+
+        console.log("Filtrirani feedovi za kategoriju:", category, filteredFeeds);
+
+        if (filteredFeeds.length === 0) {
+            container.innerHTML = '<p>Nema vesti za ovu kategoriju.</p>';
+        } else {
+            filteredFeeds.forEach(feed => {
+                const newsCard = createNewsCard(feed);
+                container.appendChild(newsCard);
+            });
+        }
+    } catch (error) {
+        console.error(`Greška pri dohvaćanju vesti za kategoriju ${category}:`, error);
+        container.innerHTML = '<p>Došlo je do greške prilikom učitavanja vesti.</p>';
+    }
+}
+
