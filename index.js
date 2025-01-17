@@ -35,6 +35,7 @@ redisClient.connect().catch((err) => console.error('Redis greška:', err));
 const RSS_FEED_URL = "https://rss.app/feeds/v1.1/tSylunkFT455Icoi.json";
 const GPT_API_URL = "https://api.openai.com/v1/chat/completions";
 
+// Preuzima sirove feedove sa RSS App
 async function fetchRSSFeed() {
   try {
     const response = await axios.get(RSS_FEED_URL);
@@ -45,12 +46,12 @@ async function fetchRSSFeed() {
   }
 }
 
+// Slanje batcha vesti GPT-u radi kategorizacije
 async function sendBatchToGPT(feedBatch) {
   const combinedContent = feedBatch.map((item) => ({
     id: item.id,
     title: item.title,
     description: item.description
-   
   }));
 
   const payload = {
@@ -83,12 +84,15 @@ async function sendBatchToGPT(feedBatch) {
   }
 }
 
+// Procesiranje feedova (kategorizacija i čuvanje u Redis)
 async function processFeeds() {
-  // Očisti Redis keš za obrađene ID-ove
+  // Očisti Redis keš za obrađene ID-ove (opciono, ako želite da resetujete)
   await redisClient.del('processed_ids');
-  
+
+  // 1) Preuzmi nove vesti
   const items = await fetchRSSFeed();
 
+  // 2) Pripremi newItems koje još nisu procesirane (na osnovu processed_ids)
   const newItems = [];
   for (const item of items) {
     const id = item.id;
@@ -103,10 +107,12 @@ async function processFeeds() {
 
   if (newItems.length === 0) return;
 
+  // 3) Pošalji batch GPT-u
   let gptResponse = await sendBatchToGPT(newItems);
   console.log("GPT batch result:", gptResponse);
 
   if (gptResponse) {
+    // Ako GPT vrati JSON u code-fence formatima (```json ...```), uklonimo ih
     if (gptResponse.startsWith("```json")) {
       gptResponse = gptResponse.replace(/^```json\n?/, '').replace(/```$/, '');
     }
@@ -119,37 +125,41 @@ async function processFeeds() {
       return;
     }
 
-const idCategoryMap = {};
-classifications.forEach(item => {
-  if (item.id && item.category) {
-    idCategoryMap[item.id] = item.category;
-  }
-});
+    // 4) Mapiraj ID -> category
+    const idCategoryMap = {};
+    classifications.forEach(item => {
+      if (item.id && item.category) {
+        idCategoryMap[item.id] = item.category;
+      }
+    });
 
-for (const feedItem of newItems) {
-  const category = idCategoryMap[feedItem.id] || "Uncategorized";
-  const newsItem = {
-    id: feedItem.id,
-    title: feedItem.title,
-    description: feedItem.description,
-    category,
-  };
+    // 5) Smesti svaku vest u Redis, ali prvo proveri da li već postoji
+    for (const feedItem of newItems) {
+      const category = idCategoryMap[feedItem.id] || "Uncategorized";
+      const newsItem = {
+        id: feedItem.id,
+        title: feedItem.title,
+        description: feedItem.description,
+        category,
+      };
 
-  // Proveri da li već postoji u listi za tu kategoriju
-  const existingItems = await redisClient.lRange(`category:${category}`, 0, -1);
-  const isDuplicate = existingItems.some(str => {
-    const parsed = JSON.parse(str);
-    return parsed.id === feedItem.id;
-  });
+      // Proveri da li već postoji u listi za tu kategoriju
+      const existingItems = await redisClient.lRange(`category:${category}`, 0, -1);
+      const isDuplicate = existingItems.some(str => {
+        const parsed = JSON.parse(str);
+        return parsed.id === feedItem.id;
+      });
 
-  // Ako nije duplikat, dodaj ga
-  if (!isDuplicate) {
-    await redisClient.sAdd("processed_ids", feedItem.id);
-    await redisClient.rPush(`category:${category}`, JSON.stringify(newsItem));
-  }
-}
+      // Ako nije duplikat, dodaj ga
+      if (!isDuplicate) {
+        await redisClient.sAdd("processed_ids", feedItem.id);
+        await redisClient.rPush(`category:${category}`, JSON.stringify(newsItem));
+      }
+    }
+  } // ← dodata zatvarajuća zagrada za if (gptResponse)
+} // ← zatvaranje funkcije processFeeds
 
-
+// Rute
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
@@ -188,9 +198,8 @@ app.get('/api/feeds-by-category/:category', async (req, res) => {
   }
 });
 
-// Modifikovana main funkcija bez localStorage
+// Pokretanje
 async function main() {
-  // Use the correct function to fetch feeds
   const feeds = await fetchRSSFeed();
   console.log("Preuzeti feedovi:", feeds);
 }
@@ -204,6 +213,5 @@ app.listen(PORT, () => {
 });
 
 main().then(() => {
-  // Selektovanje i inicijalizacija tabova i ostalih funkcija se odvija na strani klijenta,
-  // tako da nije potrebno dodatno rukovanje ovde.
+  // Ostatak klijentskih stvari ide u index.html
 });
