@@ -90,44 +90,37 @@ localStorage.setItem('feeds', JSON.stringify(items));
 
 // Keširanje feedova (Local Storage)
 function cacheFeedsLocally(items) {
-    const cachedFeeds = JSON.parse(localStorage.getItem('feeds') || '[]');
-    const newFeeds = items.filter(item => !cachedFeeds.some(cached => cached.id === item.id));
-    localStorage.setItem('feeds', JSON.stringify([...cachedFeeds, ...newFeeds]));
-    console.log("Novi feedovi za keširanje:", newFeeds); // Provera novih feedova za keširanje
-    return newFeeds;
+  // Ovde jednostavno zamenjujemo dosadašnji sadržaj novim
+  localStorage.setItem('feeds', JSON.stringify(items));
+  console.log("Sačuvani feedovi u localStorage:", items);
+  return items;
 }
 
-// Glavna funkcija
+// Glavna funkcija – Rešenje A (uvek prvo fetch sa servera)
 async function main() {
-    // Pokušaj učitavanja feedova iz localStorage
-    const storedFeeds = localStorage.getItem('feeds');
-    if (storedFeeds) {
-        feeds = JSON.parse(storedFeeds);
-        console.log("Učitani feedovi iz localStorage:", feeds);
-    } else {
-        // Ako nema u localStorage, preuzmi sa servera
-        feeds = await fetchFeeds();
-        console.log("Preuzeti feedovi:", feeds);
-        const newFeeds = cacheFeedsLocally(feeds);
+  // 1) Uvek najpre dovuci sveže feedove sa vašeg /api/feeds
+  const freshFeeds = await fetchFeeds();
+  console.log("Preuzeti (sveži) feedovi sa servera:", freshFeeds);
 
-        if (newFeeds.length > 0) {
-            console.log(`Pronađeno ${newFeeds.length} novih feedova.`);
-        } else {
-            console.log("Nema novih feedova za kategorizaciju.");
-        }
-        // Sačuvaj preuzete feedove u localStorage
-        localStorage.setItem('feeds', JSON.stringify(feeds));
-    }
+  // 2) Upisi ih odmah u localStorage
+  cacheFeedsLocally(freshFeeds);
+
+  // 3) Sačuvaj ih i u globalnoj promenljivoj `feeds`
+  feeds = freshFeeds;
+
+  // 4) Prikaži ih odmah na ekranu
+  displayAllFeeds();
 }
 
-// Pomoćna funkcija da uklonimo 'active' klasu sa svih tabova
+// Pomoćna funkcija da uklonimo 'active' klasu sa svih tabova (ostaje nepromenjena)
 function removeActiveClass() {
-    const allTabs = document.querySelectorAll('.tab');
-    allTabs.forEach(tab => {
-        tab.classList.remove('active');
-        tab.setAttribute('aria-selected', 'false');
-    });
+  const allTabs = document.querySelectorAll('.tab');
+  allTabs.forEach(tab => {
+    tab.classList.remove('active');
+    tab.setAttribute('aria-selected', 'false');
+  });
 }
+
 
 // Funkcija koja generiše HTML karticu za pojedinačan feed
 function createNewsCard(feed) {
