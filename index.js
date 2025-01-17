@@ -75,7 +75,7 @@ app.get('/api/feeds', async (req, res) => {
 });
 
 // Pokreni server
-const PORT = process.env.PORT || 10000;
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => console.log(`Server pokrenut na portu ${PORT}`));
 
 
