@@ -50,7 +50,8 @@ async function sendBatchToGPT(feedBatch) {
     id: item.id,
     title: item.title,
     description: item.description
-    console.log(`Naslov: "${title}", Opis: "${description}", Rezultat: ${result}`);
+   console.log("Naslov:", title, "Opis:", description, "Rezultat:", result);
+
 
   }));
 
