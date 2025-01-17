@@ -95,14 +95,24 @@ function cacheFeedsLocally(items) {
 
 // Glavna funkcija
 async function main() {
-    feeds = await fetchFeeds(); // Učitaj feedove i sačuvaj u globalnoj varijabli
-    console.log("Keširani feedovi:", feeds);
-    const newFeeds = cacheFeedsLocally(feeds);
-
-    if (newFeeds.length > 0) {
-        console.log(`Pronađeno ${newFeeds.length} novih feedova.`);
+    // Pokušaj učitavanja feedova iz localStorage
+    const storedFeeds = localStorage.getItem('feeds');
+    if (storedFeeds) {
+        feeds = JSON.parse(storedFeeds);
+        console.log("Učitani feedovi iz localStorage:", feeds);
     } else {
-        console.log("Nema novih feedova za kategorizaciju.");
+        // Ako nema u localStorage, preuzmi sa servera
+        feeds = await fetchFeeds();
+        console.log("Preuzeti feedovi:", feeds);
+        const newFeeds = cacheFeedsLocally(feeds);
+
+        if (newFeeds.length > 0) {
+            console.log(`Pronađeno ${newFeeds.length} novih feedova.`);
+        } else {
+            console.log("Nema novih feedova za kategorizaciju.");
+        }
+        // Sačuvaj preuzete feedove u localStorage
+        localStorage.setItem('feeds', JSON.stringify(feeds));
     }
 }
 
@@ -141,7 +151,6 @@ function displayNewsCardsByCategory(category) {
 
     // Filtriraj feedove po odabranoj kategoriji
     const filteredFeeds = feeds.filter(feed => {
-        // feed.category mora da se poklapa, ili ako nije definisana kategorija feed-a, prikazujemo u "Uncategorized"
         return feed.category === category || (!feed.category && category === "Uncategorized");
     });
 
@@ -229,26 +238,14 @@ main().then(() => {
     }
 
     // Dinamičko dodavanje tabova za ostale kategorije
-    // (ako želite da preskočite "Uncategorized", isključite ga iz niza)
     const tabsContainer = document.getElementById('tabs-container');
     if (tabsContainer) {
-        // Izbacujemo "Uncategorized" ako vam ne treba:
-        // const dynamicCategories = categories.filter(cat => cat !== "Uncategorized");
-
-        // Ako hoćete sve kategorije, samo uzmite "categories"
         const dynamicCategories = categories;
-
-        // Nemojte da ponavljate "Home" i "Latest" ako su već statički u HTML-u
-        // Uklonite ih iz dynamicCategories ako su slučajno tu
-        // (ovde zapravo i nisu, ali da budemo sigurni)
-        const skipList = ["LGBT+", "Uncategorized"]; 
-        // primer: ako NE želite da prikažete "LGBT+" i "Uncategorized" u tabovima
-        // ako ipak želite i te tabove, izbrišite skipList ili ga ostavite praznim
+        const skipList = ["LGBT+", "Uncategorized"];
 
         dynamicCategories
-            .filter(cat => !skipList.includes(cat)) // preskače navedene
+            .filter(cat => !skipList.includes(cat))
             .forEach(cat => {
-                // Napravi dugme (tab) za svaku kategoriju
                 const btn = document.createElement('button');
                 btn.classList.add('tab');
                 btn.setAttribute('data-tab', cat);
@@ -256,7 +253,6 @@ main().then(() => {
                 btn.setAttribute('aria-selected', 'false');
                 btn.textContent = cat;
 
-                // Na klik, prikazujemo feedove te kategorije
                 btn.addEventListener('click', (e) => {
                     removeActiveClass();
                     e.target.classList.add('active');
@@ -264,7 +260,6 @@ main().then(() => {
                     displayNewsCardsByCategory(cat);
                 });
 
-                // Dodajemo tab u tabs-container
                 tabsContainer.appendChild(btn);
             });
     }
