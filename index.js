@@ -119,26 +119,36 @@ async function processFeeds() {
       return;
     }
 
-    const idCategoryMap = {};
-    classifications.forEach(item => {
-      if (item.id && item.category) {
-        idCategoryMap[item.id] = item.category;
-      }
-    });
+const idCategoryMap = {};
+classifications.forEach(item => {
+  if (item.id && item.category) {
+    idCategoryMap[item.id] = item.category;
+  }
+});
 
-    for (const feedItem of newItems) {
-      const category = idCategoryMap[feedItem.id] || "Uncategorized";
-      const newsItem = {
-        id: feedItem.id,
-        title: feedItem.title,
-        description: feedItem.description,
-        category,
-      };
-      await redisClient.sAdd("processed_ids", feedItem.id);
-      await redisClient.rPush(`category:${category}`, JSON.stringify(newsItem));
-    }
+for (const feedItem of newItems) {
+  const category = idCategoryMap[feedItem.id] || "Uncategorized";
+  const newsItem = {
+    id: feedItem.id,
+    title: feedItem.title,
+    description: feedItem.description,
+    category,
+  };
+
+  // Proveri da li već postoji u listi za tu kategoriju
+  const existingItems = await redisClient.lRange(`category:${category}`, 0, -1);
+  const isDuplicate = existingItems.some(str => {
+    const parsed = JSON.parse(str);
+    return parsed.id === feedItem.id;
+  });
+
+  // Ako nije duplikat, dodaj ga
+  if (!isDuplicate) {
+    await redisClient.sAdd("processed_ids", feedItem.id);
+    await redisClient.rPush(`category:${category}`, JSON.stringify(newsItem));
   }
 }
+
 
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
