@@ -241,7 +241,7 @@ main().then(() => {
     const tabsContainer = document.getElementById('tabs-container');
     if (tabsContainer) {
         const dynamicCategories = categories;
-        const skipList = ["LGBT+", "Uncategorized"];
+        const skipList = ["Uncategorized"];
 
         dynamicCategories
             .filter(cat => !skipList.includes(cat))
