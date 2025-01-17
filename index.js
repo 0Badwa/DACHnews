@@ -40,6 +40,14 @@ async function fetchRSSFeed() {
   }
 }
 
+ const response = await axios.post(GPT_API_URL, payload, {
+      headers: {
+        Authorization: `Bearer ${process.env.CHATGPT_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+
 // Funkcija za slanje zahteva GPT API-ju
 async function sendToGPT(title, description) {
   try {
@@ -58,13 +66,7 @@ async function sendToGPT(title, description) {
       max_tokens: 50
     };
 
-    const response = await axios.post(GPT_API_URL, payload, {
-      headers: {
-        Authorization: `Bearer ${process.env.CHATGPT_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-    });
-
+   
     return response.data.choices[0].message.content.trim();
   } catch (error) {
     console.error("Greška pri slanju GPT API-ju:", error);
