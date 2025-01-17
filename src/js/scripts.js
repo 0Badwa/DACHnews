@@ -142,28 +142,42 @@ function createNewsCard(feed) {
     return newsCard;
 }
 
-// Prikaz feedova po kategoriji
-function displayNewsCardsByCategory(category) {
+// Ažurirana funkcija za prikazivanje vesti po kategoriji sa lokalnim keširanjem
+async function displayNewsCardsByCategory(category) {
     const container = document.getElementById('news-container');
     if (!container) return;
 
     container.innerHTML = ''; // Očisti prethodni sadržaj
 
-    // Filtriraj feedove po odabranoj kategoriji
-    const filteredFeeds = feeds.filter(feed => {
-        return feed.category === category || (!feed.category && category === "Uncategorized");
-    });
+    // Provera lokalnog keša za datu kategoriju
+    const cachedCategory = localStorage.getItem(`feeds-${category}`);
+    let parsedItems = [];
 
-    console.log("Filtrirani feedovi za kategoriju:", category, filteredFeeds);
+    if (cachedCategory) {
+        parsedItems = JSON.parse(cachedCategory);
+        console.log("Korišćenje keširanih feedova za kategoriju:", category, parsedItems);
+    } else {
+        try {
+            const response = await fetch(`/api/feeds-by-category/${encodeURIComponent(category)}`);
+            parsedItems = await response.json();
+            console.log("Filtrirani feedovi za kategoriju:", category, parsedItems);
 
-    // Generiši kartice
-    filteredFeeds.forEach(feed => {
-        const newsCard = createNewsCard(feed);
-        container.appendChild(newsCard);
-    });
+            // Sačuvaj preuzete podatke u localStorage
+            localStorage.setItem(`feeds-${category}`, JSON.stringify(parsedItems));
+        } catch (error) {
+            console.error(`Greška pri preuzimanju vesti za kategoriju ${category}:`, error);
+            container.innerHTML = '<p>Greška pri učitavanju vesti.</p>';
+            return;
+        }
+    }
 
-    if (filteredFeeds.length === 0) {
+    if(parsedItems.length === 0) {
         container.innerHTML = '<p>Nema vesti za ovu kategoriju.</p>';
+    } else {
+        parsedItems.forEach(feed => {
+            const newsCard = createNewsCard(feed);
+            container.appendChild(newsCard);
+        });
     }
 }
 
