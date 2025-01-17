@@ -87,7 +87,7 @@ async function sendBatchToGPT(feedBatch) {
 // Procesiranje feedova (kategorizacija i čuvanje u Redis)
 async function processFeeds() {
   // Očisti Redis keš za obrađene ID-ove (opciono, ako želite da resetujete)
-  await redisClient.del('processed_ids');
+  // await redisClient.del('processed_ids');
 
   // 1) Preuzmi nove vesti
   const items = await fetchRSSFeed();
