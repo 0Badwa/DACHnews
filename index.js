@@ -1,9 +1,19 @@
-require('dotenv').config();
-const express = require('express');
-const { createClient } = require('redis');
-const helmet = require('helmet');
-const path = require('path');
-const axios = require('axios');
+import dotenv from 'dotenv';
+dotenv.config();
+
+import express from 'express';
+import { createClient } from 'redis';
+import helmet from 'helmet';
+import path from 'path';
+import axios from 'axios';
+import { fileURLToPath } from 'url';
+
+// Postavljanje __dirname u ES module okruženju
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// ... ostatak koda ostaje isti, osim što ne možete koristiti CommonJS specifične funkcije
+
 
 // Kreiraj Express aplikaciju
 const app = express();
@@ -40,36 +50,70 @@ async function fetchRSSFeed() {
   }
 }
 
- const response = await axios.post(GPT_API_URL, payload, {
+// Funkcija za slanje zahteva GPT API-ju za jedan naslov i opis
+async function sendToGPT(title, description) {
+  const payload = {
+    model: "gpt-4o-mini",
+    messages: [
+      {
+        role: "system",
+        content: "Vrati rezultat u formatu 'id=kategorija' za naslov i opis vesti. Dostupne kategorije su: Technologie, Gesundheit, Sport, Wirtschaft, Kultur, Auto, Reisen, Lifestyle, Panorama, Politik, Unterhaltung, Welt, LGBT."
+      },
+      {
+        role: "user",
+        content: `Naslov: "${title}". Opis: "${description}".`
+      }
+    ],
+    max_tokens: 50
+  };
+
+  try {
+    const response = await axios.post(GPT_API_URL, payload, {
       headers: {
         Authorization: `Bearer ${process.env.CHATGPT_API_KEY}`,
         "Content-Type": "application/json",
       },
     });
-
-
-// Funkcija za slanje zahteva GPT API-ju
-async function sendToGPT(title, description) {
-  try {
-    const payload = {
-      model: "gpt-4o-mini",
-      messages: [
-        {
-          role: "system",
-          content: "Vrati rezultat u formatu 'id=kategorija' za naslov i opis vesti. Dostupne kategorije su: Technologie, Gesundheit, Sport, Wirtschaft, Kultur, Auto, Reisen, Lifestyle, Panorama, Politik, Unterhaltung, Welt, LGBT."
-        },
-        {
-          role: "user",
-          content: `Naslov: \"${title}\". Opis: \"${description}\".`
-        }
-      ],
-      max_tokens: 50
-    };
-
-   
     return response.data.choices[0].message.content.trim();
   } catch (error) {
     console.error("Greška pri slanju GPT API-ju:", error);
+    return null;
+  }
+}
+
+// Nova funkcija za slanje više upita u jednom promptu
+async function sendMultipleToGPT(feeds) {
+  const messages = [
+    {
+      role: "system",
+      content: "Za svaku vest vrati rezultat u formatu 'id=kategorija'. Dostupne kategorije su: Technologie, Gesundheit, Sport, Wirtschaft, Kultur, Auto, Reisen, Lifestyle, Panorama, Politik, Unterhaltung, Welt, LGBT."
+    }
+  ];
+
+  // Dodaj naslove i opise svih feedova kao korisničke poruke
+  feeds.forEach(feed => {
+    messages.push({
+      role: "user",
+      content: `Naslov: "${feed.title}". Opis: "${feed.description}".`
+    });
+  });
+
+  const payload = {
+    model: "gpt-4o-mini",
+    messages,
+    max_tokens: 500  // Podesite vrednost po potrebi
+  };
+
+  try {
+    const response = await axios.post(GPT_API_URL, payload, {
+      headers: {
+        Authorization: `Bearer ${process.env.CHATGPT_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+    });
+    return response.data.choices[0].message.content.trim();
+  } catch (error) {
+    console.error("Greška pri slanju više upita GPT API-ju:", error);
     return null;
   }
 }
@@ -146,16 +190,35 @@ app.post('/api/categorize', async (req, res) => {
 
   try {
     const results = await Promise.all(
-      validFeeds.map((feed) => sendToGPT(feed.title, feed.content_text).then(category => ({
-        id: feed.id,
-        title: feed.title,
-        category,
-      })))
+      validFeeds.map((feed) =>
+        sendToGPT(feed.title, feed.content_text).then(category => ({
+          id: feed.id,
+          title: feed.title,
+          category,
+        }))
+      )
     );
 
     res.json(results);
   } catch (error) {
     console.error('Greška pri kategorizaciji:', error);
+    res.status(500).send('Server error');
+  }
+});
+
+// Primer korišćenja sendMultipleToGPT funkcije – možete kreirati rutu za testiranje
+app.post('/api/categorize-multiple', async (req, res) => {
+  const { feeds } = req.body;
+
+  if (!feeds || !Array.isArray(feeds)) {
+    return res.status(400).send('Invalid input');
+  }
+
+  try {
+    const result = await sendMultipleToGPT(feeds);
+    res.json({ result });
+  } catch (error) {
+    console.error('Greška pri višestrukoj kategorizaciji:', error);
     res.status(500).send('Server error');
   }
 });
