@@ -222,11 +222,11 @@ main().then(() => {
 
 
 // OVO IZBACI, BRISANJE CELOG KEŠA REDIS
-(async () => {
-  const categoryKeys = await redisClient.keys("category:*");
-  for (const key of categoryKeys) {
-    await redisClient.del(key);
-  }
-  await redisClient.del("processed_ids");
-  console.log("Redis keš na Render-u očišćen!");
-})();
+// (async () => {
+  // const categoryKeys = await redisClient.keys("category:*");
+  // for (const key of categoryKeys) {
+    // await redisClient.del(key);
+ //  }
+  // await redisClient.del("processed_ids");
+  // console.log("Redis keš na Render-u očišćen!");
+// })();
