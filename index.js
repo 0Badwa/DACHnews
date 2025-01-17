@@ -47,22 +47,30 @@ async function fetchRSSFeed() {
   }
 }
 
-// Funkcija za slanje zahteva GPT API-ju za jedan naslov i opis
-async function sendToGPT(title, description) {
+// Funkcija za slanje grupe feed-ova GPT API-ju i vraćanje rezultata
+async function sendBatchToGPT(feedBatch) {
+  const combinedContent = feedBatch.map((item) => {
+    return {
+      id: item.id,
+      title: item.title,
+      description: item.description
+    };
+  });
+
   const payload = {
     model: "gpt-4o-mini",
     messages: [
       {
         role: "system",
         content:
-          "Vrati rezultat u formatu 'id=kategorija' za naslov i opis vesti. Dostupne kategorije su: Technologie, Gesundheit, Sport, Wirtschaft, Kultur, Auto, Reisen, Lifestyle, Panorama, Politik, Unterhaltung, Welt, LGBT."
+          "Klasifikuj vesti u sledeće kategorije: Technologie, Gesundheit, Sport, Wirtschaft, Kultur, Auto, Reisen, Lifestyle, Panorama, Politik, Unterhaltung, Welt, LGBT. Vrati rezultat u validnom JSON formatu gde je svaki element objekat sa poljima 'id' i 'category'."
       },
       {
         role: "user",
-        content: `Naslov: "${title}". Opis: "${description}".`
+        content: JSON.stringify(combinedContent)
       }
     ],
-    max_tokens: 50
+    max_tokens: 1500
   };
 
   try {
@@ -83,6 +91,7 @@ async function sendToGPT(title, description) {
 async function processFeeds() {
   const items = await fetchRSSFeed();
 
+  const newItems = [];
   for (const item of items) {
     const id = item.id;
     const title = item.title;
@@ -92,22 +101,40 @@ async function processFeeds() {
     const isProcessed = await redisClient.sIsMember("processed_ids", id);
     if (isProcessed) continue;
 
-    // Pošalji podatke GPT API-ju
-    const result = await sendToGPT(title, description);
-    console.log("GPT result:", result); // Log za testiranje
-    if (result) {
-      const [newsId, category] = result.split("=");
-      if (newsId && category) {
-        // Dodavanje u Redis sa kategorijom
-        const newsItem = {
-          id,
-          title,
-          description,
-          category, // Dodajemo kategoriju
-        };
-        await redisClient.sAdd("processed_ids", id);
-        await redisClient.rPush(`category:${category}`, JSON.stringify(newsItem));
+    newItems.push({ id, title, description });
+  }
+
+  if (newItems.length === 0) return;
+
+  const gptResponse = await sendBatchToGPT(newItems);
+  console.log("GPT batch result:", gptResponse);
+
+  if (gptResponse) {
+    let classifications;
+    try {
+      classifications = JSON.parse(gptResponse);
+    } catch (e) {
+      console.error("Greška pri parsiranju GPT odgovora:", e);
+      return;
+    }
+
+    const idCategoryMap = {};
+    classifications.forEach(item => {
+      if (item.id && item.category) {
+        idCategoryMap[item.id] = item.category;
       }
+    });
+
+    for (const feedItem of newItems) {
+      const category = idCategoryMap[feedItem.id] || "Uncategorized";
+      const newsItem = {
+        id: feedItem.id,
+        title: feedItem.title,
+        description: feedItem.description,
+        category,
+      };
+      await redisClient.sAdd("processed_ids", feedItem.id);
+      await redisClient.rPush(`category:${category}`, JSON.stringify(newsItem));
     }
   }
 }
@@ -128,7 +155,7 @@ app.get("/api/feeds", async (req, res) => {
       console.log("Preuzimanje feedova sa izvora:", RSS_FEED_URL);
       const response = await axios.get(RSS_FEED_URL);
       data = response.data;
-      await redisClient.set(cacheKey, JSON.stringify(data), { EX: 3600 }); // Keširaj na 1 sat
+      await redisClient.set(cacheKey, JSON.stringify(data), { EX: 604800 }); // Keširaj na 7 dana
     } else {
       data = JSON.parse(data);
     }
@@ -152,23 +179,6 @@ app.get('/api/feeds-by-category/:category', async (req, res) => {
     res.status(500).send('Server error');
   }
 });
-
-// Funkcija za kreiranje kartice za vest
-function createNewsCard(feed) {
-  const newsCard = document.createElement('div');
-  newsCard.className = 'news-card';
-  newsCard.innerHTML = `
-    <h3 class="news-title">${feed.title}</h3>
-    <p class="news-category">Kategorija: ${feed.category || 'Uncategorized'}</p>
-    <p class="news-date">
-      ${feed.date_published ? new Date(feed.date_published).toLocaleDateString() : 'N/A'}
-    </p>
-    <img class="news-image" src="${feed.image || 'https://via.placeholder.com/150'}" alt="${feed.title}">
-    <p class="news-content">${feed.description || ''}</p>
-    <a class="news-link" href="${feed.url}" target="_blank">Pročitaj više</a>
-  `;
-  return newsCard;
-}
 
 // Pokreni proces osvežavanja svakih 5 minuta
 setInterval(processFeeds, 5 * 60 * 1000);
