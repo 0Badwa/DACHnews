@@ -23,6 +23,30 @@ const categories = [
     "Uncategorized"
 ];
 
+// Pomoćna funkcija za prikaz vremena od objave u nemačkom formatu
+function timeAgo(dateString) {
+  const now = new Date();
+  const past = new Date(dateString);
+  const seconds = Math.floor((now - past) / 1000);
+
+  let interval = Math.floor(seconds / 31536000);
+  if (interval >= 1) return `vor ${interval} Jahr${interval > 1 ? 'en' : ''}`;
+
+  interval = Math.floor(seconds / 2592000);
+  if (interval >= 1) return `vor ${interval} Monat${interval > 1 ? 'en' : ''}`;
+
+  interval = Math.floor(seconds / 86400);
+  if (interval >= 1) return `vor ${interval} Tag${interval > 1 ? 'en' : ''}`;
+
+  interval = Math.floor(seconds / 3600);
+  if (interval >= 1) return `vor ${interval} Stunde${interval > 1 ? 'n' : ''}`;
+
+  interval = Math.floor(seconds / 60);
+  if (interval >= 1) return `vor ${interval} Minute${interval > 1 ? 'n' : ''}`;
+
+  return `gerade eben`;
+}
+
 // Učitavanje SVIH feedova sa servera (spojenih iz Redis-a)
 async function fetchAllFeedsFromServer() {
   console.log("[fetchAllFeedsFromServer] /api/feeds...");
@@ -54,7 +78,7 @@ function removeActiveClass() {
   });
 }
 
-// Kreiranje HTML kartice za pojedinačni feed prema novom dizajnu
+// Kreiranje HTML kartice za pojedinačni feed prema novim specifikacijama
 function createNewsCard(feed) {
   console.log("[createNewsCard] Kreiranje kartice za:", feed.title);
   
@@ -74,39 +98,19 @@ function createNewsCard(feed) {
   // Naslov vesti
   const title = document.createElement('h3');
   title.className = "news-title";
-  // Naslov može biti link ka originalnom članku
-  const titleLink = document.createElement('a');
-  titleLink.href = feed.url || '#';
-  titleLink.target = "_blank";
-  titleLink.textContent = feed.title;
-  title.appendChild(titleLink);
+  title.textContent = feed.title;
 
-  // Meta podaci - datum i kategorija
-  const meta = document.createElement('p');
-  meta.className = "news-meta";
-  const pubDate = feed.date_published
-    ? new Date(feed.date_published).toLocaleDateString() + " " +
-      new Date(feed.date_published).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    : "";
-  meta.textContent = `${pubDate} | ${feed.category || 'Uncategorized'}`;
-
-  // Opis vesti
-  const description = document.createElement('p');
-  description.className = "news-card-description";
-  description.textContent = feed.content_text || '';
-
-  // Link "Pročitaj više"
-  const readMoreLink = document.createElement('a');
-  readMoreLink.className = "news-card-link";
-  readMoreLink.href = feed.url || '#';
-  readMoreLink.target = "_blank";
-  readMoreLink.textContent = "Pročitaj više";
+  // Izvor i vreme od objave
+  const source = document.createElement('p');
+  source.className = "news-meta";
+  // Pretpostavljamo da feed ima polje 'source'; ako ne, zamenite sa odgovarajućim izvorom.
+  const sourceName = feed.source || 'Nepoznat izvor';
+  const timeString = feed.date_published ? timeAgo(feed.date_published) : '';
+  source.textContent = `${sourceName} • ${timeString}`;
 
   // Sastavljanje sadržaja kartice
   contentDiv.appendChild(title);
-  contentDiv.appendChild(meta);
-  contentDiv.appendChild(description);
-  contentDiv.appendChild(readMoreLink);
+  contentDiv.appendChild(source);
 
   // Dodavanje slike i sadržaja u glavnu karticu
   card.appendChild(img);
