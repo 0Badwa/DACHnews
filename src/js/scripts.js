@@ -115,7 +115,7 @@ function createNewsCard(feed) {
   return card;
 }
 
-// Prikaz feedova – *sortiramo* po datumu (najnoviji prvo)
+// Prikaz feedova – *sortiramo* po datumu (najnoviji prvo) i uklanjamo duplikate
 function displayAllFeeds() {
   console.log("[displayAllFeeds] Prikaz svih feedova (sortirano)...");
   const container = document.getElementById('news-container');
@@ -125,24 +125,33 @@ function displayAllFeeds() {
   }
   container.innerHTML = '';
 
-  // Sortiramo feedove po date_published (opadajuće)
+  // Sortiranje feedova po date_published (opadajuće)
   const sorted = [...feeds].sort((a, b) => {
     const dateA = new Date(a.date_published).getTime() || 0;
     const dateB = new Date(b.date_published).getTime() || 0;
     return dateB - dateA; // najnoviji prvi
   });
 
-  if (sorted.length === 0) {
+  // Filtriranje duplikata na osnovu 'id'
+  const uniqueFeedsMap = new Map();
+  sorted.forEach(feed => {
+    if (!uniqueFeedsMap.has(feed.id)) {
+      uniqueFeedsMap.set(feed.id, feed);
+    }
+  });
+  const uniqueFeeds = Array.from(uniqueFeedsMap.values());
+
+  if (uniqueFeeds.length === 0) {
     container.innerHTML = "<p>Nema vesti.</p>";
     return;
   }
 
-  sorted.forEach(feed => {
+  uniqueFeeds.forEach(feed => {
     container.appendChild(createNewsCard(feed));
   });
 }
 
-// Prikaz feedova *po kategoriji*
+// Prikaz feedova *po kategoriji* uz uklanjanje duplikata
 async function displayNewsByCategory(category) {
   console.log("[displayNewsByCategory] Kategorija:", category);
   const container = document.getElementById('news-container');
@@ -171,19 +180,28 @@ async function displayNewsByCategory(category) {
     }
   }
 
-  // Sortiramo i ovde, ako želite i po kategoriji da su najnoviji prvi
+  // Sortiramo po datumu opadajuće
   const sorted = data.sort((a, b) => {
     const da = new Date(a.date_published).getTime() || 0;
     const db = new Date(b.date_published).getTime() || 0;
     return db - da;
   });
 
-  if (sorted.length === 0) {
+  // Filtriranje duplikata na osnovu 'id'
+  const uniqueFeedsMap = new Map();
+  sorted.forEach(feed => {
+    if (!uniqueFeedsMap.has(feed.id)) {
+      uniqueFeedsMap.set(feed.id, feed);
+    }
+  });
+  const uniqueFeeds = Array.from(uniqueFeedsMap.values());
+
+  if (uniqueFeeds.length === 0) {
     container.innerHTML = "<p>Nema vesti za ovu kategoriju.</p>";
     return;
   }
 
-  sorted.forEach(feed => {
+  uniqueFeeds.forEach(feed => {
     container.appendChild(createNewsCard(feed));
   });
 }
