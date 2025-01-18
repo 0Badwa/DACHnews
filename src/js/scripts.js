@@ -54,27 +54,65 @@ function removeActiveClass() {
   });
 }
 
-// Kreiranje HTML kartice za pojedinačni feed
+// Kreiranje HTML kartice za pojedinačni feed prema novom dizajnu
 function createNewsCard(feed) {
   console.log("[createNewsCard] Kreiranje kartice za:", feed.title);
-  const div = document.createElement('div');
-  div.className = "news-card";
-  div.innerHTML = `
-    <h3 class="news-title">${feed.title}</h3>
-    <p class="news-category">${feed.category || 'Uncategorized'}</p>
-    <p class="news-date">
-      ${
-        feed.date_published
-          ? new Date(feed.date_published).toLocaleDateString() + " " +
-            new Date(feed.date_published).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-          : ""
-      }
-    </p>
-    <img class="news-image" src="${feed.image || 'https://via.placeholder.com/150'}" alt="${feed.title}">
-    <p class="news-content">${feed.content_text || ''}</p>
-    <a class="news-link" href="${feed.url || '#'}" target="_blank">Pročitaj više</a>
-  `;
-  return div;
+  
+  const card = document.createElement('div');
+  card.className = "news-card";
+
+  // Kreiranje elementa za sliku
+  const img = document.createElement('img');
+  img.className = "news-card-image";
+  img.src = feed.image || 'https://via.placeholder.com/150';
+  img.alt = feed.title;
+
+  // Kreiranje kontejnera za sadržaj kartice
+  const contentDiv = document.createElement('div');
+  contentDiv.className = "news-card-content";
+
+  // Naslov vesti
+  const title = document.createElement('h3');
+  title.className = "news-title";
+  // Naslov može biti link ka originalnom članku
+  const titleLink = document.createElement('a');
+  titleLink.href = feed.url || '#';
+  titleLink.target = "_blank";
+  titleLink.textContent = feed.title;
+  title.appendChild(titleLink);
+
+  // Meta podaci - datum i kategorija
+  const meta = document.createElement('p');
+  meta.className = "news-meta";
+  const pubDate = feed.date_published
+    ? new Date(feed.date_published).toLocaleDateString() + " " +
+      new Date(feed.date_published).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    : "";
+  meta.textContent = `${pubDate} | ${feed.category || 'Uncategorized'}`;
+
+  // Opis vesti
+  const description = document.createElement('p');
+  description.className = "news-card-description";
+  description.textContent = feed.content_text || '';
+
+  // Link "Pročitaj više"
+  const readMoreLink = document.createElement('a');
+  readMoreLink.className = "news-card-link";
+  readMoreLink.href = feed.url || '#';
+  readMoreLink.target = "_blank";
+  readMoreLink.textContent = "Pročitaj više";
+
+  // Sastavljanje sadržaja kartice
+  contentDiv.appendChild(title);
+  contentDiv.appendChild(meta);
+  contentDiv.appendChild(description);
+  contentDiv.appendChild(readMoreLink);
+
+  // Dodavanje slike i sadržaja u glavnu karticu
+  card.appendChild(img);
+  card.appendChild(contentDiv);
+
+  return card;
 }
 
 // Prikaz feedova – *sortiramo* po datumu (najnoviji prvo)
