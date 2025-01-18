@@ -198,7 +198,10 @@ async function processFeeds() {
       url: item.url || null,
       image: item.image || null,
       content_text: item.content_text || "",
-      category
+      category,
+      // Koristimo autora iz JSON-a kao izvor ako postoji
+  source: (item.authors && item.authors.length > 0) ? item.authors[0].name : extractSource(item.url)
+
     };
 
     // Upis u listu "category:KATEGORIJA"
