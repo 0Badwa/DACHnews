@@ -5,7 +5,7 @@
 // Globalna promenljiva
 let feeds = [];
 
-// Liste kategorija - moraju odgovarati onima u GPT promptu
+// Kategorije (iste kao u GPT promptu + "Uncategorized")
 const categories = [
     "Technologie",
     "Gesundheit",
@@ -23,7 +23,7 @@ const categories = [
     "Uncategorized"
 ];
 
-// Funkcija: Učitavanje svih feedova sa servera
+// Učitavanje SVIH feedova sa servera (spojenih iz Redis-a)
 async function fetchAllFeedsFromServer() {
   console.log("[fetchAllFeedsFromServer] /api/feeds...");
   try {
@@ -38,14 +38,15 @@ async function fetchAllFeedsFromServer() {
   }
 }
 
-// Keširanje u localStorage
+// Čuvanje feedova u localStorage
 function cacheAllFeedsLocally(items) {
   localStorage.setItem('feeds', JSON.stringify(items));
-  console.log("[cacheAllFeedsLocally] Sačuvan niz feedova u localStorage:", items.length);
+  console.log("[cacheAllFeedsLocally] Sačuvano:", items.length, "vesti u localStorage");
 }
 
-// Uklanjanje 'active' klase
+// Uklanjanje 'active' klase sa tab dugmića
 function removeActiveClass() {
+  console.log("[removeActiveClass] Uklanjam 'active' sa svih tabova...");
   const allTabs = document.querySelectorAll('.tab');
   allTabs.forEach(tab => {
     tab.classList.remove('active');
@@ -53,28 +54,32 @@ function removeActiveClass() {
   });
 }
 
-// Kreiranje jedne kartice feeda
+// Kreiranje HTML kartice za pojedinačni feed
 function createNewsCard(feed) {
-  console.log("[createNewsCard] Kreiramo karticu za:", feed.title);
+  console.log("[createNewsCard] Kreiranje kartice za:", feed.title);
   const div = document.createElement('div');
   div.className = "news-card";
   div.innerHTML = `
     <h3 class="news-title">${feed.title}</h3>
-    <p class="news-category">${feed.category || "Uncategorized"}</p>
+    <p class="news-category">${feed.category || 'Uncategorized'}</p>
     <p class="news-date">
-      ${feed.date_published ? new Date(feed.date_published).toLocaleDateString() : ""}
-      ${feed.date_published ? new Date(feed.date_published).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : ""}
+      ${
+        feed.date_published
+          ? new Date(feed.date_published).toLocaleDateString() + " " +
+            new Date(feed.date_published).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          : ""
+      }
     </p>
     <img class="news-image" src="${feed.image || 'https://via.placeholder.com/150'}" alt="${feed.title}">
-    <p class="news-content">${feed.content_text || ""}</p>
+    <p class="news-content">${feed.content_text || ''}</p>
     <a class="news-link" href="${feed.url || '#'}" target="_blank">Pročitaj više</a>
   `;
   return div;
 }
 
-// Prikaz “Home” – svi feedovi
+// Prikaz feedova – *sortiramo* po datumu (najnoviji prvo)
 function displayAllFeeds() {
-  console.log("[displayAllFeeds] Prikaz svih feedova...");
+  console.log("[displayAllFeeds] Prikaz svih feedova (sortirano)...");
   const container = document.getElementById('news-container');
   if (!container) {
     console.error("[displayAllFeeds] #news-container ne postoji!");
@@ -82,27 +87,11 @@ function displayAllFeeds() {
   }
   container.innerHTML = '';
 
-  if (!feeds || feeds.length === 0) {
-    container.innerHTML = "<p>Nema vesti.</p>";
-    return;
-  }
-
-  feeds.forEach(f => {
-    const card = createNewsCard(f);
-    container.appendChild(card);
-  });
-}
-
-// Prikaz “Latest” – sortirano po datumu
-function displayLatestFeeds() {
-  console.log("[displayLatestFeeds] Prikaz feedova po datumu (najnoviji prvi)...");
-  const container = document.getElementById('news-container');
-  container.innerHTML = '';
-
+  // Sortiramo feedove po date_published (opadajuće)
   const sorted = [...feeds].sort((a, b) => {
-    const aTime = new Date(a.date_published).getTime() || 0;
-    const bTime = new Date(b.date_published).getTime() || 0;
-    return bTime - aTime;
+    const dateA = new Date(a.date_published).getTime() || 0;
+    const dateB = new Date(b.date_published).getTime() || 0;
+    return dateB - dateA; // najnoviji prvi
   });
 
   if (sorted.length === 0) {
@@ -110,77 +99,82 @@ function displayLatestFeeds() {
     return;
   }
 
-  sorted.forEach(f => {
-    container.appendChild(createNewsCard(f));
+  sorted.forEach(feed => {
+    container.appendChild(createNewsCard(feed));
   });
 }
 
-// Prikaz feedova po kategoriji
+// Prikaz feedova *po kategoriji*
 async function displayNewsByCategory(category) {
   console.log("[displayNewsByCategory] Kategorija:", category);
   const container = document.getElementById('news-container');
   container.innerHTML = '';
 
-  // Pogledamo lokalni keš za tu kategoriju
+  // Pogledamo da li imamo keš za tu kategoriju
   const cached = localStorage.getItem(`feeds-${category}`);
   let data = [];
 
   if (cached) {
-    console.log(`[displayNewsByCategory] Imamo keš za '${category}', koristimo ga...`);
+    console.log(`[displayNewsByCategory] Koristimo keširane feedove za '${category}'...`);
     data = JSON.parse(cached);
   } else {
-    console.log(`[displayNewsByCategory] Nema keša za '${category}', dohvatamo /api/feeds-by-category/${category}...`);
+    console.log(`[displayNewsByCategory] Nema keša, povlačimo /api/feeds-by-category/${category}`);
     try {
       const resp = await fetch(`/api/feeds-by-category/${encodeURIComponent(category)}`);
-      if (!resp.ok) throw new Error("Greška /feeds-by-category");
+      if (!resp.ok) throw new Error("Greška u fetch-u /feeds-by-category");
       data = await resp.json();
-      console.log(`[displayNewsByCategory] Sa servera stiglo:`, data.length);
-      // Snimimo u localStorage
+      console.log(`[displayNewsByCategory] Primljeno:`, data.length, "vesti");
+      // Sačuvamo u localStorage
       localStorage.setItem(`feeds-${category}`, JSON.stringify(data));
-      console.log(`[displayNewsByCategory] Sačuvano u localStorage: feeds-${category}`);
-    } catch (err) {
-      console.error("[displayNewsByCategory] Greška fetch:", err);
+    } catch (error) {
+      console.error("[displayNewsByCategory] Greška:", error);
       container.innerHTML = `<p>Greška pri učitavanju kategorije ${category}.</p>`;
       return;
     }
   }
 
-  if (data.length === 0) {
-    container.innerHTML = "<p>Nema vesti u ovoj kategoriji.</p>";
+  // Sortiramo i ovde, ako želite i po kategoriji da su najnoviji prvi
+  const sorted = data.sort((a, b) => {
+    const da = new Date(a.date_published).getTime() || 0;
+    const db = new Date(b.date_published).getTime() || 0;
+    return db - da;
+  });
+
+  if (sorted.length === 0) {
+    container.innerHTML = "<p>Nema vesti za ovu kategoriju.</p>";
     return;
   }
 
-  data.forEach(item => {
-    container.appendChild(createNewsCard(item));
+  sorted.forEach(feed => {
+    container.appendChild(createNewsCard(feed));
   });
 }
 
-// "main" funk. se poziva na start stranice
+// main inicijalna funkcija
 async function main() {
   console.log("[main] Provera localStorage('feeds')...");
-  const cachedFeeds = localStorage.getItem("feeds");
+  const cachedFeeds = localStorage.getItem('feeds');
 
   if (cachedFeeds) {
     feeds = JSON.parse(cachedFeeds);
-    console.log(`[main] Učitano iz keša: ${feeds.length} feedova`);
-    displayAllFeeds();
+    console.log(`[main] Učitano ${feeds.length} feedova iz localStorage`);
+    displayAllFeeds(); // prikažemo sortirano
   } else {
-    console.log("[main] Nema keša, dohvatamo /api/feeds...");
-    const all = await fetchAllFeedsFromServer();
-    feeds = all;
-    cacheAllFeedsLocally(all);
+    console.log("[main] Nema 'feeds' u localStorage, dohvatamo sa servera...");
+    const fresh = await fetchAllFeedsFromServer();
+    feeds = fresh;
+    cacheAllFeedsLocally(fresh);
     displayAllFeeds();
   }
 
-  // (Opcionalno) Periodično da vidimo ima li novih feedova
+  // (Opcionalno) Periodično da vidimo ima li NOVIH feedova
   setInterval(async () => {
-    console.log("[main - setInterval] Provera novih feedova na /api/feeds...");
+    console.log("[main - setInterval] Provera novih feedova na serveru...");
     const fresh = await fetchAllFeedsFromServer();
     if (fresh.length > feeds.length) {
       console.log("[main - setInterval] Ima novih feedova, ažuriramo localStorage i prikaz...");
-      feeds = fresh; // zamenimo staru listu
-      cacheAllFeedsLocally(fresh);
-      // Ostajemo na "Home"? Možete se prilagoditi da re-renderuje i tablo ili sl.
+      feeds = fresh;
+      cacheAllFeedsLocally(feeds);
       displayAllFeeds();
     } else {
       console.log("[main - setInterval] Nema novih feedova.");
@@ -188,42 +182,32 @@ async function main() {
   }, 180000); // npr. svake 3 min
 }
 
-// Kad se main završi, dodaćemo event listenere za tabove
+// Kada se main završi, dodelimo event listenere tabova
 main().then(() => {
   console.log("[main.then] Inicijalizacija tabova...");
 
-  // Home i Latest
   const homeTab = document.querySelector('[data-tab="home"]');
-  const latestTab = document.querySelector('[data-tab="latest"]');
   const tabsContainer = document.getElementById('tabs-container');
 
   if (homeTab) {
     homeTab.addEventListener('click', (e) => {
-      console.log("[Home Tab] Klik...");
+      console.log("[Home Tab] Kliknuto...");
       removeActiveClass();
       e.target.classList.add('active');
       e.target.setAttribute('aria-selected', 'true');
-      displayAllFeeds();
+      displayAllFeeds(); // Najnoviji prvi
     });
   }
 
-  if (latestTab) {
-    latestTab.addEventListener('click', (e) => {
-      console.log("[Latest Tab] Klik...");
-      removeActiveClass();
-      e.target.classList.add('active');
-      e.target.setAttribute('aria-selected', 'true');
-      displayLatestFeeds();
-    });
-  }
-
-  // Dinamički generišemo tabove za preostale kategorije, ako želite
+  // Generišemo dugmiće/tabove za svaku kategoriju
   if (tabsContainer) {
-    console.log("[main.then] Generisanje kategorija-dugmića...");
-    const skipList = []; // Ako ne želite 'Uncategorized', ubacite ga ovde
+    console.log("[main.then] Generišemo tabove za kategorije...");
+    const skipList = []; // ovde biste npr. ubacili "Uncategorized" ako ne želite prikaz
+
     categories
       .filter(cat => !skipList.includes(cat))
       .forEach(cat => {
+        // Kreiramo dugme
         const btn = document.createElement('button');
         btn.classList.add('tab');
         btn.setAttribute('data-tab', cat);
@@ -232,7 +216,7 @@ main().then(() => {
         btn.textContent = cat;
 
         btn.addEventListener('click', (ev) => {
-          console.log(`[Category Tab] Kliknuto na '${cat}'`);
+          console.log(`[Category Tab] Klik na '${cat}'`);
           removeActiveClass();
           ev.target.classList.add('active');
           ev.target.setAttribute('aria-selected', 'true');
