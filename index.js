@@ -71,11 +71,11 @@ async function sendBatchToGPT(feedBatch) {
 
   // Prompt i poruke za GPT
   const payload = {
-    model: "gpt-3.5-turbo", // Ili "gpt-4", "gpt-4-32k", sl. (zavisi šta vam je dostupno)
+    model: "gpt-4o-mini",
     messages: [
       {
         role: "system",
-        content: `Ti si stručnjak za kategorizaciju vesti. Kategorizuj vesti isključivo u ove kategorije:
+        content: `Ti si stručnjak za kategorizaciju vesti. Kategorizuj SVE vesti isključivo u ove kategorije:
 - Technologie
 - Gesundheit
 - Sport
