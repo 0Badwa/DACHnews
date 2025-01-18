@@ -191,18 +191,17 @@ async function processFeeds() {
   for (const item of newItems) {
     const category = idToCategory[item.id] || "Uncategorized";
 
-    const newsObj = {
-      id: item.id,
-      title: item.title,
-      date_published: item.date_published || null,
-      url: item.url || null,
-      image: item.image || null,
-      content_text: item.content_text || "",
-      category,
-      // Koristimo autora iz JSON-a kao izvor ako postoji
+    // Unutar petlje u processFeeds za svaku novu stavku
+const newsObj = {
+  id: item.id,
+  title: item.title,
+  date_published: item.date_published || null,
+  url: item.url || null,
+  image: item.image || null,
+  content_text: item.content_text || "",
+  category,
   source: (item.authors && item.authors.length > 0) ? item.authors[0].name : extractSource(item.url)
-
-    };
+};
 
     // Upis u listu "category:KATEGORIJA"
     const redisKey = `category:${category}`;
