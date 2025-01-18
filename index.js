@@ -101,6 +101,7 @@ async function processFeeds() {
   const newItems = [];
   for (const item of items) {
     const id = item.id;
+        console.log("Item ID:", id);  // Dodato logovanje ID-ja
     const title = item.title;
     const description = item.content_text || "";
 
