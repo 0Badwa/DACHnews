@@ -246,3 +246,23 @@ nav .menu button {
     padding: 0.4rem 0.8rem;
   }
 }
+
+
+
+:root[data-theme="dark"] .news-card {
+  background-color: #000; /* crna pozadina */
+  border: 1px solid var(--border-color);
+}
+
+:root[data-theme="dark"] .news-card .news-title {
+  color: var(--primary-color); /* koristi primarnu boju teksta */
+}
+
+:root[data-theme="dark"] .news-card .news-meta {
+  color: var(--text-color); /* svetli tekst za meta podatke */
+}
+
+/* Opcionalno: prilagodba slike ili drugih elemenata unutar kartice */
+:root[data-theme="dark"] .news-card img {
+  border: none; /* uklonite border ili primenite drugi stil po potrebi */
+}
