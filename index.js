@@ -203,7 +203,7 @@ async function main() {
   console.log("Preuzeti feedovi:", feeds);
 }
 
-setInterval(processFeeds, 5 * 60 * 1000);
+setInterval(processFeeds, 60 * 1000);
 processFeeds();
 
 const PORT = process.env.PORT || 3001;
