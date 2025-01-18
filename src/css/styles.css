@@ -124,7 +124,7 @@ nav .menu button {
 }
 
 /************************************************
- * Tabovi
+ * Tabovi (tabs-container)
  ************************************************/
 .tabs-container {
   background-color: var(--secondary-color);
@@ -154,33 +154,40 @@ nav .menu button {
 }
 
 /************************************************
- * Kartice za vesti (news-card)
+ * Kartice za vesti (news-card) – stil kao stari
  ************************************************/
 .news-card {
   display: flex;
-  margin: 0;
-  padding: 0;
-  background: var(--background-color);
-  border-radius: 8px;
+  align-items: flex-start; /* da tekst bude gore poravnat */
+  background-color: var(--secondary-color);
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+  padding: 0.3rem;
+  margin-bottom: 0.1rem;
+  transition: transform 0.2s;
+}
+.news-card:hover {
+  transform: scale(1.02);
 }
 
-/* Omot za sliku */
+/* Omot za sliku, opciono ga možete držati */
+/* Ako koristite .image-wrapper, definišite ga: */
 .image-wrapper {
   width: 75px;
   height: 75px;
   overflow: hidden;
-  margin: 0 auto;
+  margin-right: 0.8rem;
   position: relative;
   text-align: center;
 }
 
 /* Slika unutar kartice */
 .news-card img {
-  display: block;
-  margin: 0 auto;
-  height: 75px;    /* fiksna visina */
-  width: auto;     /* zadržava razmeru */
-  object-fit: cover; /* osigurava popunu u okviru */
+  border-radius: 5px;
+  width: 75px;
+  height: 75px;
+  object-fit: cover; /* zadrži proporciju */
+  margin-right: 0.8rem;
 }
 
 /************************************************
@@ -196,10 +203,11 @@ nav .menu button {
   text-overflow: ellipsis;
   line-height: 1.3;
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 3;       /* prikaz maksimalno 3 linije naslova */
   -webkit-box-orient: vertical;
 }
 
+/* meta podaci (datum, kategorija...) */
 .news-meta {
   font-size: 0.8rem;
   margin: 0;
@@ -216,6 +224,9 @@ nav .menu button {
   text-decoration: none !important;
 }
 
+/************************************************
+ * Tab-content
+ ************************************************/
 .tab-content {
   display: none;
 }
