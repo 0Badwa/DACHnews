@@ -6,7 +6,6 @@
 let feeds = [];
 
 // URL feed-a
-// const feedUrl = "https://rss.app/feeds/v1.1/_sf1gbLo1ZadJmc5e.json";
 const feedUrl = "/api/feeds";
 
 // Definicija kategorija
@@ -74,14 +73,13 @@ function removeCategory(category) {
 // Preuzimanje feedova
 async function fetchFeeds() {
     try {
-        const response = await fetch("/api/feeds");
+        const response = await fetch(feedUrl);
         if (!response.ok) throw new Error("Neuspešno preuzimanje feedova.");
-const data = await response.json();
-// Recimo da data === { items: [...] } ili samo [...], u zavisnosti kako ste to poslali
-const items = data.items || data;
-localStorage.setItem('feeds', JSON.stringify(items));
-        console.log("Preuzeti feedovi:", data.items); // Provera preuzetih feedova
-        return data.items || [];
+        const data = await response.json();
+        // Pretpostavljamo da data može biti { items: [...] } ili samo [...]
+        const items = data.items || data;
+        console.log("Preuzeti feedovi:", items);
+        return items;
     } catch (error) {
         console.error("Greška prilikom preuzimanja feedova:", error);
         return [];
@@ -90,29 +88,12 @@ localStorage.setItem('feeds', JSON.stringify(items));
 
 // Keširanje feedova (Local Storage)
 function cacheFeedsLocally(items) {
-  // Ovde jednostavno zamenjujemo dosadašnji sadržaj novim
   localStorage.setItem('feeds', JSON.stringify(items));
   console.log("Sačuvani feedovi u localStorage:", items);
   return items;
 }
 
-// Glavna funkcija – Rešenje A (uvek prvo fetch sa servera)
-async function main() {
-  // 1) Uvek najpre dovuci sveže feedove sa vašeg /api/feeds
-  const freshFeeds = await fetchFeeds();
-  console.log("Preuzeti (sveži) feedovi sa servera:", freshFeeds);
-
-  // 2) Upisi ih odmah u localStorage
-  cacheFeedsLocally(freshFeeds);
-
-  // 3) Sačuvaj ih i u globalnoj promenljivoj `feeds`
-  feeds = freshFeeds;
-
-  // 4) Prikaži ih odmah na ekranu
-  displayAllFeeds();
-}
-
-// Pomoćna funkcija da uklonimo 'active' klasu sa svih tabova (ostaje nepromenjena)
+// Pomoćna funkcija da uklonimo 'active' klasu sa svih tabova
 function removeActiveClass() {
   const allTabs = document.querySelectorAll('.tab');
   allTabs.forEach(tab => {
@@ -120,7 +101,6 @@ function removeActiveClass() {
     tab.setAttribute('aria-selected', 'false');
   });
 }
-
 
 // Funkcija koja generiše HTML karticu za pojedinačan feed
 function createNewsCard(feed) {
@@ -131,7 +111,7 @@ function createNewsCard(feed) {
         <p class="news-category">${feed.category || 'Uncategorized'}</p>
         <p class="news-date">
          ${feed.date_published ? new Date(feed.date_published).toLocaleDateString() : 'N/A'} 
-  ${feed.date_published ? new Date(feed.date_published).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
+         ${feed.date_published ? new Date(feed.date_published).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
         </p>
         <img class="news-image" src="${feed.image || 'https://via.placeholder.com/150'}" alt="${feed.title}">
         <p class="news-content">${feed.content_text || ''}</p>
@@ -147,7 +127,6 @@ async function displayNewsCardsByCategory(category) {
 
     container.innerHTML = ''; // Očisti prethodni sadržaj
 
-    // Provera lokalnog keša za datu kategoriju
     const cachedCategory = localStorage.getItem(`feeds-${category}`);
     let parsedItems = [];
 
@@ -159,8 +138,6 @@ async function displayNewsCardsByCategory(category) {
             const response = await fetch(`/api/feeds-by-category/${encodeURIComponent(category)}`);
             parsedItems = await response.json();
             console.log("Filtrirani feedovi za kategoriju:", category, parsedItems);
-
-            // Sačuvaj preuzete podatke u localStorage
             localStorage.setItem(`feeds-${category}`, JSON.stringify(parsedItems));
         } catch (error) {
             console.error(`Greška pri preuzimanju vesti za kategoriju ${category}:`, error);
@@ -203,7 +180,6 @@ function displayLatestFeeds() {
 
     container.innerHTML = ''; // Očisti prethodni sadržaj
 
-    // Sortiramo kopiju niza feedova po datumu objave (opadajuće)
     const sortedFeeds = [...feeds].sort((a, b) => {
         const dateA = new Date(a.date_published).getTime() || 0;
         const dateB = new Date(b.date_published).getTime() || 0;
@@ -220,11 +196,35 @@ function displayLatestFeeds() {
     }
 }
 
-// Pokretanje aplikacije
-main().then(() => {
-    // Kad se feedovi preuzmu i keširaju, prikažemo "Home" (sve feedove) i markiramo Home tab
+// Glavna funkcija koja koristi localStorage i periodično osvežava podatke
+async function main() {
+  // Pokušaj učitavanja feedova iz localStorage-a
+  const cachedFeeds = localStorage.getItem('feeds');
+  if (cachedFeeds) {
+    feeds = JSON.parse(cachedFeeds);
+    console.log("Učitani feedovi iz localStorage:", feeds);
     displayAllFeeds();
+  } else {
+    // Ako nema lokalno keširanih feedova, preuzmi ih sa servera
+    const freshFeeds = await fetchFeeds();
+    console.log("Preuzeti (sveži) feedovi sa servera:", freshFeeds);
+    cacheFeedsLocally(freshFeeds);
+    feeds = freshFeeds;
+    displayAllFeeds();
+  }
 
+  // Postavi periodično osvežavanje svakih 15 minuta
+  setInterval(async () => {
+    const freshFeeds = await fetchFeeds();
+    console.log("Periodično preuzeti (sveži) feedovi sa servera:", freshFeeds);
+    cacheFeedsLocally(freshFeeds);
+    feeds = freshFeeds;
+    displayAllFeeds();
+  }, 15 * 60 * 1000); // 15 minuta u milisekundama
+}
+
+// Pokretanje aplikacije i inicijalizacija tabova nakon učitavanja feedova
+main().then(() => {
     // Selektujemo statičke tabove
     const homeTab = document.querySelector('[data-tab="home"]');
     const latestTab = document.querySelector('[data-tab="latest"]');
