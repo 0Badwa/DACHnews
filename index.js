@@ -166,25 +166,24 @@ app.get("/", (req, res) => {
 
 app.get("/api/feeds", async (req, res) => {
   const cacheKey = "rss_feeds";
-
   try {
     let data = await redisClient.get(cacheKey);
-
-    if (!data) {
-      console.log("Preuzimanje feedova sa izvora:", RSS_FEED_URL);
+    if (data) {
+      console.log("Koristi se keširani feed iz Redis-a.");
+      data = JSON.parse(data);
+    } else {
+      console.log("Keš prazan, preuzimanje feedova sa izvora:", RSS_FEED_URL);
       const response = await axios.get(RSS_FEED_URL);
       data = response.data;
       await redisClient.set(cacheKey, JSON.stringify(data), { EX: 604800 });
-    } else {
-      data = JSON.parse(data);
     }
-
     res.json(data);
   } catch (error) {
     console.error("Greška pri preuzimanju feedova:", error);
     res.status(500).send("Server error");
   }
 });
+
 
 app.get('/api/feeds-by-category/:category', async (req, res) => {
   const category = req.params.category;
