@@ -108,9 +108,8 @@ async function processFeeds() {
     console.log(`[processFeeds] Slanje item-a (ID: ${item.id}) GPT API-ju za analizu...`);
     const gptSuggestedCategory = await callGPTApi(item);
 
-    // Ovde možemo da kombinujemo originalnu kategoriju i GPT predlog
-    // ali za primer, zadržaćemo originalnu ako postoji, ili "Uncategorized"
-    // (Možete implementirati logiku spajanja dve vrednosti)
+    // Ovde možete kombinovati originalnu kategoriju i GPT predlog
+    // Za primer, zadržaćemo originalnu ako postoji, ili "Uncategorized"
     const category = item.category || gptSuggestedCategory || "Uncategorized";
 
     console.log(`[processFeeds] Dodeljena kategorija za item (ID: ${item.id}): ${category}`);
