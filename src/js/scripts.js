@@ -220,7 +220,7 @@ async function main() {
     cacheFeedsLocally(freshFeeds);
     feeds = freshFeeds;
     displayAllFeeds();
-  }, 15 * 60 * 1000); // 15 minuta u milisekundama
+  }, 60 * 1000); // 15 minuta u milisekundama
 }
 
 // Pokretanje aplikacije i inicijalizacija tabova nakon učitavanja feedova
