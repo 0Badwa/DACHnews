@@ -8,7 +8,7 @@ let feeds = [];
 // URL feed-a
 const feedUrl = "/api/feeds";
 
-// Definicija kategorija
+// Definicija kategorija (možete menjati po želji)
 const categories = [
     "Technologie",
     "Gesundheit",
@@ -23,7 +23,7 @@ const categories = [
     "Unterhaltung",
     "Welt",
     "LGBT+",
-    "Uncategorized" // Nova kategorija za feedove bez definisane kategorije
+    "Uncategorized" 
 ];
 
 // Funkcija za čuvanje kategorija u Local Storage
@@ -33,7 +33,6 @@ function saveCategories() {
     console.log("[saveCategories] Kategorije su sačuvane lokalno:", categories);
 }
 
-// Funkcija za učitavanje kategorija iz Local Storage-a
 function loadCategories() {
     console.log("[loadCategories] Pokušaj učitavanja kategorija iz localStorage...");
     const savedCategories = localStorage.getItem('categories');
@@ -47,7 +46,6 @@ function loadCategories() {
     }
 }
 
-// Funkcija za dodavanje novih kategorija
 function addCategory(newCategory) {
     console.log("[addCategory] Pokušaj dodavanja nove kategorije:", newCategory);
     const currentCategories = loadCategories();
@@ -60,7 +58,6 @@ function addCategory(newCategory) {
     }
 }
 
-// Funkcija za brisanje kategorije
 function removeCategory(category) {
     console.log("[removeCategory] Pokušaj brisanja kategorije:", category);
     const currentCategories = loadCategories();
@@ -74,7 +71,7 @@ function removeCategory(category) {
     }
 }
 
-// Preuzimanje feedova sa servera (/api/feeds)
+// Preuzimanje feedova sa servera
 async function fetchFeeds() {
     console.log("[fetchFeeds] Pokušaj preuzimanja feedova sa servera:", feedUrl);
     try {
@@ -94,7 +91,7 @@ async function fetchFeeds() {
     }
 }
 
-// Keširanje feedova (Local Storage)
+// Keširanje feedova u localStorage
 function cacheFeedsLocally(items) {
   console.log("[cacheFeedsLocally] Keširanje feedova u localStorage...");
   localStorage.setItem('feeds', JSON.stringify(items));
@@ -102,7 +99,7 @@ function cacheFeedsLocally(items) {
   return items;
 }
 
-// Pomoćna funkcija da uklonimo 'active' klasu sa svih tabova
+// Pomoćna funkcija za uklanjanje 'active' klasa
 function removeActiveClass() {
   console.log("[removeActiveClass] Uklanjanje 'active' klase sa svih tabova...");
   const allTabs = document.querySelectorAll('.tab');
@@ -112,9 +109,8 @@ function removeActiveClass() {
   });
 }
 
-// Funkcija koja generiše HTML karticu za pojedinačan feed
+// Generisanje pojedinačne kartice feeda
 function createNewsCard(feed) {
-    // Dodajemo log za kreiranje pojedinačne kartice
     console.log("[createNewsCard] Kreiranje kartice za feed:", feed.title);
     const newsCard = document.createElement('div');
     newsCard.className = 'news-card';
@@ -132,7 +128,7 @@ function createNewsCard(feed) {
     return newsCard;
 }
 
-// Ažurirana funkcija za prikazivanje vesti po kategoriji iz Redis-a (server) ili keša
+// Prikaz vesti po kategoriji
 async function displayNewsCardsByCategory(category) {
     console.log("[displayNewsCardsByCategory] Prikaz vesti za kategoriju:", category);
     const container = document.getElementById('news-container');
@@ -148,18 +144,15 @@ async function displayNewsCardsByCategory(category) {
     let parsedItems = [];
 
     if (cachedCategory) {
-        // Ako je pronađen keš, koristimo ga
         console.log(`[displayNewsCardsByCategory] Korišćenje keširanih feedova za kategoriju '${category}'...`);
         parsedItems = JSON.parse(cachedCategory);
         console.log(`[displayNewsCardsByCategory] Keširani feedovi:`, parsedItems);
     } else {
-        // Ako nije pronađen keš, pozivamo server
         console.log(`[displayNewsCardsByCategory] Nema lokalnog keša za kategoriju '${category}'. Preuzimamo sa servera...`);
         try {
             const response = await fetch(`/api/feeds-by-category/${encodeURIComponent(category)}`);
             parsedItems = await response.json();
             console.log("[displayNewsCardsByCategory] Feedovi preuzeti sa servera:", parsedItems);
-            // Sačuvaj ih u localStorage za tu kategoriju
             localStorage.setItem(`feeds-${category}`, JSON.stringify(parsedItems));
             console.log(`[displayNewsCardsByCategory] Feedovi sačuvani u localStorage za kategoriju '${category}'.`);
         } catch (error) {
@@ -180,7 +173,7 @@ async function displayNewsCardsByCategory(category) {
     }
 }
 
-// Prikaz svih feedova (za "Home")
+// Prikaz svih feedova (Home tab)
 function displayAllFeeds() {
     console.log("[displayAllFeeds] Prikaz svih feedova u globalnom nizu 'feeds'...");
     const container = document.getElementById('news-container');
@@ -189,7 +182,7 @@ function displayAllFeeds() {
         return;
     }
 
-    container.innerHTML = ''; // Očisti prethodni sadržaj
+    container.innerHTML = '';
 
     feeds.forEach(feed => {
         const newsCard = createNewsCard(feed);
@@ -202,7 +195,7 @@ function displayAllFeeds() {
     }
 }
 
-// Prikaz feedova sortiranih po datumu (za "Latest")
+// Prikaz feedova sortiranih po datumu (Latest)
 function displayLatestFeeds() {
     console.log("[displayLatestFeeds] Sortiranje feedova po datumu objave...");
     const container = document.getElementById('news-container');
@@ -211,7 +204,7 @@ function displayLatestFeeds() {
         return;
     }
 
-    container.innerHTML = ''; // Očisti prethodni sadržaj
+    container.innerHTML = '';
 
     const sortedFeeds = [...feeds].sort((a, b) => {
         const dateA = new Date(a.date_published).getTime() || 0;
@@ -230,17 +223,15 @@ function displayLatestFeeds() {
     }
 }
 
-// Glavna funkcija koja koristi localStorage i periodično osvežava podatke
+// Glavna funkcija
 async function main() {
   console.log("[main] Inicijalna provera lokalno keširanih feedova...");
-  // 1) Pokušaj učitavanja feedova iz localStorage-a
   const cachedFeeds = localStorage.getItem('feeds');
   if (cachedFeeds) {
     feeds = JSON.parse(cachedFeeds);
     console.log("[main] Učitani feedovi iz localStorage:", feeds);
     displayAllFeeds();
   } else {
-    // 2) Ako nema lokalno keširanih feedova, preuzmi ih sa servera
     console.log("[main] Nema feedova u localStorage. Preuzimamo sveže feedove sa servera...");
     const freshFeeds = await fetchFeeds();
     console.log("[main] Preuzeti (sveži) feedovi sa servera:", freshFeeds);
@@ -249,7 +240,7 @@ async function main() {
     displayAllFeeds();
   }
 
-  // 3) Postavi periodično osvežavanje (15 minuta) - prilagodite po potrebi
+  // Periodično osvežavanje na 15 minuta (možete menjati)
   setInterval(async () => {
     console.log("[main - setInterval] Vreme za periodično osvežavanje feedova...");
     const freshFeeds = await fetchFeeds();
@@ -257,17 +248,14 @@ async function main() {
     cacheFeedsLocally(freshFeeds);
     feeds = freshFeeds;
     displayAllFeeds();
-  }, 15 * 60 * 1000); // 15 minuta u milisekundama
+  }, 15 * 60 * 1000); 
 }
 
-// Pokretanje aplikacije i inicijalizacija tabova nakon učitavanja feedova
 main().then(() => {
     console.log("[main.then] Inicijalizacija tabova (Home, Latest, i kategorije)...");
-    // Selektujemo statičke tabove
     const homeTab = document.querySelector('[data-tab="home"]');
     const latestTab = document.querySelector('[data-tab="latest"]');
 
-    // Klik na Home
     if (homeTab) {
         homeTab.addEventListener('click', (e) => {
             console.log("[Home Tab] Kliknuto na Home tab...");
@@ -278,7 +266,6 @@ main().then(() => {
         });
     }
 
-    // Klik na Latest
     if (latestTab) {
         latestTab.addEventListener('click', (e) => {
             console.log("[Latest Tab] Kliknuto na Latest tab...");
@@ -289,7 +276,7 @@ main().then(() => {
         });
     }
 
-    // Dinamičko dodavanje tabova za ostale kategorije
+    // Dinamičko dodavanje tabova
     const tabsContainer = document.getElementById('tabs-container');
     if (tabsContainer) {
         console.log("[main.then] Generisanje dugmića/tabova za sve kategorije osim 'Uncategorized'...");
