@@ -104,7 +104,7 @@ function createNewsCard(feed) {
   const source = document.createElement('p');
   source.className = "news-meta";
   // Pretpostavljamo da feed ima polje 'source'; ako ne, zamenite sa odgovarajućim izvorom.
-  const sourceName = feed.source || 'Nepoznat izvor';
+  const sourceName = feed.source;
   const timeString = feed.date_published ? timeAgo(feed.date_published) : '';
   source.textContent = `${sourceName} • ${timeString}`;
 
