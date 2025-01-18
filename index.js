@@ -32,17 +32,13 @@ const redisClient = createClient({
 });
 redisClient.connect().catch((err) => console.error('Redis greška:', err));
 
-// URL RSS feeda i OpenAI GPT API
 const RSS_FEED_URL = "https://rss.app/feeds/v1.1/tSylunkFT455Icoi.json";
 const GPT_API_URL = "https://api.openai.com/v1/chat/completions";
 
-/**
- * 1. Preuzima sirove feedove sa RSS App
- */
+// Preuzima sirove feedove sa RSS App
 async function fetchRSSFeed() {
   try {
     const response = await axios.get(RSS_FEED_URL);
-    // Ako je struktura: { items: [...] }, onda vraćamo .items
     return response.data.items || [];
   } catch (error) {
     console.error("Greška pri preuzimanju RSS feed-a:", error);
@@ -50,161 +46,43 @@ async function fetchRSSFeed() {
   }
 }
 
-/**
- * 2. Slanje batcha vesti GPT-u radi kategorizacije
- */
-async function sendBatchToGPT(feedBatch) {
-  const combinedContent = feedBatch.map((item) => ({
-    id: item.id,
-    title: item.title,
-    description: item.description
-  }));
-
-  const payload = {
-    model: "gpt-4o-mini", // Ovde stavite model koji koristite (npr. "gpt-3.5-turbo" ako nemate custom model)
-    messages: [
-      {
-        role: "system",
-        content:
-          "Ti si stručnjak za kategorizaciju vesti. Kategorizuj vesti u sledeće kategorije: Technologie, Gesundheit, Sport, Wirtschaft, Kultur, Auto, Reisen, Lifestyle, Panorama, Politik, Unterhaltung, Welt, LGBT+. Svakoj vesti dodeli kategoriju. Vrati rezultat u validnom JSON formatu gde je svaki element objekat sa poljima 'id' i 'category'."
-      },
-      {
-        role: "user",
-        content: JSON.stringify(combinedContent)
-      }
-    ],
-    max_tokens: 9000
-  };
-
-  try {
-    const response = await axios.post(GPT_API_URL, payload, {
-      headers: {
-        Authorization: `Bearer ${process.env.CHATGPT_API_KEY}`,
-        "Content-Type": "application/json"
-      }
-    });
-    return response.data.choices[0]?.message?.content?.trim();
-  } catch (error) {
-    console.error("Greška pri slanju GPT API-ju:", error);
-    return null;
-  }
-}
-
-/**
- * 3. Procesiranje feedova (kategorizacija i čuvanje u Redis)
- */
+// Procesiranje feedova (kategorizacija i čuvanje u Redis)
 async function processFeeds() {
-  // 1) Preuzmi nove vesti
   const items = await fetchRSSFeed();
-
-  // 2) Pripremi newItems koje još nisu procesirane (na osnovu processed_ids)
   const newItems = [];
+
   for (const item of items) {
     const id = item.id;
-        console.log("Item ID:", id);  // Dodato logovanje ID-ja
-    const title = item.title;
-    const description = item.content_text || "";
-
     const isProcessed = await redisClient.sIsMember("processed_ids", id);
-    if (isProcessed) continue; // preskoči ako je već obrađen ranije
-
-    newItems.push({ id, title, description });
-  }
-
-  if (newItems.length === 0) {
-    // Nema novih vesti za obradu
-    return;
-  }
-
-  // 3) Pošalji batch GPT-u
-  let gptResponse = await sendBatchToGPT(newItems);
-  console.log("GPT batch result:", gptResponse);
-
-  if (!gptResponse) return;
-
-  // Ako GPT vrati JSON u code-fence formatima (```json ...```), uklonimo ih
-  if (gptResponse.startsWith("```json")) {
-    gptResponse = gptResponse.replace(/^```json\n?/, '').replace(/```$/, '');
-  }
-
-  let classifications;
-  try {
-    classifications = JSON.parse(gptResponse);
-  } catch (e) {
-    console.error("Greška pri parsiranju GPT odgovora:", e);
-    return;
-  }
-
-  // 4) Mapiraj ID -> category
-  const idCategoryMap = {};
-  classifications.forEach(item => {
-    if (item.id && item.category) {
-      idCategoryMap[item.id] = item.category;
+    if (!isProcessed) {
+      newItems.push(item);
     }
-  });
+  }
 
-  // 5) Smesti svaku vest u Redis
-  for (const feedItem of newItems) {
-    const category = idCategoryMap[feedItem.id] || "Uncategorized";
-    const newsItem = {
-      id: feedItem.id,
-      title: feedItem.title,
-      description: feedItem.description,
-      category,
-    };
+  if (newItems.length === 0) return;
 
-    // Proveri da li već postoji u listi za tu kategoriju
-    const existingItems = await redisClient.lRange(`category:${category}`, 0, -1);
-    const isDuplicate = existingItems.some(str => {
-      const parsed = JSON.parse(str);
-      return parsed.id === feedItem.id;
-    });
-
-    // Ako nije duplikat, dodaj ga
-    if (!isDuplicate) {
-      // Dodaj u set processed_ids
-      await redisClient.sAdd("processed_ids", feedItem.id);
-      // Dodaj u listu za tu kategoriju
-      await redisClient.rPush(`category:${category}`, JSON.stringify(newsItem));
-    }
+  for (const item of newItems) {
+    const category = item.category || "Uncategorized";
+    await redisClient.rPush(`category:${category}`, JSON.stringify(item));
+    await redisClient.sAdd("processed_ids", item.id);
   }
 }
 
 // Rute
 app.get("/", (req, res) => {
-  // Služi index.html fajl (koji učitava scripts.js)
   res.sendFile(path.join(__dirname, "index.html"));
 });
 
-/**
- * 4. /api/feeds -> vraća feedove iz Redis-a ili sveže
- */
 app.get("/api/feeds", async (req, res) => {
-  const cacheKey = "rss_feeds";
   try {
-    let data = await redisClient.get(cacheKey);
-
-    if (data) {
-      console.log("Koristi se keširani feed iz Redis-a.");
-      data = JSON.parse(data);
-    } else {
-      console.log("Keš prazan, preuzimanje feedova sa izvora:", RSS_FEED_URL);
-      const response = await axios.get(RSS_FEED_URL);
-      data = response.data;
-      // Postavljeno na 3 dana (259200 sekundi):
-      await redisClient.set(cacheKey, JSON.stringify(data), { EX: 259200 });
-    }
-
-    res.json(data);
+    const items = await fetchRSSFeed();
+    res.json(items);
   } catch (error) {
     console.error("Greška pri preuzimanju feedova:", error);
     res.status(500).send("Server error");
   }
 });
 
-/**
- * 5. /api/feeds-by-category/:category -> vraća feedove za određenu kategoriju
- */
 app.get('/api/feeds-by-category/:category', async (req, res) => {
   const category = req.params.category;
   try {
@@ -217,25 +95,10 @@ app.get('/api/feeds-by-category/:category', async (req, res) => {
   }
 });
 
-// Periodično procesiraj nove feedove svakih 5 minuta
-setInterval(processFeeds, 5 * 60 * 1000);
-// Prvi put odmah
-processFeeds();
-
-// Pokretanje servera
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Server pokrenut na portu ${PORT}`);
 });
 
-/**
- * Opciona funkcija main() - samo za test
- */
-async function main() {
-  const feeds = await fetchRSSFeed();
-  console.log("Preuzeti feedovi (inicijalno, bez GPT obrade):", feeds);
-}
-
-main().then(() => {
-  // Ostatak klijentskih stvari ide u index.html
-});
+setInterval(processFeeds, 5 * 60 * 1000);
+processFeeds();
