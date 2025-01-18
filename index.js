@@ -40,7 +40,7 @@ redisClient.connect()
 const SEVEN_DAYS = 60 * 60 * 24 * 7;
 
 // URL do RSS feed-a
-const RSS_FEED_URL = "https://rss.app/feeds/v1.1/tSylunkFT455Icoi.json";
+const RSS_FEED_URL = "https://rss.app/feeds/v1.1/_sf1gbLo1ZadJmc5e.json";
 
 // OpenAI endpoint, koristimo "gpt-4o-mini" (pod pretpostavkom da vam je dostupan)
 const GPT_API_URL = "https://api.openai.com/v1/chat/completions";
