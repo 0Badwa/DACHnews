@@ -175,7 +175,7 @@ app.get("/api/feeds", async (req, res) => {
       console.log("Keš prazan, preuzimanje feedova sa izvora:", RSS_FEED_URL);
       const response = await axios.get(RSS_FEED_URL);
       data = response.data;
-      await redisClient.set(cacheKey, JSON.stringify(data), { EX: 604800 });
+      await redisClient.set(cacheKey, JSON.stringify(data), { EX: 60 });
     }
     res.json(data);
   } catch (error) {
