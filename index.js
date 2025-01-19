@@ -306,7 +306,27 @@ app.listen(PORT, () => {
   console.log(`[Express] Server pokrenut na portu ${PORT}`);
 });
 
-// Periodično, npr. svakih 15 minuta, radimo processFeeds
-setInterval(processFeeds, 10 * 60 * 1000);
+function getRandomInterval() {
+  const minMinutes = 12;
+  const maxMinutes = 14;
+  const randomMinutes = Math.floor(Math.random() * (maxMinutes - minMinutes + 1)) + minMinutes;
+  return randomMinutes * 60 * 1000; // Konvertovanje u milisekunde
+}
+
+// Periodično, npr. svakih 13 minuta, radimo processFeeds
+// setInterval(processFeeds, 13 * 60 * 1000);
 // I odmah pri startu
+setInterval(processFeeds, getRandomInterval());
 processFeeds();
+
+
+setInterval(async () => {
+  try {
+    const response = await fetch('/api/feeds');
+    const newFeeds = await response.json();
+    updateFeedDisplay(newFeeds); // Prikaz novih feedova
+  } catch (error) {
+    console.error("Greška pri osvežavanju feedova:", error);
+  }
+}, 11 * 60 * 1000); // Svakih 5 minuta
+
