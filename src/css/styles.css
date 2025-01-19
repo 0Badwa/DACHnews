@@ -9,6 +9,8 @@
   --border-color: #333;
   --font-size: 16px;
   --news-title-font-size: 1rem;
+  --font-family: Arial, sans-serif;
+  --font-size: var(--font-size);
 }
 
 :root[data-theme="dark"] {
