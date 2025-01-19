@@ -314,16 +314,17 @@ async function fetchLGBTFeed() {
  * 6) Učitava LGBT+ feed u Redis (bez GPT kategorizacije)
  */
 async function processLGBTFeed() {
-  console.log("[processLGBTFeed] Obrada LGBT+ feed-a...");
+  console.log("[processLGBTFeed] Početak obrade...");
   const lgbtItems = await fetchLGBTFeed();
+  console.log(`[processLGBTFeed] Preuzeto ${lgbtItems.length} vesti za LGBT+ kategoriju`);
 
   if (lgbtItems.length === 0) {
-    console.log("[processLGBTFeed] Nema vesti u LGBT+ feed-u.");
+    console.log("[processLGBTFeed] Nema vesti za obradu.");
     return;
   }
 
-  // Čišćenje duplikata
   const uniqueItems = [...new Map(lgbtItems.map(item => [item.id, item])).values()];
+  console.log(`[processLGBTFeed] Filtrirano ${uniqueItems.length} jedinstvenih vesti`);
 
   for (const item of uniqueItems) {
     const newsObj = {
@@ -337,32 +338,14 @@ async function processLGBTFeed() {
       source: (item.authors && item.authors.length > 0) ? item.authors[0].name : extractSource(item.url)
     };
 
-    // Upis u Redis listu za LGBT+ kategoriju
-    const redisKey = `category:LGBT+`;
-    await redisClient.rPush(redisKey, JSON.stringify(newsObj));
-    await redisClient.expire(redisKey, SEVEN_DAYS);
-    console.log(`[processLGBTFeed] Upisano u Redis ID:${item.id} za kategoriju: LGBT+`);
+    try {
+      const redisKey = `category:LGBT+`;
+      await redisClient.rPush(redisKey, JSON.stringify(newsObj));
+      await redisClient.expire(redisKey, SEVEN_DAYS);
+      console.log(`[processLGBTFeed] Upisano ID:${item.id} u kategoriju LGBT+`);
+    } catch (error) {
+      console.error(`[processLGBTFeed] Greška pri upisu u Redis za ID: ${item.id}`, error);
+    }
   }
 }
-
-// Poziva se na startu i periodično osvežava LGBT+ feed
-setInterval(processLGBTFeed, getRandomInterval());
-processLGBTFeed();
-
-/**
- * 7) /api/lgbt-feeds ruta za preuzimanje LGBT+ feed-ova
- */
-app.get("/api/lgbt-feeds", async (req, res) => {
-  console.log("[Route /api/lgbt-feeds] Klijent traži LGBT+ feedove...");
-  try {
-    const redisKey = `category:LGBT+`;
-    const feedItems = await redisClient.lRange(redisKey, 0, -1);
-    console.log(`[Route /api/lgbt-feeds] Nađeno ${feedItems.length} stavki za LGBT+ kategoriju`);
-    const parsed = feedItems.map(x => JSON.parse(x));
-    res.json(parsed);
-  } catch (error) {
-    console.error("[Route /api/lgbt-feeds] Greška:", error);
-    res.status(500).send("Server error");
-  }
-});
 
