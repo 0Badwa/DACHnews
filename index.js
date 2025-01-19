@@ -324,7 +324,7 @@ async function processLGBTFeed() {
       image: item.image || null,
       content_text: item.content_text || "",
       category: "LGBT+",
-      source: item.source || "unknown"
+      source: item.source || extractSource(item.url)
     };
 
     try {
