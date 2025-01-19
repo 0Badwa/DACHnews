@@ -306,7 +306,7 @@ app.listen(PORT, () => {
   console.log(`[Express] Server pokrenut na portu ${PORT}`);
 });
 
-// Periodično, npr. svakih 5 minuta, radimo processFeeds
-setInterval(processFeeds, 5 * 60 * 1000);
+// Periodično, npr. svakih 15 minuta, radimo processFeeds
+setInterval(processFeeds, 10 * 60 * 1000);
 // I odmah pri startu
 processFeeds();
