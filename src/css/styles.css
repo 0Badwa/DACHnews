@@ -19,13 +19,13 @@
   --border-color: #333;
 }
 
-:root[data-theme="light"] {
+/ :root[data-theme="light"] {
   --background-color: #ffffff;
   --text-color: #000000;
   --primary-color: #04AA6D;
   --secondary-color: #f4f4f4;
   --border-color: #ddd;
-}
+} /
 
 /************************************************
  * Globalni stil
