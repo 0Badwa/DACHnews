@@ -10,8 +10,7 @@
   --font-size: 16px;
   --news-title-font-size: 1rem;
   --font-family: Arial, sans-serif;
-  / --font-size: var(--font-size); /
-}
+ }
 
 :root[data-theme="dark"] {
   --background-color: #121212;
@@ -50,6 +49,12 @@ body {
   transition: background-color 0.3s, color 0.3s, font-size 0.3s;
   -webkit-tap-highlight-color: transparent;
 }
+
+body[data-theme="dark"] {
+  background-color: var(--background-color) !important;
+  color: var(--text-color) !important;
+}
+
 
 /************************************************
  * Header (nav)
