@@ -2,11 +2,11 @@
  * Osnovne varijable za boje i veličine
  ************************************************/
 :root {
-  --background-color: #ffffff;
-  --text-color: #000000;
-  --primary-color: #04AA6D;
-  --secondary-color: #f4f4f4;
-  --border-color: #ddd;
+--background-color: #121212;
+  --text-color: #ffffff;
+  --primary-color: #1DB954;
+  --secondary-color: #1c1c1c;
+  --border-color: #333;
   --font-size: 16px;
   --news-title-font-size: 1rem;
 }
