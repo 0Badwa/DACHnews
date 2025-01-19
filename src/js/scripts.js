@@ -314,7 +314,7 @@ async function fetchLGBTFeed() {
  * 6) Učitava LGBT+ feed u Redis (bez GPT kategorizacije)
  */
 async function processLGBTFeed() {
-  console.log("[processLGBTFeed] Početak obrade...");
+  console.log("[processLGBTFeed] Početak obrade LGBT feed-a...");
   const lgbtItems = await fetchLGBTFeed();
   console.log(`[processLGBTFeed] Preuzeto ${lgbtItems.length} vesti za LGBT+ kategoriju`);
 
@@ -323,10 +323,8 @@ async function processLGBTFeed() {
     return;
   }
 
-  const uniqueItems = [...new Map(lgbtItems.map(item => [item.id, item])).values()];
-  console.log(`[processLGBTFeed] Filtrirano ${uniqueItems.length} jedinstvenih vesti`);
-
-  for (const item of uniqueItems) {
+  const redisKey = `category:LGBT+`;
+  for (const item of lgbtItems) {
     const newsObj = {
       id: item.id,
       title: item.title,
@@ -335,17 +333,19 @@ async function processLGBTFeed() {
       image: item.image || null,
       content_text: item.content_text || "",
       category: "LGBT+",
-      source: (item.authors && item.authors.length > 0) ? item.authors[0].name : extractSource(item.url)
+      source: item.source || "unknown"
     };
 
     try {
-      const redisKey = `category:LGBT+`;
       await redisClient.rPush(redisKey, JSON.stringify(newsObj));
-      await redisClient.expire(redisKey, SEVEN_DAYS);
       console.log(`[processLGBTFeed] Upisano ID:${item.id} u kategoriju LGBT+`);
     } catch (error) {
-      console.error(`[processLGBTFeed] Greška pri upisu u Redis za ID: ${item.id}`, error);
+      console.error(`[processLGBTFeed] Greška pri upisu ID:${item.id}`, error);
     }
   }
+
+  await redisClient.expire(redisKey, SEVEN_DAYS);
+  console.log("[processLGBTFeed] Završena obrada LGBT feed-a.");
 }
+
 
