@@ -208,7 +208,6 @@ for (const item of newItems) {
     category,
     source: (item.authors && item.authors.length > 0) ? item.authors[0].name : extractSource(item.url)
   };
-}
 
 
     // Upis u listu "category:KATEGORIJA"
