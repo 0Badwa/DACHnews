@@ -452,3 +452,53 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
+
+
+
+// Swipe funkcionalnost za prelazak između kategorija
+  function setupSwipeListener() {
+    let touchstartX = 0;
+    let touchendX = 0;
+    const threshold = 50;
+    const container = document.getElementById('news-container');
+    if (!container) return;
+
+    container.addEventListener('touchstart', e => {
+      touchstartX = e.changedTouches[0].screenX;
+    });
+
+    container.addEventListener('touchend', e => {
+      touchendX = e.changedTouches[0].screenX;
+      handleSwipeGesture();
+    });
+
+    function handleSwipeGesture() {
+      if (touchendX < touchstartX - threshold) {
+        goToNextTab();
+      }
+      if (touchendX > touchstartX + threshold) {
+        goToPreviousTab();
+      }
+    }
+  }
+
+  function goToNextTab() {
+    const tabs = Array.from(document.querySelectorAll('.tab'));
+    const activeTab = tabs.find(tab => tab.classList.contains('active'));
+    let nextIndex = tabs.indexOf(activeTab) + 1;
+    if (nextIndex < tabs.length) {
+      tabs[nextIndex].click();
+    }
+  }
+
+  function goToPreviousTab() {
+    const tabs = Array.from(document.querySelectorAll('.tab'));
+    const activeTab = tabs.find(tab => tab.classList.contains('active'));
+    let prevIndex = tabs.indexOf(activeTab) - 1;
+    if (prevIndex >= 0) {
+      tabs[prevIndex].click();
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", setupSwipeListener);
+});
