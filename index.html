@@ -15,21 +15,18 @@
     <div class="menu">
       <button id="menu-button" class="menu-button">☰</button>
       <div class="dropdown" id="dropdown-menu">
-        <!-- Uklonjeni duplicirani gumbi za otvaranje modala -->
-        <button id="theme-toggle">Dark Modus</button>
-        <button id="font-increase">Schrift vergrößern</button>
-        <button id="font-decrease">Schrift verkleinern</button>
+        <!-- Ovaj deo dropdown menija je sada deo Settings modala -->
       </div>
     </div>
     <img src="src/icons/dachnewslogo.png" alt="DACH.news" />
   </nav>
 
   <!-- Dinamički generisani tabovi -->
- <div class="tabs-container" role="tablist" id="tabs-container">
-  <!-- Statički definisani tabovi -->
-  <button class="tab active" data-tab="home" role="tab" aria-selected="true">🏠 Home</button>
-  <button class="tab" data-tab="latest" role="tab" aria-selected="false">⏰ Latest</button>
-</div>
+  <div class="tabs-container" role="tablist" id="tabs-container">
+    <!-- Statički definisani tabovi -->
+    <button class="tab active" data-tab="home" role="tab" aria-selected="true">🏠 Home</button>
+    <button class="tab" data-tab="latest" role="tab" aria-selected="false">⏰ Latest</button>
+  </div>
 
   <!-- Dinamički generisane kartice feedova -->
   <div id="news-container"></div>
