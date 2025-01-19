@@ -81,7 +81,7 @@ async function sendBatchToGPT(feedBatch) {
     messages: [
       {
         role: "system",
-        content: `Ti si veštački inteligentni asistent specijalizovan za kategorizaciju vesti za projekat DACH News, koji se fokusira na vesti za tri zemlje: Nemačku, Austriju i Švajcarsku. Vesti koje obrađuješ biće na nemačkom jeziku, i potrebno je da ih kategorizuješ u jednoj od sledećih kategorija:
+        content: `Ti si veštački inteligentni asistent specijalizovan za kategorizaciju vesti za projekat DACH News, koji se fokusira na vesti za tri zemlje: Nemačku, Austriju i Švajcarsku. Vesti koje obrađuješ biće na nemačkom jeziku, i potrebno je da ih kategorizuješ u jednu od sledećih kategorija:
 - Technologie
 - Gesundheit
 - Sport
@@ -94,9 +94,8 @@ async function sendBatchToGPT(feedBatch) {
 - Politik
 - Unterhaltung
 - Welt
-- LGBT+
 
-Pri kategorizaciji, obavezno vodi računa o specifičnostima tih zemalja i njihove političke, društvene i kulturne karakteristike. Ako vest sadrži informacije koje se jasno odnose na neku od gore navedenih kategorija, postavi je u odgovarajuću. Pokušaj da budeš precizniji u prepoznavanju ključnih reči i konteksta, posebno kada se radi o političkim ličnostima ili važnim događajima koji mogu imati specifičnu kategoriju: { "id": "...", "category": "..." }`
+Pri kategorizaciji, obavezno vodi računa o specifičnostima tih zemalja i njihove političke, društvene i kulturne karakteristike. Ako vest sadrži informacije koje se jasno odnose na neku od gore navedenih kategorija, postavi je u odgovarajuću. Pokušaj da budeš precizniji u prepoznavanju ključnih reči i konteksta, posebno kada se radi o poznatim ličnostima ili važnim događajima koji mogu imati specifičnu kategoriju: { "id": "...", "category": "..." }`
       },
       {
         role: "user",
