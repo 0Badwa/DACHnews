@@ -316,6 +316,13 @@ async function processLGBTFeed() {
 
   const redisKey = `category:LGBT+`;
   for (const item of lgbtItems) {
+  // Provera da li je vest već obrađena
+    const alreadyProcessed = await redisClient.sIsMember("processed_ids", item.id);
+    if (alreadyProcessed) {
+      console.log(`[processLGBTFeed] Vest sa ID:${item.id} je već obrađena, preskačem.`);
+      continue; // Preskačemo ovu vest ako je već obrađena
+    }
+    
     const newsObj = {
       id: item.id,
       title: item.title,
@@ -330,6 +337,8 @@ async function processLGBTFeed() {
     try {
       await redisClient.rPush(redisKey, JSON.stringify(newsObj));
       console.log(`[processLGBTFeed] Upisano ID:${item.id} u kategoriju LGBT+`);
+  // Dodajemo ID u set processed_ids nakon uspešnog upisa
+      await redisClient.sAdd("processed_ids", item.id);
     } catch (error) {
       console.error(`[processLGBTFeed] Greška pri upisu ID:${item.id}`, error);
     }
