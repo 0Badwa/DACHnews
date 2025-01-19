@@ -122,7 +122,9 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
     container.innerHTML = '';
+  loadingIndicator.style.display = 'block'; // Prikaz loading logo
 
+    
     const sorted = [...feeds].sort((a, b) => {
       const dateA = new Date(a.date_published).getTime() || 0;
       const dateB = new Date(b.date_published).getTime() || 0;
@@ -137,8 +139,16 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     const uniqueFeeds = Array.from(uniqueFeedsMap.values());
 
+// Učitaj samo prvih deset kartica
+  uniqueFeeds.slice(0, 10).forEach(feed => {
+    container.appendChild(createNewsCard(feed, false)); 
+  });
+
+  loadingIndicator.style.display = 'none'; // Sakrij loading nakon učitavanja
+}
+    
     if (uniqueFeeds.length === 0) {
-      container.innerHTML = "<p>Nema vesti.</p>";
+      container.innerHTML = "<p>No news.</p>";
       return;
     }
 
