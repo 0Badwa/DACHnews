@@ -318,6 +318,11 @@ function getRandomInterval() {
 setInterval(processFeeds, getRandomInterval());
 processFeeds();
 
+// NOVO: Pozivanje processLGBTFeed odmah pri startu
+processLGBTFeed();
+// Zakazivanje periodičnog poziva za LGBT+ feed svakih 15 minuta (prilagodite po potrebi)
+setInterval(processLGBTFeed, 13 * 60 * 1000);
+
 
 setInterval(async () => {
   try {
@@ -327,5 +332,5 @@ setInterval(async () => {
   } catch (error) {
     console.error("Greška pri osvežavanju feedova:", error);
   }
-}, 11 * 60 * 1000); // Svakih 5 minuta
+}, 11 * 60 * 1000); // Svakih 11 minuta
 
