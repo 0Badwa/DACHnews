@@ -375,3 +375,37 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 console.log('Script loaded');
+
+
+
+document.addEventListener("DOMContentLoaded", function() {
+  const lazyImages = document.querySelectorAll('img.lazy');
+
+  if ("IntersectionObserver" in window) {
+    const imageObserver = new IntersectionObserver((entries, observer) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const img = entry.target;
+          img.src = img.dataset.src;  // postavljanje pravog src atributa
+          img.classList.remove("lazy");
+          img.classList.add("loaded");  // opcionalno, za uklanjanje blur efekta
+          observer.unobserve(img);      // prestaje da posmatra ovu sliku
+        }
+      });
+    }, {
+      rootMargin: "0px 0px 50px 0px", // opcionalno proširuje viewport za 50px dole
+      threshold: 0.01                 // mali prag da prepozna kada je slika skoro vidljiva
+    });
+
+    lazyImages.forEach(img => {
+      imageObserver.observe(img);
+    });
+  } else {
+    // Fallback - učitaj sve slike ako IntersectionObserver nije podržan
+    lazyImages.forEach(img => {
+      img.src = img.dataset.src;
+      img.classList.remove("lazy");
+    });
+  }
+});
+
