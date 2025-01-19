@@ -268,3 +268,12 @@ nav .menu button {
 :root[data-theme="dark"] .news-card img {
   border: none; /* uklonite border ili primenite drugi stil po potrebi */
 }
+
+
+.news-card-content h3 {
+  font-family: var(--font-family);
+}
+
+.news-card-content .news-meta {
+  font-family: var(--font-family);
+}
