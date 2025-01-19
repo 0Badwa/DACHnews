@@ -76,15 +76,21 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  function createNewsCard(feed) {
+  // Funkcija kreiranja kartice sa mogućnošću lazy loading-a
+  function createNewsCard(feed, useLazy = false) {
     console.log(`Kreiram karticu: ${feed.title} u kategoriji: ${feed.category}`);
     
     const card = document.createElement('div');
     card.className = "news-card";
 
     const img = document.createElement('img');
-    img.className = "news-card-image lazy"; 
-    img.dataset.src = feed.image || 'https://via.placeholder.com/150';
+    if (useLazy) {
+      img.className = "news-card-image lazy"; 
+      img.dataset.src = feed.image || 'https://via.placeholder.com/150';
+    } else {
+      img.className = "news-card-image";
+      img.src = feed.image || 'https://via.placeholder.com/150';
+    }
     img.alt = feed.title;
 
     const contentDiv = document.createElement('div');
@@ -137,7 +143,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     uniqueFeeds.forEach(feed => {
-      container.appendChild(createNewsCard(feed));
+      // Na Home stranici ne koristimo lazy loading
+      container.appendChild(createNewsCard(feed, false));
     });
   }
 
@@ -188,9 +195,38 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     sorted.forEach(newsItem => {
-      const card = createNewsCard(newsItem);
+      // Koristimo lazy loading za slike u ostalim kategorijama
+      const card = createNewsCard(newsItem, true);
       container.appendChild(card);
     });
+
+    // Inicijalizacija IntersectionObserver-a za slike u ovoj kategoriji
+    const lazyImages = container.querySelectorAll('img.lazy');
+    if ("IntersectionObserver" in window) {
+      const imageObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const img = entry.target;
+            img.src = img.dataset.src;
+            img.classList.remove("lazy");
+            img.classList.add("loaded");
+            observer.unobserve(img);
+          }
+        });
+      }, {
+        rootMargin: "0px 0px 50px 0px",
+        threshold: 0.01
+      });
+
+      lazyImages.forEach(img => {
+        imageObserver.observe(img);
+      });
+    } else {
+      lazyImages.forEach(img => {
+        img.src = img.dataset.src;
+        img.classList.remove("lazy");
+      });
+    }
   }
 
   async function main() {
