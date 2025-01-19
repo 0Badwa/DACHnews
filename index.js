@@ -115,8 +115,12 @@ Pri kategorizaciji, obavezno vodi računa o specifičnostima tih zemalja i njiho
       }
     });
 
-    const gptText = response.data.choices?.[0]?.message?.content?.trim();
+    let gptText = response.data.choices?.[0]?.message?.content?.trim();
     console.log("[sendBatchToGPT] GPT raw odgovor:", gptText);
+    // Ako je fenced code, uklonimo
+    if (gptText.startsWith("```json")) {
+      gptText = gptText.replace(/^```json\n?/, '').replace(/```$/, '');
+    }
     return gptText;
   } catch (error) {
     console.error("[sendBatchToGPT] Greška pri pozivu GPT API:", error?.response?.data || error.message);
@@ -143,13 +147,16 @@ async function processFeeds() {
   }
 
   // Filtriramo one koje NISU u processed_ids
-  const newItems = [];
+  let newItems = [];
   for (const item of allItems) {
     const alreadyProcessed = await redisClient.sIsMember("processed_ids", item.id);
     if (!alreadyProcessed) {
       newItems.push(item);
     }
   }
+
+  // Filtriranje duplikata po ID-ju (ako se pojave)
+  newItems = [...new Map(newItems.map(item => [item.id, item])).values()];
 
   if (newItems.length === 0) {
     console.log("[processFeeds] Nema novih feedova. Sve je već procesirano.");
@@ -158,57 +165,50 @@ async function processFeeds() {
 
   console.log(`[processFeeds] Nađeno ${newItems.length} novih feedova. Slanje GPT-u...`);
 
-  // Pozovemo GPT za batch
+  // Pozivamo GPT za batch
   let gptResponse = await sendBatchToGPT(newItems);
   if (!gptResponse) {
     console.error("[processFeeds] GPT odgovor je prazan ili null, prekidamo.");
     return;
   }
 
-  // Ako je fenced code, uklonimo
-  if (gptResponse.startsWith("```json")) {
-    gptResponse = gptResponse.replace(/^```json\n?/, '').replace(/```$/, '');
+  let classifications;
+  try {
+    classifications = JSON.parse(gptResponse);
+    console.log("[processFeeds] Parsiran GPT JSON:", classifications);
+
+    // Ako parsirani JSON nije niz, pretvorimo ga u niz radi dalje obrade
+    if (!Array.isArray(classifications)) {
+      classifications = [classifications];
+    }
+    
+  } catch (error) {
+    console.error("[processFeeds] Greška pri parse GPT JSON:", error);
+    return;
   }
 
-let classifications;
-try {
-  classifications = JSON.parse(gptResponse);
-  console.log("[processFeeds] Parsiran GPT JSON:", classifications);
-
-  // Ako parsirani JSON nije niz, pretvorimo ga u niz radi dalje obrade
-  if (!Array.isArray(classifications)) {
-    classifications = [classifications];
+  // Napravimo mapu ID -> category
+  const idToCategory = {};
+  for (const c of classifications) {
+    if (c.id && c.category) {
+      idToCategory[c.id] = c.category;
+    }
   }
-  
-} catch (error) {
-  console.error("[processFeeds] Greška pri parse GPT JSON:", error);
-  return;
-}
 
-// Napravimo mapu ID -> category
-const idToCategory = {};
-for (const c of classifications) {
-  if (c.id && c.category) {
-    idToCategory[c.id] = c.category;
-  }
-}
+  // Sad upišemo nove stavke u Redis
+  for (const item of newItems) {
+    const category = idToCategory[item.id] || "Uncategorized";
 
-// Sad upišemo u Redis
-for (const item of newItems) {
-  const category = idToCategory[item.id] || "Uncategorized";
-
-  // Unutar petlje u processFeeds za svaku novu stavku
-  const newsObj = {
-    id: item.id,
-    title: item.title,
-    date_published: item.date_published || null,
-    url: item.url || null,
-    image: item.image || null,
-    content_text: item.content_text || "",
-    category,
-    source: (item.authors && item.authors.length > 0) ? item.authors[0].name : extractSource(item.url)
-  };
-
+    const newsObj = {
+      id: item.id,
+      title: item.title,
+      date_published: item.date_published || null,
+      url: item.url || null,
+      image: item.image || null,
+      content_text: item.content_text || "",
+      category,
+      source: (item.authors && item.authors.length > 0) ? item.authors[0].name : extractSource(item.url)
+    };
 
     // Upis u listu "category:KATEGORIJA"
     const redisKey = `category:${category}`;
@@ -247,6 +247,16 @@ async function getAllFeedsFromRedis() {
     mapById[obj.id] = obj; // prepisujemo ako se ponovi isti ID
   }
   return Object.values(mapById);
+}
+
+// Pomoćna funkcija za ekstrakciju izvora iz URL-a (ako nije dostupan)
+function extractSource(url) {
+  try {
+    const hostname = new URL(url).hostname;
+    return hostname.replace('www.', '');
+  } catch (error) {
+    return "unknown";
+  }
 }
 
 // ------------------- RUTE ---------------------
