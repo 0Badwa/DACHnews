@@ -83,8 +83,8 @@ document.addEventListener("DOMContentLoaded", () => {
     card.className = "news-card";
 
     const img = document.createElement('img');
-    img.className = "news-card-image";
-    img.src = feed.image || 'https://via.placeholder.com/150';
+    img.className = "news-card-image lazy"; 
+    img.dataset.src = feed.image || 'https://via.placeholder.com/150';
     img.alt = feed.title;
 
     const contentDiv = document.createElement('div');
@@ -265,147 +265,144 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
   });
-});
 
-/************************************************
- * Settings Menu funkcionalnost
- ************************************************/
+  /************************************************
+   * Settings Menu funkcionalnost
+   ************************************************/
 
-// Otvaranje i zatvaranje Settings modala
-function openSettingsModal() {
-  const settingsModal = document.getElementById('settings-modal');
-  if (settingsModal) {
-    settingsModal.style.display = 'flex';
-  }
-}
-
-function closeSettingsModal() {
-  const settingsModal = document.getElementById('settings-modal');
-  if (settingsModal) {
-    settingsModal.style.display = 'none';
-  }
-}
-
-// Promena teme
-const root = document.documentElement;
-function toggleTheme() {
-  const currentTheme = root.getAttribute('data-theme');
-  const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-  root.setAttribute('data-theme', newTheme);
-  const themeToggleBtn = document.getElementById('theme-toggle');
-  if (themeToggleBtn) {
-    themeToggleBtn.textContent = newTheme === 'light' ? 'Dark Modus' : 'Licht Modus';
-  }
-  localStorage.setItem('theme', newTheme);
-}
-
-// Promena veličine fonta
-function changeFontSize(delta) {
-  const body = document.body;
-  const currentSize = parseInt(window.getComputedStyle(body).fontSize);
-  const newSize = currentSize + delta;
-  if (newSize >= 12 && newSize <= 24) {
-    body.style.fontSize = newSize + 'px';
-    localStorage.setItem('fontSize', newSize);
-  }
-}
-
-// Event listeneri za Settings meni
-document.addEventListener('DOMContentLoaded', () => {
-  const menuButton = document.getElementById('menu-button');
-  const closeSettingsButton = document.getElementById('close-settings');
-  const themeToggleBtn = document.getElementById('theme-toggle');
-  const fontIncreaseButton = document.getElementById('font-increase');
-  const fontDecreaseButton = document.getElementById('font-decrease');
-  const blockSourcesButton = document.getElementById('block-sources');
-  const blockCategoriesButton = document.getElementById('block-categories');
-  const rearrangeTabsButton = document.getElementById('rearrange-tabs');
-
-  if (menuButton) {
-    menuButton.addEventListener('click', openSettingsModal);
+  // Otvaranje i zatvaranje Settings modala
+  function openSettingsModal() {
+    const settingsModal = document.getElementById('settings-modal');
+    if (settingsModal) {
+      settingsModal.style.display = 'flex';
+    }
   }
 
-  if (closeSettingsButton) {
-    closeSettingsButton.addEventListener('click', closeSettingsModal);
+  function closeSettingsModal() {
+    const settingsModal = document.getElementById('settings-modal');
+    if (settingsModal) {
+      settingsModal.style.display = 'none';
+    }
   }
 
-  if (themeToggleBtn) {
-    themeToggleBtn.addEventListener('click', () => {
-      toggleTheme();
-      closeSettingsModal();
-    });
+  // Promena teme
+  const root = document.documentElement;
+  function toggleTheme() {
+    const currentTheme = root.getAttribute('data-theme');
+    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+    root.setAttribute('data-theme', newTheme);
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    if (themeToggleBtn) {
+      themeToggleBtn.textContent = newTheme === 'light' ? 'Dark Modus' : 'Licht Modus';
+    }
+    localStorage.setItem('theme', newTheme);
   }
 
-  if (fontIncreaseButton) {
-    fontIncreaseButton.addEventListener('click', () => changeFontSize(1));
-  }
-  if (fontDecreaseButton) {
-    fontDecreaseButton.addEventListener('click', () => changeFontSize(-1));
-  }
-
-  if (blockSourcesButton) {
-    blockSourcesButton.addEventListener('click', () => {
-      closeSettingsModal();
-      openBlockSourcesModal();
-    });
-  }
-  if (blockCategoriesButton) {
-    blockCategoriesButton.addEventListener('click', () => {
-      closeSettingsModal();
-      openBlockCategoriesModal();
-    });
-  }
-  if (rearrangeTabsButton) {
-    rearrangeTabsButton.addEventListener('click', () => {
-      closeSettingsModal();
-      openRearrangeModal();
-    });
+  // Promena veličine fonta
+  function changeFontSize(delta) {
+    const body = document.body;
+    const currentSize = parseInt(window.getComputedStyle(body).fontSize);
+    const newSize = currentSize + delta;
+    if (newSize >= 12 && newSize <= 24) {
+      body.style.fontSize = newSize + 'px';
+      localStorage.setItem('fontSize', newSize);
+    }
   }
 
-  // Inicijalizacija teme i font veličine
-  const savedFontSize = localStorage.getItem('fontSize');
-  if (savedFontSize) {
-    document.body.style.fontSize = savedFontSize + 'px';
-  }
-  const savedTheme = localStorage.getItem('theme') || 'dark';
-  root.setAttribute('data-theme', savedTheme);
-  if (themeToggleBtn) {
-    themeToggleBtn.textContent = savedTheme === 'light' ? 'Dark Modus' : 'Licht Modus';
-  }
-});
+  // Event listeneri za Settings meni
+  document.addEventListener('DOMContentLoaded', () => {
+    const menuButton = document.getElementById('menu-button');
+    const closeSettingsButton = document.getElementById('close-settings');
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    const fontIncreaseButton = document.getElementById('font-increase');
+    const fontDecreaseButton = document.getElementById('font-decrease');
+    const blockSourcesButton = document.getElementById('block-sources');
+    const blockCategoriesButton = document.getElementById('block-categories');
+    const rearrangeTabsButton = document.getElementById('rearrange-tabs');
 
-console.log('Script loaded');
+    if (menuButton) {
+      menuButton.addEventListener('click', openSettingsModal);
+    }
 
+    if (closeSettingsButton) {
+      closeSettingsButton.addEventListener('click', closeSettingsModal);
+    }
 
-
-document.addEventListener("DOMContentLoaded", function() {
-  const lazyImages = document.querySelectorAll('img.lazy');
-
-  if ("IntersectionObserver" in window) {
-    const imageObserver = new IntersectionObserver((entries, observer) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          const img = entry.target;
-          img.src = img.dataset.src;  // postavljanje pravog src atributa
-          img.classList.remove("lazy");
-          img.classList.add("loaded");  // opcionalno, za uklanjanje blur efekta
-          observer.unobserve(img);      // prestaje da posmatra ovu sliku
-        }
+    if (themeToggleBtn) {
+      themeToggleBtn.addEventListener('click', () => {
+        toggleTheme();
+        closeSettingsModal();
       });
-    }, {
-      rootMargin: "0px 0px 50px 0px", // opcionalno proširuje viewport za 50px dole
-      threshold: 0.01                 // mali prag da prepozna kada je slika skoro vidljiva
-    });
+    }
 
-    lazyImages.forEach(img => {
-      imageObserver.observe(img);
-    });
-  } else {
-    // Fallback - učitaj sve slike ako IntersectionObserver nije podržan
-    lazyImages.forEach(img => {
-      img.src = img.dataset.src;
-      img.classList.remove("lazy");
-    });
-  }
+    if (fontIncreaseButton) {
+      fontIncreaseButton.addEventListener('click', () => changeFontSize(1));
+    }
+    if (fontDecreaseButton) {
+      fontDecreaseButton.addEventListener('click', () => changeFontSize(-1));
+    }
+
+    if (blockSourcesButton) {
+      blockSourcesButton.addEventListener('click', () => {
+        closeSettingsModal();
+        openBlockSourcesModal();
+      });
+    }
+    if (blockCategoriesButton) {
+      blockCategoriesButton.addEventListener('click', () => {
+        closeSettingsModal();
+        openBlockCategoriesModal();
+      });
+    }
+    if (rearrangeTabsButton) {
+      rearrangeTabsButton.addEventListener('click', () => {
+        closeSettingsModal();
+        openRearrangeModal();
+      });
+    }
+
+    // Inicijalizacija teme i font veličine
+    const savedFontSize = localStorage.getItem('fontSize');
+    if (savedFontSize) {
+      document.body.style.fontSize = savedFontSize + 'px';
+    }
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    root.setAttribute('data-theme', savedTheme);
+    if (themeToggleBtn) {
+      themeToggleBtn.textContent = savedTheme === 'light' ? 'Dark Modus' : 'Licht Modus';
+    }
+  });
+
+  console.log('Script loaded');
+
+  // Lazy Loading implementacija
+  document.addEventListener("DOMContentLoaded", function() {
+    const lazyImages = document.querySelectorAll('img.lazy');
+
+    if ("IntersectionObserver" in window) {
+      const imageObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const img = entry.target;
+            img.src = img.dataset.src;
+            img.classList.remove("lazy");
+            img.classList.add("loaded");
+            observer.unobserve(img);
+          }
+        });
+      }, {
+        rootMargin: "0px 0px 50px 0px",
+        threshold: 0.01
+      });
+
+      lazyImages.forEach(img => {
+        imageObserver.observe(img);
+      });
+    } else {
+      lazyImages.forEach(img => {
+        img.src = img.dataset.src;
+        img.classList.remove("lazy");
+      });
+    }
+  });
 });
-
