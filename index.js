@@ -170,38 +170,46 @@ async function processFeeds() {
     gptResponse = gptResponse.replace(/^```json\n?/, '').replace(/```$/, '');
   }
 
-  let classifications;
-  try {
-    classifications = JSON.parse(gptResponse);
-    console.log("[processFeeds] Parsiran GPT JSON:", classifications);
-  } catch (error) {
-    console.error("[processFeeds] Greška pri parse GPT JSON:", error);
-    return;
+let classifications;
+try {
+  classifications = JSON.parse(gptResponse);
+  console.log("[processFeeds] Parsiran GPT JSON:", classifications);
+
+  // Ako parsirani JSON nije niz, pretvorimo ga u niz radi dalje obrade
+  if (!Array.isArray(classifications)) {
+    classifications = [classifications];
   }
+  
+} catch (error) {
+  console.error("[processFeeds] Greška pri parse GPT JSON:", error);
+  return;
+}
 
-  // Napravimo mapu ID -> category
-  const idToCategory = {};
-  for (const c of classifications) {
-    if (c.id && c.category) {
-      idToCategory[c.id] = c.category;
-    }
+// Napravimo mapu ID -> category
+const idToCategory = {};
+for (const c of classifications) {
+  if (c.id && c.category) {
+    idToCategory[c.id] = c.category;
   }
+}
 
-  // Sad upišemo u Redis
-  for (const item of newItems) {
-    const category = idToCategory[item.id] || "Uncategorized";
+// Sad upišemo u Redis
+for (const item of newItems) {
+  const category = idToCategory[item.id] || "Uncategorized";
 
-    // Unutar petlje u processFeeds za svaku novu stavku
-const newsObj = {
-  id: item.id,
-  title: item.title,
-  date_published: item.date_published || null,
-  url: item.url || null,
-  image: item.image || null,
-  content_text: item.content_text || "",
-  category,
-  source: (item.authors && item.authors.length > 0) ? item.authors[0].name : extractSource(item.url)
-};
+  // Unutar petlje u processFeeds za svaku novu stavku
+  const newsObj = {
+    id: item.id,
+    title: item.title,
+    date_published: item.date_published || null,
+    url: item.url || null,
+    image: item.image || null,
+    content_text: item.content_text || "",
+    category,
+    source: (item.authors && item.authors.length > 0) ? item.authors[0].name : extractSource(item.url)
+  };
+}
+
 
     // Upis u listu "category:KATEGORIJA"
     const redisKey = `category:${category}`;
