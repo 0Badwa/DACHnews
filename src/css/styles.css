@@ -173,8 +173,8 @@ nav .menu button {
 /* Omot za sliku, opciono ga možete držati */
 /* Ako koristite .image-wrapper, definišite ga: */
 .image-wrapper {
-  width: 75px;
-  height: 75px;
+  width: 90px;
+  height: 90px;
   overflow: hidden;
   margin-right: 0.8rem;
   position: relative;
@@ -184,8 +184,8 @@ nav .menu button {
 /* Slika unutar kartice */
 .news-card img {
   border-radius: 5px;
-  width: 75px;
-  height: 75px;
+  width: 90px;
+  height: 90px;
   object-fit: cover; /* zadrži proporciju */
   margin-right: 0.8rem;
 }
