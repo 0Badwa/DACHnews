@@ -7,20 +7,20 @@ let feeds = [];
 
 // Kategorije (iste kao u GPT promptu + "Uncategorized")
 const categories = [
-    "Technologie",
-    "Gesundheit",
-    "Sport",
-    "Wirtschaft",
-    "Kultur",
-    "Auto",
-    "Reisen",
-    "Lifestyle",
-    "Panorama",
-    "Politik",
-    "Unterhaltung",
-    "Welt",
-    "LGBT+",
-    "Uncategorized"
+  "Technologie",
+  "Gesundheit",
+  "Sport",
+  "Wirtschaft",
+  "Kultur",
+  "Auto",
+  "Reisen",
+  "Lifestyle",
+  "Panorama",
+  "Politik",
+  "Unterhaltung",
+  "Welt",
+  "LGBT+",
+  "Uncategorized"
 ];
 
 // Pomoćna funkcija za prikaz vremena od objave u nemačkom formatu
@@ -80,7 +80,7 @@ function removeActiveClass() {
 
 // Kreiranje HTML kartice za pojedinačni feed prema novim specifikacijama
 function createNewsCard(feed) {
-  console.log("[createNewsCard] Kreiranje kartice za:", feed.title);
+  console.log(`Kreiram karticu: ${feed.title} u kategoriji: ${feed.category}`);
   
   const card = document.createElement('div');
   card.className = "news-card";
@@ -103,8 +103,7 @@ function createNewsCard(feed) {
   // Izvor i vreme od objave
   const source = document.createElement('p');
   source.className = "news-meta";
-  // Pretpostavljamo da feed ima polje 'source'; ako ne, zamenite sa odgovarajućim izvorom.
-  const sourceName = feed.source;
+  const sourceName = feed.source || 'Nepoznat izvor';
   const timeString = feed.date_published ? timeAgo(feed.date_published) : '';
   source.textContent = `${sourceName} • ${timeString}`;
 
@@ -184,6 +183,12 @@ async function displayNewsByCategory(category) {
     }
   }
 
+  // Uklanjanje duplikata na osnovu id-ja
+  const uniqueMap = {};
+  data.forEach(item => uniqueMap[item.id] = item);
+  data = Object.values(uniqueMap);
+  console.log(`[displayNewsByCategory] Nakon uklanjanja duplikata: ${data.length} vesti`);
+
   // Sortiramo po datumu opadajuće
   const sorted = data.sort((a, b) => {
     const da = new Date(a.date_published).getTime() || 0;
@@ -191,22 +196,15 @@ async function displayNewsByCategory(category) {
     return db - da;
   });
 
-  // Filtriranje duplikata na osnovu 'id'
-  const uniqueFeedsMap = new Map();
-  sorted.forEach(feed => {
-    if (!uniqueFeedsMap.has(feed.id)) {
-      uniqueFeedsMap.set(feed.id, feed);
-    }
-  });
-  const uniqueFeeds = Array.from(uniqueFeedsMap.values());
-
-  if (uniqueFeeds.length === 0) {
+  // Prikazujemo feedove
+  if (sorted.length === 0) {
     container.innerHTML = "<p>Nema vesti za ovu kategoriju.</p>";
     return;
   }
 
-  uniqueFeeds.forEach(feed => {
-    container.appendChild(createNewsCard(feed));
+  sorted.forEach(newsItem => {
+    const card = createNewsCard(newsItem);
+    container.appendChild(card);
   });
 }
 
