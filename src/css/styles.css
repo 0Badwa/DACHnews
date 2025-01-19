@@ -10,7 +10,7 @@
   --font-size: 16px;
   --news-title-font-size: 1rem;
   --font-family: Arial, sans-serif;
-  --font-size: var(--font-size);
+  / --font-size: var(--font-size); /
 }
 
 :root[data-theme="dark"] {
@@ -38,7 +38,7 @@ html, body {
   margin: 0;
   padding: 0;
   overflow-x: hidden;
-  background-color: var(--background-color);
+  background-color: #121212;
   color: var(--text-color);
   font-family: Arial, sans-serif;
   font-size: var(--font-size);
