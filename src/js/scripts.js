@@ -156,10 +156,15 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Prikaz feedova *po kategoriji* uz uklanjanje duplikata
-  async function displayNewsByCategory(category) {
-    console.log("[displayNewsByCategory] Kategorija:", category);
-    const container = document.getElementById('news-container');
-    container.innerHTML = '';
+ async function displayNewsByCategory(category) {
+  // Normalizacija kategorije "lgbt" ili "lgbt+" u tačan naziv "LGBT+"
+  if (category.toLowerCase() === 'lgbt' || category.toLowerCase() === 'lgbt+') {
+    category = 'LGBT+';
+  }
+  
+  console.log("[displayNewsByCategory] Kategorija:", category);
+  const container = document.getElementById('news-container');
+  container.innerHTML = '';
 
     // Pogledamo da li imamo keš za tu kategoriju
     const cached = localStorage.getItem(`feeds-${category}`);
