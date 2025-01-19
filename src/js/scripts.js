@@ -287,3 +287,82 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
+
+
+/**
+ * URL za LGBT+ RSS feed
+ */
+const LGBT_FEED_URL = "https://rss.app/feeds/v1.1/_DZwHYDTztd0rMaNe.json";
+
+/**
+ * 5) Preuzima feed za LGBT+ kategoriju
+ */
+async function fetchLGBTFeed() {
+  console.log("[fetchLGBTFeed] Preuzimanje LGBT+ RSS feed-a sa:", LGBT_FEED_URL);
+  try {
+    const response = await axios.get(LGBT_FEED_URL);
+    const items = response.data.items || [];
+    console.log(`[fetchLGBTFeed] Uspelo, broj vesti: ${items.length}`);
+    return items;
+  } catch (error) {
+    console.error("[fetchLGBTFeed] Greška pri preuzimanju LGBT+ RSS feed-a:", error);
+    return [];
+  }
+}
+
+/**
+ * 6) Učitava LGBT+ feed u Redis (bez GPT kategorizacije)
+ */
+async function processLGBTFeed() {
+  console.log("[processLGBTFeed] Obrada LGBT+ feed-a...");
+  const lgbtItems = await fetchLGBTFeed();
+
+  if (lgbtItems.length === 0) {
+    console.log("[processLGBTFeed] Nema vesti u LGBT+ feed-u.");
+    return;
+  }
+
+  // Čišćenje duplikata
+  const uniqueItems = [...new Map(lgbtItems.map(item => [item.id, item])).values()];
+
+  for (const item of uniqueItems) {
+    const newsObj = {
+      id: item.id,
+      title: item.title,
+      date_published: item.date_published || null,
+      url: item.url || null,
+      image: item.image || null,
+      content_text: item.content_text || "",
+      category: "LGBT+",
+      source: (item.authors && item.authors.length > 0) ? item.authors[0].name : extractSource(item.url)
+    };
+
+    // Upis u Redis listu za LGBT+ kategoriju
+    const redisKey = `category:LGBT+`;
+    await redisClient.rPush(redisKey, JSON.stringify(newsObj));
+    await redisClient.expire(redisKey, SEVEN_DAYS);
+    console.log(`[processLGBTFeed] Upisano u Redis ID:${item.id} za kategoriju: LGBT+`);
+  }
+}
+
+// Poziva se na startu i periodično osvežava LGBT+ feed
+setInterval(processLGBTFeed, getRandomInterval());
+processLGBTFeed();
+
+/**
+ * 7) /api/lgbt-feeds ruta za preuzimanje LGBT+ feed-ova
+ */
+app.get("/api/lgbt-feeds", async (req, res) => {
+  console.log("[Route /api/lgbt-feeds] Klijent traži LGBT+ feedove...");
+  try {
+    const redisKey = `category:LGBT+`;
+    const feedItems = await redisClient.lRange(redisKey, 0, -1);
+    console.log(`[Route /api/lgbt-feeds] Nađeno ${feedItems.length} stavki za LGBT+ kategoriju`);
+    const parsed = feedItems.map(x => JSON.parse(x));
+    res.json(parsed);
+  } catch (error) {
+    console.error("[Route /api/lgbt-feeds] Greška:", error);
+    res.status(500).send("Server error");
+  }
+});
+
