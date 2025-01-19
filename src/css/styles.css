@@ -2,7 +2,7 @@
  * Osnovne varijable za boje i veličine
  ************************************************/
 :root {
---background-color: #121212;
+  --background-color: #121212;
   --text-color: #ffffff;
   --primary-color: #1DB954;
   --secondary-color: #1c1c1c;
@@ -10,7 +10,7 @@
   --font-size: 16px;
   --news-title-font-size: 1rem;
   --font-family: Arial, sans-serif;
- }
+}
 
 :root[data-theme="dark"] {
   --background-color: #121212;
@@ -20,13 +20,13 @@
   --border-color: #333;
 }
 
-/ :root[data-theme="light"] {
+/* :root[data-theme="light"] {
   --background-color: #ffffff;
   --text-color: #000000;
   --primary-color: #04AA6D;
   --secondary-color: #f4f4f4;
   --border-color: #ddd;
-} /
+} */
 
 /************************************************
  * Globalni stil
@@ -54,7 +54,6 @@ body[data-theme="dark"] {
   background-color: var(--background-color) !important;
   color: var(--text-color) !important;
 }
-
 
 /************************************************
  * Header (nav)
@@ -165,7 +164,7 @@ nav .menu button {
  ************************************************/
 .news-card {
   display: flex;
-  align-items: flex-start; /* da tekst bude gore poravnat */
+  align-items: flex-start;
   background-color: var(--secondary-color);
   border: 1px solid var(--border-color);
   border-radius: 5px;
@@ -178,7 +177,6 @@ nav .menu button {
 }
 
 /* Omot za sliku, opciono ga možete držati */
-/* Ako koristite .image-wrapper, definišite ga: */
 .image-wrapper {
   width: 90px;
   height: 90px;
@@ -193,7 +191,7 @@ nav .menu button {
   border-radius: 5px;
   width: 90px;
   height: 90px;
-  object-fit: cover; /* zadrži proporciju */
+  object-fit: cover;
   margin-right: 0.8rem;
 }
 
@@ -210,18 +208,16 @@ nav .menu button {
   text-overflow: ellipsis;
   line-height: 1.3;
   display: -webkit-box;
-  -webkit-line-clamp: 3;       /* prikaz maksimalno 3 linije naslova */
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
 }
 
-/* meta podaci (datum, kategorija...) */
 .news-meta {
   font-size: 0.8rem;
   margin: 0;
   color: var(--text-color);
 }
 
-/* Uklanjanje underline-a iz linkova u naslovu */
 .news-card h3 a,
 .news-card h3 a:visited,
 .news-card h3 a:hover,
@@ -254,26 +250,22 @@ nav .menu button {
   }
 }
 
-
-
 :root[data-theme="dark"] .news-card {
-  background-color: #000; /* crna pozadina */
+  background-color: #000;
   border: 1px solid var(--border-color);
 }
 
 :root[data-theme="dark"] .news-card .news-title {
-  color: var(--primary-color); /* koristi primarnu boju teksta */
+  color: var(--primary-color);
 }
 
 :root[data-theme="dark"] .news-card .news-meta {
-  color: var(--text-color); /* svetli tekst za meta podatke */
+  color: var(--text-color);
 }
 
-/* Opcionalno: prilagodba slike ili drugih elemenata unutar kartice */
 :root[data-theme="dark"] .news-card img {
-  border: none; /* uklonite border ili primenite drugi stil po potrebi */
+  border: none;
 }
-
 
 .news-card-content h3 {
   font-family: var(--font-family);
@@ -281,4 +273,70 @@ nav .menu button {
 
 .news-card-content .news-meta {
   font-family: var(--font-family);
+}
+
+/************************************************
+ * Modal styles (za Settings i ostale modale)
+ ************************************************/
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0,0,0,0.5);
+  z-index: 2000;
+}
+
+.rearrange-modal-content {
+  background-color: var(--background-color);
+  padding: 1rem;
+  border-radius: 8px;
+  max-width: 500px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.settings-list .settings-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.settings-action-button {
+  background-color: var(--primary-color);
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.font-size-buttons button {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 0.25rem 0.5rem;
+  margin-left: 0.25rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.modal-buttons {
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.save-button {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
 }
