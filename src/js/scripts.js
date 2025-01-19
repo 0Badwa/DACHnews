@@ -48,7 +48,6 @@ document.addEventListener("DOMContentLoaded", () => {
     return `gerade eben`;
   }
 
-  // Učitavanje SVIH feedova sa servera (spojenih iz Redis-a)
   async function fetchAllFeedsFromServer() {
     console.log("[fetchAllFeedsFromServer] /api/feeds...");
     try {
@@ -63,13 +62,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // Čuvanje feedova u localStorage
   function cacheAllFeedsLocally(items) {
     localStorage.setItem('feeds', JSON.stringify(items));
     console.log("[cacheAllFeedsLocally] Sačuvano:", items.length, "vesti u localStorage");
   }
 
-  // Uklanjanje 'active' klase sa tab dugmića
   function removeActiveClass() {
     console.log("[removeActiveClass] Uklanjam 'active' sa svih tabova...");
     const allTabs = document.querySelectorAll('.tab');
@@ -79,47 +76,38 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Kreiranje HTML kartice za pojedinačni feed prema novim specifikacijama
   function createNewsCard(feed) {
     console.log(`Kreiram karticu: ${feed.title} u kategoriji: ${feed.category}`);
     
     const card = document.createElement('div');
     card.className = "news-card";
 
-    // Kreiranje elementa za sliku
     const img = document.createElement('img');
     img.className = "news-card-image";
     img.src = feed.image || 'https://via.placeholder.com/150';
     img.alt = feed.title;
 
-    // Kreiranje kontejnera za sadržaj kartice
     const contentDiv = document.createElement('div');
     contentDiv.className = "news-card-content";
 
-    // Naslov vesti
     const title = document.createElement('h3');
     title.className = "news-title";
     title.textContent = feed.title;
 
-    // Izvor i vreme od objave
     const source = document.createElement('p');
     source.className = "news-meta";
     const sourceName = feed.source || 'Nepoznat izvor';
     const timeString = feed.date_published ? timeAgo(feed.date_published) : '';
     source.textContent = `${sourceName} • ${timeString}`;
 
-    // Sastavljanje sadržaja kartice
     contentDiv.appendChild(title);
     contentDiv.appendChild(source);
-
-    // Dodavanje slike i sadržaja u glavnu karticu
     card.appendChild(img);
     card.appendChild(contentDiv);
 
     return card;
   }
 
-  // Prikaz feedova – *sortiramo* po datumu (najnoviji prvo) i uklanjamo duplikate
   function displayAllFeeds() {
     console.log("[displayAllFeeds] Prikaz svih feedova (sortirano)...");
     const container = document.getElementById('news-container');
@@ -129,14 +117,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     container.innerHTML = '';
 
-    // Sortiranje feedova po date_published (opadajuće)
     const sorted = [...feeds].sort((a, b) => {
       const dateA = new Date(a.date_published).getTime() || 0;
       const dateB = new Date(b.date_published).getTime() || 0;
-      return dateB - dateA; // najnoviji prvi
+      return dateB - dateA;
     });
 
-    // Filtriranje duplikata na osnovu 'id'
     const uniqueFeedsMap = new Map();
     sorted.forEach(feed => {
       if (!uniqueFeedsMap.has(feed.id)) {
@@ -155,18 +141,15 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Prikaz feedova *po kategoriji* uz uklanjanje duplikata
- async function displayNewsByCategory(category) {
-  // Normalizacija kategorije "lgbt" ili "lgbt+" u tačan naziv "LGBT+"
-  if (category.toLowerCase() === 'lgbt' || category.toLowerCase() === 'lgbt+') {
-    category = 'LGBT+';
-  }
-  
-  console.log("[displayNewsByCategory] Kategorija:", category);
-  const container = document.getElementById('news-container');
-  container.innerHTML = '';
+  async function displayNewsByCategory(category) {
+    if (category.toLowerCase() === 'lgbt' || category.toLowerCase() === 'lgbt+') {
+      category = 'LGBT+';
+    }
+    
+    console.log("[displayNewsByCategory] Kategorija:", category);
+    const container = document.getElementById('news-container');
+    container.innerHTML = '';
 
-    // Pogledamo da li imamo keš za tu kategoriju
     const cached = localStorage.getItem(`feeds-${category}`);
     let data = [];
 
@@ -180,7 +163,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!resp.ok) throw new Error("Greška u fetch-u /feeds-by-category");
         data = await resp.json();
         console.log(`[displayNewsByCategory] Primljeno:`, data.length, "vesti");
-        // Sačuvamo u localStorage
         localStorage.setItem(`feeds-${category}`, JSON.stringify(data));
       } catch (error) {
         console.error("[displayNewsByCategory] Greška:", error);
@@ -189,20 +171,17 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
-    // Uklanjanje duplikata na osnovu id-ja
     const uniqueMap = {};
     data.forEach(item => uniqueMap[item.id] = item);
     data = Object.values(uniqueMap);
     console.log(`[displayNewsByCategory] Nakon uklanjanja duplikata: ${data.length} vesti`);
 
-    // Sortiramo po datumu opadajuće
     const sorted = data.sort((a, b) => {
       const da = new Date(a.date_published).getTime() || 0;
       const db = new Date(b.date_published).getTime() || 0;
       return db - da;
     });
 
-    // Prikazujemo feedove
     if (sorted.length === 0) {
       container.innerHTML = "<p>Nema vesti za ovu kategoriju.</p>";
       return;
@@ -214,7 +193,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // main inicijalna funkcija
   async function main() {
     console.log("[main] Provera localStorage('feeds')...");
     const cachedFeeds = localStorage.getItem('feeds');
@@ -222,7 +200,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (cachedFeeds) {
       feeds = JSON.parse(cachedFeeds);
       console.log(`[main] Učitano ${feeds.length} feedova iz localStorage`);
-      displayAllFeeds(); // prikažemo sortirano
+      displayAllFeeds();
     } else {
       console.log("[main] Nema 'feeds' u localStorage, dohvatamo sa servera...");
       const fresh = await fetchAllFeedsFromServer();
@@ -231,7 +209,6 @@ document.addEventListener("DOMContentLoaded", () => {
       displayAllFeeds();
     }
 
-    // (Opcionalno) Periodično da vidimo ima li NOVIH feedova
     setInterval(async () => {
       console.log("[main - setInterval] Provera novih feedova na serveru...");
       const fresh = await fetchAllFeedsFromServer();
@@ -243,10 +220,9 @@ document.addEventListener("DOMContentLoaded", () => {
       } else {
         console.log("[main - setInterval] Nema novih feedova.");
       }
-    }, 180000); // npr. svake 3 min
+    }, 180000);
   }
 
-  // Inicijalizacija nakon učitavanja DOM-a
   main().then(() => {
     console.log("[main.then] Inicijalizacija tabova...");
 
@@ -259,19 +235,17 @@ document.addEventListener("DOMContentLoaded", () => {
         removeActiveClass();
         e.target.classList.add('active');
         e.target.setAttribute('aria-selected', 'true');
-        displayAllFeeds(); // Najnoviji prvi
+        displayAllFeeds();
       });
     }
 
-    // Generišemo dugmiće/tabove za svaku kategoriju
     if (tabsContainer) {
       console.log("[main.then] Generišemo tabove za kategorije...");
-      const skipList = []; // ovde biste npr. ubacili "Uncategorized" ako ne želite prikaz
+      const skipList = [];
 
       categories
         .filter(cat => !skipList.includes(cat))
         .forEach(cat => {
-          // Kreiramo dugme
           const btn = document.createElement('button');
           btn.classList.add('tab');
           btn.setAttribute('data-tab', cat);
@@ -293,64 +267,111 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
+/************************************************
+ * Settings Menu funkcionalnost
+ ************************************************/
 
-/**
- * URL za LGBT+ RSS feed
- */
-const LGBT_FEED_URL = "https://rss.app/feeds/v1.1/_DZwHYDTztd0rMaNe.json";
-
-/**
- * 5) Preuzima feed za LGBT+ kategoriju
- */
-async function fetchLGBTFeed() {
-  console.log("[fetchLGBTFeed] Preuzimanje LGBT+ RSS feed-a sa:", LGBT_FEED_URL);
-  try {
-    const response = await axios.get(LGBT_FEED_URL);
-    const items = response.data.items || [];
-    console.log(`[fetchLGBTFeed] Uspelo, broj vesti: ${items.length}`);
-    return items;
-  } catch (error) {
-    console.error("[fetchLGBTFeed] Greška pri preuzimanju LGBT+ RSS feed-a:", error);
-    return [];
+// Otvaranje i zatvaranje Settings modala
+function openSettingsModal() {
+  const settingsModal = document.getElementById('settings-modal');
+  if (settingsModal) {
+    settingsModal.style.display = 'flex';
   }
 }
 
-/**
- * 6) Učitava LGBT+ feed u Redis (bez GPT kategorizacije)
- */
-async function processLGBTFeed() {
-  console.log("[processLGBTFeed] Početak obrade LGBT feed-a...");
-  const lgbtItems = await fetchLGBTFeed();
-  console.log(`[processLGBTFeed] Preuzeto ${lgbtItems.length} vesti za LGBT+ kategoriju`);
-
-  if (lgbtItems.length === 0) {
-    console.log("[processLGBTFeed] Nema vesti za obradu.");
-    return;
+function closeSettingsModal() {
+  const settingsModal = document.getElementById('settings-modal');
+  if (settingsModal) {
+    settingsModal.style.display = 'none';
   }
-
-  const redisKey = `category:LGBT+`;
-  for (const item of lgbtItems) {
-    const newsObj = {
-      id: item.id,
-      title: item.title,
-      date_published: item.date_published || null,
-      url: item.url || null,
-      image: item.image || null,
-      content_text: item.content_text || "",
-      category: "LGBT+",
-      source: item.source || "unknown"
-    };
-
-    try {
-      await redisClient.rPush(redisKey, JSON.stringify(newsObj));
-      console.log(`[processLGBTFeed] Upisano ID:${item.id} u kategoriju LGBT+`);
-    } catch (error) {
-      console.error(`[processLGBTFeed] Greška pri upisu ID:${item.id}`, error);
-    }
-  }
-
-  await redisClient.expire(redisKey, SEVEN_DAYS);
-  console.log("[processLGBTFeed] Završena obrada LGBT feed-a.");
 }
 
+// Promena teme
+const root = document.documentElement;
+function toggleTheme() {
+  const currentTheme = root.getAttribute('data-theme');
+  const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+  root.setAttribute('data-theme', newTheme);
+  const themeToggleBtn = document.getElementById('theme-toggle');
+  if (themeToggleBtn) {
+    themeToggleBtn.textContent = newTheme === 'light' ? 'Dark Modus' : 'Licht Modus';
+  }
+  localStorage.setItem('theme', newTheme);
+}
 
+// Promena veličine fonta
+function changeFontSize(delta) {
+  const body = document.body;
+  const currentSize = parseInt(window.getComputedStyle(body).fontSize);
+  const newSize = currentSize + delta;
+  if (newSize >= 12 && newSize <= 24) {
+    body.style.fontSize = newSize + 'px';
+    localStorage.setItem('fontSize', newSize);
+  }
+}
+
+// Event listeneri za Settings meni
+document.addEventListener('DOMContentLoaded', () => {
+  const menuButton = document.getElementById('menu-button');
+  const closeSettingsButton = document.getElementById('close-settings');
+  const themeToggleBtn = document.getElementById('theme-toggle');
+  const fontIncreaseButton = document.getElementById('font-increase');
+  const fontDecreaseButton = document.getElementById('font-decrease');
+  const blockSourcesButton = document.getElementById('block-sources');
+  const blockCategoriesButton = document.getElementById('block-categories');
+  const rearrangeTabsButton = document.getElementById('rearrange-tabs');
+
+  if (menuButton) {
+    menuButton.addEventListener('click', openSettingsModal);
+  }
+
+  if (closeSettingsButton) {
+    closeSettingsButton.addEventListener('click', closeSettingsModal);
+  }
+
+  if (themeToggleBtn) {
+    themeToggleBtn.addEventListener('click', () => {
+      toggleTheme();
+      closeSettingsModal();
+    });
+  }
+
+  if (fontIncreaseButton) {
+    fontIncreaseButton.addEventListener('click', () => changeFontSize(1));
+  }
+  if (fontDecreaseButton) {
+    fontDecreaseButton.addEventListener('click', () => changeFontSize(-1));
+  }
+
+  if (blockSourcesButton) {
+    blockSourcesButton.addEventListener('click', () => {
+      closeSettingsModal();
+      openBlockSourcesModal();
+    });
+  }
+  if (blockCategoriesButton) {
+    blockCategoriesButton.addEventListener('click', () => {
+      closeSettingsModal();
+      openBlockCategoriesModal();
+    });
+  }
+  if (rearrangeTabsButton) {
+    rearrangeTabsButton.addEventListener('click', () => {
+      closeSettingsModal();
+      openRearrangeModal();
+    });
+  }
+
+  // Inicijalizacija teme i font veličine
+  const savedFontSize = localStorage.getItem('fontSize');
+  if (savedFontSize) {
+    document.body.style.fontSize = savedFontSize + 'px';
+  }
+  const savedTheme = localStorage.getItem('theme') || 'dark';
+  root.setAttribute('data-theme', savedTheme);
+  if (themeToggleBtn) {
+    themeToggleBtn.textContent = savedTheme === 'light' ? 'Dark Modus' : 'Licht Modus';
+  }
+});
+
+console.log('Script loaded');
