@@ -355,12 +355,12 @@ processLGBTFeed();
 // Zakazivanje periodičnog poziva za LGBT+ feed svakih 13 minuta
 setInterval(processLGBTFeed, 13 * 60 * 1000);
 
-setInterval(async () => {
-  try {
-    const response = await fetch(`${BASE_URL}/api/feeds`);
-    const newFeeds = await response.json();
+// setInterval(async () => {
+  // try {
+    // const response = await fetch(`${BASE_URL}/api/feeds`);
+    // const newFeeds = await response.json();
   //  updateFeedDisplay(newFeeds); // Prikaz novih feedova
-  } catch (error) {
-    console.error("Greška pri osvežavanju feedova:", error);
-  }
-}, 11 * 60 * 1000);
+  // } catch (error) {
+    // console.error("Greška pri osvežavanju feedova:", error);
+  // }
+// }, 11 * 60 * 1000);
