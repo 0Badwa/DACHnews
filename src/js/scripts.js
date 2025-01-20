@@ -142,12 +142,13 @@ function displayAllFeeds() {
     return;
   }
 
+// Kreirajte Swiper slajdove unutar news-container
+  createSwiperSlides(uniqueFeeds);
+  
   uniqueFeeds.forEach(feed => {
     // Na Home stranici ne koristimo lazy loading
     container.appendChild(createNewsCard(feed, false));
   });
-
-  createSwiperSlides(uniqueFeeds);
 }
 
   async function displayNewsByCategory(category) {
@@ -463,6 +464,8 @@ var swiper = new Swiper('.swiper-container', {
 // Funkcija za kreiranje Swiper kartica
 function createSwiperSlides(feeds) {
   const swiperWrapper = document.querySelector('.swiper-wrapper');
+  swiperWrapper.innerHTML = ''; // Očistite prethodne slajdove
+
   feeds.forEach(feed => {
     const slide = document.createElement('div');
     slide.className = 'swiper-slide';
@@ -477,5 +480,6 @@ function createSwiperSlides(feeds) {
     `;
     swiperWrapper.appendChild(slide);
   });
+
   swiper.update();
 }
