@@ -345,7 +345,7 @@ img.lazy.loaded {
  ************************************************/
 .category-indicator {
  position: fixed;
-  top: 50px; /* visina nav */
+  top: 80px; /* visina nav */
   left: 0;
   right: 0;
   padding: 2px;  /* Smanji padding za manje visine */
