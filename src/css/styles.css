@@ -148,7 +148,7 @@ nav .menu button {
   border: none;
   color: var(--text-color);
   font-size: 1rem;
-  cursor: pointer;
+  font-weight: bold; cursor: pointer;
   padding: 0.5rem 1rem;
   flex-shrink: 0;
   transition: background-color 0.3s, color 0.3s;
@@ -291,6 +291,7 @@ img.lazy.loaded {
   }
   .tabs-container button {
     font-size: 0.9rem;
+    font-weight: bold; 
     padding: 0.4rem 0.8rem;
   }
 }
@@ -317,6 +318,7 @@ img.lazy.loaded {
  ************************************************/
 .category-indicator {
   font-size: 1.2em;
+ font-weight: bold;
   margin: 10px;
   text-align: center;
   color: var(--primary-color);
