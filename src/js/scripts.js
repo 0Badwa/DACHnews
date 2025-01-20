@@ -5,21 +5,9 @@
 document.addEventListener("DOMContentLoaded", () => {
   // Globalna promenljiva
   let feeds = [];
+  let currentIndex = 0; // Praćenje trenutnog indeksa za swipe
+  const itemsPerPage = 5; // Broj vesti prikazanih po jednom "listanju"
 
- // Inicijalizacija Swiper-a
-  var swiper = new Swiper('.swiper-container', {
-    direction: 'horizontal',
-    loop: true,
-    pagination: {
-      el: '.swiper-pagination',
-      clickable: true,
-    },
-    navigation: {
-      nextEl: '.swiper-button-next',
-      prevEl: '.swiper-button-prev',
-    },
-  });
-  
   // Kategorije (iste kao u GPT promptu + "Uncategorized")
   const categories = [
     "Technologie",
@@ -128,15 +116,21 @@ document.addEventListener("DOMContentLoaded", () => {
     return card;
   }
 
+  // Funkcija za ažuriranje prikazanih vesti na osnovu currentIndex
+  function updateDisplayedFeeds() {
+    const container = document.getElementById('news-container');
+    container.innerHTML = ''; // očisti prethodni sadržaj
+
+    const endIndex = Math.min(currentIndex + itemsPerPage, feeds.length);
+    for (let i = currentIndex; i < endIndex; i++) {
+      const card = createNewsCard(feeds[i], false);
+      container.appendChild(card);
+    }
+  }
+
   function displayAllFeeds() {
     console.log("[displayAllFeeds] Prikaz svih feedova (sortirano)...");
-    const container = document.getElementById('news-container');
-    if (!container) {
-      console.error("[displayAllFeeds] #news-container ne postoji!");
-      return;
-    }
-    container.innerHTML = '';
-
+    // Sortiranje i filtriranje vesti
     const sorted = [...feeds].sort((a, b) => {
       const dateA = new Date(a.date_published).getTime() || 0;
       const dateB = new Date(b.date_published).getTime() || 0;
@@ -149,44 +143,17 @@ document.addEventListener("DOMContentLoaded", () => {
         uniqueFeedsMap.set(feed.id, feed);
       }
     });
-    const uniqueFeeds = Array.from(uniqueFeedsMap.values());
+    feeds = Array.from(uniqueFeedsMap.values());
 
-    if (uniqueFeeds.length === 0) {
+    if (feeds.length === 0) {
+      const container = document.getElementById('news-container');
       container.innerHTML = "<p>No news.</p>";
       return;
     }
 
-    uniqueFeeds.forEach(feed => {
-      // Na Home stranici ne koristimo lazy loading
-      container.appendChild(createNewsCard(feed, false));
-    });
-
-    createSwiperSlides(uniqueFeeds); // Poziv nakon dodavanja kartica
-    if (typeof swiper !== 'undefined') {
-  swiper.update();
-}
-  }
-
-  function createSwiperSlides(feeds) {
-    const swiperWrapper = document.querySelector('.swiper-wrapper');
-    swiperWrapper.innerHTML = ''; // Očistite prethodne slajdove
-
-    feeds.forEach(feed => {
-      const slide = document.createElement('div');
-      slide.className = 'swiper-slide';
-      slide.innerHTML = `
-        <div class="news-card">
-          <img class="news-card-image" src="${feed.image || 'https://via.placeholder.com/150'}" alt="${feed.title}">
-          <div class="news-card-content">
-            <h3 class="news-title">${feed.title}</h3>
-            <p class="news-meta">${feed.source || 'Nepoznat izvor'} • ${feed.date_published}</p>
-          </div>
-        </div>
-      `;
-      swiperWrapper.appendChild(slide);
-    });
-
-    swiper.update();
+    // Resetujemo currentIndex i prikazujemo prvi set vesti
+    currentIndex = 0;
+    updateDisplayedFeeds();
   }
 
   async function displayNewsByCategory(category) {
@@ -236,12 +203,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     sorted.forEach(newsItem => {
-      // Koristimo lazy loading za slike u ostalim kategorijama
       const card = createNewsCard(newsItem, true);
       container.appendChild(card);
     });
 
-    // Inicijalizacija IntersectionObserver-a za slike u ovoj kategoriji
+    // Inicijalizacija IntersectionObserver-a za lazy loading slika
     const lazyImages = container.querySelectorAll('img.lazy');
     if ("IntersectionObserver" in window) {
       const imageObserver = new IntersectionObserver((entries, observer) => {
@@ -341,6 +307,46 @@ document.addEventListener("DOMContentLoaded", () => {
           tabsContainer.appendChild(btn);
         });
     }
+
+    // Nakon generisanja tabova, dodajemo swipe detekciju
+    const swipeContainer = document.getElementById('news-container');
+    let touchstartX = 0;
+    let touchendX = 0;
+    const swipeThreshold = 50; // Prag za detekciju swipa
+
+    function handleGesture() {
+      if (touchendX < touchstartX - swipeThreshold) {
+        showNextContent();
+      }
+      if (touchendX > touchstartX + swipeThreshold) {
+        showPreviousContent();
+      }
+    }
+
+    if (swipeContainer) {
+      swipeContainer.addEventListener('touchstart', e => {
+        touchstartX = e.changedTouches[0].screenX;
+      });
+
+      swipeContainer.addEventListener('touchend', e => {
+        touchendX = e.changedTouches[0].screenX;
+        handleGesture();
+      });
+    }
+
+    function showNextContent() {
+      currentIndex += itemsPerPage;
+      if (currentIndex >= feeds.length) {
+        currentIndex = Math.max(feeds.length - itemsPerPage, 0);
+      }
+      updateDisplayedFeeds();
+    }
+
+    function showPreviousContent() {
+      currentIndex -= itemsPerPage;
+      if (currentIndex < 0) currentIndex = 0;
+      updateDisplayedFeeds();
+    }
   });
 
   /************************************************
@@ -422,19 +428,22 @@ document.addEventListener("DOMContentLoaded", () => {
     if (blockSourcesButton) {
       blockSourcesButton.addEventListener('click', () => {
         closeSettingsModal();
-        openBlockSourcesModal();
+        // Potrebno implementirati funkciju openBlockSourcesModal() ako postoji
+        // openBlockSourcesModal();
       });
     }
     if (blockCategoriesButton) {
       blockCategoriesButton.addEventListener('click', () => {
         closeSettingsModal();
-        openBlockCategoriesModal();
+        // Potrebno implementirati funkciju openBlockCategoriesModal() ako postoji
+        // openBlockCategoriesModal();
       });
     }
     if (rearrangeTabsButton) {
       rearrangeTabsButton.addEventListener('click', () => {
         closeSettingsModal();
-        openRearrangeModal();
+        // Potrebno implementirati funkciju openRearrangeModal() ako postoji
+        // openRearrangeModal();
       });
     }
 
