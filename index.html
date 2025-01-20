@@ -3,8 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-   <link rel="icon" href="src/icons/favicon.ico" type="image/x-icon" />
+  <link rel="icon" href="src/icons/favicon.ico" type="image/x-icon" />
   <title>DACH.news</title>
+  <!-- Učitajte Swiper CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
   <link rel="stylesheet" type="text/css" href="src/css/styles.css?v=124">
 </head>
 <body data-theme="dark">
@@ -25,15 +27,15 @@
     <button class="tab" data-tab="latest" role="tab" aria-selected="false">⏰ Latest</button>
   </div>
 
-  <!-- Dinamički generisane kartice feedova -->
+  <!-- Kontejner za vesti i Swiper -->
   <div id="news-container">
     <div class="swiper-container">
       <div class="swiper-wrapper">
         <!-- Slajdovi će biti dinamički generisani ovde -->
       </div>
-      <!-- Add Pagination -->
+      <!-- Pagination -->
       <div class="swiper-pagination"></div>
-      <!-- Add Navigation -->
+      <!-- Navigation -->
       <div class="swiper-button-next"></div>
       <div class="swiper-button-prev"></div>
     </div>
@@ -97,7 +99,9 @@
     </div>
   </div>
 
-    <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
- <script type="module" src="src/js/scripts.js"></script>
+  <!-- Učitavanje Swiper biblioteke -->
+  <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+  <!-- Učitavanje vaše JS logike -->
+  <script type="module" src="src/js/scripts.js"></script>
 </body>
 </html>
