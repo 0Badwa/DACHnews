@@ -359,7 +359,7 @@ setInterval(async () => {
   try {
     const response = await fetch(`${BASE_URL}/api/feeds`);
     const newFeeds = await response.json();
-    updateFeedDisplay(newFeeds); // Prikaz novih feedova
+  //  updateFeedDisplay(newFeeds); // Prikaz novih feedova
   } catch (error) {
     console.error("Greška pri osvežavanju feedova:", error);
   }
