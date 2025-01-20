@@ -6,6 +6,20 @@ document.addEventListener("DOMContentLoaded", () => {
   // Globalna promenljiva
   let feeds = [];
 
+ // Inicijalizacija Swiper-a
+  var swiper = new Swiper('.swiper-container', {
+    direction: 'horizontal',
+    loop: true,
+    pagination: {
+      el: '.swiper-pagination',
+      clickable: true,
+    },
+    navigation: {
+      nextEl: '.swiper-button-next',
+      prevEl: '.swiper-button-prev',
+    },
+  });
+  
   // Kategorije (iste kao u GPT promptu + "Uncategorized")
   const categories = [
     "Technologie",
@@ -148,6 +162,9 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     createSwiperSlides(uniqueFeeds); // Poziv nakon dodavanja kartica
+    if (typeof swiper !== 'undefined') {
+  swiper.update();
+}
   }
 
   function createSwiperSlides(feeds) {
@@ -464,19 +481,5 @@ document.addEventListener("DOMContentLoaded", () => {
         img.classList.remove("lazy");
       });
     }
-  });
-
-  // Inicijalizacija Swiper-a
-  var swiper = new Swiper('.swiper-container', {
-    direction: 'horizontal',
-    loop: true,
-    pagination: {
-      el: '.swiper-pagination',
-      clickable: true,
-    },
-    navigation: {
-      nextEl: '.swiper-button-next',
-      prevEl: '.swiper-button-prev',
-    },
   });
 });
