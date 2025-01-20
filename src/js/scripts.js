@@ -5,10 +5,10 @@
 document.addEventListener("DOMContentLoaded", () => {
   // Globalna promenljiva
   let feeds = [];
-  let currentIndex = 0; // Praćenje trenutnog indeksa za swipe
-  const itemsPerPage = 5; // Broj vesti prikazanih po jednom "listanju"
+  let currentIndex = 0; // Koristi se u displayAllFeeds(), ali nije promenjen za swipe kategorija
+  const itemsPerPage = 5; // Broj vesti prikazanih po jednom "listanju" (ne koristi se direktno za kategorije)
 
-  // Kategorije (iste kao u GPT promptu + "Uncategorized")
+  // Kategorije
   const categories = [
     "Technologie",
     "Gesundheit",
@@ -28,6 +28,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Pomoćna funkcija za prikaz vremena od objave u nemačkom formatu
   function timeAgo(dateString) {
+    // ... (postojeći kod ostaje nepromenjen)
     const now = new Date();
     const past = new Date(dateString);
     const seconds = Math.floor((now - past) / 1000);
@@ -51,7 +52,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function fetchAllFeedsFromServer() {
-    console.log("[fetchAllFeedsFromServer] /api/feeds...");
+    // ... (postojeći kod)
     try {
       const response = await fetch("/api/feeds");
       if (!response.ok) throw new Error("Neuspešno preuzimanje /api/feeds");
@@ -78,10 +79,8 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Funkcija kreiranja kartice sa mogućnošću lazy loading-a
   function createNewsCard(feed, useLazy = false) {
-    console.log(`Kreiram karticu: ${feed.title} u kategoriji: ${feed.category}`);
-    
+    // ... (postojeći kod za kreiranje kartice)
     const card = document.createElement('div');
     card.className = "news-card";
 
@@ -116,21 +115,26 @@ document.addEventListener("DOMContentLoaded", () => {
     return card;
   }
 
-  // Funkcija za ažuriranje prikazanih vesti na osnovu currentIndex
   function updateDisplayedFeeds() {
     const container = document.getElementById('news-container');
-    container.innerHTML = ''; // očisti prethodni sadržaj
+    container.innerHTML = ''; // Očisti prethodni sadržaj
 
-    const endIndex = Math.min(currentIndex + itemsPerPage, feeds.length);
-    for (let i = currentIndex; i < endIndex; i++) {
-      const card = createNewsCard(feeds[i], false);
+    // Prikazuje sve vesti iz trenutne kategorije
+    feeds.forEach(feed => {
+      const card = createNewsCard(feed, false);
       container.appendChild(card);
-    }
+    });
   }
 
   function displayAllFeeds() {
     console.log("[displayAllFeeds] Prikaz svih feedova (sortirano)...");
-    // Sortiranje i filtriranje vesti
+    const container = document.getElementById('news-container');
+    if (!container) {
+      console.error("[displayAllFeeds] #news-container ne postoji!");
+      return;
+    }
+    container.innerHTML = '';
+
     const sorted = [...feeds].sort((a, b) => {
       const dateA = new Date(a.date_published).getTime() || 0;
       const dateB = new Date(b.date_published).getTime() || 0;
@@ -146,17 +150,18 @@ document.addEventListener("DOMContentLoaded", () => {
     feeds = Array.from(uniqueFeedsMap.values());
 
     if (feeds.length === 0) {
-      const container = document.getElementById('news-container');
       container.innerHTML = "<p>No news.</p>";
       return;
     }
 
-    // Resetujemo currentIndex i prikazujemo prvi set vesti
+    // Resetujemo currentIndex (mada se ovde ne koristi za kategorije)
     currentIndex = 0;
     updateDisplayedFeeds();
   }
 
   async function displayNewsByCategory(category) {
+    // ... (postojeći kod za dohvat i prikaz kategorijskih vesti)
+    // Ovaj deo ostaje isti
     if (category.toLowerCase() === 'lgbt' || category.toLowerCase() === 'lgbt+') {
       category = 'LGBT+';
     }
@@ -301,14 +306,19 @@ document.addEventListener("DOMContentLoaded", () => {
             removeActiveClass();
             ev.target.classList.add('active');
             ev.target.setAttribute('aria-selected', 'true');
-            displayNewsByCategory(cat);
+            // Prilikom klika na tab ažuriramo prikaz
+            if (cat === 'home') {
+              displayAllFeeds();
+            } else {
+              displayNewsByCategory(cat);
+            }
           });
 
           tabsContainer.appendChild(btn);
         });
     }
 
-    // Nakon generisanja tabova, dodajemo swipe detekciju
+    // Dodavanje swipe detekcije za promenu kategorija
     const swipeContainer = document.getElementById('news-container');
     let touchstartX = 0;
     let touchendX = 0;
@@ -316,10 +326,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function handleGesture() {
       if (touchendX < touchstartX - swipeThreshold) {
-        showNextContent();
+        showNextCategory();
       }
       if (touchendX > touchstartX + swipeThreshold) {
-        showPreviousContent();
+        showPreviousCategory();
       }
     }
 
@@ -334,26 +344,42 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
 
-    function showNextContent() {
-      currentIndex += itemsPerPage;
-      if (currentIndex >= feeds.length) {
-        currentIndex = Math.max(feeds.length - itemsPerPage, 0);
+    function showNextCategory() {
+      // Pronađi trenutni aktivni tab
+      const activeTab = document.querySelector('.tab.active');
+      if (!activeTab) return;
+      const currentCat = activeTab.getAttribute('data-tab');
+      let currentIndex = categories.indexOf(currentCat);
+      // Ako je poslednja kategorija, ostani na njoj
+      if (currentIndex < categories.length - 1) {
+        currentIndex++;
+        const nextCat = categories[currentIndex];
+        // Pronađi dugme za sledeću kategoriju i simuliraj klik
+        const nextTab = document.querySelector(`.tab[data-tab="${nextCat}"]`);
+        if (nextTab) nextTab.click();
       }
-      updateDisplayedFeeds();
     }
 
-    function showPreviousContent() {
-      currentIndex -= itemsPerPage;
-      if (currentIndex < 0) currentIndex = 0;
-      updateDisplayedFeeds();
+    function showPreviousCategory() {
+      const activeTab = document.querySelector('.tab.active');
+      if (!activeTab) return;
+      const currentCat = activeTab.getAttribute('data-tab');
+      let currentIndex = categories.indexOf(currentCat);
+      // Ako je prva kategorija, ostani na njoj
+      if (currentIndex > 0) {
+        currentIndex--;
+        const prevCat = categories[currentIndex];
+        const prevTab = document.querySelector(`.tab[data-tab="${prevCat}"]`);
+        if (prevTab) prevTab.click();
+      }
     }
   });
 
   /************************************************
    * Settings Menu funkcionalnost
    ************************************************/
-
-  // Otvaranje i zatvaranje Settings modala
+  // ... (postojeći kod za Settings meni)
+  
   function openSettingsModal() {
     const settingsModal = document.getElementById('settings-modal');
     if (settingsModal) {
@@ -368,7 +394,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // Promena teme
   const root = document.documentElement;
   function toggleTheme() {
     const currentTheme = root.getAttribute('data-theme');
@@ -381,7 +406,6 @@ document.addEventListener("DOMContentLoaded", () => {
     localStorage.setItem('theme', newTheme);
   }
 
-  // Promena veličine fonta
   function changeFontSize(delta) {
     const body = document.body;
     const currentSize = parseInt(window.getComputedStyle(body).fontSize);
@@ -392,7 +416,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // Event listeneri za Settings meni
   document.addEventListener('DOMContentLoaded', () => {
     const menuButton = document.getElementById('menu-button');
     const closeSettingsButton = document.getElementById('close-settings');
@@ -406,48 +429,40 @@ document.addEventListener("DOMContentLoaded", () => {
     if (menuButton) {
       menuButton.addEventListener('click', openSettingsModal);
     }
-
     if (closeSettingsButton) {
       closeSettingsButton.addEventListener('click', closeSettingsModal);
     }
-
     if (themeToggleBtn) {
       themeToggleBtn.addEventListener('click', () => {
         toggleTheme();
         closeSettingsModal();
       });
     }
-
     if (fontIncreaseButton) {
       fontIncreaseButton.addEventListener('click', () => changeFontSize(1));
     }
     if (fontDecreaseButton) {
       fontDecreaseButton.addEventListener('click', () => changeFontSize(-1));
     }
-
     if (blockSourcesButton) {
       blockSourcesButton.addEventListener('click', () => {
         closeSettingsModal();
-        // Potrebno implementirati funkciju openBlockSourcesModal() ako postoji
-        // openBlockSourcesModal();
+        // Implementacija openBlockSourcesModal() ako postoji
       });
     }
     if (blockCategoriesButton) {
       blockCategoriesButton.addEventListener('click', () => {
         closeSettingsModal();
-        // Potrebno implementirati funkciju openBlockCategoriesModal() ako postoji
-        // openBlockCategoriesModal();
+        // Implementacija openBlockCategoriesModal() ako postoji
       });
     }
     if (rearrangeTabsButton) {
       rearrangeTabsButton.addEventListener('click', () => {
         closeSettingsModal();
-        // Potrebno implementirati funkciju openRearrangeModal() ako postoji
-        // openRearrangeModal();
+        // Implementacija openRearrangeModal() ako postoji
       });
     }
 
-    // Inicijalizacija teme i font veličine
     const savedFontSize = localStorage.getItem('fontSize');
     if (savedFontSize) {
       document.body.style.fontSize = savedFontSize + 'px';
@@ -461,7 +476,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   console.log('Script loaded');
 
-  // Lazy Loading implementacija
   document.addEventListener("DOMContentLoaded", function() {
     const lazyImages = document.querySelectorAll('img.lazy');
 
