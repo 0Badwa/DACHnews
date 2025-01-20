@@ -61,7 +61,10 @@ body[data-theme="dark"] {
  * Header (nav)
  ************************************************/
 nav {
-  position: relative;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
   background-color: var(--primary-color);
   color: white;
   height: 60px;
@@ -135,6 +138,11 @@ nav .menu button {
  * Tabovi (tabs-container)
  ************************************************/
 .tabs-container {
+  position: fixed;
+  top: 50px; /* visina nav */
+  left: 0;
+  right: 0;
+  z-index: 999;
   background-color: var(--secondary-color);
   border-bottom: 2px solid var(--border-color);
   overflow-x: auto;
@@ -320,17 +328,19 @@ img.lazy.loaded {
  * Indikator kategorije i animacije (nova logika)
  ************************************************/
 .category-indicator {
-  position: sticky;
-  padding: 3px;  /* Smanji padding za manje visine */
-  margin: 3px 0; /* Prilagodi marginu po potrebi */
+ position: fixed;
+  top: 50px; /* visina nav */
+  left: 0;
+  right: 0;
+  padding: 5px;  /* Smanji padding za manje visine */
+  margin: 0px 0; /* Prilagodi marginu po potrebi */
   font-size: 1.1em;
   font-weight: bold;
   margin: 5px;
   text-align: center;
   color: var(--primary-color);
-  top: 0;
   background: var(--secondary-color);
-  z-index: 1100;
+  z-index: 998;                     /* bio je 1100 */
   font-family: 'Arial', sans-serif; /* ili neki drugi font */
 }
 
@@ -357,4 +367,24 @@ img.lazy.loaded {
   color: white;
   border-radius: 5px;
   padding: 0.5rem 1rem;
+}
+
+
+/* Podešavanje margina za sadržaj ispod fiksiranih elemenata */
+#news-container {
+  margin-top: 100px; /* prilagodite prema visini nav + tab + indikator */
+  overflow-y: auto;
+  padding: 1rem;
+}
+
+
+/************************************************
+ * Stilizovanje izvora i vremena
+ ************************************************/
+.news-meta .source {
+  text-transform: uppercase;
+}
+
+.news-meta .time {
+  text-transform: lowercase;
 }
