@@ -320,44 +320,20 @@ img.lazy.loaded {
  * Indikator kategorije i animacije (nova logika)
  ************************************************/
 .category-indicator {
+  position: sticky;
   padding: 3px;  /* Smanji padding za manje visine */
   margin: 3px 0; /* Prilagodi marginu po potrebi */
   font-size: 1.1em;
- font-weight: bold;
-  margin: 10px;
+  font-weight: bold;
+  margin: 5px;
   text-align: center;
   color: var(--primary-color);
-}
-
-.fade-out {
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-
-.fade-in {
-  opacity: 1;
-  transition: opacity 0.3s;
-}
-
-.active-green {
-  border: 2px solid green;
-}
-
-
-/************************************************
- * Indikator kategorije i animacije
- ************************************************/
-.category-indicator {
-  position: sticky;
   top: 0;
   background: var(--secondary-color);
   z-index: 1100;
-  font-size: 1.2em;
   font-family: 'Arial', sans-serif; /* ili neki drugi font */
-  margin: 10px;
-  text-align: center;
-  color: var(--primary-color);
 }
+
 
 .fade-out {
   opacity: 0;
@@ -372,6 +348,7 @@ img.lazy.loaded {
 .active-green {
   border: 2px solid green;
 }
+
 
 
 .tab.active {
