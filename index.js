@@ -112,7 +112,7 @@ async function sendBatchToGPT(feedBatch) {
 - Unterhaltung
 - Welt
 
-Pri kategorizaciji, obavezno vodi računa o specifičnostima tih zemalja i njihove političke, društvene i kulturne karakteristike. Ako vest sadrži informacije koje se jasno odnose na neku od gore navedenih kategorija, postavi je u odgovarajuću. Pokušaj da budeš precizniji u prepoznavanju ključnih reči i konteksta, posebno kada se radi o poznatim ličnostima ili važnim događajima koji mogu imati specifičnu kategoriju: { "id": "...", "category": "..." }`
+Pri kategorizaciji, obavezno vodi računa o specifičnostima tih zemalja i njihove političke, društvene i kulturne karakteristike. Ako vest sadrži informacije koje se jasno odnose na neku od gore navedenih kategorija, postavi je u odgovarajuću. Pokušaj da budeš precizniji u prepoznavanju ključnih reči i konteksta, posebno kada se radi o poznatim ličnostima ili važnim događajima koji mogu imati specifičnu kategoriju. Molim te vrati isključivo JSON niz gde je svaki element: { "id": "...", "category": "..." }`
       },
       {
         role: "user",
