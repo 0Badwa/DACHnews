@@ -129,6 +129,9 @@ document.addEventListener("DOMContentLoaded", () => {
       return dateB - dateA;
     });
 
+createSwiperSlides(sorted);
+}
+    
     const uniqueFeedsMap = new Map();
     sorted.forEach(feed => {
       if (!uniqueFeedsMap.has(feed.id)) {
@@ -442,3 +445,38 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
+
+
+// Inicijalizacija Swiper-a
+var swiper = new Swiper('.swiper-container', {
+  direction: 'horizontal',
+  loop: true,
+  pagination: {
+    el: '.swiper-pagination',
+    clickable: true,
+  },
+  navigation: {
+    nextEl: '.swiper-button-next',
+    prevEl: '.swiper-button-prev',
+  },
+});
+
+// Funkcija za kreiranje Swiper kartica
+function createSwiperSlides(feeds) {
+  const swiperWrapper = document.querySelector('.swiper-wrapper');
+  feeds.forEach(feed => {
+    const slide = document.createElement('div');
+    slide.className = 'swiper-slide';
+    slide.innerHTML = `
+      <div class="news-card">
+        <img class="news-card-image" src="${feed.image || 'https://via.placeholder.com/150'}" alt="${feed.title}">
+        <div class="news-card-content">
+          <h3 class="news-title">${feed.title}</h3>
+          <p class="news-meta">${feed.source || 'Nepoznat izvor'} • ${feed.date_published}</p>
+        </div>
+      </div>
+    `;
+    swiperWrapper.appendChild(slide);
+  });
+  swiper.update();
+}
