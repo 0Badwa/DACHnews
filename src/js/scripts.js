@@ -464,8 +464,6 @@ function createSwiperSlides(feeds) {
       });
     }
   });
-});
-
 
 // Inicijalizacija Swiper-a
 var swiper = new Swiper('.swiper-container', {
