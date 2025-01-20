@@ -2,7 +2,7 @@
  * Osnovne varijable za boje i veličine
  ************************************************/
 :root {
-  --background-color: #121212;
+  --background-color: #121212; /* Default dark background */
   --text-color: #ffffff;
   --primary-color: #1DB954;
   --secondary-color: #1c1c1c;
@@ -20,13 +20,15 @@
   --border-color: #333;
 }
 
-/* :root[data-theme="light"] {
+/*
+:root[data-theme="light"] {
   --background-color: #ffffff;
   --text-color: #000000;
   --primary-color: #04AA6D;
   --secondary-color: #f4f4f4;
   --border-color: #ddd;
-} */
+}
+*/
 
 /************************************************
  * Globalni stil
@@ -37,9 +39,9 @@ html, body {
   margin: 0;
   padding: 0;
   overflow-x: hidden;
-  background-color: #121212  !important;
+  background-color: var(--background-color) !important;
   color: var(--text-color);
-  font-family: Arial, sans-serif;
+  font-family: var(--font-family);
   font-size: var(--font-size);
   line-height: 1.2;
   -webkit-overflow-scrolling: touch;
@@ -82,7 +84,7 @@ nav .menu {
 }
 nav .menu button {
   background-color: transparent;
-  color: #000000;
+  color: #000;
   border: 2px solid var(--primary-color);
   padding: 0.32rem;
   border-radius: 5px;
@@ -160,7 +162,7 @@ nav .menu button {
 }
 
 /************************************************
- * Kartice za vesti (news-card) – stil kao stari
+ * Kartice za vesti (news-card)
  ************************************************/
 .news-card {
   display: flex;
@@ -176,17 +178,6 @@ nav .menu button {
   transform: scale(1.02);
 }
 
-/* Omot za sliku, opciono ga možete držati */
-.image-wrapper {
-  width: 90px;
-  height: 90px;
-  overflow: hidden;
-  margin-right: 0.8rem;
-  position: relative;
-  text-align: center;
-}
-
-/* Slika unutar kartice */
 .news-card img {
   border-radius: 5px;
   width: 90px;
@@ -195,84 +186,23 @@ nav .menu button {
   margin-right: 0.8rem;
 }
 
-/************************************************
- * Naslov i tekst unutar kartice
- ************************************************/
-.news-title {
+.news-card-content h3 {
+  font-family: var(--font-family);
+}
+
+.news-card-content .news-title {
   font-size: var(--news-title-font-size);
   color: var(--primary-color);
   text-decoration: none;
   margin: 0 0 0.5rem;
   font-weight: bold;
-  overflow: hidden;
-  text-overflow: ellipsis;
   line-height: 1.3;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
 }
 
 .news-meta {
   font-size: 0.8rem;
   margin: 0;
   color: var(--text-color);
-}
-
-.news-card h3 a,
-.news-card h3 a:visited,
-.news-card h3 a:hover,
-.news-card h3 a:active,
-.news-card h3 a:focus {
-  color: inherit;
-  text-decoration: none !important;
-}
-
-/************************************************
- * Tab-content
- ************************************************/
-.tab-content {
-  display: none;
-}
-.tab-content.active {
-  display: block;
-}
-
-/************************************************
- * Responsivnost - primer za mobilne
- ************************************************/
-@media (max-width: 768px) {
-  nav img {
-    height: 40px;
-  }
-  .tabs-container button {
-    font-size: 0.9rem;
-    padding: 0.4rem 0.8rem;
-  }
-}
-
-:root[data-theme="dark"] .news-card {
-  background-color: #000;
-  border: 1px solid var(--border-color);
-}
-
-:root[data-theme="dark"] .news-card .news-title {
-  color: var(--primary-color);
-}
-
-:root[data-theme="dark"] .news-card .news-meta {
-  color: var(--text-color);
-}
-
-:root[data-theme="dark"] .news-card img {
-  border: none;
-}
-
-.news-card-content h3 {
-  font-family: var(--font-family);
-}
-
-.news-card-content .news-meta {
-  font-family: var(--font-family);
 }
 
 /************************************************
@@ -341,6 +271,9 @@ nav .menu button {
   cursor: pointer;
 }
 
+/************************************************
+ * Lazy Loading
+ ************************************************/
 img.lazy {
   filter: blur(5px);
   transition: filter 0.3s;
@@ -349,9 +282,38 @@ img.lazy.loaded {
   filter: none;
 }
 
+/************************************************
+ * Responsivnost - primer za mobilne
+ ************************************************/
+@media (max-width: 768px) {
+  nav img {
+    height: 40px;
+  }
+  .tabs-container button {
+    font-size: 0.9rem;
+    padding: 0.4rem 0.8rem;
+  }
+}
+
+:root[data-theme="dark"] .news-card {
+  background-color: #000;
+  border: 1px solid var(--border-color);
+}
+
+:root[data-theme="dark"] .news-card .news-title {
+  color: var(--primary-color);
+}
+
+:root[data-theme="dark"] .news-card .news-meta {
+  color: var(--text-color);
+}
+
+:root[data-theme="dark"] .news-card img {
+  border: none;
+}
 
 /************************************************
- * Dodatne klase za animacije i indikatore
+ * Indikator kategorije i animacije (nova logika)
  ************************************************/
 .category-indicator {
   font-size: 1.2em;
@@ -371,5 +333,5 @@ img.lazy.loaded {
 }
 
 .active-green {
-  border: 2px solid green; /* ili prilagodi stil prema dizajnu */
+  border: 2px solid green;
 }
