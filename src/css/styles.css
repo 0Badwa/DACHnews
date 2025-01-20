@@ -139,7 +139,7 @@ nav .menu button {
  ************************************************/
 .tabs-container {
   position: fixed;
-  top: 80px; /* visina nav */
+  top: 60px; /* visina nav */
   left: 0;
   right: 0;
   z-index: 999;
@@ -158,7 +158,7 @@ nav .menu button {
   font-family: 'Arial', sans-serif; /* ili neki drugi font */
   font-size: 1.1rem;
   font-weight: bold; cursor: pointer;
-  padding: 0.5rem 1rem;
+  padding: 0.7rem 1rem;
   flex-shrink: 0;
   transition: background-color 0.3s, color 0.3s;
 }
