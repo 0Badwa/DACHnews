@@ -348,8 +348,12 @@ img.lazy.loaded {
  * Indikator kategorije i animacije
  ************************************************/
 .category-indicator {
+  position: sticky;
+  top: 0;
+  background: var(--secondary-color);
+  z-index: 1100;
   font-size: 1.2em;
-    font-family: 'Arial', sans-serif; /* ili neki drugi font */
+  font-family: 'Arial', sans-serif; /* ili neki drugi font */
   margin: 10px;
   text-align: center;
   color: var(--primary-color);
@@ -367,4 +371,13 @@ img.lazy.loaded {
 
 .active-green {
   border: 2px solid green;
+}
+
+
+.tab.active {
+  /* Dodajte stilove za aktivni tab */
+  background: rgba(4, 170, 109, 0.5);
+  color: white;
+  border-radius: 5px;
+  padding: 0.5rem 1rem;
 }
