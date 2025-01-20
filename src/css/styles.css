@@ -75,7 +75,7 @@ nav {
   z-index: 1000;
 }
 nav img {
-  height: 50px;
+  height: 60px;
   width: auto;
 }
 
@@ -139,7 +139,7 @@ nav .menu button {
  ************************************************/
 .tabs-container {
   position: fixed;
-  top: 50px; /* visina nav */
+  top: 80px; /* visina nav */
   left: 0;
   right: 0;
   z-index: 999;
@@ -332,8 +332,8 @@ img.lazy.loaded {
   top: 50px; /* visina nav */
   left: 0;
   right: 0;
-  padding: 5px;  /* Smanji padding za manje visine */
-  margin: 0px 0; /* Prilagodi marginu po potrebi */
+  padding: 2px;  /* Smanji padding za manje visine */
+  margin: 2px 0; /* Prilagodi marginu po potrebi */
   font-size: 1.1em;
   font-weight: bold;
   margin: 5px;
