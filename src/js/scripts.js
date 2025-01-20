@@ -114,42 +114,41 @@ document.addEventListener("DOMContentLoaded", () => {
     return card;
   }
 
-  function displayAllFeeds() {
-    console.log("[displayAllFeeds] Prikaz svih feedova (sortirano)...");
-    const container = document.getElementById('news-container');
-    if (!container) {
-      console.error("[displayAllFeeds] #news-container ne postoji!");
-      return;
-    }
-    container.innerHTML = '';
-
-    const sorted = [...feeds].sort((a, b) => {
-      const dateA = new Date(a.date_published).getTime() || 0;
-      const dateB = new Date(b.date_published).getTime() || 0;
-      return dateB - dateA;
-    });
-
-createSwiperSlides(sorted);
-}
-    
-    const uniqueFeedsMap = new Map();
-    sorted.forEach(feed => {
-      if (!uniqueFeedsMap.has(feed.id)) {
-        uniqueFeedsMap.set(feed.id, feed);
-      }
-    });
-    const uniqueFeeds = Array.from(uniqueFeedsMap.values());
-
-    if (uniqueFeeds.length === 0) {
-      container.innerHTML = "<p>Nema vesti.</p>";
-      return;
-    }
-
-    uniqueFeeds.forEach(feed => {
-      // Na Home stranici ne koristimo lazy loading
-      container.appendChild(createNewsCard(feed, false));
-    });
+function displayAllFeeds() {
+  console.log("[displayAllFeeds] Prikaz svih feedova (sortirano)...");
+  const container = document.getElementById('news-container');
+  if (!container) {
+    console.error("[displayAllFeeds] #news-container ne postoji!");
+    return;
   }
+  container.innerHTML = '';
+
+  const sorted = [...feeds].sort((a, b) => {
+    const dateA = new Date(a.date_published).getTime() || 0;
+    const dateB = new Date(b.date_published).getTime() || 0;
+    return dateB - dateA;
+  });
+
+  const uniqueFeedsMap = new Map();
+  sorted.forEach(feed => {
+    if (!uniqueFeedsMap.has(feed.id)) {
+      uniqueFeedsMap.set(feed.id, feed);
+    }
+  });
+  const uniqueFeeds = Array.from(uniqueFeedsMap.values());
+
+  if (uniqueFeeds.length === 0) {
+    container.innerHTML = "<p>Nema vesti.</p>";
+    return;
+  }
+
+  uniqueFeeds.forEach(feed => {
+    // Na Home stranici ne koristimo lazy loading
+    container.appendChild(createNewsCard(feed, false));
+  });
+
+  createSwiperSlides(uniqueFeeds);
+}
 
   async function displayNewsByCategory(category) {
     if (category.toLowerCase() === 'lgbt' || category.toLowerCase() === 'lgbt+') {
