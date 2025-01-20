@@ -5,8 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <link rel="icon" href="src/icons/favicon.ico" type="image/x-icon" />
   <title>DACH.news</title>
-  <!-- Učitajte Swiper CSS -->
-
   <link rel="stylesheet" type="text/css" href="src/css/styles.css?v=124">
 </head>
 <body data-theme="dark">
@@ -22,23 +20,12 @@
 
   <!-- Dinamički generisani tabovi -->
   <div class="tabs-container" role="tablist" id="tabs-container">
-    <!-- Statički definisani tabovi -->
-    <button class="tab active" data-tab="home" role="tab" aria-selected="true">🏠 Home</button>
-    <button class="tab" data-tab="latest" role="tab" aria-selected="false">⏰ Latest</button>
+    <!-- Statički definisani tabovi će biti generisani JavaScript-om -->
   </div>
 
-  <!-- Kontejner za vesti i Swiper -->
+  <!-- Kontejner za vesti -->
   <div id="news-container">
-    <div class="swiper-container">
-      <div class="swiper-wrapper">
-        <!-- Slajdovi će biti dinamički generisani ovde -->
-      </div>
-      <!-- Pagination -->
-      <div class="swiper-pagination"></div>
-      <!-- Navigation -->
-      <div class="swiper-button-next"></div>
-      <div class="swiper-button-prev"></div>
-    </div>
+    <!-- Vest će biti dinamički generisane kartice -->
   </div>
 
   <!-- Modal za Tabs anordnen -->
@@ -99,8 +86,6 @@
     </div>
   </div>
 
-  <!-- Učitavanje Swiper biblioteke -->
-  <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
   <!-- Učitavanje vaše JS logike -->
   <script type="module" src="src/js/scripts.js"></script>
 </body>
