@@ -144,20 +144,30 @@ document.addEventListener("DOMContentLoaded", () => {
     title.className = "news-title";
     title.textContent = feed.title || 'No title';
 
-    const source = document.createElement('p');
-    source.className = "news-meta";
-    const sourceName = feed.source || 'Nepoznat izvor';
-    const timeString = feed.date_published ? timeAgo(feed.date_published) : '';
-    source.textContent = `${sourceName} • ${timeString}`;
+const meta = document.createElement('p');
+  meta.className = "news-meta";
+    
+   // Odvajanje izvora i vremena
+  const sourceSpan = document.createElement('span');
+  sourceSpan.className = "source";
+  const sourceName = feed.source || 'Nepoznat izvor';
+  sourceSpan.textContent = sourceName;
 
-    // Sklopi karticu
-    contentDiv.appendChild(title);
-    contentDiv.appendChild(source);
-    card.appendChild(img);
-    card.appendChild(contentDiv);
+  const timeSpan = document.createElement('span');
+  timeSpan.className = "time";
+  const timeString = feed.date_published ? timeAgo(feed.date_published) : '';
+  timeSpan.textContent = ` • ${timeString}`;
 
-    return card;
-  }
+  meta.appendChild(sourceSpan);
+  meta.appendChild(timeSpan);
+
+  contentDiv.appendChild(title);
+  contentDiv.appendChild(meta);
+  card.appendChild(img);
+  card.appendChild(contentDiv);
+
+  return card;
+}
 
   function displayFeedsList(feedsList, categoryName) {
     const container = document.getElementById('news-container');
