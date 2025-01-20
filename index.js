@@ -12,6 +12,8 @@ import path from 'path';
 import axios from 'axios';
 import { fileURLToPath } from 'url';
 
+const BASE_URL = 'https://dachnews.onrender.com';
+
 // Pomoćne promenljive za __dirname u ES modulu
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -355,7 +357,7 @@ setInterval(processLGBTFeed, 13 * 60 * 1000);
 
 setInterval(async () => {
   try {
-    const response = await fetch('/api/feeds');
+    const response = await fetch(`${BASE_URL}/api/feeds`);
     const newFeeds = await response.json();
     updateFeedDisplay(newFeeds); // Prikaz novih feedova
   } catch (error) {
