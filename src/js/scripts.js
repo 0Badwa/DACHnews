@@ -138,7 +138,7 @@ function displayAllFeeds() {
   const uniqueFeeds = Array.from(uniqueFeedsMap.values());
 
   if (uniqueFeeds.length === 0) {
-    container.innerHTML = "<p>Nema vesti.</p>";
+    container.innerHTML = "<p>No news.</p>";
     return;
   }
 
@@ -151,6 +151,27 @@ function displayAllFeeds() {
   });
 }
 
+function createSwiperSlides(feeds) {
+  const swiperWrapper = document.querySelector('.swiper-wrapper');
+  swiperWrapper.innerHTML = ''; // Očistite prethodne slajdove
+
+  feeds.forEach(feed => {
+    const slide = document.createElement('div');
+    slide.className = 'swiper-slide';
+    slide.innerHTML = `
+      <div class="news-card">
+        <img class="news-card-image" src="${feed.image || 'https://via.placeholder.com/150'}" alt="${feed.title}">
+        <div class="news-card-content">
+          <h3 class="news-title">${feed.title}</h3>
+          <p class="news-meta">${feed.source || 'Nepoznat izvor'} • ${feed.date_published}</p>
+        </div>
+      </div>
+    `;
+    swiperWrapper.appendChild(slide);
+  });
+
+  swiper.update();
+  
   async function displayNewsByCategory(category) {
     if (category.toLowerCase() === 'lgbt' || category.toLowerCase() === 'lgbt+') {
       category = 'LGBT+';
@@ -461,25 +482,4 @@ var swiper = new Swiper('.swiper-container', {
   },
 });
 
-// Funkcija za kreiranje Swiper kartica
-function createSwiperSlides(feeds) {
-  const swiperWrapper = document.querySelector('.swiper-wrapper');
-  swiperWrapper.innerHTML = ''; // Očistite prethodne slajdove
 
-  feeds.forEach(feed => {
-    const slide = document.createElement('div');
-    slide.className = 'swiper-slide';
-    slide.innerHTML = `
-      <div class="news-card">
-        <img class="news-card-image" src="${feed.image || 'https://via.placeholder.com/150'}" alt="${feed.title}">
-        <div class="news-card-content">
-          <h3 class="news-title">${feed.title}</h3>
-          <p class="news-meta">${feed.source || 'Nepoznat izvor'} • ${feed.date_published}</p>
-        </div>
-      </div>
-    `;
-    swiperWrapper.appendChild(slide);
-  });
-
-  swiper.update();
-}
