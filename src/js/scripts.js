@@ -267,4 +267,241 @@ document.addEventListener("DOMContentLoaded", () => {
   // --------------------------------------------
   // Inicijalizacija nakon main() - tabovi i swipe
   // --------------------------------------------
-  main().then(() 
+  main().then(() => {
+    const homeTab = document.querySelector('.tab[data-tab="home"]');
+    const latestTab = document.querySelector('.tab[data-tab="latest"]');
+    const tabsContainer = document.getElementById('tabs-container');
+
+    // Sakrij zeleni pravougaonik pri učitavanju (za "latest")
+    hideGreenRectangle();
+
+    // Ručni klik na Home tab => prikaži "home" feed (isto što i latest)
+    if (homeTab) {
+      homeTab.addEventListener('click', (e) => {
+        removeActiveClass();
+        e.target.classList.add('active');
+        e.target.setAttribute('aria-selected', 'true');
+        // Home tab se ponaša isto kao i Latest
+        displayAllFeeds();
+        showGreenRectangle();
+      });
+    }
+
+    // Ručni klik na Latest tab => prikaži "latest" feed
+    if (latestTab) {
+      latestTab.addEventListener('click', (e) => {
+        removeActiveClass();
+        e.target.classList.add('active');
+        e.target.setAttribute('aria-selected', 'true');
+        displayAllFeeds();
+        showGreenRectangle();
+      });
+    }
+
+    // Generišemo tabove za ostale kategorije
+    if (tabsContainer) {
+      // Možeš da isključiš neke kategorije iz generate ako želiš
+      const skipList = [];
+
+      categories
+        .filter(cat => !skipList.includes(cat))
+        .forEach(cat => {
+          const btn = document.createElement('button');
+          btn.classList.add('tab');
+          btn.setAttribute('data-tab', cat);
+          btn.setAttribute('role', 'tab');
+          btn.setAttribute('aria-selected', 'false');
+          btn.textContent = cat;
+
+          btn.addEventListener('click', (ev) => {
+            removeActiveClass();
+            ev.target.classList.add('active');
+            ev.target.setAttribute('aria-selected', 'true');
+            showGreenRectangle();
+
+            displayNewsByCategory(cat);
+          });
+
+          tabsContainer.appendChild(btn);
+        });
+    }
+
+    // -------------------------------
+    // Swipe detekcija za promenu kategorija
+    // -------------------------------
+    const swipeContainer = document.getElementById('news-container');
+    let touchstartX = 0;
+    let touchendX = 0;
+    const swipeThreshold = 50;
+
+    function handleGesture() {
+      if (!firstSwipeOccurred) {
+        firstSwipeOccurred = true;
+        showGreenRectangle();
+      }
+      if (touchendX < touchstartX - swipeThreshold) {
+        showNextCategory();
+      } else if (touchendX > touchstartX + swipeThreshold) {
+        showPreviousCategory();
+      }
+    }
+
+    if (swipeContainer) {
+      swipeContainer.addEventListener('touchstart', e => {
+        touchstartX = e.changedTouches[0].screenX;
+      });
+
+      swipeContainer.addEventListener('touchend', e => {
+        touchendX = e.changedTouches[0].screenX;
+        handleGesture();
+      });
+    }
+
+    // Pravimo listu svih kategorija za swipe redom: home, latest, pa ostale
+    const fullCategoryList = ["home", "latest", ...categories];
+
+    function showNextCategory() {
+      const activeTab = document.querySelector('.tab.active');
+      if (!activeTab) return;
+      const currentCat = activeTab.getAttribute('data-tab');
+      let currentIdx = fullCategoryList.indexOf(currentCat.toLowerCase());
+      if (currentIdx < 0) currentIdx = 0; // ako iz nekog razloga ne postoji
+      if (currentIdx < fullCategoryList.length - 1) {
+        currentIdx++;
+        const nextCat = fullCategoryList[currentIdx];
+        // Pronađi tab i klikni ga
+        const nextTab = document.querySelector(`.tab[data-tab="${nextCat}"]`);
+        if (nextTab) nextTab.click();
+      }
+    }
+
+    function showPreviousCategory() {
+      const activeTab = document.querySelector('.tab.active');
+      if (!activeTab) return;
+      const currentCat = activeTab.getAttribute('data-tab');
+      let currentIdx = fullCategoryList.indexOf(currentCat.toLowerCase());
+      if (currentIdx < 0) currentIdx = 0;
+      if (currentIdx > 0) {
+        currentIdx--;
+        const prevCat = fullCategoryList[currentIdx];
+        const prevTab = document.querySelector(`.tab[data-tab="${prevCat}"]`);
+        if (prevTab) prevTab.click();
+      }
+    }
+  });
+
+  // --------------------------------------------
+  // Settings Menu funkcionalnost
+  // --------------------------------------------
+  function openSettingsModal() {
+    const settingsModal = document.getElementById('settings-modal');
+    if (settingsModal) {
+      settingsModal.style.display = 'flex';
+    }
+  }
+
+  function closeSettingsModal() {
+    const settingsModal = document.getElementById('settings-modal');
+    if (settingsModal) {
+      settingsModal.style.display = 'none';
+    }
+  }
+
+  function toggleTheme() {
+    const root = document.documentElement;
+    const currentTheme = root.getAttribute('data-theme') || 'dark';
+    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+    root.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+
+    // Ako postoji dugme za promenu teme, ažuriraj njegov tekst
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    if (themeToggleBtn) {
+      themeToggleBtn.textContent = newTheme === 'light' ? 'Dark Modus' : 'Licht Modus';
+    }
+  }
+
+  function changeFontSize(delta) {
+    const body = document.body;
+    const currentSize = parseInt(window.getComputedStyle(body).fontSize);
+    const newSize = currentSize + delta;
+    if (newSize >= 12 && newSize <= 24) {
+      body.style.fontSize = newSize + 'px';
+      localStorage.setItem('fontSize', newSize);
+    }
+  }
+
+  // Inicijalizacija Settings menija
+  document.addEventListener('DOMContentLoaded', () => {
+    const menuButton = document.getElementById('menu-button');
+    const closeSettingsButton = document.getElementById('close-settings');
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    const fontIncreaseButton = document.getElementById('font-increase');
+    const fontDecreaseButton = document.getElementById('font-decrease');
+
+    if (menuButton) {
+      menuButton.addEventListener('click', openSettingsModal);
+    }
+    if (closeSettingsButton) {
+      closeSettingsButton.addEventListener('click', closeSettingsModal);
+    }
+    if (themeToggleBtn) {
+      themeToggleBtn.addEventListener('click', () => {
+        toggleTheme();
+        closeSettingsModal();
+      });
+    }
+    if (fontIncreaseButton) {
+      fontIncreaseButton.addEventListener('click', () => changeFontSize(1));
+    }
+    if (fontDecreaseButton) {
+      fontDecreaseButton.addEventListener('click', () => changeFontSize(-1));
+    }
+
+    // Učitaj prethodno sačuvana podešavanja teme i fonta
+    const savedFontSize = localStorage.getItem('fontSize');
+    if (savedFontSize) {
+      document.body.style.fontSize = savedFontSize + 'px';
+    }
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    if (themeToggleBtn) {
+      themeToggleBtn.textContent = savedTheme === 'light' ? 'Dark Modus' : 'Licht Modus';
+    }
+  });
+
+  console.log('Script loaded');
+
+  // --------------------------------------------
+  // Lazy Loading (opciono, ako slike imaju klasu .lazy)
+  // --------------------------------------------
+  document.addEventListener("DOMContentLoaded", function() {
+    const lazyImages = document.querySelectorAll('img.lazy');
+    if ("IntersectionObserver" in window) {
+      const imageObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const img = entry.target;
+            img.src = img.dataset.src; // Kopira data-src u src
+            img.classList.remove("lazy");
+            img.classList.add("loaded");
+            observer.unobserve(img);
+          }
+        });
+      }, {
+        rootMargin: "0px 0px 50px 0px",
+        threshold: 0.01
+      });
+
+      lazyImages.forEach(img => {
+        imageObserver.observe(img);
+      });
+    } else {
+      // Fallback ako IntersectionObserver nije podržan
+      lazyImages.forEach(img => {
+        img.src = img.dataset.src;
+        img.classList.remove("lazy");
+      });
+    }
+  });
+});
