@@ -147,7 +147,8 @@ nav .menu button {
   background: none;
   border: none;
   color: var(--text-color);
-  font-size: 1rem;
+  font-family: 'Arial', sans-serif; /* ili neki drugi font */
+  font-size: 1.1rem;
   font-weight: bold; cursor: pointer;
   padding: 0.5rem 1rem;
   flex-shrink: 0;
@@ -192,6 +193,7 @@ nav .menu button {
 
 .news-card-content .news-title {
   font-size: var(--news-title-font-size);
+  font-family: 'Arial', sans-serif; /* ili neki drugi font */
   color: var(--primary-color);
   text-decoration: none;
   margin: 0 0 0.5rem;
@@ -201,6 +203,7 @@ nav .menu button {
 
 .news-meta {
   font-size: 0.8rem;
+ text-transform: uppercase;
   margin: 0;
   color: var(--text-color);
 }
@@ -317,7 +320,9 @@ img.lazy.loaded {
  * Indikator kategorije i animacije (nova logika)
  ************************************************/
 .category-indicator {
-  font-size: 1.2em;
+  padding: 3px;  /* Smanji padding za manje visine */
+  margin: 3px 0; /* Prilagodi marginu po potrebi */
+  font-size: 1.1em;
  font-weight: bold;
   margin: 10px;
   text-align: center;
@@ -344,6 +349,7 @@ img.lazy.loaded {
  ************************************************/
 .category-indicator {
   font-size: 1.2em;
+    font-family: 'Arial', sans-serif; /* ili neki drugi font */
   margin: 10px;
   text-align: center;
   color: var(--primary-color);
