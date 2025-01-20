@@ -3,12 +3,11 @@
  ************************************************/
 
 document.addEventListener("DOMContentLoaded", () => {
-  // --------------------------------------------
-  // Globalne promenljive i inicijalne vrednosti
-  // --------------------------------------------
+  // Globalne promenljive
   let feeds = [];
-  let firstSwipeOccurred = false; // Praćenje prvog swipa (za zeleni pravougaonik)
-  // Ovo su kategorije koje će biti generisane dinamički (bez "home" i "latest")
+  let firstSwipeOccurred = false; // Prati prvi swipe (za zeleni okvir)
+  
+  // Ovo su ostale kategorije (posle home i latest)
   const categories = [
     "Technologie",
     "Gesundheit",
@@ -26,17 +25,10 @@ document.addEventListener("DOMContentLoaded", () => {
     "Uncategorized"
   ];
 
-  // Element za prikaz trenutne kategorije iznad vesti
-  const categoryIndicator = document.createElement('div');
-  categoryIndicator.className = "category-indicator";
-  // Postavljamo categoryIndicator iznad #news-container
-  document.body.insertBefore(categoryIndicator, document.getElementById('news-container'));
-
-  // --------------------------------------------
-  // Pomoćne funkcije za formatiranje
-  // --------------------------------------------
+  /************************************************
+   * Pomoćne funkcije
+   ************************************************/
   function timeAgo(dateString) {
-    // Pretpostavka: dateString je ISO string za datum objavljivanja
     if (!dateString) return '';
     const now = new Date();
     const past = new Date(dateString);
@@ -65,12 +57,11 @@ document.addEventListener("DOMContentLoaded", () => {
     allTabs.forEach(tab => {
       tab.classList.remove('active');
       tab.setAttribute('aria-selected', 'false');
-      tab.classList.remove('active-green'); // Uklanja zeleni okvir
+      tab.classList.remove('active-green');
     });
   }
 
   function showGreenRectangle() {
-    // Prikazuje zeleni pravougaonik oko aktivnog taba
     const activeTab = document.querySelector('.tab.active');
     if (activeTab) {
       activeTab.classList.add('active-green');
@@ -78,18 +69,36 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function hideGreenRectangle() {
-    // Sklanja zeleni pravougaonik sa "Latest" taba prilikom inicijalnog učitavanja
-    const homeTab = document.querySelector('.tab[data-tab="latest"]');
+    // Možeš sakriti zeleni okvir na samom početku, npr. za "home"
+    const homeTab = document.querySelector('.tab[data-tab="home"]');
     if (homeTab) {
       homeTab.classList.remove('active-green');
     }
   }
 
-  // --------------------------------------------
-  // Funkcije za dohvat i prikaz feedova
-  // --------------------------------------------
+  // Indikator kategorije (dinamički div koji prikazuje tekst trenutne kategorije)
+  const categoryIndicator = document.createElement('div');
+  categoryIndicator.className = "category-indicator";
+  document.body.insertBefore(categoryIndicator, document.getElementById('news-container'));
+
+  function updateCategoryIndicator(categoryName) {
+    if (categoryIndicator) {
+      categoryIndicator.textContent = categoryName;
+      categoryIndicator.classList.add('fade-out');
+      setTimeout(() => {
+        categoryIndicator.classList.remove('fade-out');
+        categoryIndicator.classList.add('fade-in');
+        setTimeout(() => {
+          categoryIndicator.classList.remove('fade-in');
+        }, 300);
+      }, 300);
+    }
+  }
+
+  /************************************************
+   * Funkcije za dohvat i prikaz feedova
+   ************************************************/
   async function fetchAllFeedsFromServer() {
-    // Dohvata sve vesti (npr. za home/latest)
     try {
       const response = await fetch("/api/feeds");
       if (!response.ok) throw new Error("Neuspešno preuzimanje /api/feeds");
@@ -102,7 +111,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function fetchCategoryFeeds(category) {
-    // Dohvata vesti za odabranu kategoriju
     try {
       const url = `/api/feeds-by-category/${encodeURIComponent(category)}`;
       const response = await fetch(url);
@@ -125,8 +133,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const img = document.createElement('img');
     img.className = "news-card-image";
-    // Lazy loading nije potrebno ako se dohvata direktno
-    // Ako želiš lazy, koristi data-src i klasu "lazy"
     img.src = feed.image || 'https://via.placeholder.com/150';
     img.alt = feed.title || 'No title';
 
@@ -143,7 +149,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const timeString = feed.date_published ? timeAgo(feed.date_published) : '';
     source.textContent = `${sourceName} • ${timeString}`;
 
-    // Sklopi karticu
     contentDiv.appendChild(title);
     contentDiv.appendChild(source);
     card.appendChild(img);
@@ -152,33 +157,37 @@ document.addEventListener("DOMContentLoaded", () => {
     return card;
   }
 
-  function updateCategoryIndicator(categoryName) {
-    // Prikazuje naziv kategorije u categoryIndicator
-    if (categoryIndicator) {
-      categoryIndicator.textContent = categoryName;
-      categoryIndicator.classList.add('fade-out');
-      setTimeout(() => {
-        categoryIndicator.classList.remove('fade-out');
-        categoryIndicator.classList.add('fade-in');
-        setTimeout(() => {
-          categoryIndicator.classList.remove('fade-in');
-        }, 300);
-      }, 300);
+  function displayFeedsList(feedsList, categoryName) {
+    const container = document.getElementById('news-container');
+    if (!container) return;
+
+    container.innerHTML = '';
+    if (!feedsList || feedsList.length === 0) {
+      container.innerHTML = `<p>Nema vesti za kategoriju: ${categoryName}</p>`;
+      return;
     }
+
+    // Sortiramo od najnovijih
+    feedsList.sort((a, b) => {
+      return new Date(b.date_published).getTime() - new Date(a.date_published).getTime();
+    });
+
+    feedsList.forEach(feed => {
+      const card = createNewsCard(feed);
+      container.appendChild(card);
+    });
+    updateCategoryIndicator(categoryName);
   }
 
   async function displayAllFeeds() {
-    // Prikazuje sve feedove (home / latest)
+    // home/latest feed
     const container = document.getElementById('news-container');
     if (!container) return;
-    container.innerHTML = '';
 
     let local = localStorage.getItem('feeds');
     if (local) {
-      // Ako već imamo feeds u localStorage
       feeds = JSON.parse(local);
     } else {
-      // Ako nemamo, dohvatamo
       feeds = await fetchAllFeedsFromServer();
       cacheAllFeedsLocally(feeds);
     }
@@ -188,23 +197,11 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    // Sortiranje od najnovijih
-    feeds.sort((a, b) => {
-      return new Date(b.date_published).getTime() - new Date(a.date_published).getTime();
-    });
-
-    feeds.forEach(feed => {
-      const card = createNewsCard(feed);
-      container.appendChild(card);
-    });
-    updateCategoryIndicator("Latest");
+    displayFeedsList(feeds, "Latest");
   }
 
   async function displayNewsByCategory(category) {
-    console.log(`Prikaz vesti za kategoriju: ${category}`);
-
-    // Poseban keš za svaku kategoriju
-    let localKey = `feeds-${category}`;
+    const localKey = `feeds-${category}`;
     let local = localStorage.getItem(localKey);
     let catFeeds = [];
 
@@ -215,79 +212,62 @@ document.addEventListener("DOMContentLoaded", () => {
       localStorage.setItem(localKey, JSON.stringify(catFeeds));
     }
 
-    const container = document.getElementById('news-container');
-    if (!container) return;
-    container.innerHTML = '';
-
-    if (!catFeeds || catFeeds.length === 0) {
-      container.innerHTML = `<p>Nema vesti za kategoriju: ${category}</p>`;
-      return;
-    }
-
-    // Sortiramo i prikazujemo
-    catFeeds.sort((a, b) => {
-      return new Date(b.date_published).getTime() - new Date(a.date_published).getTime();
-    });
-
-    catFeeds.forEach(item => {
-      const card = createNewsCard(item);
-      container.appendChild(card);
-    });
-
-    updateCategoryIndicator(category);
+    displayFeedsList(catFeeds, category);
   }
 
-  // --------------------------------------------
-  // Glavni tok - main() + interval za osvežavanje
-  // --------------------------------------------
+  /************************************************
+   * Glavni tok - main() + periodično osvežavanje
+   ************************************************/
   async function main() {
-    // Proveri localStorage('feeds'), ako postoji, prikaži. U suprotnom dohvatimo
+    // Ako postoji keširani feeds za Home/Latest
     const cachedFeeds = localStorage.getItem('feeds');
     if (cachedFeeds) {
       feeds = JSON.parse(cachedFeeds);
       displayAllFeeds();
     } else {
-      let fresh = await fetchAllFeedsFromServer();
+      const fresh = await fetchAllFeedsFromServer();
       feeds = fresh;
       cacheAllFeedsLocally(feeds);
       displayAllFeeds();
     }
 
-    // Periodična provera novih feedova
+    // Periodična provera za nove feedove
     setInterval(async () => {
-      let fresh = await fetchAllFeedsFromServer();
+      const fresh = await fetchAllFeedsFromServer();
       if (fresh.length > feeds.length) {
         feeds = fresh;
         cacheAllFeedsLocally(feeds);
         displayAllFeeds();
       }
-    }, 300000); // 5 minuta
+    }, 300000); // 5 min
   }
 
-  // --------------------------------------------
-  // Inicijalizacija nakon main() - tabovi i swipe
-  // --------------------------------------------
+  /************************************************
+   * main().then -> Inicijalizacija tabova i swipe
+   ************************************************/
   main().then(() => {
+    // U startu je "home" tab aktivan (u HTML), pa prikazujemo home feed:
+    // displayAllFeeds(); // Ako želiš eksplicitno da pozoveš
+
+    // Sakrij zeleni pravougaonik pri samom startu (za home tab)
+    hideGreenRectangle();
+
     const homeTab = document.querySelector('.tab[data-tab="home"]');
     const latestTab = document.querySelector('.tab[data-tab="latest"]');
     const tabsContainer = document.getElementById('tabs-container');
 
-    // Sakrij zeleni pravougaonik pri učitavanju (za "latest")
-    hideGreenRectangle();
-
-    // Ručni klik na Home tab => prikaži "home" feed (isto što i latest)
+    // HOME tab -> isto kao latest
     if (homeTab) {
       homeTab.addEventListener('click', (e) => {
         removeActiveClass();
         e.target.classList.add('active');
         e.target.setAttribute('aria-selected', 'true');
-        // Home tab se ponaša isto kao i Latest
-        displayAllFeeds();
+        displayAllFeeds(); // Home prikazuje isti feed kao Latest
         showGreenRectangle();
       });
     }
 
-    // Ručni klik na Latest tab => prikaži "latest" feed
+    // LATEST tab
     if (latestTab) {
       latestTab.addEventListener('click', (e) => {
         removeActiveClass();
@@ -298,9 +278,9 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
 
-    // Generišemo tabove za ostale kategorije
+    // Generišemo ostatak tabova (kategorija) posle home i latest
     if (tabsContainer) {
-      // Možeš da isključiš neke kategorije iz generate ako želiš
+      // Možeš definisati skipList ako želiš da izuzmeš neke kategorije
       const skipList = [];
 
       categories
@@ -318,7 +298,6 @@ document.addEventListener("DOMContentLoaded", () => {
             ev.target.classList.add('active');
             ev.target.setAttribute('aria-selected', 'true');
             showGreenRectangle();
-
             displayNewsByCategory(cat);
           });
 
@@ -326,13 +305,16 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // -------------------------------
-    // Swipe detekcija za promenu kategorija
-    // -------------------------------
+    /**********************************************
+     * Swipe logika (home -> latest -> kategorije)
+     **********************************************/
     const swipeContainer = document.getElementById('news-container');
     let touchstartX = 0;
     let touchendX = 0;
     const swipeThreshold = 50;
+
+    // pun redosled: home -> latest -> ...categories
+    const fullCategoryList = ["home", "latest", ...categories];
 
     function handleGesture() {
       if (!firstSwipeOccurred) {
@@ -357,21 +339,21 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
 
-    // Pravimo listu svih kategorija za swipe redom: home, latest, pa ostale
-    const fullCategoryList = ["home", "latest", ...categories];
-
     function showNextCategory() {
       const activeTab = document.querySelector('.tab.active');
       if (!activeTab) return;
       const currentCat = activeTab.getAttribute('data-tab');
-      let currentIdx = fullCategoryList.indexOf(currentCat.toLowerCase());
-      if (currentIdx < 0) currentIdx = 0; // ako iz nekog razloga ne postoji
+      let currentIdx = fullCategoryList.indexOf(currentCat);
+      if (currentIdx < 0) currentIdx = 0;
+
+      // Ako nije poslednja kategorija, idemo na sledeću
       if (currentIdx < fullCategoryList.length - 1) {
         currentIdx++;
         const nextCat = fullCategoryList[currentIdx];
-        // Pronađi tab i klikni ga
         const nextTab = document.querySelector(`.tab[data-tab="${nextCat}"]`);
-        if (nextTab) nextTab.click();
+        if (nextTab) {
+          nextTab.click();
+        }
       }
     }
 
@@ -379,20 +361,24 @@ document.addEventListener("DOMContentLoaded", () => {
       const activeTab = document.querySelector('.tab.active');
       if (!activeTab) return;
       const currentCat = activeTab.getAttribute('data-tab');
-      let currentIdx = fullCategoryList.indexOf(currentCat.toLowerCase());
+      let currentIdx = fullCategoryList.indexOf(currentCat);
       if (currentIdx < 0) currentIdx = 0;
+
+      // Ako nije prva kategorija, idemo na prethodnu
       if (currentIdx > 0) {
         currentIdx--;
         const prevCat = fullCategoryList[currentIdx];
         const prevTab = document.querySelector(`.tab[data-tab="${prevCat}"]`);
-        if (prevTab) prevTab.click();
+        if (prevTab) {
+          prevTab.click();
+        }
       }
     }
   });
 
-  // --------------------------------------------
-  // Settings Menu funkcionalnost
-  // --------------------------------------------
+  /************************************************
+   * Settings Menu funkcionalnost
+   ************************************************/
   function openSettingsModal() {
     const settingsModal = document.getElementById('settings-modal');
     if (settingsModal) {
@@ -414,7 +400,6 @@ document.addEventListener("DOMContentLoaded", () => {
     root.setAttribute('data-theme', newTheme);
     localStorage.setItem('theme', newTheme);
 
-    // Ako postoji dugme za promenu teme, ažuriraj njegov tekst
     const themeToggleBtn = document.getElementById('theme-toggle');
     if (themeToggleBtn) {
       themeToggleBtn.textContent = newTheme === 'light' ? 'Dark Modus' : 'Licht Modus';
@@ -472,20 +457,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
   console.log('Script loaded');
 
-  // --------------------------------------------
-  // Lazy Loading (opciono, ako slike imaju klasu .lazy)
-  // --------------------------------------------
+  /************************************************
+   * Lazy Loading (opciono)
+   ************************************************/
   document.addEventListener("DOMContentLoaded", function() {
     const lazyImages = document.querySelectorAll('img.lazy');
     if ("IntersectionObserver" in window) {
-      const imageObserver = new IntersectionObserver((entries, observer) => {
+      const imageObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
           if (entry.isIntersecting) {
             const img = entry.target;
-            img.src = img.dataset.src; // Kopira data-src u src
+            img.src = img.dataset.src;
             img.classList.remove("lazy");
             img.classList.add("loaded");
-            observer.unobserve(img);
+            imageObserver.unobserve(img);
           }
         });
       }, {
@@ -497,7 +482,7 @@ document.addEventListener("DOMContentLoaded", () => {
         imageObserver.observe(img);
       });
     } else {
-      // Fallback ako IntersectionObserver nije podržan
+      // Fallback za browsere bez IntersectionObserver
       lazyImages.forEach(img => {
         img.src = img.dataset.src;
         img.classList.remove("lazy");
