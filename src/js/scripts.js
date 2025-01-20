@@ -142,13 +142,12 @@ function displayAllFeeds() {
     return;
   }
 
-// Kreirajte Swiper slajdove unutar news-container
-  createSwiperSlides(uniqueFeeds);
-  
   uniqueFeeds.forEach(feed => {
     // Na Home stranici ne koristimo lazy loading
     container.appendChild(createNewsCard(feed, false));
   });
+
+    createSwiperSlides(uniqueFeeds); // Poziv nakon dodavanja kartica
 }
 
 function createSwiperSlides(feeds) {
@@ -284,47 +283,47 @@ function createSwiperSlides(feeds) {
   }
 
   main().then(() => {
-    console.log("[main.then] Inicijalizacija tabova...");
+  console.log("[main.then] Inicijalizacija tabova...");
 
-    const homeTab = document.querySelector('[data-tab="home"]');
-    const tabsContainer = document.getElementById('tabs-container');
+  const homeTab = document.querySelector('[data-tab="home"]');
+  const tabsContainer = document.getElementById('tabs-container');
 
-    if (homeTab) {
-      homeTab.addEventListener('click', (e) => {
-        console.log("[Home Tab] Kliknuto...");
-        removeActiveClass();
-        e.target.classList.add('active');
-        e.target.setAttribute('aria-selected', 'true');
-        displayAllFeeds();
-      });
-    }
+  if (homeTab) {
+    homeTab.addEventListener('click', (e) => {
+      console.log("[Home Tab] Kliknuto...");
+      removeActiveClass();
+      e.target.classList.add('active');
+      e.target.setAttribute('aria-selected', 'true');
+      displayAllFeeds();
+    });
+  }
 
-    if (tabsContainer) {
-      console.log("[main.then] Generišemo tabove za kategorije...");
-      const skipList = [];
+  if (tabsContainer) {
+    console.log("[main.then] Generišemo tabove za kategorije...");
+    const skipList = [];
 
-      categories
-        .filter(cat => !skipList.includes(cat))
-        .forEach(cat => {
-          const btn = document.createElement('button');
-          btn.classList.add('tab');
-          btn.setAttribute('data-tab', cat);
-          btn.setAttribute('role', 'tab');
-          btn.setAttribute('aria-selected', 'false');
-          btn.textContent = cat;
+    categories
+      .filter(cat => !skipList.includes(cat))
+      .forEach(cat => {
+        const btn = document.createElement('button');
+        btn.classList.add('tab');
+        btn.setAttribute('data-tab', cat);
+        btn.setAttribute('role', 'tab');
+        btn.setAttribute('aria-selected', 'false');
+        btn.textContent = cat;
 
-          btn.addEventListener('click', (ev) => {
-            console.log(`[Category Tab] Klik na '${cat}'`);
-            removeActiveClass();
-            ev.target.classList.add('active');
-            ev.target.setAttribute('aria-selected', 'true');
-            displayNewsByCategory(cat);
-          });
-
-          tabsContainer.appendChild(btn);
+        btn.addEventListener('click', (ev) => {
+          console.log(`[Category Tab] Klik na '${cat}'`);
+          removeActiveClass();
+          ev.target.classList.add('active');
+          ev.target.setAttribute('aria-selected', 'true');
+          displayNewsByCategory(cat);
         });
-    }
-  });
+
+        tabsContainer.appendChild(btn);
+      });
+  }
+});
 
   /************************************************
    * Settings Menu funkcionalnost
