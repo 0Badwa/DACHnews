@@ -216,6 +216,22 @@ nav .menu button {
   color: var(--text-color);
 }
 
+.news-title {
+  font-size: var(--news-title-font-size);
+  color: var(--primary-color);
+  text-decoration: none;
+  margin: 0 0 0.5rem;
+  font-weight: bold;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;        /* Ograničava na 3 reda */
+  -webkit-box-orient: vertical; /* Postavlja vertikalnu orijentaciju */
+}
+
+
+
 /************************************************
  * Modal styles (za Settings i ostale modale)
  ************************************************/
