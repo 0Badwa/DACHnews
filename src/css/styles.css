@@ -349,13 +349,13 @@ img.lazy.loaded {
   top: 100px; /* visina nav */
   left: 0;
   right: 0;
-   height: 30px; /* Visina indikatora */
-  line-height: 30px; /* Poravnanje teksta u centru vertikalno */
+   height: 25px; /* Visina indikatora */
+  line-height: 25px; /* Poravnanje teksta u centru vertikalno */
   padding: 2px;  /* Smanji padding za manje visine */
-  margin: 2px 0; /* Prilagodi marginu po potrebi */
+  margin: 0px 0; /* Prilagodi marginu po potrebi */
   font-size: 1.1em;
   font-weight: bold;
-  margin: 5px;
+  margin: 1px;
   text-align: center;
   color: var(--primary-color);
   background: var(--secondary-color);
@@ -391,7 +391,7 @@ img.lazy.loaded {
 
 /* Podešavanje margina za sadržaj ispod fiksiranih elemenata */
 #news-container {
-  margin-top: 130px; /* prilagodite prema visini nav + tab + indikator */
+  margin-top: 125px; /* prilagodite prema visini nav + tab + indikator */
   overflow-y: auto;
   padding: 1rem;
 }
