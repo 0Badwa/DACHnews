@@ -3,9 +3,11 @@
  ************************************************/
 
 document.addEventListener("DOMContentLoaded", () => {
-  // Globalne promenljive
+  // --------------------------------------------
+  // Globalne promenljive i inicijalne vrednosti
+  // --------------------------------------------
   let feeds = [];
-  let firstSwipeOccurred = false; // Prati prvi swipe (za zeleni okvir)
+  let firstSwipeOccurred = false; // Praćenje prvog swipa (za zeleni pravougaonik)
   
   // Ovo su ostale kategorije (posle home i latest)
   const categories = [
@@ -57,11 +59,12 @@ document.addEventListener("DOMContentLoaded", () => {
     allTabs.forEach(tab => {
       tab.classList.remove('active');
       tab.setAttribute('aria-selected', 'false');
-      tab.classList.remove('active-green');
+      tab.classList.remove('active-green'); // Uklanja zeleni okvir
     });
   }
 
   function showGreenRectangle() {
+    // Prikazuje zeleni pravougaonik oko aktivnog taba
     const activeTab = document.querySelector('.tab.active');
     if (activeTab) {
       activeTab.classList.add('active-green');
@@ -69,7 +72,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function hideGreenRectangle() {
-    // Možeš sakriti zeleni okvir na samom početku, npr. za "home"
+    // Sakrij zeleni okvir na samom početku, npr. za "home"
     const homeTab = document.querySelector('.tab[data-tab="home"]');
     if (homeTab) {
       homeTab.classList.remove('active-green');
@@ -77,9 +80,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Indikator kategorije (dinamički div koji prikazuje tekst trenutne kategorije)
-  const categoryIndicator = document.createElement('div');
-  categoryIndicator.className = "category-indicator";
-  document.body.insertBefore(categoryIndicator, document.getElementById('news-container'));
+  const categoryIndicator = document.querySelector('.category-indicator');
 
   function updateCategoryIndicator(categoryName) {
     if (categoryIndicator) {
@@ -132,8 +133,8 @@ document.addEventListener("DOMContentLoaded", () => {
     card.className = "news-card";
 
     const img = document.createElement('img');
-    img.className = "news-card-image";
-    img.src = feed.image || 'https://via.placeholder.com/150';
+    img.className = "news-card-image lazy";
+    img.dataset.src = feed.image || 'https://via.placeholder.com/150';
     img.alt = feed.title || 'No title';
 
     const contentDiv = document.createElement('div');
@@ -149,6 +150,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const timeString = feed.date_published ? timeAgo(feed.date_published) : '';
     source.textContent = `${sourceName} • ${timeString}`;
 
+    // Sklopi karticu
     contentDiv.appendChild(title);
     contentDiv.appendChild(source);
     card.appendChild(img);
@@ -177,6 +179,7 @@ document.addEventListener("DOMContentLoaded", () => {
       container.appendChild(card);
     });
     updateCategoryIndicator(categoryName);
+    initializeLazyLoading(); // Inicijalizuj lazy loading nakon dodavanja novih slika
   }
 
   async function displayAllFeeds() {
@@ -197,7 +200,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    displayFeedsList(feeds, "Latest");
+    displayFeedsList(feeds, "Home");
   }
 
   async function displayNewsByCategory(category) {
@@ -239,16 +242,13 @@ document.addEventListener("DOMContentLoaded", () => {
         cacheAllFeedsLocally(feeds);
         displayAllFeeds();
       }
-    }, 300000); // 5 min
+    }, 300000); // 5 minuta
   }
 
   /************************************************
    * main().then -> Inicijalizacija tabova i swipe
    ************************************************/
   main().then(() => {
-    // U startu je "home" tab aktivan (u HTML), pa prikazujemo home feed:
-    // displayAllFeeds(); // Ako želiš eksplicitno da pozoveš
-
     // Sakrij zeleni pravougaonik pri samom startu (za home tab)
     hideGreenRectangle();
 
@@ -256,7 +256,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const latestTab = document.querySelector('.tab[data-tab="latest"]');
     const tabsContainer = document.getElementById('tabs-container');
 
-    // HOME tab -> isto kao latest
+    // HOME tab -> prikaži home feed
     if (homeTab) {
       homeTab.addEventListener('click', (e) => {
         removeActiveClass();
@@ -267,13 +267,13 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
 
-    // LATEST tab
+    // LATEST tab -> prikaži latest feed
     if (latestTab) {
       latestTab.addEventListener('click', (e) => {
         removeActiveClass();
         e.target.classList.add('active');
         e.target.setAttribute('aria-selected', 'true');
-        displayAllFeeds();
+        displayAllFeeds(); // Latest takođe prikazuje home feed
         showGreenRectangle();
       });
     }
@@ -281,10 +281,10 @@ document.addEventListener("DOMContentLoaded", () => {
     // Generišemo ostatak tabova (kategorija) posle home i latest
     if (tabsContainer) {
       // Možeš definisati skipList ako želiš da izuzmeš neke kategorije
-      const skipList = [];
+      const skipList = ["home", "latest"]; // Izuzimamo "home" i "latest"
 
       categories
-        .filter(cat => !skipList.includes(cat))
+        .filter(cat => !skipList.includes(cat.toLowerCase()))
         .forEach(cat => {
           const btn = document.createElement('button');
           btn.classList.add('tab');
@@ -460,17 +460,17 @@ document.addEventListener("DOMContentLoaded", () => {
   /************************************************
    * Lazy Loading (opciono)
    ************************************************/
-  document.addEventListener("DOMContentLoaded", function() {
+  function initializeLazyLoading() {
     const lazyImages = document.querySelectorAll('img.lazy');
     if ("IntersectionObserver" in window) {
-      const imageObserver = new IntersectionObserver((entries) => {
+      const imageObserver = new IntersectionObserver((entries, observer) => {
         entries.forEach(entry => {
           if (entry.isIntersecting) {
             const img = entry.target;
             img.src = img.dataset.src;
             img.classList.remove("lazy");
             img.classList.add("loaded");
-            imageObserver.unobserve(img);
+            observer.unobserve(img);
           }
         });
       }, {
@@ -488,5 +488,8 @@ document.addEventListener("DOMContentLoaded", () => {
         img.classList.remove("lazy");
       });
     }
-  });
+  }
+
+  // Inicijalizuj lazy loading prilikom početnog prikaza feedova
+  document.addEventListener("DOMContentLoaded", initializeLazyLoading);
 });
