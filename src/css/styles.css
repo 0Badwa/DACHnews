@@ -348,3 +348,28 @@ img.lazy {
 img.lazy.loaded {
   filter: none;
 }
+
+
+/************************************************
+ * Dodatne klase za animacije i indikatore
+ ************************************************/
+.category-indicator {
+  font-size: 1.2em;
+  margin: 10px;
+  text-align: center;
+  color: var(--primary-color);
+}
+
+.fade-out {
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.fade-in {
+  opacity: 1;
+  transition: opacity 0.3s;
+}
+
+.active-green {
+  border: 2px solid green; /* ili prilagodi stil prema dizajnu */
+}
