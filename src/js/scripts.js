@@ -256,7 +256,7 @@ document.addEventListener("DOMContentLoaded", () => {
       } else {
         console.log("[main - setInterval] Nema novih feedova.");
       }
-    }, 180000);
+    }, 500000);
   }
 
   main().then(() => {
