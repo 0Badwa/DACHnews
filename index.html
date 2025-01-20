@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <link rel="icon" href="src/icons/favicon.ico" type="image/x-icon" />
   <title>DACH.news</title>
+  <!-- Učitajte glavni CSS fajl -->
   <link rel="stylesheet" type="text/css" href="src/css/styles.css?v=124">
 </head>
 <body data-theme="dark">
@@ -18,14 +19,17 @@
     <img src="src/icons/dachnewslogo.png" alt="DACH.news" />
   </nav>
 
-  <!-- Dinamički generisani tabovi -->
+  <!-- Dinamički generisani tabovi + statički Home i Latest -->
   <div class="tabs-container" role="tablist" id="tabs-container">
-    <!-- Statički definisani tabovi će biti generisani JavaScript-om -->
+    <!-- Statički definisani tabovi za Home i Latest -->
+    <button class="tab" data-tab="home" role="tab" aria-selected="true">🏠 Home</button>
+    <button class="tab" data-tab="latest" role="tab" aria-selected="false">⏰ Latest</button>
+    <!-- Ostali tabovi (kategorije) biće generisani iz JavaScript-a -->
   </div>
 
   <!-- Kontejner za vesti -->
   <div id="news-container">
-    <!-- Vest će biti dinamički generisane kartice -->
+    <!-- Vesti će biti dinamički generisane kao kartice unutar scripts.js -->
   </div>
 
   <!-- Modal za Tabs anordnen -->
@@ -86,7 +90,7 @@
     </div>
   </div>
 
-  <!-- Učitavanje vaše JS logike -->
+  <!-- Učitajte glavni JS fajl -->
   <script type="module" src="src/js/scripts.js"></script>
 </body>
 </html>
