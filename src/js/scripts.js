@@ -114,63 +114,64 @@ document.addEventListener("DOMContentLoaded", () => {
     return card;
   }
 
-function displayAllFeeds() {
-  console.log("[displayAllFeeds] Prikaz svih feedova (sortirano)...");
-  const container = document.getElementById('news-container');
-  if (!container) {
-    console.error("[displayAllFeeds] #news-container ne postoji!");
-    return;
-  }
-  container.innerHTML = '';
-
-  const sorted = [...feeds].sort((a, b) => {
-    const dateA = new Date(a.date_published).getTime() || 0;
-    const dateB = new Date(b.date_published).getTime() || 0;
-    return dateB - dateA;
-  });
-
-  const uniqueFeedsMap = new Map();
-  sorted.forEach(feed => {
-    if (!uniqueFeedsMap.has(feed.id)) {
-      uniqueFeedsMap.set(feed.id, feed);
+  function displayAllFeeds() {
+    console.log("[displayAllFeeds] Prikaz svih feedova (sortirano)...");
+    const container = document.getElementById('news-container');
+    if (!container) {
+      console.error("[displayAllFeeds] #news-container ne postoji!");
+      return;
     }
-  });
-  const uniqueFeeds = Array.from(uniqueFeedsMap.values());
+    container.innerHTML = '';
 
-  if (uniqueFeeds.length === 0) {
-    container.innerHTML = "<p>No news.</p>";
-    return;
-  }
+    const sorted = [...feeds].sort((a, b) => {
+      const dateA = new Date(a.date_published).getTime() || 0;
+      const dateB = new Date(b.date_published).getTime() || 0;
+      return dateB - dateA;
+    });
 
-  uniqueFeeds.forEach(feed => {
-    // Na Home stranici ne koristimo lazy loading
-    container.appendChild(createNewsCard(feed, false));
-  });
+    const uniqueFeedsMap = new Map();
+    sorted.forEach(feed => {
+      if (!uniqueFeedsMap.has(feed.id)) {
+        uniqueFeedsMap.set(feed.id, feed);
+      }
+    });
+    const uniqueFeeds = Array.from(uniqueFeedsMap.values());
+
+    if (uniqueFeeds.length === 0) {
+      container.innerHTML = "<p>No news.</p>";
+      return;
+    }
+
+    uniqueFeeds.forEach(feed => {
+      // Na Home stranici ne koristimo lazy loading
+      container.appendChild(createNewsCard(feed, false));
+    });
 
     createSwiperSlides(uniqueFeeds); // Poziv nakon dodavanja kartica
-}
+  }
 
-function createSwiperSlides(feeds) {
-  const swiperWrapper = document.querySelector('.swiper-wrapper');
-  swiperWrapper.innerHTML = ''; // Očistite prethodne slajdove
+  function createSwiperSlides(feeds) {
+    const swiperWrapper = document.querySelector('.swiper-wrapper');
+    swiperWrapper.innerHTML = ''; // Očistite prethodne slajdove
 
-  feeds.forEach(feed => {
-    const slide = document.createElement('div');
-    slide.className = 'swiper-slide';
-    slide.innerHTML = `
-      <div class="news-card">
-        <img class="news-card-image" src="${feed.image || 'https://via.placeholder.com/150'}" alt="${feed.title}">
-        <div class="news-card-content">
-          <h3 class="news-title">${feed.title}</h3>
-          <p class="news-meta">${feed.source || 'Nepoznat izvor'} • ${feed.date_published}</p>
+    feeds.forEach(feed => {
+      const slide = document.createElement('div');
+      slide.className = 'swiper-slide';
+      slide.innerHTML = `
+        <div class="news-card">
+          <img class="news-card-image" src="${feed.image || 'https://via.placeholder.com/150'}" alt="${feed.title}">
+          <div class="news-card-content">
+            <h3 class="news-title">${feed.title}</h3>
+            <p class="news-meta">${feed.source || 'Nepoznat izvor'} • ${feed.date_published}</p>
+          </div>
         </div>
-      </div>
-    `;
-    swiperWrapper.appendChild(slide);
-  });
+      `;
+      swiperWrapper.appendChild(slide);
+    });
 
-  swiper.update();
-  
+    swiper.update();
+  }
+
   async function displayNewsByCategory(category) {
     if (category.toLowerCase() === 'lgbt' || category.toLowerCase() === 'lgbt+') {
       category = 'LGBT+';
@@ -283,47 +284,47 @@ function createSwiperSlides(feeds) {
   }
 
   main().then(() => {
-  console.log("[main.then] Inicijalizacija tabova...");
+    console.log("[main.then] Inicijalizacija tabova...");
 
-  const homeTab = document.querySelector('[data-tab="home"]');
-  const tabsContainer = document.getElementById('tabs-container');
+    const homeTab = document.querySelector('[data-tab="home"]');
+    const tabsContainer = document.getElementById('tabs-container');
 
-  if (homeTab) {
-    homeTab.addEventListener('click', (e) => {
-      console.log("[Home Tab] Kliknuto...");
-      removeActiveClass();
-      e.target.classList.add('active');
-      e.target.setAttribute('aria-selected', 'true');
-      displayAllFeeds();
-    });
-  }
-
-  if (tabsContainer) {
-    console.log("[main.then] Generišemo tabove za kategorije...");
-    const skipList = [];
-
-    categories
-      .filter(cat => !skipList.includes(cat))
-      .forEach(cat => {
-        const btn = document.createElement('button');
-        btn.classList.add('tab');
-        btn.setAttribute('data-tab', cat);
-        btn.setAttribute('role', 'tab');
-        btn.setAttribute('aria-selected', 'false');
-        btn.textContent = cat;
-
-        btn.addEventListener('click', (ev) => {
-          console.log(`[Category Tab] Klik na '${cat}'`);
-          removeActiveClass();
-          ev.target.classList.add('active');
-          ev.target.setAttribute('aria-selected', 'true');
-          displayNewsByCategory(cat);
-        });
-
-        tabsContainer.appendChild(btn);
+    if (homeTab) {
+      homeTab.addEventListener('click', (e) => {
+        console.log("[Home Tab] Kliknuto...");
+        removeActiveClass();
+        e.target.classList.add('active');
+        e.target.setAttribute('aria-selected', 'true');
+        displayAllFeeds();
       });
-  }
-});
+    }
+
+    if (tabsContainer) {
+      console.log("[main.then] Generišemo tabove za kategorije...");
+      const skipList = [];
+
+      categories
+        .filter(cat => !skipList.includes(cat))
+        .forEach(cat => {
+          const btn = document.createElement('button');
+          btn.classList.add('tab');
+          btn.setAttribute('data-tab', cat);
+          btn.setAttribute('role', 'tab');
+          btn.setAttribute('aria-selected', 'false');
+          btn.textContent = cat;
+
+          btn.addEventListener('click', (ev) => {
+            console.log(`[Category Tab] Klik na '${cat}'`);
+            removeActiveClass();
+            ev.target.classList.add('active');
+            ev.target.setAttribute('aria-selected', 'true');
+            displayNewsByCategory(cat);
+          });
+
+          tabsContainer.appendChild(btn);
+        });
+    }
+  });
 
   /************************************************
    * Settings Menu funkcionalnost
@@ -465,18 +466,17 @@ function createSwiperSlides(feeds) {
     }
   });
 
-// Inicijalizacija Swiper-a
-var swiper = new Swiper('.swiper-container', {
-  direction: 'horizontal',
-  loop: true,
-  pagination: {
-    el: '.swiper-pagination',
-    clickable: true,
-  },
-  navigation: {
-    nextEl: '.swiper-button-next',
-    prevEl: '.swiper-button-prev',
-  },
+  // Inicijalizacija Swiper-a
+  var swiper = new Swiper('.swiper-container', {
+    direction: 'horizontal',
+    loop: true,
+    pagination: {
+      el: '.swiper-pagination',
+      clickable: true,
+    },
+    navigation: {
+      nextEl: '.swiper-button-next',
+      prevEl: '.swiper-button-prev',
+    },
+  });
 });
-
-
