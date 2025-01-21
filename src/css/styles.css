@@ -355,7 +355,7 @@ img.lazy.loaded {
   margin: 1px;
   text-align: center;
   color: #ffffff; /* Bele boje */
-  background: #008000; /* Zelena pozadina */
+  background: var(--primary-color); /* Zelena pozadina */
   z-index: 998; /* bio je 1100 */
   font-family: 'Arial', sans-serif; /* ili neki drugi font */
 }
