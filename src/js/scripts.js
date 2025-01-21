@@ -281,17 +281,12 @@ function displayFeedsList(feedsList, headingTitle = "") {
  * i setActiveTabInUI("Aktuell").
  */
 async function displayAktuellFeeds() {
-  const allFeedsCache = localStorage.getItem('feeds-Aktuell');
-  let allFeeds = [];
-  if (allFeedsCache) {
-    allFeeds = JSON.parse(allFeedsCache);
-  } else {
-    allFeeds = await fetchAllFeedsFromServer();
-    localStorage.setItem('feeds-Aktuell', JSON.stringify(allFeeds));
-  }
-  displayFeedsList(allFeeds, "Aktuell");
-  setActiveTabInUI("Aktuell");
-}
+   // Uvek uzimamo sveže feedove sa servera (bez localStorage keša):
+   const allFeeds = await fetchAllFeedsFromServer();
+   localStorage.setItem('feeds-Aktuell', JSON.stringify(allFeeds));
+   displayFeedsList(allFeeds, "Aktuell");
+   setActiveTabInUI("Aktuell");
+ }
 
 /**
  * "Neueste":
