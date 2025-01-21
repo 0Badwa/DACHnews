@@ -1,7 +1,7 @@
 :root {
-  --background-color: #000; /* Crna pozadina */
-  --text-color: #ffffff;
-  --primary-color: #1DB954; 
+  --background-color: #000;
+  --text-color: #fff;
+  --primary-color: #1DB954;
   --secondary-color: #1c1c1c;
   --border-color: #333;
   --font-size: 16px;
@@ -12,7 +12,7 @@
 
 :root[data-theme="dark"] {
   --background-color: #000;
-  --text-color: #ffffff;
+  --text-color: #fff;
   --primary-color: #1DB954;
   --secondary-color: #1c1c1c;
   --border-color: #333;
@@ -31,18 +31,12 @@ html, body {
   line-height: 1.2;
   -webkit-overflow-scrolling: touch;
 }
-
 body {
   transition: background-color 0.3s, color 0.3s;
   -webkit-tap-highlight-color: transparent;
 }
 
-[data-theme="dark"] {
-  background-color: var(--background-color) !important;
-  color: var(--text-color) !important;
-}
-
-/* Header (nav) */
+/* Nav */
 nav {
   position: fixed;
   top: 0;
@@ -61,7 +55,6 @@ nav img {
   height: 60px;
   width: auto;
 }
-
 nav .menu {
   position: relative;
 }
@@ -109,7 +102,7 @@ nav .menu button {
   cursor: pointer;
 }
 
-/* Tabs container (fixed) */
+/* Tabs-container */
 .tabs-container {
   position: fixed;
   top: 60px;
@@ -145,35 +138,31 @@ nav .menu button {
   padding: 0.5rem 1rem;
 }
 
-/* Category indicator (fixed) */
-.category-indicator {
-  position: fixed;
-  top: 100px;
-  left: 0;
-  right: 0;
-  height: 30px;
-  line-height: 30px;
-  padding: 3px 2px 2px;
-  margin: 1px;
-  font-size: 1.1em;
-  font-weight: bold;
-  text-align: center;
-  color: var(--primary-color);
-  background: #000;
-  z-index: 998;
-  font-family: 'Arial', sans-serif;
-}
-
-/* Main container for news (scrolls together with headings) */
+/* Sadržaj (news-container) */
 #news-container {
-  margin-top: 130px; /* space for nav + tabs + indicator */
+  margin-top: 90px; /* offset for nav (60) + tabs (30) */
   overflow-y: auto;
-  padding: 0.3rem;
-  height: calc(100vh - 130px);
+  padding: 0.4rem;
+  height: calc(100vh - 90px);
   box-sizing: border-box;
 }
 
-/* News card */
+/* Animacija prelaza (swipe ili klik) */
+.transition-container.fade-slide {
+  animation: fadeSlide 0.4s ease;
+}
+@keyframes fadeSlide {
+  0% {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Cards */
 .news-card {
   display: flex;
   align-items: flex-start;
@@ -208,7 +197,6 @@ nav .menu button {
 }
 .news-card-content .news-title {
   color: var(--primary-color);
-  text-decoration: none;
   line-height: 1.3;
 }
 .news-meta {
@@ -223,20 +211,12 @@ nav .menu button {
   text-transform: lowercase;
 }
 
-/* Animacije */
-.fade-out {
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-.fade-in {
-  opacity: 1;
-  transition: opacity 0.3s;
-}
+/* Green border for active tab on first swipe */
 .active-green {
   border: 2px solid var(--primary-color);
 }
 
-/* Modal */
+/* Modals */
 .modal {
   display: none;
   position: fixed;
@@ -294,7 +274,7 @@ nav .menu button {
   cursor: pointer;
 }
 
-/* Lazy loading */
+/* Lazy load */
 img.lazy {
   filter: blur(5px);
   transition: filter 0.3s;
@@ -308,9 +288,6 @@ img.lazy.loaded {
   background-color: #000;
   border: 1px solid var(--border-color);
 }
-:root[data-theme="dark"] .news-card .news-title {
-  color: var(--primary-color);
-}
 :root[data-theme="dark"] .news-card .news-meta {
   color: var(--text-color);
 }
@@ -318,7 +295,7 @@ img.lazy.loaded {
   border: none;
 }
 
-/* Tutorial overlay */
+/* Tutorial Overlay */
 .tutorial-overlay {
   position: fixed;
   top: 0;
