@@ -502,4 +502,27 @@ const meta = document.createElement('p');
 
   // Inicijalizuj lazy loading prilikom početnog prikaza feedova
   document.addEventListener("DOMContentLoaded", initializeLazyLoading);
+
+  // Primer funkcije za prikazivanje feed-a
+  function displayFeed(feeds, category = 'Aktuell') {
+    const feedContainer = document.querySelector(`.feed-content[data-category="${category}"]`);
+    if (!feedContainer) {
+        console.error(`Feed container for category "${category}" not found`);
+        return;
+    }
+
+    // Sortiranje po datumu (najnovije prvo)
+    feeds.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
+
+    // Čišćenje prethodnih kartica
+    feedContainer.innerHTML = '';
+
+    feeds.forEach(feed => {
+        const card = createNewsCard(feed);
+        feedContainer.appendChild(card);
+    });
+  }
+
+  // Učitavanje feed-a za "Aktuell" kategoriju
+  loadFeed('Aktuell');
 });
