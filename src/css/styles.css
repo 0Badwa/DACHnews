@@ -155,7 +155,7 @@ nav .menu button {
   padding: 0.3rem;
 }
 
-/* news-card (font-size iz varijable --card-font-size) */
+/* .news-card -> koristimo varijablu --card-font-size */
 .news-card {
   display: flex;
   align-items: flex-start;
@@ -362,13 +362,15 @@ img.lazy.loaded {
   border-radius: 10px;
   text-align: center;
 }
+/* Povećan spacing unutar <p>, dodate leve/desne margine 9px */
+.tutorial-content p {
+  color: #fff;
+  margin: 0 9px 1rem 9px; 
+  line-height: 1.4;
+}
 .tutorial-content h2 {
   color: var(--primary-color);
   margin-bottom: 0.5rem;
-}
-.tutorial-content p {
-  color: #fff;
-  margin-bottom: 1rem;
 }
 .tutorial-close-btn {
   background-color: var(--primary-color);
