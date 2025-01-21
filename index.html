@@ -6,7 +6,7 @@
   <link rel="icon" href="src/icons/favicon.ico" type="image/x-icon" />
   <title>DACH.news</title>
   <!-- Glavni CSS fajl -->
-  <link rel="stylesheet" type="text/css" href="src/css/styles.css?v=129">
+  <link rel="stylesheet" type="text/css" href="src/css/styles.css?v=130">
 </head>
 <body data-theme="dark">
   <nav>
@@ -19,18 +19,16 @@
     <img src="src/icons/dachnewslogo.png" alt="DACH.news" />
   </nav>
 
-  <!-- Dinamički generisani tabovi + statički Neueste i Aktuell -->
+  <!-- Tabs-container (nije definisan "active" unapred, radi da se ispravno postavi iz skripte) -->
   <div class="tabs-container" role="tablist" id="tabs-container">
-    <button class="tab active" data-tab="Neueste" role="tab" aria-selected="true">Neueste</button>
+    <button class="tab" data-tab="Neueste" role="tab" aria-selected="false">Neueste</button>
     <button class="tab" data-tab="Aktuell" role="tab" aria-selected="false">Aktuell</button>
+    <!-- Ostale kategorije generisaće se iz JavaScript-a -->
   </div>
 
-  <!-- Indikator kategorije -->
-  <div class="category-indicator">Home</div>
-
-  <!-- Kontejner za vesti (skroluje se zajedno sa naslovima i vestima) -->
-  <div id="news-container">
-    <!-- Vesti će se dinamički generisati unutar scripts.js -->
+  <!-- Kontejner za vesti (skroluje se zajedno sa heading-ovima i vestima) -->
+  <div id="news-container" class="transition-container">
+    <!-- Ovde će se dinamički prikazivati heading (crni box sa zelenim tekstom) i news-cards -->
   </div>
 
   <!-- Moderni tutorial overlay (skriven na početku) -->
