@@ -87,23 +87,25 @@ function timeAgo(dateString) {
 }
 
 /**
- * Funkcija koja kreira jednu "news card" za prikaz vesti.
+ * Funkcija koja kreira jednu "news card" za prikaz vesti, 
+ * skraćuje naslov na max 3 reda, bez hifenacije.
  */
 function createNewsCard(feed) {
   const card = document.createElement('div');
   card.className = "news-card";
 
+  // Slika 80x80
   const img = document.createElement('img');
   img.className = "news-card-image lazy";
-  // Smanjena slika na 80x80
   img.dataset.src = feed.image || 'https://via.placeholder.com/80';
   img.alt = feed.title || 'No title';
 
   const contentDiv = document.createElement('div');
   contentDiv.className = "news-card-content";
 
+  // Naslov skraćen na 3 linije, bez hifenacije
   const title = document.createElement('h3');
-  title.className = "news-title";
+  title.className = "news-title truncated-title";
   title.textContent = feed.title || 'No title';
 
   const meta = document.createElement('p');
@@ -296,15 +298,45 @@ async function displayAktuellFeeds() {
 }
 
 /**
- * Funkcija koja prikazuje "Neueste" - po 4 iz svake kategorije (osim Aktuell).
- * Smanjili smo razmak i font naslova, i centrirali naslov.
+ * Funkcija koja prikazuje "Neueste":
+ *  - Prvih 4 vesti iz "Aktuell"
+ *  - Zatim po 4 iz svake druge kategorije.
  */
 async function displayNeuesteFeeds() {
   const container = document.getElementById('news-container');
   if (!container) return;
   container.innerHTML = '';
 
-  // Naša glavna lista kategorija (zamenjujemo "Uncategorized" sa "Ohne Kategorie" u UI)
+  // 1) Uzmemo prvih 4 iz Aktuell
+  let aktuellFeeds = JSON.parse(localStorage.getItem('feeds-Aktuell') || '[]');
+  if (aktuellFeeds.length === 0) {
+    // Ako nije keširano, fetchujemo
+    aktuellFeeds = await fetchAllFeedsFromServer();
+    localStorage.setItem('feeds-Aktuell', JSON.stringify(aktuellFeeds));
+  }
+  aktuellFeeds.sort((a, b) => new Date(b.date_published).getTime() - new Date(a.date_published).getTime());
+  const top4Aktuell = aktuellFeeds.slice(0, 4);
+
+  // Ubacimo heading za Aktuell (4px margin-bottom)
+  if (top4Aktuell.length > 0) {
+    const headingAkt = document.createElement('h2');
+    headingAkt.textContent = "Aktuell";
+    headingAkt.style.backgroundColor = "#000";
+    headingAkt.style.color = "var(--primary-color)";
+    headingAkt.style.padding = "4px";
+    headingAkt.style.marginTop = "0.4rem";
+    headingAkt.style.marginBottom = "4px";
+    headingAkt.style.fontSize = "0.9em";
+    headingAkt.style.textAlign = "center";
+    container.appendChild(headingAkt);
+
+    top4Aktuell.forEach(feed => {
+      const card = createNewsCard(feed);
+      container.appendChild(card);
+    });
+  }
+
+  // 2) Ostale kategorije (osim Aktuell)
   const categories = [
     "Technologie",
     "Gesundheit",
@@ -322,12 +354,10 @@ async function displayNeuesteFeeds() {
     "Ohne Kategorie"
   ];
 
-  // Paralelno dohvatamo feedove ako nisu u localStorage
+  // Paralelno dohvatamo feedove
   const fetchPromises = categories.map(async (cat) => {
     const localKey = `feeds-${cat}`;
     let catFeeds = JSON.parse(localStorage.getItem(localKey) || '[]');
-
-    // Ako nemamo ništa u localStorage, fetchujemo
     if (catFeeds.length === 0) {
       catFeeds = await fetchCategoryFeeds(cat);
       localStorage.setItem(localKey, JSON.stringify(catFeeds));
@@ -335,25 +365,22 @@ async function displayNeuesteFeeds() {
     return { cat, feeds: catFeeds };
   });
 
-  // Kad se svi fetchovi završe
   const results = await Promise.all(fetchPromises);
 
   // Za svaku kategoriju prikazujemo prvih 4 vesti
   results.forEach(({ cat, feeds }) => {
     if (!feeds || feeds.length === 0) return;
 
-    // Uzimamo najnovije 4
     feeds.sort((a, b) => new Date(b.date_published).getTime() - new Date(a.date_published).getTime());
     const top4 = feeds.slice(0, 4);
 
-    // Kreiramo heading: smanjen ~10%, centriran, smanjen marginBottom 50%
     const heading = document.createElement('h2');
     heading.textContent = cat;
     heading.style.backgroundColor = "#000";
     heading.style.color = "var(--primary-color)";
     heading.style.padding = "4px";
-    heading.style.marginBottom = "0.4rem";
     heading.style.marginTop = "0.4rem";
+    heading.style.marginBottom = "4px";
     heading.style.fontSize = "0.9em";
     heading.style.textAlign = "center";
     container.appendChild(heading);
@@ -411,6 +438,7 @@ async function displayNewsByCategory(category) {
 
 /**
  * Funkcija za swipe (left/right) navigaciju kroz kategorije.
+ * Tabs container treba da isprati aktivnu kategoriju.
  */
 function initSwipe() {
   let firstSwipeOccurred = false;
@@ -474,7 +502,7 @@ function initSwipe() {
       const nextCat = categories[currentIdx];
       const nextTab = document.querySelector(`.tab[data-tab="${nextCat}"]`);
       if (nextTab) {
-        nextTab.click();
+        nextTab.click(); // menja i active tab i prikaz
       }
     }
   }
@@ -491,7 +519,7 @@ function initSwipe() {
       const prevCat = categories[currentIdx];
       const prevTab = document.querySelector(`.tab[data-tab="${prevCat}"]`);
       if (prevTab) {
-        prevTab.click();
+        prevTab.click(); // menja i active tab i prikaz
       }
     }
   }
@@ -535,7 +563,7 @@ function initSettings() {
   function changeFontSize(delta) {
     currentCardFontSize += delta;
     if (currentCardFontSize < 12) currentCardFontSize = 12;
-    if (currentCardFontSize > 24) currentCardFontSize = 24;
+    if (currentCardFontSize > 28) currentCardFontSize = 28;
     localStorage.setItem('cardFontSize', currentCardFontSize.toString());
     applyCardFontSize(currentCardFontSize);
   }
@@ -572,10 +600,10 @@ function initSettings() {
     });
   }
   if (fontIncreaseButton) {
-    fontIncreaseButton.addEventListener('click', () => changeFontSize(1));
+    fontIncreaseButton.addEventListener('click', () => changeFontSize(2));
   }
   if (fontDecreaseButton) {
-    fontDecreaseButton.addEventListener('click', () => changeFontSize(-1));
+    fontDecreaseButton.addEventListener('click', () => changeFontSize(-2));
   }
 
   // Učitaj prethodno sačuvana podešavanja teme
