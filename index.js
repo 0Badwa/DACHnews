@@ -9,7 +9,7 @@ import helmet from 'helmet';
 import path from 'path';
 import axios from 'axios';
 import { fileURLToPath } from 'url';
-import { createPool } from 'generic-pool';       // Dodajemo generic-pool
+import { createPool } from 'generic-pool';     // Dodato
 import { createClient } from 'redis';
 
 const BASE_URL = 'https://dachnews.onrender.com';
@@ -18,7 +18,7 @@ const BASE_URL = 'https://dachnews.onrender.com';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const app = express();
+const app = express(); // <--- OVO je jedino kreiranje app
 app.use(
   helmet({
     contentSecurityPolicy: false,
@@ -26,7 +26,7 @@ app.use(
 );
 app.use(express.json());
 
-// Posluži statiku iz "src" (gde je scripts.js, css, sl.)
+// Posluži statiku iz "src" (gde su scripts.js, css, itd.)
 app.use('/src', express.static(path.join(__dirname, 'src')));
 
 // ----------------------------------------------
@@ -42,28 +42,31 @@ const factory = {
   },
   destroy: async (client) => {
     await client.disconnect();
-  }
+  },
 };
 
 const opts = {
-  max: 8,  // maximalni broj konekcija
+  max: 8,  // maksimalni broj konekcija
   min: 2
 };
 
 const redisPool = createPool(factory, opts);
 console.log("[Redis] Connection pool kreiran.");
 
-// Pomoćna async funkcija da dobijemo Redis client iz pool-a.
+/**
+ * Dohvati Redis client iz pool-a
+ */
 async function getRedisClient() {
   return redisPool.acquire();
 }
 
-// Otpustimo client nazad u pool
+/**
+ * Vrati Redis client nazad u pool
+ */
 async function releaseRedisClient(client) {
   await redisPool.release(client);
 }
 
-// Trajanje keša u sekundama (7 dana)
 const SEVEN_DAYS = 60 * 60 * 24 * 7;
 
 // URL do RSS feed-a
@@ -71,7 +74,7 @@ const RSS_FEED_URL = "https://rss.app/feeds/v1.1/_sf1gbLo1ZadJmc5e.json";
 const GPT_API_URL = "https://api.openai.com/v1/chat/completions";
 
 /**
- * 1) Preuzima ceo feed sa RSS.App
+ * Preuzima ceo feed sa RSS.App
  */
 async function fetchRSSFeed() {
   console.log("[fetchRSSFeed] Preuzimanje RSS feed-a sa:", RSS_FEED_URL);
@@ -87,7 +90,7 @@ async function fetchRSSFeed() {
 }
 
 /**
- * 1.1) Preuzima LGBT+ feed
+ * Preuzima LGBT+ feed
  */
 async function fetchLGBTFeed() {
   const LGBT_FEED_URL = "https://rss.app/feeds/v1.1/_DZwHYDTztd0rMaNe.json";
@@ -104,7 +107,7 @@ async function fetchLGBTFeed() {
 }
 
 /**
- * 2) Šaljemo *batch* feed stavki GPT-u, da dobijemo kategorizaciju
+ * Šaljemo *batch* feed stavki GPT-u (kategorizacija)
  */
 async function sendBatchToGPT(feedBatch) {
   console.log("[sendBatchToGPT] Slanje serije stavki GPT API-ju...");
@@ -177,7 +180,7 @@ function extractSource(url) {
 }
 
 /**
- * 3) processFeeds - dodaje samo *nove* vesti u Redis, uz pipelining
+ * processFeeds - dodaje samo *nove* vesti u Redis, uz pipelining
  */
 async function processFeeds() {
   console.log("[processFeeds] Počinje procesiranje feed-ova (dodavanje *novih* stavki)...");
@@ -192,10 +195,8 @@ async function processFeeds() {
       return;
     }
 
+    // Odvajamo samo nove
     let newItems = [];
-    // pipeline za sIsMember nije bas standardno. Možemo da radimo multi() i MIsMember(??) ne postoji, 
-    // pa ćemo ići redom, i to nije problem. 
-    // Ali bar kasnije rPush radimo unutar pipeline.
     for (const item of allItems) {
       const isProcessed = await client.sIsMember("processed_ids", item.id);
       if (!isProcessed) {
@@ -237,7 +238,7 @@ async function processFeeds() {
       }
     }
 
-    // Kreiramo pipeline (multi)
+    // pipeline (multi)
     const pipeline = client.multi();
 
     for (const item of newItems) {
@@ -259,13 +260,11 @@ async function processFeeds() {
       pipeline.rPush(redisKey, JSON.stringify(newsObj));
       pipeline.expire(redisKey, SEVEN_DAYS);
       pipeline.sAdd("processed_ids", item.id);
+
       console.log(`[processFeeds] Upisano ID:${item.id} -> category:${category}`);
     }
 
-    // i na kraju expire processed_ids:
     pipeline.expire("processed_ids", SEVEN_DAYS);
-
-    // izvršavamo pipeline
     await pipeline.exec();
 
     console.log("[processFeeds] Završeno dodavanje novih feedova u Redis (pipelining).");
@@ -277,8 +276,7 @@ async function processFeeds() {
 }
 
 /**
- * 4) Funkcija za spajanje *svih* feed-ova iz svih "category:*" listi
- *    Radi pipelining prilikom dohvata.
+ * getAllFeedsFromRedis - spajanje *svih* feed-ova iz "category:*" listi (pipelining).
  */
 async function getAllFeedsFromRedis() {
   const client = await getRedisClient();
@@ -286,16 +284,13 @@ async function getAllFeedsFromRedis() {
     const keys = await client.keys("category:*");
     if (!keys || keys.length === 0) return [];
 
-    // Napravimo pipeline
     const pipeline = client.multi();
     keys.forEach((key) => {
       pipeline.lRange(key, 0, -1);
     });
-    const results = await pipeline.exec(); // results je niz
-    let all = [];
+    const results = await pipeline.exec();
 
-    // results[i][1] sadrži ishod lRange
-    // results[i][0] -> error (ako ga ima)
+    let all = [];
     results.forEach((entry) => {
       const [err, arr] = entry;
       if (!err && arr) {
@@ -304,7 +299,7 @@ async function getAllFeedsFromRedis() {
       }
     });
 
-    // Uklanjamo duplikate po ID
+    // Uklanjanje duplikata
     const mapById = {};
     for (const obj of all) {
       mapById[obj.id] = obj;
@@ -318,9 +313,9 @@ async function getAllFeedsFromRedis() {
   }
 }
 
-// ------------- RUTE ---------------------------
-const app = express();
-
+/**
+ * Route definicije
+ */
 app.get("/", (req, res) => {
   console.log("[Route /] Služenje index.html...");
   res.sendFile(path.join(__dirname, "index.html"));
@@ -361,7 +356,6 @@ app.listen(PORT, () => {
   console.log(`[Express] Server pokrenut na portu ${PORT}`);
 });
 
-// Random interval od 12 do 14 minuta
 function getRandomInterval() {
   const minMinutes = 12;
   const maxMinutes = 14;
@@ -373,7 +367,9 @@ function getRandomInterval() {
 setInterval(processFeeds, getRandomInterval());
 processFeeds();
 
-// 5) Učitava LGBT+ feed u Redis (bez GPT), takodje uz pipeline
+/**
+ * processLGBTFeed - Učitava LGBT+ feed u Redis (bez GPT), uz pipeline
+ */
 async function processLGBTFeed() {
   console.log("[processLGBTFeed] Početak obrade LGBT feed-a...");
   const client = await getRedisClient();
