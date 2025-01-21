@@ -234,10 +234,9 @@ async function fetchAllFeedsFromServer() {
  * ("/api/feeds-by-category/<cat>") i vraća ih.
  */
 async function fetchCategoryFeeds(category) {
+  // Zamenjujemo "Ohne Kategorie" -> "Uncategorized" za fetch
+  const catForUrl = (category === "Ohne Kategorie") ? "Uncategorized" : category;
   try {
-    // Zamenjujemo "Uncategorized" sa nemačkim "Ohne Kategorie"
-    const catForUrl = category === "Ohne Kategorie" ? "Uncategorized" : category;
-
     const url = `/api/feeds-by-category/${encodeURIComponent(catForUrl)}`;
     const response = await fetch(url);
     if (!response.ok) throw new Error(`Neuspešno preuzimanje ${url}`);
@@ -298,7 +297,7 @@ async function displayAktuellFeeds() {
 
 /**
  * Funkcija koja prikazuje "Neueste" - po 4 iz svake kategorije (osim Aktuell).
- * Ako kategorija nema feed u localStorage, fetchuje ga i smešta.
+ * Smanjili smo razmak i font naslova, i centrirali naslov.
  */
 async function displayNeuesteFeeds() {
   const container = document.getElementById('news-container');
@@ -339,7 +338,7 @@ async function displayNeuesteFeeds() {
   // Kad se svi fetchovi završe
   const results = await Promise.all(fetchPromises);
 
-  // Sad za svaku kategoriju prikazujemo prvih 4 vesti
+  // Za svaku kategoriju prikazujemo prvih 4 vesti
   results.forEach(({ cat, feeds }) => {
     if (!feeds || feeds.length === 0) return;
 
@@ -347,12 +346,16 @@ async function displayNeuesteFeeds() {
     feeds.sort((a, b) => new Date(b.date_published).getTime() - new Date(a.date_published).getTime());
     const top4 = feeds.slice(0, 4);
 
-    // Kreiramo heading (crna pozadina, zelena boja)
+    // Kreiramo heading: smanjen ~10%, centriran, smanjen marginBottom 50%
     const heading = document.createElement('h2');
     heading.textContent = cat;
     heading.style.backgroundColor = "#000";
     heading.style.color = "var(--primary-color)";
-    heading.style.padding = "8px";
+    heading.style.padding = "4px";
+    heading.style.marginBottom = "0.4rem";
+    heading.style.marginTop = "0.4rem";
+    heading.style.fontSize = "0.9em";
+    heading.style.textAlign = "center";
     container.appendChild(heading);
 
     top4.forEach(feed => {
@@ -396,7 +399,6 @@ async function displayNewsByCategory(category) {
     return;
   }
 
-  // Dohvata iz localStorage ili sa servera
   const localKey = `feeds-${category}`;
   let catFeeds = JSON.parse(localStorage.getItem(localKey) || '[]');
 
@@ -497,18 +499,21 @@ function initSwipe() {
 
 /**
  * Funkcija za inicijalizaciju podešavanja (tema, font, itd.).
- * Ovde ćemo menjati samo font veličinu za news-card.
+ * Ograničavamo font-size samo na news-card (pomoću varijable --card-font-size).
  */
 function initSettings() {
-  // Umesto menjanja font-size tela, menjaćemo samo .news-card font-size
+  // Učitavamo iz localStorage, ili default 16
   let currentCardFontSize = parseInt(localStorage.getItem('cardFontSize') || '16');
 
+  /**
+   * Primeni veličinu fonta na .news-card preko CSS varijable.
+   */
   function applyCardFontSize(size) {
     const root = document.documentElement;
     root.style.setProperty('--card-font-size', size + 'px');
   }
 
-  // Inicijalno postavi
+  // Odmah primenimo vrednost
   applyCardFontSize(currentCardFontSize);
 
   function toggleTheme() {
@@ -524,11 +529,14 @@ function initSettings() {
     }
   }
 
+  /**
+   * Menja veličinu fonta za kartice.
+   */
   function changeFontSize(delta) {
     currentCardFontSize += delta;
     if (currentCardFontSize < 12) currentCardFontSize = 12;
     if (currentCardFontSize > 24) currentCardFontSize = 24;
-    localStorage.setItem('cardFontSize', currentCardFontSize);
+    localStorage.setItem('cardFontSize', currentCardFontSize.toString());
     applyCardFontSize(currentCardFontSize);
   }
 
@@ -583,8 +591,7 @@ function initSettings() {
  * - Inicijalizuje overlay tutorial, tabove, swipe, settings...
  */
 document.addEventListener("DOMContentLoaded", () => {
-
-  // Tutorial overlay i njegov close button
+  // Tutorial overlay
   checkAndShowTutorial();
   const closeTutorialBtn = document.getElementById('close-tutorial');
   if (closeTutorialBtn) {
@@ -600,7 +607,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Swipe logika
   initSwipe();
 
-  // Osnovne kategorije (ovde "Ohne Kategorie" umesto "Uncategorized")
+  // Kategorije
   const categories = [
     "Technologie",
     "Gesundheit",
