@@ -341,27 +341,25 @@ img.lazy.loaded {
   border: none;
 }
 
-/************************************************
- * Indikator kategorije i animacije (nova logika)
- ************************************************/
 .category-indicator {
- position: fixed;
+  position: fixed;
   top: 100px; /* visina nav */
   left: 0;
   right: 0;
-   height: 30px; /* Visina indikatora */
+  height: 30px; /* Visina indikatora */
   line-height: 30px; /* Poravnanje teksta u centru vertikalno */
-  padding: 2px;  /* Smanji padding za manje visine */
+  padding: 3px 2px 2px;  /* Veći padding gore, manji dole */
   margin: 0px 0; /* Prilagodi marginu po potrebi */
   font-size: 1.1em;
   font-weight: bold;
   margin: 1px;
   text-align: center;
-  color: var(--primary-color);
-  background: var(--secondary-color);
-  z-index: 998;                     /* bio je 1100 */
+  color: #ffffff; /* Bele boje */
+  background: #008000; /* Zelena pozadina */
+  z-index: 998; /* bio je 1100 */
   font-family: 'Arial', sans-serif; /* ili neki drugi font */
 }
+
 
 
 .fade-out {
