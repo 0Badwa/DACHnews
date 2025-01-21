@@ -1,38 +1,24 @@
-/************************************************
- * Osnovne varijable za boje i veličine
- ************************************************/
 :root {
-  --background-color: #121212; /* Default dark background */
+  --background-color: #000; /* Crna pozadina svuda */
   --text-color: #ffffff;
-  --primary-color: #1DB954;
+  --primary-color: #1DB954; /* Jedinstvena zelena */
   --secondary-color: #1c1c1c;
   --border-color: #333;
   --font-size: 16px;
   --news-title-font-size: 1rem;
   --font-family: Arial, sans-serif;
+  /* Veličina fonta za .news-card */
+  --card-font-size: 16px;
 }
 
 :root[data-theme="dark"] {
-  --background-color: #121212;
+  --background-color: #000;
   --text-color: #ffffff;
   --primary-color: #1DB954;
   --secondary-color: #1c1c1c;
   --border-color: #333;
 }
 
-/*
-:root[data-theme="light"] {
-  --background-color: #ffffff;
-  --text-color: #000000;
-  --primary-color: #04AA6D;
-  --secondary-color: #f4f4f4;
-  --border-color: #ddd;
-}
-*/
-
-/************************************************
- * Globalni stil
- ************************************************/
 html, body {
   width: 100%;
   height: 100%;
@@ -48,18 +34,15 @@ html, body {
 }
 
 body {
-  transition: background-color 0.3s, color 0.3s, font-size 0.3s;
+  transition: background-color 0.3s, color 0.3s;
   -webkit-tap-highlight-color: transparent;
 }
 
-body[data-theme="dark"] {
+[data-theme="dark"] {
   background-color: var(--background-color) !important;
   color: var(--text-color) !important;
 }
 
-/************************************************
- * Header (nav)
- ************************************************/
 nav {
   position: fixed;
   top: 0;
@@ -74,20 +57,19 @@ nav {
   padding: 0 1rem;
   z-index: 1000;
 }
+
 nav img {
   height: 60px;
   width: auto;
 }
 
-/************************************************
- * Dropdown meni u hederu (npr. za hamburger)
- ************************************************/
 nav .menu {
   position: relative;
 }
+
 nav .menu button {
   background-color: transparent;
-  color: #000;
+  color: #fff;
   border: 2px solid var(--primary-color);
   padding: 0.32rem;
   border-radius: 5px;
@@ -97,10 +79,6 @@ nav .menu button {
   align-items: center;
   justify-content: center;
   outline: none;
-  transition: none;
-}
-[data-theme="dark"] nav .menu button {
-  color: #ffffff;
 }
 
 .dropdown {
@@ -119,9 +97,11 @@ nav .menu button {
   margin: 0;
   z-index: 1001;
 }
+
 #dropdown-menu.visible {
   display: block;
 }
+
 .dropdown button {
   font-size: 0.8rem;
   font-family: inherit;
@@ -134,13 +114,10 @@ nav .menu button {
   cursor: pointer;
 }
 
-/************************************************
- * Tabovi (tabs-container)
- ************************************************/
 .tabs-container {
   position: fixed;
-  top: 60px; /* visina nav */
-   height: 30px;                /* Postavite visinu tab container-a */
+  top: 60px;
+  height: 30px;
   left: 0;
   right: 0;
   z-index: 999;
@@ -152,28 +129,35 @@ nav .menu button {
   align-items: center;
   padding: 0.4rem 0;
 }
+
+/* Svetlija nijansa za hover i aktivni tab */
 .tabs-container button {
   background: none;
   border: none;
   color: var(--text-color);
-  font-family: 'Arial', sans-serif; /* ili neki drugi font */
+  font-family: 'Arial', sans-serif;
   font-size: 1.1rem;
-  font-weight: bold; cursor: pointer;
+  font-weight: bold; 
+  cursor: pointer;
   padding: 0.7rem 1rem;
   flex-shrink: 0;
   transition: background-color 0.3s, color 0.3s;
 }
 .tabs-container button:hover,
 .tabs-container button.active {
-  background: rgba(4, 170, 109, 0.5); 
+  background: rgba(29,185,84, 0.7); /* malo svetlija zelena */
   color: white; 
   border-radius: 5px; 
-  padding: 0.5rem 1rem; 
+  padding: 0.5rem 1rem;
 }
 
-/************************************************
- * Kartice za vesti (news-card)
- ************************************************/
+#news-container {
+  margin-top: 130px;
+  overflow-y: auto;
+  padding: 0.3rem;
+}
+
+/* .news-card -> koristimo varijablu --card-font-size uz !important da preuzme primat */
 .news-card {
   display: flex;
   align-items: flex-start;
@@ -183,6 +167,7 @@ nav .menu button {
   padding: 0.2rem;
   margin-bottom: 0.1rem;
   transition: transform 0.2s;
+  font-size: var(--card-font-size) !important;
 }
 .news-card:hover {
   transform: scale(1.02);
@@ -190,8 +175,8 @@ nav .menu button {
 
 .news-card img {
   border-radius: 5px;
-  width: 90px;
-  height: 90px;
+  width: 80px;   /* smanjena na 80x80 */
+  height: 80px;
   object-fit: cover;
   margin-right: 0.8rem;
 }
@@ -202,7 +187,7 @@ nav .menu button {
 
 .news-card-content .news-title {
   font-size: var(--news-title-font-size);
-  font-family: 'Arial', sans-serif; /* ili neki drugi font */
+  font-family: 'Arial', sans-serif;
   color: var(--primary-color);
   text-decoration: none;
   margin: 0 0 0.1rem;
@@ -212,36 +197,53 @@ nav .menu button {
 
 .news-meta {
   font-size: 0.7rem;
- text-transform: uppercase;
   margin: 0;
   color: var(--text-color);
 }
 
-.news-title {
-  font-size: var(--news-title-font-size);
-  color: var(--primary-color);
-  text-decoration: none;
-  margin: 0 0 0.5rem;
+.category-indicator {
+  position: fixed;
+  top: 100px;
+  left: 0;
+  right: 0;
+  height: 30px;
+  line-height: 30px;
+  padding: 3px 2px 2px;
+  margin: 1px;
+  font-size: 1.1em;
   font-weight: bold;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  line-height: 1.3;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;        /* Ograničava na 3 reda */
-  -webkit-box-orient: vertical; /* Postavlja vertikalnu orijentaciju */
+  text-align: center;
+  color: var(--primary-color);
+  background: #000;
+  z-index: 998;
+  font-family: 'Arial', sans-serif;
 }
 
-
-/* Podešavanje margina za sadržaj ispod fiksiranih elemenata */
-#news-container {
-  margin-top: 130px; /* prilagodite prema visini nav + tab + indikator */
-  overflow-y: auto;
-  padding: 0.3rem;
+.fade-out {
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.fade-in {
+  opacity: 1;
+  transition: opacity 0.3s;
+}
+.active-green {
+  border: 2px solid var(--primary-color);
+}
+.tab.active {
+  background: rgba(29,185,84, 0.7);
+  color: white;
+  border-radius: 5px;
+  padding: 0.5rem 1rem;
 }
 
-/************************************************
- * Modal styles (za Settings i ostale modale)
- ************************************************/
+.news-meta .source {
+  text-transform: uppercase;
+}
+.news-meta .time {
+  text-transform: lowercase;
+}
+
 .modal {
   display: none;
   position: fixed;
@@ -254,7 +256,6 @@ nav .menu button {
   background-color: rgba(0,0,0,0.5);
   z-index: 2000;
 }
-
 .rearrange-modal-content {
   background-color: var(--background-color);
   padding: 1rem;
@@ -264,14 +265,12 @@ nav .menu button {
   max-height: 80vh;
   overflow-y: auto;
 }
-
 .settings-list .settings-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
 }
-
 .settings-action-button {
   background-color: var(--primary-color);
   color: #fff;
@@ -280,7 +279,6 @@ nav .menu button {
   border-radius: 4px;
   cursor: pointer;
 }
-
 .font-size-buttons button {
   background-color: var(--primary-color);
   color: white;
@@ -290,12 +288,10 @@ nav .menu button {
   border-radius: 4px;
   cursor: pointer;
 }
-
 .modal-buttons {
   text-align: center;
   margin-top: 1rem;
 }
-
 .save-button {
   background-color: var(--primary-color);
   color: white;
@@ -304,10 +300,6 @@ nav .menu button {
   border-radius: 4px;
   cursor: pointer;
 }
-
-/************************************************
- * Lazy Loading
- ************************************************/
 img.lazy {
   filter: blur(5px);
   transition: filter 0.3s;
@@ -315,10 +307,6 @@ img.lazy {
 img.lazy.loaded {
   filter: none;
 }
-
-/************************************************
- * Responsivnost - primer za mobilne
- ************************************************/
 @media (max-width: 768px) {
   nav img {
     height: 40px;
@@ -330,78 +318,56 @@ img.lazy.loaded {
   }
 }
 
+/* Dark theme card background */
 :root[data-theme="dark"] .news-card {
   background-color: #000;
   border: 1px solid var(--border-color);
 }
-
 :root[data-theme="dark"] .news-card .news-title {
   color: var(--primary-color);
 }
-
 :root[data-theme="dark"] .news-card .news-meta {
   color: var(--text-color);
 }
-
 :root[data-theme="dark"] .news-card img {
   border: none;
 }
 
-.category-indicator {
+/* Moderni tutorial overlay */
+.tutorial-overlay {
   position: fixed;
-  top: 100px; /* visina nav */
+  top: 0;
   left: 0;
   right: 0;
-  height: 30px; /* Visina indikatora */
-  line-height: 30px; /* Poravnanje teksta u centru vertikalno */
-  padding: 3px 2px 2px;  /* Veći padding gore, manji dole */
-  margin: 0px 0; /* Prilagodi marginu po potrebi */
-  font-size: 1.1em;
-  font-weight: bold;
-  margin: 1px;
+  bottom: 0;
+  background-color: rgba(0,0,0,0.7);
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.tutorial-content {
+  background-color: #000;
+  border: 1px solid var(--primary-color);
+  padding: 1rem 2rem;
+  border-radius: 10px;
   text-align: center;
-  color: #ffffff; /* Bele boje */
-  background: var(--primary-color); /* Zelena pozadina */
-  z-index: 998; /* bio je 1100 */
-  font-family: 'Arial', sans-serif; /* ili neki drugi font */
 }
-
-
-
-.fade-out {
-  opacity: 0;
-  transition: opacity 0.3s;
+.tutorial-content h2 {
+  color: var(--primary-color);
+  margin-bottom: 0.5rem;
 }
-
-.fade-in {
-  opacity: 1;
-  transition: opacity 0.3s;
+.tutorial-content p {
+  color: #fff;
+  margin-bottom: 1rem;
 }
-
-.active-green {
-  border: 2px solid green;
-}
-
-
-
-.tab.active {
-  /* Dodajte stilove za aktivni tab */
-  background: rgba(4, 170, 109, 0.5);
-  color: white;
-  border-radius: 5px;
+.tutorial-close-btn {
+  background-color: var(--primary-color);
+  color: #fff;
+  border: none;
   padding: 0.5rem 1rem;
-}
-
-
-
-
-/************************************************
- * Stilizovanje izvora i vremena
- ************************************************/
-.news-meta .source {
-  text-transform: uppercase;
-}
-
-.news-meta .time {
-  text-transform: lowercase;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1rem;
 }
