@@ -1,3 +1,4 @@
+
 /************************************************
  * scripts.js
  ************************************************/
@@ -87,23 +88,25 @@ function timeAgo(dateString) {
 }
 
 /**
- * Funkcija koja kreira jednu "news card" za prikaz vesti.
+ * Funkcija koja kreira jednu "news card" za prikaz vesti,
+ * skraćuje naslov na max 3 reda, bez hifenacije.
  */
 function createNewsCard(feed) {
   const card = document.createElement('div');
   card.className = "news-card";
 
+  // Slika 80x80
   const img = document.createElement('img');
   img.className = "news-card-image lazy";
-  // Smanjena slika na 80x80
   img.dataset.src = feed.image || 'https://via.placeholder.com/80';
   img.alt = feed.title || 'No title';
 
   const contentDiv = document.createElement('div');
   contentDiv.className = "news-card-content";
 
+  // Naslov skraćen na 3 linije, bez hifenacije
   const title = document.createElement('h3');
-  title.className = "news-title";
+  title.className = "news-title truncated-title";
   title.textContent = feed.title || 'No title';
 
   const meta = document.createElement('p');
@@ -296,15 +299,34 @@ async function displayAktuellFeeds() {
 }
 
 /**
- * Funkcija koja prikazuje "Neueste" - po 4 iz svake kategorije (osim Aktuell).
- * Smanjili smo razmak i font naslova, i centrirali naslov.
+ * Funkcija koja prikazuje "Neueste":
+ *  - Uzimamo prvih 4 vesti iz "Aktuell"
+ *  - Zatim po 4 iz svake druge kategorije
+ *  - Ne prikazujemo poseban naslov "Aktuell" iznad tih prvih 4,
+ *    a category-indicator menja iz "Neueste" u "Aktuell".
  */
 async function displayNeuesteFeeds() {
   const container = document.getElementById('news-container');
   if (!container) return;
   container.innerHTML = '';
 
-  // Naša glavna lista kategorija (zamenjujemo "Uncategorized" sa "Ohne Kategorie" u UI)
+  // 1) Dohvatimo prvih 4 iz Aktuell
+  let aktuellFeeds = JSON.parse(localStorage.getItem('feeds-Aktuell') || '[]');
+  if (aktuellFeeds.length === 0) {
+    // Ako nije keširano, fetchujemo
+    aktuellFeeds = await fetchAllFeedsFromServer();
+    localStorage.setItem('feeds-Aktuell', JSON.stringify(aktuellFeeds));
+  }
+  aktuellFeeds.sort((a, b) => new Date(b.date_published).getTime() - new Date(a.date_published).getTime());
+  const top4Aktuell = aktuellFeeds.slice(0, 4);
+
+  // Prikaz tih 4 vesti (bez posebnog naslova)
+  top4Aktuell.forEach(feed => {
+    const card = createNewsCard(feed);
+    container.appendChild(card);
+  });
+
+  // 2) Ostale kategorije (osim Aktuell)
   const categories = [
     "Technologie",
     "Gesundheit",
@@ -322,12 +344,10 @@ async function displayNeuesteFeeds() {
     "Ohne Kategorie"
   ];
 
-  // Paralelno dohvatamo feedove ako nisu u localStorage
+  // Paralelno dohvatamo feedove
   const fetchPromises = categories.map(async (cat) => {
     const localKey = `feeds-${cat}`;
     let catFeeds = JSON.parse(localStorage.getItem(localKey) || '[]');
-
-    // Ako nemamo ništa u localStorage, fetchujemo
     if (catFeeds.length === 0) {
       catFeeds = await fetchCategoryFeeds(cat);
       localStorage.setItem(localKey, JSON.stringify(catFeeds));
@@ -335,26 +355,23 @@ async function displayNeuesteFeeds() {
     return { cat, feeds: catFeeds };
   });
 
-  // Kad se svi fetchovi završe
   const results = await Promise.all(fetchPromises);
 
   // Za svaku kategoriju prikazujemo prvih 4 vesti
   results.forEach(({ cat, feeds }) => {
     if (!feeds || feeds.length === 0) return;
 
-    // Uzimamo najnovije 4
     feeds.sort((a, b) => new Date(b.date_published).getTime() - new Date(a.date_published).getTime());
     const top4 = feeds.slice(0, 4);
 
-    // Kreiramo heading: smanjen ~10%, centriran, smanjen marginBottom 50%
     const heading = document.createElement('h2');
     heading.textContent = cat;
     heading.style.backgroundColor = "#000";
     heading.style.color = "var(--primary-color)";
     heading.style.padding = "4px";
-    heading.style.marginBottom = "0.4rem";
     heading.style.marginTop = "0.4rem";
-    heading.style.fontSize = "0.9em";
+    heading.style.marginBottom = "4px";
+    heading.style.fontSize = "1.1rem"; /* isto kao tab */
     heading.style.textAlign = "center";
     container.appendChild(heading);
 
@@ -364,7 +381,8 @@ async function displayNeuesteFeeds() {
     });
   });
 
-  updateCategoryIndicator("Neueste");
+  // Menjamo category indicator iz "Neueste" u "Aktuell"
+  updateCategoryIndicator("Aktuell");
   initializeLazyLoading();
 }
 
@@ -411,6 +429,7 @@ async function displayNewsByCategory(category) {
 
 /**
  * Funkcija za swipe (left/right) navigaciju kroz kategorije.
+ * Tabs container treba da isprati aktivnu kategoriju (scroll u vidljivost).
  */
 function initSwipe() {
   let firstSwipeOccurred = false;
@@ -462,6 +481,7 @@ function initSwipe() {
     });
   }
 
+  // Kad prelazimo na next/previous, radimo .click() i .scrollIntoView()
   function showNextCategory() {
     const activeTab = document.querySelector('.tab.active');
     if (!activeTab) return;
@@ -475,6 +495,9 @@ function initSwipe() {
       const nextTab = document.querySelector(`.tab[data-tab="${nextCat}"]`);
       if (nextTab) {
         nextTab.click();
+        setTimeout(() => {
+          nextTab.scrollIntoView({ behavior: 'smooth', inline: 'center' });
+        }, 150);
       }
     }
   }
@@ -492,6 +515,9 @@ function initSwipe() {
       const prevTab = document.querySelector(`.tab[data-tab="${prevCat}"]`);
       if (prevTab) {
         prevTab.click();
+        setTimeout(() => {
+          prevTab.scrollIntoView({ behavior: 'smooth', inline: 'center' });
+        }, 150);
       }
     }
   }
@@ -530,12 +556,12 @@ function initSettings() {
   }
 
   /**
-   * Menja veličinu fonta za kartice.
+   * Menja veličinu fonta za kartice (po 2px).
    */
   function changeFontSize(delta) {
     currentCardFontSize += delta;
     if (currentCardFontSize < 12) currentCardFontSize = 12;
-    if (currentCardFontSize > 24) currentCardFontSize = 24;
+    if (currentCardFontSize > 36) currentCardFontSize = 36;
     localStorage.setItem('cardFontSize', currentCardFontSize.toString());
     applyCardFontSize(currentCardFontSize);
   }
@@ -572,10 +598,10 @@ function initSettings() {
     });
   }
   if (fontIncreaseButton) {
-    fontIncreaseButton.addEventListener('click', () => changeFontSize(1));
+    fontIncreaseButton.addEventListener('click', () => changeFontSize(2));
   }
   if (fontDecreaseButton) {
-    fontDecreaseButton.addEventListener('click', () => changeFontSize(-1));
+    fontDecreaseButton.addEventListener('click', () => changeFontSize(-2));
   }
 
   // Učitaj prethodno sačuvana podešavanja teme
@@ -607,7 +633,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Swipe logika
   initSwipe();
 
-  // Kategorije
+  // Kategorije (ostale sem Neueste i Aktuell generišemo kasnije)
   const categories = [
     "Technologie",
     "Gesundheit",
