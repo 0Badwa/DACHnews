@@ -1,4 +1,4 @@
-/* ========== (1) GLOBAL ========== */
+/* ========== 1) GLOBALNI STILOVI ========== */
 :root {
   --background-color: #000;
   --text-color: #ffffff;
@@ -8,8 +8,7 @@
   --font-size: 16px;
   --news-title-font-size: 1rem;
   --font-family: Arial, sans-serif;
-  /* Ovaj var cemo menjati iz main.js za news-cards */
-  --card-font-size: 16px;
+  --card-font-size: 16px; /* Dinamički menjamo iz main.js */
 }
 
 :root[data-theme="dark"] {
@@ -23,7 +22,8 @@
 html, body {
   width: 100%;
   height: 100%;
-  margin: 0; padding: 0;
+  margin: 0;
+  padding: 0;
   overflow-x: hidden;
   background-color: var(--background-color) !important;
   color: var(--text-color);
@@ -37,19 +37,24 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* ========== (2) NAV / TABS ========== */
+/* ========== 2) NAVIGACIJA I TABS ========== */
 nav {
   position: fixed;
-  top: 0; left: 0; right: 0;
+  top: 0;
+  left: 0;
+  right: 0;
   background-color: var(--primary-color);
   color: white;
   height: 60px;
-  display: flex; justify-content: space-between; align-items: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   padding: 0 1rem;
   z-index: 1000;
 }
 nav img {
-  height: 60px; width: auto;
+  height: 60px;
+  width: auto;
 }
 nav .menu button {
   background-color: transparent;
@@ -57,27 +62,38 @@ nav .menu button {
   border: 2px solid var(--primary-color);
   padding: 0.32rem;
   border-radius: 5px;
-  cursor: pointer; font-size: 1rem;
-  outline: none; display: flex;
-  align-items: center; justify-content: center;
+  cursor: pointer;
+  font-size: 1rem;
+  outline: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
+
 .tabs-container {
   position: fixed;
-  top: 60px; left: 0; right: 0;
-  height: 30px; z-index: 999;
+  top: 60px;
+  height: 30px;
+  left: 0; right: 0;
+  z-index: 999;
   background-color: var(--secondary-color);
   border-bottom: 2px solid var(--border-color);
-  overflow-x: auto; white-space: nowrap;
-  display: flex; align-items: center;
+  overflow-x: auto;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
   padding: 0.4rem 0;
 }
 .tabs-container button {
-  background: none; border: none;
+  background: none;
+  border: none;
   color: var(--text-color);
   font-family: 'Arial', sans-serif;
-  font-size: 1.1rem; font-weight: bold;
+  font-size: 1.1rem;
+  font-weight: bold;
   cursor: pointer;
-  padding: 0.7rem 1rem; flex-shrink: 0;
+  padding: 0.7rem 1rem;
+  flex-shrink: 0;
   transition: background-color 0.3s, color 0.3s;
 }
 .tabs-container button:hover,
@@ -88,20 +104,25 @@ nav .menu button {
   padding: 0.5rem 1rem;
 }
 
-/* ========== (3) CATEGORY INDICATOR ========== */
+/* ========== 3) CATEGORY INDICATOR ========== */
 .category-indicator {
   position: fixed;
-  top: 100px; left: 0; right: 0;
-  height: 30px; line-height: 30px;
-  padding: 3px 2px 2px; margin: 1px;
-  font-size: 1.1em; font-weight: bold;
+  top: 100px;
+  left: 0; right: 0;
+  height: 30px;
+  line-height: 30px;
+  padding: 3px 2px 2px;
+  margin: 1px;
+  font-size: 1.1em;
+  font-weight: bold;
   text-align: center;
   color: var(--primary-color);
-  background: #000; z-index: 998;
+  background: #000;
+  z-index: 998;
   font-family: 'Arial', sans-serif;
 }
 
-/* ========== (4) NEWS-CARDS ========== */
+/* ========== 4) NEWS-CONTAINER, NEWS-CARDS ========== */
 #news-container {
   margin-top: 130px;
   overflow-y: auto;
@@ -109,13 +130,16 @@ nav .menu button {
 }
 
 .news-card {
-  display: flex; align-items: flex-start;
+  display: flex;
+  align-items: flex-start;
   background-color: var(--secondary-color);
   border: 1px solid var(--border-color);
   border-radius: 5px;
-  padding: 0.2rem; margin-bottom: 0.1rem;
+  padding: 0.2rem;
+  margin-bottom: 0.1rem;
   transition: transform 0.2s;
   cursor: pointer;
+  /* veličina fonta -> var(--card-font-size) */
   font-size: var(--card-font-size);
 }
 .news-card:hover {
@@ -127,21 +151,28 @@ nav .menu button {
   object-fit: cover;
   margin-right: 0.8rem;
 }
+.news-card-content h3 {
+  font-family: var(--font-family);
+}
 .truncated-title {
   display: -webkit-box;
-  -webkit-line-clamp: 3; -webkit-box-orient: vertical;
-  overflow: hidden; text-overflow: ellipsis;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
   hyphens: none;
-  margin: 0 0 0.1rem; font-weight: bold;
+  margin: 0 0 0.1rem;
+  font-weight: bold;
 }
 .news-title {
-  font-size: 1rem;
-  color: var(--primary-color);
+  font-size: 1rem; /* ili var(...) */
+  color: var(--primary-color); /* zelena */
   text-decoration: none;
   line-height: 1.3;
 }
 .news-meta {
-  font-size: 0.7rem; margin: 0;
+  font-size: 0.7rem;
+  margin: 0;
   color: var(--text-color);
 }
 .news-meta .source {
@@ -153,7 +184,7 @@ nav .menu button {
   color: var(--text-color);
 }
 
-/* ========== (5) LAZY LOADING ========== */
+/* Lazy loading */
 img.lazy {
   filter: blur(5px);
   transition: filter 0.3s;
@@ -162,18 +193,19 @@ img.lazy.loaded {
   filter: none;
 }
 
-/* ========== (6) RESPONSIVE ========== */
+/* ========== 5) RESPONSIVE ========== */
 @media (max-width: 768px) {
   nav img {
     height: 40px;
   }
   .tabs-container button {
-    font-size: 0.9rem; font-weight: bold;
+    font-size: 0.9rem;
+    font-weight: bold;
     padding: 0.4rem 0.8rem;
   }
 }
 
-/* ========== (7) DARK THEME OVERRIDES ========== */
+/* ========== 6) DARK THEME OVERRIDES ========== */
 :root[data-theme="dark"] .news-card {
   background-color: #000;
   border: 1px solid var(--border-color);
@@ -188,7 +220,7 @@ img.lazy.loaded {
   border: none;
 }
 
-/* ========== (8) MODALS (poluprovidni) ========== */
+/* ========== 7) MODALS (COMMON) ========== */
 .modal {
   display: none;
   position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -201,11 +233,15 @@ img.lazy.loaded {
   padding: 1rem;
   border-radius: 8px;
   max-width: 500px; width: 90%;
-  max-height: 80vh; overflow-y: auto;
+  max-height: 80vh;
+  overflow-y: auto;
   box-shadow: 0 0 15px rgba(0,0,0,0.6);
-  /* Povećana leva/desna margina: 3rem */
-  margin: 0 3rem;
+  /* Povećana leva/desna margina (3rem) -> inline style se menja ili ovde */
 }
+
+/* ========== 8) SETTINGS, QUELLEN, KATEGORIEN, ÜBER MODAL ========== */
+/* Margine: 3rem left/right -> stavljamo inline na <div style="margin: 0 3rem;"> */
+
 .modal-title {
   font-size: 1.1rem;
   font-weight: bold;
@@ -214,19 +250,27 @@ img.lazy.loaded {
   color: var(--text-color);
 }
 .settings-list .settings-item {
-  display: flex; justify-content: space-between; align-items: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 0.5rem;
 }
 .settings-action-button {
   background-color: var(--primary-color);
   color: #fff;
-  border: none; border-radius: 4px;
-  padding: 0.3rem 0.8rem; cursor: pointer;
+  border: none;
+  padding: 0.3rem 0.8rem;
+  border-radius: 4px;
+  cursor: pointer;
 }
 .font-size-buttons button {
   background-color: var(--primary-color);
-  color: white; border: none; padding: 0.25rem 0.5rem;
-  margin-left: 0.25rem; border-radius: 4px; cursor: pointer;
+  color: white;
+  border: none;
+  padding: 0.25rem 0.5rem;
+  margin-left: 0.25rem;
+  border-radius: 4px;
+  cursor: pointer;
 }
 .modal-buttons {
   text-align: center;
@@ -235,11 +279,13 @@ img.lazy.loaded {
 .save-button {
   background-color: var(--primary-color);
   color: white;
-  border: none; border-radius: 4px;
-  padding: 0.5rem 1rem; cursor: pointer;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
 }
 
-/* ========== (9) NEWS MODAL ========== */
+/* ========== 9) NEWS MODAL (naslov i izvor su već zeleni) ========== */
 .news-modal-content img#news-modal-image {
   display: block;
   margin: 1rem auto;
@@ -247,6 +293,7 @@ img.lazy.loaded {
   box-shadow: 0 0 12px var(--primary-color);
   border-radius: 10px;
 }
+/* Naslov vesti u modalu da bude zelene boje */
 .news-modal-content h2 {
   color: var(--primary-color);
   text-align: center;
@@ -258,14 +305,17 @@ img.lazy.loaded {
   padding: 0rem 1rem;
 }
 
-/* ========== (10) KATEGORIEN REARRANGE ========== */
+/* ========== 10) KATEGORIEN REARRANGE LIST ========== */
 #sortable-list {
   list-style: none;
   margin: 0; padding: 0;
 }
 #sortable-list li {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 0.5rem 0.8rem; margin-bottom: 0.2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0.8rem;
+  margin-bottom: 0.2rem;
   background: var(--secondary-color);
   border: 0.5px solid var(--border-color);
   border-radius: 5px;
@@ -274,7 +324,8 @@ img.lazy.loaded {
 }
 #sortable-list li button {
   background: none; border: none; color: inherit; font-size: inherit;
-  margin-left: 0.5rem; cursor: pointer; transition: color 0.2s;
+  margin-left: 0.5rem;
+  cursor: pointer; transition: color 0.2s;
 }
 #sortable-list li:hover {
   background-color: #d8f9d8;
@@ -283,38 +334,54 @@ img.lazy.loaded {
   background-color: #333333;
 }
 
-/* ========== (11) QUELLEN LISTA ========== */
+/* ========== 11) QUELLEN LIST ========== */
 .sources-list {
   margin-bottom: 1.5rem;
 }
 .source-item {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 1rem; margin: 0.5rem 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  margin: 0.5rem 0;
   background-color: var(--secondary-color);
-  border-radius: 8px; font-size: 1rem;
+  border-radius: 8px;
+  font-size: 1rem;
 }
 .block-button {
   background-color: #ff4444;
-  color: white; border: none; border-radius: 4px;
-  padding: 0.4rem 0.8rem; cursor: pointer; font-size: 0.8rem;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 0.4rem 0.8rem;
+  cursor: pointer;
+  font-size: 0.8rem;
 }
 .unblock-button {
   background-color: var(--primary-color);
-  color: white; border: none; border-radius: 4px;
-  padding: 0.4rem 0.8rem; cursor: pointer; font-size: 0.8rem;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 0.4rem 0.8rem;
+  cursor: pointer;
+  font-size: 0.8rem;
 }
 
-/* ========== (12) TUTORIAL OVERLAY ========== */
+/* ========== 12) TUTORIAL OVERLAY ========== */
 .tutorial-overlay {
-  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
   background-color: rgba(0,0,0,0.7);
-  z-index: 3000; display: flex; align-items: center; justify-content: center;
+  z-index: 3000;
+  display: flex; align-items: center; justify-content: center;
 }
 .tutorial-content {
   background-color: #000;
   border: 1px solid var(--primary-color);
-  padding: 1rem 2rem; border-radius: 10px;
-  text-align: center; margin: 0 10px;
+  padding: 1rem 2rem;
+  border-radius: 10px;
+  text-align: center;
+  margin: 0 10px;
   box-shadow: 0 0 12px var(--primary-color);
 }
 .tutorial-content p {
@@ -328,6 +395,9 @@ img.lazy.loaded {
 }
 .tutorial-close-btn {
   background-color: var(--primary-color);
-  color: #fff; border: none; padding: 0.5rem 1rem;
-  border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 1rem;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer; font-weight: bold; font-size: 1rem;
 }
