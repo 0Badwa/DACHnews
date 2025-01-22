@@ -5,16 +5,18 @@
  */
 
 import { showGreenRectangle } from './ui.js';
-import { displayNewsByCategory, displayNeuesteFeeds, displayAktuellFeeds } from './feeds.js';
 
 /**
- * Funkcija za inicijalizaciju swipe (left/right) navigacije kroz kategorije.
+ * Inicijalizacija swipe (left/right) navigacije kroz kategorije,
+ * pri čemu ne reagujemo na vertikalni swipe.
  */
 export function initSwipe() {
   let firstSwipeOccurred = false;
   const swipeContainer = document.getElementById('news-container');
   let touchstartX = 0;
   let touchendX = 0;
+  let touchstartY = 0;
+  let touchendY = 0;
   const swipeThreshold = 50;
 
   // pun redosled: Neueste -> Aktuell -> ...categories
@@ -38,30 +40,41 @@ export function initSwipe() {
   ];
 
   function handleGesture() {
-    if (!firstSwipeOccurred) {
-      firstSwipeOccurred = true;
-      showGreenRectangle();
-    }
-    if (touchendX < touchstartX - swipeThreshold) {
-      showNextCategory();
-    } else if (touchendX > touchstartX + swipeThreshold) {
-      showPreviousCategory();
+    const distX = touchendX - touchstartX;
+    const distY = touchendY - touchstartY;
+
+    // Treba da reagujemo samo ako je pomeraj po X
+    // znatno veći od pomeraja po Y (vođeno horizontalnim swipe-om)
+    if (Math.abs(distX) > Math.abs(distY) && Math.abs(distX) > swipeThreshold) {
+      // Ako je distX < 0 => showNextCategory, a ako je > 0 => showPreviousCategory
+      if (distX < 0) {
+        showNextCategory();
+      } else {
+        showPreviousCategory();
+      }
     }
   }
 
   if (swipeContainer) {
     swipeContainer.addEventListener('touchstart', e => {
-      touchstartX = e.changedTouches[0].screenX;
+      const t = e.changedTouches[0];
+      touchstartX = t.screenX;
+      touchstartY = t.screenY;
     });
 
     swipeContainer.addEventListener('touchend', e => {
-      touchendX = e.changedTouches[0].screenX;
+      const t = e.changedTouches[0];
+      touchendX = t.screenX;
+      touchendY = t.screenY;
       handleGesture();
     });
   }
 
-  // Kad prelazimo na next/previous, radimo .click() i .scrollIntoView()
   function showNextCategory() {
+    if (!firstSwipeOccurred) {
+      firstSwipeOccurred = true;
+      showGreenRectangle();
+    }
     const activeTab = document.querySelector('.tab.active');
     if (!activeTab) return;
     const currentCat = activeTab.getAttribute('data-tab');
@@ -76,6 +89,10 @@ export function initSwipe() {
   }
 
   function showPreviousCategory() {
+    if (!firstSwipeOccurred) {
+      firstSwipeOccurred = true;
+      showGreenRectangle();
+    }
     const activeTab = document.querySelector('.tab.active');
     if (!activeTab) return;
     const currentCat = activeTab.getAttribute('data-tab');
