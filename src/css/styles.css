@@ -1,5 +1,5 @@
 :root {
-  --background-color: #000; /* Crna pozadina svuda */
+  --background-color: #000; /* Crna pozadina */
   --text-color: #ffffff;
   --primary-color: #1DB954; /* Jedinstvena zelena */
   --secondary-color: #1c1c1c;
@@ -348,12 +348,16 @@ img.lazy.loaded {
   align-items: center;
   justify-content: center;
 }
+
+/* Ovde ubacujemo margin 0 10px i zeleni glow */
 .tutorial-content {
   background-color: #000;
   border: 1px solid var(--primary-color);
   padding: 1rem 2rem;
   border-radius: 10px;
   text-align: center;
+  margin: 0 10px; /* levo i desno 10px */
+  box-shadow: 0 0 12px var(--primary-color); /* isti glow */
 }
 .tutorial-content p {
   color: #fff;
@@ -381,7 +385,13 @@ img.lazy.loaded {
   word-break: break-word; 
 }
 
-/* Povećan glow, border-radius 10px */
+/* Zelena + bold za izvor */
+.modal-source-bold-green {
+  color: var(--primary-color);
+  font-weight: bold;
+}
+
+/* Glow, border-radius za sliku */
 #news-modal-image {
   display: block;
   margin: 1rem auto;
@@ -391,21 +401,14 @@ img.lazy.loaded {
   border-radius: 10px;
 }
 
-/* Margine za naslov i opis (isti horizontalni centar i širina 240px) */
+/* Centriranje naslova i opisa */
 #news-modal-title,
 #news-modal-description {
   width: 240px;
   margin: 1rem auto;
-  text-align: left;
+  text-align: center; /* sada centrirano */
 }
 
-/* Zelena i bold za izvor (u modalSourceTime) */
-.modal-source-bold-green {
-  color: var(--primary-color);
-  font-weight: bold;
-}
-
-/* .news-modal-content -> text-align: center */
 .news-modal-content {
   text-align: center;
 }
