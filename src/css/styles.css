@@ -349,15 +349,15 @@ img.lazy.loaded {
   justify-content: center;
 }
 
-/* Ovde ubacujemo margin 0 10px i zeleni glow */
+/* Dodat glow i margine na tutorial-content */
 .tutorial-content {
   background-color: #000;
   border: 1px solid var(--primary-color);
   padding: 1rem 2rem;
   border-radius: 10px;
   text-align: center;
-  margin: 0 10px; /* levo i desno 10px */
-  box-shadow: 0 0 12px var(--primary-color); /* isti glow */
+  margin: 0 10px;
+  box-shadow: 0 0 12px var(--primary-color);
 }
 .tutorial-content p {
   color: #fff;
@@ -383,6 +383,7 @@ img.lazy.loaded {
 .no-hyphenation {
   hyphens: none;
   word-break: break-word; 
+  white-space: pre-wrap; /* multiline text da bude centriran i lepo wrapovan */
 }
 
 /* Zelena + bold za izvor */
@@ -401,12 +402,12 @@ img.lazy.loaded {
   border-radius: 10px;
 }
 
-/* Centriranje naslova i opisa */
+/* Centriramo naslov i opis */
 #news-modal-title,
 #news-modal-description {
   width: 240px;
   margin: 1rem auto;
-  text-align: center; /* sada centrirano */
+  text-align: center;
 }
 
 .news-modal-content {
