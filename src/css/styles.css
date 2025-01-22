@@ -239,39 +239,39 @@ nav .menu button {
   text-transform: lowercase;
 }
 
-/* Modal => crna pozadina */
+/* Modal => polu-providna pozadina */
 .modal {
   display: none;
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  top: 0; left: 0; width: 100%; height: 100%;
   align-items: center;
   justify-content: center;
-  background-color: #000;
+  background-color: rgba(0,0,0,0.7); /* poluprovidno */
   z-index: 2000;
 }
 .rearrange-modal-content {
   background-color: var(--background-color);
-  padding: 1rem;
+  padding: 0.8rem; /* malo smanjen padding */
   border-radius: 8px;
   max-width: 500px;
   width: 90%;
   max-height: 80vh;
   overflow-y: auto;
+  box-shadow: 0 0 15px rgba(0,0,0,0.6);
 }
+
+/* Settings list */
 .settings-list .settings-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem; /* smanjen razmak */
 }
 .settings-action-button {
   background-color: var(--primary-color);
   color: #fff;
   border: none;
-  padding: 0.5rem 1rem;
+  padding: 0.3rem 0.8rem;
   border-radius: 4px;
   cursor: pointer;
 }
@@ -388,31 +388,38 @@ img.lazy.loaded {
   font-weight: bold;
 }
 
-/* Slika 240px, auto visina, zeleni glow */
+/* Slika 320px, auto visina, zeleni glow */
 #news-modal-image {
   display: block;
   margin: 1rem auto;
-  width: 240px;
+  width: 320px;
   height: auto;
   box-shadow: 0 0 12px var(--primary-color);
   border-radius: 10px;
 }
 
-/* Naslov i opis: 240px širina, centrirano, levo poravnat tekst */
+/* Naslov i opis: centar poravnanje */
 #news-modal-title,
 #news-modal-description {
-    margin: 1rem 10px;
+  margin: 1rem 10px;
   padding: 0rem 1rem;
-  text-align: center; /* važno: center poravnanje */
+  text-align: center;
 }
 
 /* Modal content centriran */
 .news-modal-content {
   display: flex;
   flex-direction: column;
-  justify-content: center;  /* vertikalno centriranje */
-  align-items: center;      /* horizontalno centriranje */
-  text-align: center;       /* tekst u sredini */
-  min-height: 50vh;         /* da ima dovoljno prostora za centriranje */
+  justify-content: center; 
+  align-items: center;
+  text-align: center; 
+  min-height: 50vh;
 }
 
+/* Quellen, Kategorien, Uber */
+.quellen-modal-content, .kategorien-modal-content, .uber-modal-content {
+  background-color: var(--background-color);
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 0 15px rgba(0,0,0,0.6);
+}
