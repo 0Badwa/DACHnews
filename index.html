@@ -21,7 +21,6 @@
 
   <!-- Dinamički generisani tabovi + statički Neueste i Aktuell -->
   <div class="tabs-container" role="tablist" id="tabs-container">
-    <!-- Po defaultu: Neueste je prvi i označen kao aktivan -->
     <button class="tab active" data-tab="Neueste" role="tab" aria-selected="true">Neueste</button>
     <button class="tab" data-tab="Aktuell" role="tab" aria-selected="false">Aktuell</button>
     <!-- Ostale kategorije generisaće se iz JavaScript-a -->
@@ -32,7 +31,7 @@
 
   <!-- Kontejner za vesti -->
   <div id="news-container">
-    <!-- Vesti će se dinamički generisati unutar scripts.js -->
+    <!-- Vesti će se dinamički generisati unutar .js fajlova -->
   </div>
 
   <!-- Moderni tutorial overlay (skriven na početku) -->
@@ -103,7 +102,21 @@
     </div>
   </div>
 
-  <!-- Glavni JS fajl -->
-<script type="module" src="src/js/main.js"></script>
+  <!-- NOVO: Modal za pojedinačnu vest -->
+  <div id="news-modal" class="modal" style="display: none;">
+    <div class="rearrange-modal-content news-modal-content">
+      <img id="news-modal-image" src="" alt="News Image" style="width: 240px; height: auto; margin-bottom: 1rem;" />
+      <h2 id="news-modal-title" style="margin-top: 0.5rem; margin-bottom: 0.5rem; color: var(--primary-color);"></h2>
+      <p id="news-modal-description" style="margin: 1rem 0; line-height: 1.4;"></p>
+      <p id="news-modal-source-time" style="margin-bottom: 1rem; font-size: 0.9rem; color: var(--text-color);"></p>
+      <div class="modal-buttons">
+        <button class="save-button" id="close-news-modal">Schließen</button>
+        <button class="save-button" id="news-modal-weiter">Weiter</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Glavni JS fajl (koji zatim povlači ostale module) -->
+  <script type="module" src="src/js/main.js"></script>
 </body>
 </html>

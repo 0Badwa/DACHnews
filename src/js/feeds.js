@@ -8,6 +8,7 @@
  */
 
 import { initializeLazyLoading, updateCategoryIndicator } from './ui.js';
+import { openNewsModal } from './newsModal.js';
 
 /**
  * Funkcija za formatiranje vremena u stilu "vor X Minuten/Stunden/Tagen..."
@@ -77,14 +78,12 @@ export async function fetchAllFeedsFromServer(forceRefresh = false) {
  * ("/api/feeds-by-category/<cat>") i vraća ih, uz keširanje.
  */
 export async function fetchCategoryFeeds(category, forceRefresh = false) {
-  // Zamenjujemo "Ohne Kategorie" -> "Uncategorized" za fetch
   const catForUrl = (category === "Ohne Kategorie") ? "Uncategorized" : category;
   try {
     const lastFetchKey = `feeds-${catForUrl}-lastFetch`;
     const cachedFeedsKey = `feeds-${catForUrl}`;
     const lastFetchTime = localStorage.getItem(lastFetchKey);
 
-    // Ako nije forceRefresh i nije prošlo više od 10 min -> uzmi keš
     if (!forceRefresh && lastFetchTime && (Date.now() - new Date(lastFetchTime).getTime()) < 10 * 60 * 1000) {
       const cached = localStorage.getItem(cachedFeedsKey);
       if (cached) {
@@ -94,14 +93,12 @@ export async function fetchCategoryFeeds(category, forceRefresh = false) {
       }
     }
 
-    // Novi fetch
     const url = `/api/feeds-by-category/${encodeURIComponent(catForUrl)}`;
     const response = await fetch(url);
     if (!response.ok) throw new Error(`Neuspešno preuzimanje ${url}`);
     let data = await response.json();
     data.sort((a, b) => new Date(b.date_published).getTime() - new Date(a.date_published).getTime());
 
-    // Upis u localStorage i beleženje vremena
     localStorage.setItem(cachedFeedsKey, JSON.stringify(data));
     localStorage.setItem(lastFetchKey, new Date().toISOString());
     return data.slice(0, 50);
@@ -114,12 +111,18 @@ export async function fetchCategoryFeeds(category, forceRefresh = false) {
 /**
  * Funkcija koja kreira jednu "news card" za prikaz vesti,
  * skraćuje naslov na max 3 reda, bez hifenacije.
+ * Klik na karticu -> otvara modal (newsModal.js).
  */
 function createNewsCard(feed) {
   const card = document.createElement('div');
   card.className = "news-card";
 
-  // Slika 80x80
+  // Dodajemo event listener za otvaranje modala
+  card.addEventListener('click', () => {
+    openNewsModal(feed);
+  });
+
+  // Slika
   const img = document.createElement('img');
   img.className = "news-card-image lazy";
   img.dataset.src = feed.image || 'https://via.placeholder.com/80';
@@ -128,11 +131,12 @@ function createNewsCard(feed) {
   const contentDiv = document.createElement('div');
   contentDiv.className = "news-card-content";
 
-  // Naslov skraćen na 3 linije, bez hifenacije
+  // Naslov skraćen
   const title = document.createElement('h3');
   title.className = "news-title truncated-title";
   title.textContent = feed.title || 'No title';
 
+  // meta
   const meta = document.createElement('p');
   meta.className = "news-meta";
 
@@ -207,9 +211,10 @@ function pickRandom(array, count) {
  *  1) Pronalazi 4 vesti objavljene prvo u poslednja 2 sata,
  *     ako nema dovoljno, onda poslednja 4 sata,
  *     ako i dalje nema dovoljno, do 1 dana.
- *  2) Ispod naslova "Neueste Nachrichten" prikazuje te 4 vesti
- *     (najnovija prva, iako su random izvučene iz skupa).
- *  3) Zatim po 4 vesti iz svake kategorije (osim Aktuell).
+ *  2) Više NE dodajemo drugi naslov "Neueste Nachrichten" unutar kontejnera;
+ *     ostaje samo category indicator (updateCategoryIndicator).
+ *  3) Te 4 vesti sortiramo od najnovije ka najstarijoj i prikazujemo.
+ *  4) Zatim po 4 vesti iz svake kategorije (osim Aktuell).
  */
 export async function displayNeuesteFeeds() {
   const container = document.getElementById('news-container');
@@ -242,23 +247,11 @@ export async function displayNeuesteFeeds() {
     });
   }
 
-  // 4 random, zatim sortiramo po datumu (najnovija prva)
+  // 4 random, zatim sortiramo (najnovija prva)
   const top4Neueste = pickRandom(filtered, 4);
   top4Neueste.sort((a, b) => new Date(b.date_published).getTime() - new Date(a.date_published).getTime());
 
-  // Naslov
-  const neuesteHeading = document.createElement('h2');
-  neuesteHeading.textContent = "Neueste Nachrichten";
-  neuesteHeading.style.backgroundColor = "#000";
-  neuesteHeading.style.color = "var(--primary-color)";
-  neuesteHeading.style.padding = "4px";
-  neuesteHeading.style.marginTop = "0.4rem";
-  neuesteHeading.style.marginBottom = "4px";
-  neuesteHeading.style.fontSize = "1.1rem"; 
-  neuesteHeading.style.textAlign = "center";
-  container.appendChild(neuesteHeading);
-
-  // Prikaz ovih 4 (sortiranih) vesti
+  // Prvo prikažemo te 4
   top4Neueste.forEach(feed => {
     const card = createNewsCard(feed);
     container.appendChild(card);
@@ -290,7 +283,7 @@ export async function displayNeuesteFeeds() {
 
   const results = await Promise.all(fetchPromises);
 
-  // Za svaku kategoriju prikazujemo prvih 4 vesti
+  // Za svaku kategoriju prikazujemo po 4 vesti
   results.forEach(({ cat, feeds }) => {
     if (!feeds || feeds.length === 0) return;
 
@@ -304,7 +297,7 @@ export async function displayNeuesteFeeds() {
     heading.style.padding = "4px";
     heading.style.marginTop = "0.4rem";
     heading.style.marginBottom = "4px";
-    heading.style.fontSize = "1.1rem"; /* isto kao tab */
+    heading.style.fontSize = "1.1rem"; 
     heading.style.textAlign = "center";
     container.appendChild(heading);
 
@@ -314,9 +307,8 @@ export async function displayNeuesteFeeds() {
     });
   });
 
-  // Za "Neueste" tab, NE stavljamo "Aktuell" u indicator, već "Neueste Nachrichten"
+  // Indikator umesto "Aktuell" -> "Neueste Nachrichten"
   updateCategoryIndicator("Neueste Nachrichten");
-
   initializeLazyLoading();
 }
 

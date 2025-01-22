@@ -127,7 +127,6 @@ nav .menu button {
   align-items: center;
   padding: 0.4rem 0;
 }
-/* Svetlija nijansa na hover/active */
 .tabs-container button {
   background: none;
   border: none;
@@ -155,7 +154,6 @@ nav .menu button {
   padding: 0.3rem;
 }
 
-/* .news-card -> koristimo varijablu --card-font-size */
 .news-card {
   display: flex;
   align-items: flex-start;
@@ -166,6 +164,7 @@ nav .menu button {
   margin-bottom: 0.1rem;
   transition: transform 0.2s;
   font-size: var(--card-font-size);
+  cursor: pointer; /* da bude jasno da je klikabilno */
 }
 .news-card:hover {
   transform: scale(1.02);
@@ -180,7 +179,6 @@ nav .menu button {
 .news-card-content h3 {
   font-family: var(--font-family);
 }
-/* .truncated-title -> max 3 lines, no hyphens */
 .truncated-title {
   display: -webkit-box;
   -webkit-line-clamp: 3; 
@@ -203,8 +201,6 @@ nav .menu button {
   margin: 0;
   color: var(--text-color);
 }
-
-/* category-indicator */
 .category-indicator {
   position: fixed;
   top: 100px;
@@ -222,8 +218,6 @@ nav .menu button {
   z-index: 998;
   font-family: 'Arial', sans-serif;
 }
-
-/* Animacije */
 .fade-out {
   opacity: 0;
   transition: opacity 0.3s;
@@ -362,7 +356,6 @@ img.lazy.loaded {
   border-radius: 10px;
   text-align: center;
 }
-/* Povećan spacing unutar <p>, dodate leve/desne margine 9px */
 .tutorial-content p {
   color: #fff;
   margin: 0 9px 1rem 9px; 
@@ -381,4 +374,10 @@ img.lazy.loaded {
   cursor: pointer;
   font-weight: bold;
   font-size: 1rem;
+}
+
+/* NOVO: stil za modal prikaza pojedinačne vesti */
+.news-modal-content {
+  /* Može i dodatni stil, ali za sada koristimo isto kao .rearrange-modal-content */
+  text-align: center;
 }
