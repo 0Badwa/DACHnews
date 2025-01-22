@@ -1,10 +1,9 @@
 /**
  * main.js
  * 
- * Glavni fajl koji se poziva nakon učitavanja DOM-a.
- * Uvešćemo ostale module i inicijalizovati događaje, tabove, itd.
- * Sada bez LocalStorage za aktivnu kategoriju:
- * - Po svakom reload-u bira se "Neueste"
+ * - Promenili smo "Ohne Kategorie" -> "Sonstiges".
+ * - Posle reload-a -> uvek Neueste tab, i tabs-container je skrolovan levo.
+ * - Generišemo tabove osim Neueste i Aktuell, + "Sonstiges" umesto "Ohne Kategorie".
  */
 
 import { checkAndShowTutorial, closeTutorialOverlay, removeActiveClass, showGreenRectangle, hideGreenRectangle } from './ui.js';
@@ -23,13 +22,14 @@ document.addEventListener("DOMContentLoaded", () => {
   // Sakrij zeleni okvir za prvi tab
   hideGreenRectangle();
 
-  // Inicijalizuj podešavanja (tema, font, itd.)
+  // Inicijalizuj podešavanja
   initSettings();
 
-  // Swipe logika (horizontalno menjanje kategorija)
+  // Swipe logika
   initSwipe();
 
-  // Definišemo ostale kategorije (osim Neueste, Aktuell)
+  // Kategorije (sem Neueste, Aktuell)
+  // Uklanjamo "Ohne Kategorie", zamenjujemo "Sonstiges"
   const categories = [
     "Technologie",
     "Gesundheit",
@@ -44,10 +44,9 @@ document.addEventListener("DOMContentLoaded", () => {
     "Unterhaltung",
     "Welt",
     "LGBT+",
-    "Ohne Kategorie"
+    "Sonstiges"
   ];
 
-  // Hvatamo tab elemente
   const neuesteTab = document.querySelector('.tab[data-tab="Neueste"]');
   const aktuellTab = document.querySelector('.tab[data-tab="Aktuell"]');
   const tabsContainer = document.getElementById('tabs-container');
@@ -60,7 +59,6 @@ document.addEventListener("DOMContentLoaded", () => {
       e.target.setAttribute('aria-selected', 'true');
       await displayNeuesteFeeds();
       showGreenRectangle();
-      // Nema više saveAppState
     });
   }
 
@@ -75,7 +73,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Generišemo ostale kategorije (tabove)
+  // Generišemo ostale kategorije
   if (tabsContainer) {
     const skipList = ["Neueste", "Aktuell"];
     categories
@@ -100,8 +98,13 @@ document.addEventListener("DOMContentLoaded", () => {
       });
   }
 
-  // Po svakom refresh-u -> uvek Neueste tab
+  // Po refresh-u -> kliknemo Neueste i tabs-container scroll levo
   if (neuesteTab) {
     neuesteTab.click();
+    setTimeout(() => {
+      if (tabsContainer) {
+        tabsContainer.scrollLeft = 0; // skroluj skroz levo
+      }
+    }, 200);
   }
 });
