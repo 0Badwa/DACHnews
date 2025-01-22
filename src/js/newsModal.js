@@ -1,8 +1,8 @@
 /**
  * newsModal.js
  * 
- * Logika za otvaranje i zatvaranje modala sa detaljima o vesti (slika, naslov, opis, izvor, vreme).
- * Klik na 'Weiter' -> sačekamo 1s i zatvorimo modal.
+ * Klikom na 'Weiter' -> otvori link u novom tabu,
+ * a modal zatvori posle 3 sekunde.
  */
 
 export function openNewsModal(feed) {
@@ -19,16 +19,16 @@ export function openNewsModal(feed) {
     return;
   }
 
-  // Ubacujemo podatke
+  // Postavimo sliku
   modalImage.src = feed.image || 'https://via.placeholder.com/240';
 
-  // Naslov i opis bez hifenacije, centrirani
+  // Naslov i opis
   modalTitle.classList.add('no-hyphenation');
   modalDescription.classList.add('no-hyphenation');
   modalTitle.textContent = feed.title || 'No title';
   modalDescription.textContent = feed.content_text || 'Keine Beschreibung';
 
-  // Izvor (velika slova, zeleno/bold), datum i vreme ostaju belim slovima
+  // Izvor (velika slova, zeleno/bold), datum i vreme
   const sourceName = (feed.source || 'Unbekannte Quelle').toUpperCase();
   let datePart = '';
   let timePart = '';
@@ -53,20 +53,18 @@ export function openNewsModal(feed) {
   // Prikažemo modal
   modal.style.display = 'flex';
 
-  // Dugme X
+  // Dugme X -> odmah zatvara
   closeModalButton.onclick = () => {
     modal.style.display = 'none';
   };
 
-  // Klik na Weiter:
-  // 1) Otvaramo link u novom tabu
-  // 2) Posle 1s zatvaramo modal
+  // Weiter -> otvori link, zatvori modal posle 3 sekunde
   weiterButton.onclick = () => {
     if (feed.url) {
       window.open(feed.url, '_blank');
     }
     setTimeout(() => {
       modal.style.display = 'none';
-    }, 3000);
+    }, 3000); // sada 3 sekunde
   };
 }
