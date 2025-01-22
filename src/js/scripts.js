@@ -582,10 +582,10 @@ function initSettings() {
     root.setAttribute('data-theme', next);
     localStorage.setItem('theme', next);
 
-    const themeToggle = document.getElementById('theme-toggle');
-    if (themeToggle) {
-      themeToggle.textContent = (next === 'light') ? 'Dark Modus' : 'Licht Modus';
-    }
+     // Umesto "themeToggle", koristimo "themeBtn" (konzistentno s gornjim kodom)
+    if (themeBtn) {
+      themeBtn.textContent = (next === 'light') ? 'Dark Modus' : 'Licht Modus';
+     }
   }
 
   function changeFont(delta) {
@@ -633,9 +633,9 @@ function initSettings() {
   // Učitaj temu
   const savedTheme = localStorage.getItem('theme') || 'dark';
   document.documentElement.setAttribute('data-theme', savedTheme);
-  if (themeToggle) {
-    themeToggle.textContent = (savedTheme === 'light') ? 'Dark Modus' : 'Licht Modus';
-  }
+ if (themeBtn) {
+    themeBtn.textContent = (savedTheme === 'light') ? 'Dark Modus' : 'Licht Modus';
+   }
 }
 
 /**
