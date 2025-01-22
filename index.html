@@ -5,8 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <link rel="icon" href="src/icons/favicon.ico" type="image/x-icon" />
   <title>DACH.news</title>
-  <!-- Glavni CSS fajl -->
-  <link rel="stylesheet" type="text/css" href="src/css/styles.css?v=128">
+  <!-- Podeljeni CSS fajlovi -->
+  <link rel="stylesheet" type="text/css" href="src/css/styles.global.css?v=1">
+  <link rel="stylesheet" type="text/css" href="src/css/styles.modals.css?v=1">
+  <link rel="stylesheet" type="text/css" href="src/css/styles.tutorial.css?v=1">
 </head>
 <body data-theme="dark">
   <nav>
@@ -32,37 +34,24 @@
   <!-- Kontejner za vesti -->
   <div id="news-container"></div>
 
-  <!-- Moderni tutorial overlay (skriven na početku) -->
+  <!-- Tutorial overlay (skriven) -->
   <div id="tutorial-overlay" class="tutorial-overlay" style="display: none;">
     <div class="tutorial-content">
       <h2>Willkommen!</h2>
-      <!-- Izbačena prva rečenica, ostaje samo ovo: -->
+      <!-- Izbačena prva rečenica, ostaje samo wischen: -->
       <p>Wischen Sie nach LINKS, um Kategorien zu wechseln.</p>
       <button id="close-tutorial" class="tutorial-close-btn">Verstanden</button>
     </div>
   </div>
 
-  <!-- Modal za Tabs anordnen (možete ukloniti ako ne koristite) -->
-  <div id="rearrange-modal" class="modal" style="display: none;">
-    <div class="rearrange-modal-content">
-      <div class="modal-title">Tabs anordnen</div>
-      <div class="rearrange-list">
-        <!-- Dinamički sadržaj modalne liste -->
-      </div>
-      <div class="modal-buttons">
-        <button class="save-button" id="close-rearrange">Schließen</button>
-      </div>
-    </div>
-  </div>
-
   <!-- Modal za Settings (Einstellungen) -->
   <div id="settings-modal" class="modal" style="display: none;">
-    <div class="rearrange-modal-content settings-modal-content" style="margin: 0 1rem;">
-      <!-- Uvećan, zelen, bold: -->
+    <div class="rearrange-modal-content settings-modal-content" style="margin: 0 2rem;">
+      <!-- Uvećan, zelen i bold, 20% veći font -->
       <div class="modal-title" style="color: var(--primary-color); font-weight: bold; font-size: 120%;">
         Einstellungen
       </div>
-      <!-- Razmak 1rem između naslova i prvog item-a: -->
+      <!-- Razmak 1rem između naslova i prvog item-a -->
       <div class="settings-list" style="margin-top: 1rem;">
         <div class="settings-item">
           <span>Quellen</span>
@@ -90,16 +79,32 @@
     </div>
   </div>
 
-  <!-- Modal za Quellen (promenjeno iz "Quellen verwalten" u "Quelle verbergen") -->
+  <!-- Modal za Quellen (naslov: Quelle verbergen, margin 2rem) -->
   <div id="quellen-modal" class="modal" style="display: none;">
-    <div class="rearrange-modal-content quellen-modal-content" style="margin: 0 1rem;">
-      <!-- Stil naslova kao kod Einstellungen: -->
+    <div class="rearrange-modal-content quellen-modal-content" style="margin: 0 2rem;">
+      <!-- Stil naslova kao kod Einstellungen -->
       <div class="modal-title" style="color: var(--primary-color); font-weight: bold; font-size: 120%;">
         Quelle verbergen
       </div>
-      <input type="text" id="quellen-search" placeholder="Suchen..." style="width: 90%; margin: 0.5rem 0;" />
-      <div class="quellen-list">
-        <!-- Dinamički spisak izvora (Bild, Zeit, itd.) sa check/box za sakrivanje -->
+      <div class="quellen-list" style="margin-top: 1rem;">
+        <!-- Primer spiska izvora s checkbox opcijom za sakrivanje -->
+        <label style="display: block; margin-bottom: 0.5rem;">
+          <input type="checkbox" class="quellen-checkbox" data-source="Bild" />
+          Bild
+        </label>
+        <label style="display: block; margin-bottom: 0.5rem;">
+          <input type="checkbox" class="quellen-checkbox" data-source="Zeit" />
+          Zeit
+        </label>
+        <label style="display: block; margin-bottom: 0.5rem;">
+          <input type="checkbox" class="quellen-checkbox" data-source="Blick" />
+          Blick
+        </label>
+        <label style="display: block; margin-bottom: 0.5rem;">
+          <input type="checkbox" class="quellen-checkbox" data-source="Heise" />
+          Heise
+        </label>
+        <!-- Dodajte još izvora po potrebi... -->
       </div>
       <div class="modal-buttons">
         <button class="save-button" id="close-quellen-modal">Schließen</button>
@@ -107,17 +112,40 @@
     </div>
   </div>
 
-  <!-- Modal za Kategorien (promenjeno u "Kategorien verbergen und neu anordnen") -->
+  <!-- Modal za Kategorien (naslov: "Verbergen und anordnen"), margin 2rem -->
   <div id="kategorien-modal" class="modal" style="display: none;">
-    <div class="rearrange-modal-content kategorien-modal-content" style="margin: 0 1rem;">
-      <!-- Stil naslova kao kod Einstellungen: -->
+    <div class="rearrange-modal-content kategorien-modal-content" style="margin: 0 2rem;">
+      <!-- Stil naslova kao kod Einstellungen -->
       <div class="modal-title" style="color: var(--primary-color); font-weight: bold; font-size: 120%;">
-        Kategorien verbergen und neu anordnen
+        Verbergen und anordnen
       </div>
+      <p style="margin: 0.5rem 0;">
+        <!-- Spisak svih kategorija osim Neueste i Aktuell, 
+             user može da ih sakrije (checkbox) i rearanžira (drag & drop) -->
+      </p>
       <div class="kategorien-list">
-        <!-- Spisak svih kategorija osim Neueste, Aktuell, Sonstiges,
-             uz mogućnost da ih sakrijemo (checkbox)
-             i "drag & drop" za rearrange -->
+        <!-- Primer:
+            1) check za sakrivanje
+            2) draggable handle za rearrange
+         -->
+        <div class="kategorie-item" draggable="true" style="margin-bottom: 0.5rem;">
+          <input type="checkbox" class="kategorie-hide-cb" data-cat="Technologie" />
+          <span style="margin-left: 0.5rem;">Technologie</span>
+        </div>
+        <div class="kategorie-item" draggable="true" style="margin-bottom: 0.5rem;">
+          <input type="checkbox" class="kategorie-hide-cb" data-cat="Sport" />
+          <span style="margin-left: 0.5rem;">Sport</span>
+        </div>
+        <div class="kategorie-item" draggable="true" style="margin-bottom: 0.5rem;">
+          <input type="checkbox" class="kategorie-hide-cb" data-cat="Wirtschaft" />
+          <span style="margin-left: 0.5rem;">Wirtschaft</span>
+        </div>
+        <div class="kategorie-item" draggable="true" style="margin-bottom: 0.5rem;">
+          <input type="checkbox" class="kategorie-hide-cb" data-cat="Kultur" />
+          <span style="margin-left: 0.5rem;">Kultur</span>
+        </div>
+        <!-- Dodajte ostale kategorije: Politik, Lifestyle, Panorma, LGBT+, usw.
+             Nepominjemo Neueste i Aktuell, ni Sonstiges (ili prikazati prema želji) -->
       </div>
       <div class="modal-buttons">
         <button class="save-button" id="close-kategorien-modal">Schließen</button>
@@ -125,15 +153,14 @@
     </div>
   </div>
 
-  <!-- Modal za Über -->
+  <!-- Modal za Über (margin 2rem) -->
   <div id="uber-modal" class="modal" style="display: none;">
-    <div class="rearrange-modal-content uber-modal-content" style="margin: 0 1rem;">
-      <!-- Stil naslova kao kod Einstellungen: -->
+    <div class="rearrange-modal-content uber-modal-content" style="margin: 0 2rem;">
+      <!-- Stil naslova kao kod Einstellungen -->
       <div class="modal-title" style="color: var(--primary-color); font-weight: bold; font-size: 120%;">
         Über diese App
       </div>
       <p style="margin: 1rem 0;">
-        <!-- Placeholder: tekst dodati kasnije -->
         Hier kommt später ein Text über die App...
       </p>
       <div class="modal-buttons">
