@@ -327,24 +327,71 @@ async function displayAktuellFeeds() {
 }
 
 /**
+ * Funkcija za uzimanje slučajnih elemenata iz niza.
+ */
+function pickRandom(array, count) {
+  if (array.length <= count) return array;
+  const shuffled = array.sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, count);
+}
+
+/**
  * Funkcija koja prikazuje "Neueste":
- *  - Uzimamo prvih 4 vesti iz "Aktuell"
- *  - Zatim po 4 iz svake druge kategorije
- *  - Ne prikazujemo poseban naslov "Aktuell" iznad tih prvih 4,
- *    a category-indicator menja iz "Neueste" u "Aktuell".
+ *  1) Pronalazi 4 random vesti objavljene prvo u poslednja 2 sata,
+ *     ako nema dovoljno, onda poslednja 4 sata,
+ *     ako i dalje nema dovoljno, do 1 dana.
+ *  2) Iznad tih 4 vesti prikazuje naslov "Neueste Nachrichten".
+ *  3) Zatim prikazuje po 4 vesti iz svake kategorije.
+ *  4) category-indicator se menja iz "Neueste" u "Aktuell".
  */
 async function displayNeuesteFeeds() {
   const container = document.getElementById('news-container');
   if (!container) return;
   container.innerHTML = '';
 
-  // 1) Dohvatimo prvih 4 iz Aktuell
-  let aktuellFeeds = await fetchAllFeedsFromServer();
-  aktuellFeeds.sort((a, b) => new Date(b.date_published).getTime() - new Date(a.date_published).getTime());
-  const top4Aktuell = aktuellFeeds.slice(0, 4);
+  // Dohvatimo sve feedove
+  let allFeeds = await fetchAllFeedsFromServer();
+  const now = Date.now();
 
-  // Prikaz tih 4 vesti (bez posebnog naslova)
-  top4Aktuell.forEach(feed => {
+  // Prvo probamo 2 sata
+  let filtered = allFeeds.filter(feed => {
+    if (!feed.date_published) return false;
+    return (now - new Date(feed.date_published).getTime()) <= (2 * 60 * 60 * 1000);
+  });
+
+  // Ako ima < 4, probamo 4 sata
+  if (filtered.length < 4) {
+    filtered = allFeeds.filter(feed => {
+      if (!feed.date_published) return false;
+      return (now - new Date(feed.date_published).getTime()) <= (4 * 60 * 60 * 1000);
+    });
+  }
+
+  // Ako i dalje ima < 4, uzimamo do 1 dana
+  if (filtered.length < 4) {
+    filtered = allFeeds.filter(feed => {
+      if (!feed.date_published) return false;
+      return (now - new Date(feed.date_published).getTime()) <= (24 * 60 * 60 * 1000);
+    });
+  }
+
+  // Uzmi 4 random iz rezultata
+  const top4Neueste = pickRandom(filtered, 4);
+
+  // Prikaz "Neueste Nachrichten"
+  const neuesteHeading = document.createElement('h2');
+  neuesteHeading.textContent = "Neueste Nachrichten";
+  neuesteHeading.style.backgroundColor = "#000";
+  neuesteHeading.style.color = "var(--primary-color)";
+  neuesteHeading.style.padding = "4px";
+  neuesteHeading.style.marginTop = "0.4rem";
+  neuesteHeading.style.marginBottom = "4px";
+  neuesteHeading.style.fontSize = "1.1rem"; 
+  neuesteHeading.style.textAlign = "center";
+  container.appendChild(neuesteHeading);
+
+  // Prikaz ovih 4 random vesti
+  top4Neueste.forEach(feed => {
     const card = createNewsCard(feed);
     container.appendChild(card);
   });
@@ -537,6 +584,7 @@ function initSwipe() {
 
 /**
  * Funkcija za inicijalizaciju podešavanja (tema, font, itd.).
+ * Ograničavamo font-size samo na news-card (pomoću varijable --card-font-size).
  */
 function initSettings() {
   // Učitavamo iz localStorage, ili default 16
@@ -553,9 +601,6 @@ function initSettings() {
   // Odmah primenimo vrednost
   applyCardFontSize(currentCardFontSize);
 
-  /**
-   * Funkcija za promenu teme (dark/light).
-   */
   function toggleTheme() {
     const root = document.documentElement;
     const currentTheme = root.getAttribute('data-theme') || 'dark';
@@ -570,7 +615,7 @@ function initSettings() {
   }
 
   /**
-   * Funkcija za menjanje veličine fonta kartica (+/- 2px).
+   * Menja veličinu fonta za kartice (po 2px).
    */
   function changeFontSize(delta) {
     currentCardFontSize += delta;
