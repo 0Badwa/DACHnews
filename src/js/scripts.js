@@ -282,10 +282,15 @@ function displayFeedsList(feedsList, headingTitle = "") {
  */
 async function displayAktuellFeeds() {
    // Uvek uzimamo sveže feedove sa servera (bez localStorage keša):
-   const allFeeds = await fetchAllFeedsFromServer();
-   localStorage.setItem('feeds-Aktuell', JSON.stringify(allFeeds));
-   displayFeedsList(allFeeds, "Aktuell");
-   setActiveTabInUI("Aktuell");
+  const response = await fetch("/api/feeds");
+  if (!response.ok) {
+    displayFeedsList([], "Aktuell"); // ili ispišite grešku
+    return;
+  }
+  const allFeeds = await response.json();
+  // Ako je allFeeds.length == 0, "Keine News verfügbar."
+  displayFeedsList(allFeeds, "Aktuell");
+  setActiveTabInUI("Aktuell");
  }
 
 /**
