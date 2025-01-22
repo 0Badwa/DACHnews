@@ -2,15 +2,310 @@
  * scripts.js
  ************************************************/
 
-document.addEventListener("DOMContentLoaded", () => {
+/**
+ * Funkcija za prikazivanje modernog tutorial overlaya
+ * samo pri prvom pokretanju aplikacije.
+ */
+function checkAndShowTutorial() {
+  const tutorialShown = localStorage.getItem('tutorialShown');
+  const overlay = document.getElementById('tutorial-overlay');
+  if (!tutorialShown && overlay) {
+    overlay.style.display = 'flex';
+  }
+}
 
-  // --------------------------------------------
-  // 1) Globalne promenljive
-  // --------------------------------------------
-  let feeds = [];
+/**
+ * Funkcija za zatvaranje tutorial overlaya i setovanje
+ * localStorage flag-a da se ne prikazuje ponovo.
+ */
+function closeTutorialOverlay() {
+  const overlay = document.getElementById('tutorial-overlay');
+  if (overlay) {
+    overlay.style.display = 'none';
+    localStorage.setItem('tutorialShown', 'true');
+  }
+}
 
-  // Samo kategorije BEZ "Neueste" i "Aktuell"
-  const baseCategories = [
+/**
+ * Funkcija koja čuva aktivni tab i scroll poziciju u LocalStorage,
+ * kako bi ih obnovili kasnije.
+ */
+function saveAppState(currentTab) {
+  const scrollPos = window.scrollY || 0;
+  localStorage.setItem('activeTab', currentTab);
+  localStorage.setItem('scrollPosition', scrollPos);
+}
+
+/**
+ * Funkcija koja vraća aplikaciju na prethodno aktivni tab i scroll poziciju.
+ */
+function restoreAppState() {
+  const savedTab = localStorage.getItem('activeTab');
+  const savedPosition = localStorage.getItem('scrollPosition');
+  if (savedTab) {
+    const tabButton = document.querySelector(`.tab[data-tab="${savedTab}"]`);
+    if (tabButton) {
+      tabButton.click();
+    }
+  } else {
+    // Ako nema sacuvanog taba, kliknemo na Neueste
+    const neuesteTab = document.querySelector('.tab[data-tab="Neueste"]');
+    if (neuesteTab) {
+      neuesteTab.click();
+    }
+  }
+  if (savedPosition) {
+    setTimeout(() => window.scrollTo(0, savedPosition), 100);
+  }
+}
+
+/**
+ * Funkcija za formatiranje vremena u stilu "vor X Minuten/Stunden/Tagen..."
+ */
+function timeAgo(dateString) {
+  if (!dateString) return '';
+  const now = new Date();
+  const past = new Date(dateString);
+  const seconds = Math.floor((now - past) / 1000);
+
+  let interval = Math.floor(seconds / 31536000);
+  if (interval >= 1) return `vor ${interval} Jahr${interval > 1 ? 'en' : ''}`;
+
+  interval = Math.floor(seconds / 2592000);
+  if (interval >= 1) return `vor ${interval} Monat${interval > 1 ? 'en' : ''}`;
+
+  interval = Math.floor(seconds / 86400);
+  if (interval >= 1) return `vor ${interval} Tag${interval > 1 ? 'en' : ''}`;
+
+  interval = Math.floor(seconds / 3600);
+  if (interval >= 1) return `vor ${interval} Stunde${interval > 1 ? 'n' : ''}`;
+
+  interval = Math.floor(seconds / 60);
+  if (interval >= 1) return `vor ${interval} Minute${interval > 1 ? 'n' : ''}`;
+
+  return `gerade eben`;
+}
+
+/**
+ * Funkcija koja kreira jednu "news card" za prikaz vesti.
+ */
+function createNewsCard(feed) {
+  const card = document.createElement('div');
+  card.className = "news-card";
+
+  const img = document.createElement('img');
+  img.className = "news-card-image lazy";
+  // Smanjena slika na 80x80
+  img.dataset.src = feed.image || 'https://via.placeholder.com/80';
+  img.alt = feed.title || 'No title';
+
+  const contentDiv = document.createElement('div');
+  contentDiv.className = "news-card-content";
+
+  const title = document.createElement('h3');
+  title.className = "news-title";
+  title.textContent = feed.title || 'No title';
+
+  const meta = document.createElement('p');
+  meta.className = "news-meta";
+
+  const sourceSpan = document.createElement('span');
+  sourceSpan.className = "source";
+  const sourceName = feed.source || 'Unbekannte Quelle';
+  sourceSpan.textContent = sourceName;
+
+  const timeSpan = document.createElement('span');
+  timeSpan.className = "time";
+  const timeString = feed.date_published ? timeAgo(feed.date_published) : '';
+  timeSpan.textContent = ` • ${timeString}`;
+
+  meta.appendChild(sourceSpan);
+  meta.appendChild(timeSpan);
+  contentDiv.appendChild(title);
+  contentDiv.appendChild(meta);
+  card.appendChild(img);
+  card.appendChild(contentDiv);
+
+  return card;
+}
+
+/**
+ * Funkcija koja uklanja klasu 'active' sa svih tabova.
+ */
+function removeActiveClass() {
+  const allTabs = document.querySelectorAll('.tab');
+  allTabs.forEach(tab => {
+    tab.classList.remove('active');
+    tab.setAttribute('aria-selected', 'false');
+    tab.classList.remove('active-green');
+  });
+}
+
+/**
+ * Funkcija koja prikazuje zeleni okvir oko aktivnog taba.
+ */
+function showGreenRectangle() {
+  const activeTab = document.querySelector('.tab.active');
+  if (activeTab) {
+    activeTab.classList.add('active-green');
+  }
+}
+
+/**
+ * Funkcija koja uklanja zeleni okvir (koristi se samo na početku).
+ */
+function hideGreenRectangle() {
+  const homeTab = document.querySelector('.tab[data-tab="Neueste"]');
+  if (homeTab) {
+    homeTab.classList.remove('active-green');
+  }
+}
+
+/**
+ * Funkcija za ažuriranje naziva prikazane kategorije (category indicator).
+ */
+function updateCategoryIndicator(categoryName) {
+  const categoryIndicator = document.querySelector('.category-indicator');
+  if (categoryIndicator) {
+    categoryIndicator.textContent = categoryName;
+    categoryIndicator.classList.add('fade-out');
+    setTimeout(() => {
+      categoryIndicator.classList.remove('fade-out');
+      categoryIndicator.classList.add('fade-in');
+      setTimeout(() => {
+        categoryIndicator.classList.remove('fade-in');
+      }, 300);
+    }, 300);
+  }
+}
+
+/**
+ * Funkcija koja inicijalizuje lazy loading za slike.
+ */
+function initializeLazyLoading() {
+  const lazyImages = document.querySelectorAll('img.lazy');
+  if ("IntersectionObserver" in window) {
+    const imageObserver = new IntersectionObserver((entries, observer) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const img = entry.target;
+          img.src = img.dataset.src;
+          img.classList.remove("lazy");
+          img.classList.add("loaded");
+          observer.unobserve(img);
+        }
+      });
+    }, {
+      rootMargin: "0px 0px 50px 0px",
+      threshold: 0.01
+    });
+
+    lazyImages.forEach(img => {
+      imageObserver.observe(img);
+    });
+  } else {
+    // Fallback
+    lazyImages.forEach(img => {
+      img.src = img.dataset.src;
+      img.classList.remove("lazy");
+    });
+  }
+}
+
+/**
+ * Funkcija koja dohvata 50 najnovijih feed-ova sa servera ("/api/feeds") i vraća ih.
+ */
+async function fetchAllFeedsFromServer() {
+  try {
+    const response = await fetch("/api/feeds");
+    if (!response.ok) throw new Error("Neuspešno preuzimanje /api/feeds");
+    const data = await response.json();
+    // Sortiranje i ograničavanje
+    data.sort((a, b) => new Date(b.date_published).getTime() - new Date(a.date_published).getTime());
+    return data.slice(0, 50);
+  } catch (error) {
+    console.error(error);
+    return [];
+  }
+}
+
+/**
+ * Funkcija koja dohvata 50 najnovijih feed-ova za određenu kategoriju
+ * ("/api/feeds-by-category/<cat>") i vraća ih.
+ */
+async function fetchCategoryFeeds(category) {
+  // Zamenjujemo "Ohne Kategorie" -> "Uncategorized" za fetch
+  const catForUrl = (category === "Ohne Kategorie") ? "Uncategorized" : category;
+  try {
+    const url = `/api/feeds-by-category/${encodeURIComponent(catForUrl)}`;
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`Neuspešno preuzimanje ${url}`);
+    let data = await response.json();
+    // Sortiranje i ograničavanje
+    data.sort((a, b) => new Date(b.date_published).getTime() - new Date(a.date_published).getTime());
+    return data.slice(0, 50);
+  } catch (error) {
+    console.error(error);
+    return [];
+  }
+}
+
+/**
+ * Funkcija koja prikazuje listu vesti i ažurira indikator kategorije.
+ */
+function displayFeedsList(feedsList, categoryName) {
+  const container = document.getElementById('news-container');
+  if (!container) return;
+
+  container.innerHTML = '';
+  if (!feedsList || feedsList.length === 0) {
+    container.innerHTML = `<p>Nema vesti za kategoriju: ${categoryName}</p>`;
+    updateCategoryIndicator(categoryName);
+    return;
+  }
+
+  feedsList.sort((a, b) => {
+    return new Date(b.date_published).getTime() - new Date(a.date_published).getTime();
+  });
+
+  feedsList.forEach(feed => {
+    const card = createNewsCard(feed);
+    container.appendChild(card);
+  });
+  updateCategoryIndicator(categoryName);
+  initializeLazyLoading();
+}
+
+/**
+ * Funkcija koja prikazuje "Aktuell" feed (sve vesti).
+ */
+async function displayAktuellFeeds() {
+  const container = document.getElementById('news-container');
+  if (!container) return;
+
+  let cached = localStorage.getItem('feeds-Aktuell');
+  let allFeeds = [];
+  if (cached) {
+    allFeeds = JSON.parse(cached);
+  } else {
+    // Fetch sa servera i čuvamo
+    allFeeds = await fetchAllFeedsFromServer();
+    localStorage.setItem('feeds-Aktuell', JSON.stringify(allFeeds));
+  }
+  displayFeedsList(allFeeds, "Aktuell");
+}
+
+/**
+ * Funkcija koja prikazuje "Neueste" - po 4 iz svake kategorije (osim Aktuell).
+ * Smanjili smo razmak i font naslova, i centrirali naslov.
+ */
+async function displayNeuesteFeeds() {
+  const container = document.getElementById('news-container');
+  if (!container) return;
+  container.innerHTML = '';
+
+  // Naša glavna lista kategorija (zamenjujemo "Uncategorized" sa "Ohne Kategorie" u UI)
+  const categories = [
     "Technologie",
     "Gesundheit",
     "Sport",
@@ -24,356 +319,239 @@ document.addEventListener("DOMContentLoaded", () => {
     "Unterhaltung",
     "Welt",
     "LGBT+",
-    "Uncategorized"
+    "Ohne Kategorie"
   ];
 
-  // --------------------------------------------
-  // 2) Pomoćne funkcije
-  // --------------------------------------------
+  // Paralelno dohvatamo feedove ako nisu u localStorage
+  const fetchPromises = categories.map(async (cat) => {
+    const localKey = `feeds-${cat}`;
+    let catFeeds = JSON.parse(localStorage.getItem(localKey) || '[]');
 
-  /**
-   * Formatiranje vremena ("vor X Minuten/Stunden/Tagen...").
-   */
-  function timeAgo(dateString) {
-    if (!dateString) return '';
-    const now = new Date();
-    const past = new Date(dateString);
-    const seconds = Math.floor((now - past) / 1000);
-
-    let interval = Math.floor(seconds / 31536000);
-    if (interval >= 1) return `vor ${interval} Jahr${interval > 1 ? 'en' : ''}`;
-
-    interval = Math.floor(seconds / 2592000);
-    if (interval >= 1) return `vor ${interval} Monat${interval > 1 ? 'en' : ''}`;
-
-    interval = Math.floor(seconds / 86400);
-    if (interval >= 1) return `vor ${interval} Tag${interval > 1 ? 'en' : ''}`;
-
-    interval = Math.floor(seconds / 3600);
-    if (interval >= 1) return `vor ${interval} Stunde${interval > 1 ? 'n' : ''}`;
-
-    interval = Math.floor(seconds / 60);
-    if (interval >= 1) return `vor ${interval} Minute${interval > 1 ? 'n' : ''}`;
-
-    return `gerade eben`;
-  }
-
-  /**
-   * Fetch svih vesti sa servera (/api/feeds).
-   */
-  async function fetchAllFeedsFromServer() {
-    try {
-      const response = await fetch("/api/feeds");
-      if (!response.ok) throw new Error("Neuspešno preuzimanje /api/feeds");
-      const data = await response.json();
-      console.log("[fetchAllFeedsFromServer] Primljeno:", data.length, "vesti");
-      return data;
-    } catch (error) {
-      console.error("[fetchAllFeedsFromServer] Greška:", error);
-      return [];
+    // Ako nemamo ništa u localStorage, fetchujemo
+    if (catFeeds.length === 0) {
+      catFeeds = await fetchCategoryFeeds(cat);
+      localStorage.setItem(localKey, JSON.stringify(catFeeds));
     }
-  }
+    return { cat, feeds: catFeeds };
+  });
 
-  /**
-   * Kreiramo DOM element za jednu vest (news card).
-   */
-  function createNewsCard(feed, lazy = false) {
-    const card = document.createElement('div');
-    card.className = "news-card";
+  // Kad se svi fetchovi završe
+  const results = await Promise.all(fetchPromises);
 
-    const img = document.createElement('img');
-    if (lazy) {
-      img.className = "news-card-image lazy";
-      img.dataset.src = feed.image || 'https://via.placeholder.com/150';
-    } else {
-      img.className = "news-card-image";
-      img.src = feed.image || 'https://via.placeholder.com/150';
-    }
-    img.alt = feed.title;
+  // Za svaku kategoriju prikazujemo prvih 4 vesti
+  results.forEach(({ cat, feeds }) => {
+    if (!feeds || feeds.length === 0) return;
 
-    const contentDiv = document.createElement('div');
-    contentDiv.className = "news-card-content";
+    // Uzimamo najnovije 4
+    feeds.sort((a, b) => new Date(b.date_published).getTime() - new Date(a.date_published).getTime());
+    const top4 = feeds.slice(0, 4);
 
-    const title = document.createElement('h3');
-    title.className = "news-title";
-    title.textContent = feed.title;
+    // Kreiramo heading: smanjen ~10%, centriran, smanjen marginBottom 50%
+    const heading = document.createElement('h2');
+    heading.textContent = cat;
+    heading.style.backgroundColor = "#000";
+    heading.style.color = "var(--primary-color)";
+    heading.style.padding = "4px";
+    heading.style.marginBottom = "0.4rem";
+    heading.style.marginTop = "0.4rem";
+    heading.style.fontSize = "0.9em";
+    heading.style.textAlign = "center";
+    container.appendChild(heading);
 
-    const meta = document.createElement('p');
-    meta.className = "news-meta";
-    const srcName = feed.source || 'Nepoznat izvor';
-    const dateStr = feed.date_published ? timeAgo(feed.date_published) : '';
-    meta.textContent = `${srcName} • ${dateStr}`;
-
-    contentDiv.appendChild(title);
-    contentDiv.appendChild(meta);
-    card.appendChild(img);
-    card.appendChild(contentDiv);
-
-    return card;
-  }
-
-  /**
-   * Postavlja dati tab kao aktivan, skida 'active' sa ostalih tabova.
-   */
-  function setActiveTab(cat) {
-    const allTabs = document.querySelectorAll('.tab');
-    allTabs.forEach(t => {
-      t.classList.remove('active');
-      t.setAttribute('aria-selected', 'false');
-    });
-    const tabBtn = document.querySelector(`.tab[data-tab="${cat}"]`);
-    if (tabBtn) {
-      tabBtn.classList.add('active');
-      tabBtn.setAttribute('aria-selected', 'true');
-    }
-  }
-
-  /**
-   * Inicijalizuje lazy load u kontejneru.
-   */
-  function initLazyLoad(container) {
-    const lazyImages = container.querySelectorAll('img.lazy');
-    if ("IntersectionObserver" in window) {
-      const imageObserver = new IntersectionObserver((entries, observer) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            const img = entry.target;
-            img.src = img.dataset.src;
-            img.classList.remove("lazy");
-            img.classList.add("loaded");
-            observer.unobserve(img);
-          }
-        });
-      }, {
-        rootMargin: "0px 0px 50px 0px",
-        threshold: 0.01
-      });
-      lazyImages.forEach(img => {
-        imageObserver.observe(img);
-      });
-    } else {
-      lazyImages.forEach(img => {
-        img.src = img.dataset.src;
-        img.classList.remove("lazy");
-      });
-    }
-  }
-
-  // --------------------------------------------
-  // 3) Funkcije za prikaz "Aktuell", "Neueste" i pojedinačne kategorije
-  // --------------------------------------------
-
-  /**
-   * "Aktuell" -> 50 najnovijih, uvek se fetchuje /api/feeds, bez uklanjanja duplikata.
-   */
-  async function displayAktuell() {
-    console.log("[displayAktuell] fetch /api/feeds...");
-    const container = document.getElementById('news-container');
-    if (!container) return;
-
-    container.innerHTML = "";
-    const allFeeds = await fetchAllFeedsFromServer();
-    if (!allFeeds || allFeeds.length === 0) {
-      container.innerHTML = "<p>No news.</p>";
-      setActiveTab("Aktuell");
-      return;
-    }
-    // Sort najnovije
-    allFeeds.sort((a,b) => new Date(b.date_published) - new Date(a.date_published));
-    // Bez uklanjanja duplikata
-    const top50 = allFeeds.slice(0, 50);
-
-    top50.forEach(feed => {
-      const card = createNewsCard(feed, true);
+    top4.forEach(feed => {
+      const card = createNewsCard(feed);
       container.appendChild(card);
     });
-    setActiveTab("Aktuell");
+  });
 
-    initLazyLoad(container);
+  updateCategoryIndicator("Neueste");
+  initializeLazyLoading();
+}
+
+/**
+ * Funkcija koja prikazuje vesti za određenu kategoriju.
+ * Ako kategorija ne postoji, prikazuje "Aktuell".
+ */
+async function displayNewsByCategory(category) {
+  const container = document.getElementById('news-container');
+  if (!container) return;
+
+  const validCategories = [
+    "Technologie",
+    "Gesundheit",
+    "Sport",
+    "Wirtschaft",
+    "Kultur",
+    "Auto",
+    "Reisen",
+    "Lifestyle",
+    "Panorama",
+    "Politik",
+    "Unterhaltung",
+    "Welt",
+    "LGBT+",
+    "Ohne Kategorie"
+  ];
+
+  // Ako nije validna -> Aktuell
+  if (!validCategories.includes(category)) {
+    displayAktuellFeeds();
+    return;
+  }
+
+  const localKey = `feeds-${category}`;
+  let catFeeds = JSON.parse(localStorage.getItem(localKey) || '[]');
+
+  if (catFeeds.length === 0) {
+    catFeeds = await fetchCategoryFeeds(category);
+    localStorage.setItem(localKey, JSON.stringify(catFeeds));
+  }
+  displayFeedsList(catFeeds, category);
+}
+
+/**
+ * Funkcija za swipe (left/right) navigaciju kroz kategorije.
+ */
+function initSwipe() {
+  let firstSwipeOccurred = false;
+  const swipeContainer = document.getElementById('news-container');
+  let touchstartX = 0;
+  let touchendX = 0;
+  const swipeThreshold = 50;
+
+  // pun redosled: Neueste -> Aktuell -> ...categories
+  const categories = [
+    "Neueste",
+    "Aktuell",
+    "Technologie",
+    "Gesundheit",
+    "Sport",
+    "Wirtschaft",
+    "Kultur",
+    "Auto",
+    "Reisen",
+    "Lifestyle",
+    "Panorama",
+    "Politik",
+    "Unterhaltung",
+    "Welt",
+    "LGBT+",
+    "Ohne Kategorie"
+  ];
+
+  function handleGesture() {
+    if (!firstSwipeOccurred) {
+      firstSwipeOccurred = true;
+      showGreenRectangle();
+    }
+    if (touchendX < touchstartX - swipeThreshold) {
+      showNextCategory();
+    } else if (touchendX > touchstartX + swipeThreshold) {
+      showPreviousCategory();
+    }
+  }
+
+  if (swipeContainer) {
+    swipeContainer.addEventListener('touchstart', e => {
+      touchstartX = e.changedTouches[0].screenX;
+    });
+
+    swipeContainer.addEventListener('touchend', e => {
+      touchendX = e.changedTouches[0].screenX;
+      handleGesture();
+    });
+  }
+
+  function showNextCategory() {
+    const activeTab = document.querySelector('.tab.active');
+    if (!activeTab) return;
+    const currentCat = activeTab.getAttribute('data-tab');
+    let currentIdx = categories.indexOf(currentCat);
+    if (currentIdx < 0) currentIdx = 0;
+
+    if (currentIdx < categories.length - 1) {
+      currentIdx++;
+      const nextCat = categories[currentIdx];
+      const nextTab = document.querySelector(`.tab[data-tab="${nextCat}"]`);
+      if (nextTab) {
+        nextTab.click();
+      }
+    }
+  }
+
+  function showPreviousCategory() {
+    const activeTab = document.querySelector('.tab.active');
+    if (!activeTab) return;
+    const currentCat = activeTab.getAttribute('data-tab');
+    let currentIdx = categories.indexOf(currentCat);
+    if (currentIdx < 0) currentIdx = 0;
+
+    if (currentIdx > 0) {
+      currentIdx--;
+      const prevCat = categories[currentIdx];
+      const prevTab = document.querySelector(`.tab[data-tab="${prevCat}"]`);
+      if (prevTab) {
+        prevTab.click();
+      }
+    }
+  }
+}
+
+/**
+ * Funkcija za inicijalizaciju podešavanja (tema, font, itd.).
+ * Ograničavamo font-size samo na news-card (pomoću varijable --card-font-size).
+ */
+function initSettings() {
+  // Učitavamo iz localStorage, ili default 16
+  let currentCardFontSize = parseInt(localStorage.getItem('cardFontSize') || '16');
+
+  /**
+   * Primeni veličinu fonta na .news-card preko CSS varijable.
+   */
+  function applyCardFontSize(size) {
+    const root = document.documentElement;
+    root.style.setProperty('--card-font-size', size + 'px');
+  }
+
+  // Odmah primenimo vrednost
+  applyCardFontSize(currentCardFontSize);
+
+  function toggleTheme() {
+    const root = document.documentElement;
+    const currentTheme = root.getAttribute('data-theme') || 'dark';
+    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+    root.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    if (themeToggleBtn) {
+      themeToggleBtn.textContent = newTheme === 'light' ? 'Dark Modus' : 'Licht Modus';
+    }
   }
 
   /**
-   * "Neueste" -> primer: dohvata sve vesti, prikazuje ih (možete ubaciti custom logiku)
+   * Menja veličinu fonta za kartice.
    */
-  async function displayNeueste() {
-    console.log("[displayNeueste] dohvat /api/feeds...");
-    const container = document.getElementById('news-container');
-    if (!container) return;
-
-    container.innerHTML = "";
-    const allFeeds = await fetchAllFeedsFromServer();
-    if (!allFeeds || allFeeds.length === 0) {
-      container.innerHTML = "<p>No news.</p>";
-      setActiveTab("Neueste");
-      return;
-    }
-    // Sort
-    allFeeds.sort((a,b) => new Date(b.date_published) - new Date(a.date_published));
-
-    // Ovaj primer prikazuje sve (možete implementirati 4 random ako želite)
-    allFeeds.forEach(item => {
-      const card = createNewsCard(item, true);
-      container.appendChild(card);
-    });
-    setActiveTab("Neueste");
-
-    initLazyLoad(container);
+  function changeFontSize(delta) {
+    currentCardFontSize += delta;
+    if (currentCardFontSize < 12) currentCardFontSize = 12;
+    if (currentCardFontSize > 24) currentCardFontSize = 24;
+    localStorage.setItem('cardFontSize', currentCardFontSize.toString());
+    applyCardFontSize(currentCardFontSize);
   }
 
-  /**
-   * Prikaz feedova za određenu kategoriju (osim Neueste/Aktuell).
-   */
-  async function displayCategory(cat) {
-    console.log("[displayCategory]", cat);
-    const container = document.getElementById('news-container');
-    if (!container) return;
-    container.innerHTML = "";
+  const menuButton = document.getElementById('menu-button');
+  const closeSettingsButton = document.getElementById('close-settings');
+  const themeToggleBtn = document.getElementById('theme-toggle');
+  const fontIncreaseButton = document.getElementById('font-increase');
+  const fontDecreaseButton = document.getElementById('font-decrease');
 
-    try {
-      const resp = await fetch(`/api/feeds-by-category/${encodeURIComponent(cat)}`);
-      if (!resp.ok) {
-        throw new Error("Greška /feeds-by-category");
-      }
-      let data = await resp.json();
-      if (!data || data.length === 0) {
-        container.innerHTML = `<p>No news for ${cat}.</p>`;
-        setActiveTab(cat);
-        return;
-      }
-      data.sort((a,b) => new Date(b.date_published) - new Date(a.date_published));
-      // Uklanjanje dupl.
-      const uniqueMap = {};
-      data.forEach(x => uniqueMap[x.id] = x);
-      const finalData = Object.values(uniqueMap);
-
-      finalData.forEach(feed => {
-        const card = createNewsCard(feed, true);
-        container.appendChild(card);
-      });
-      setActiveTab(cat);
-
-      initLazyLoad(container);
-    } catch(err) {
-      console.error(err);
-      container.innerHTML = `<p>Fehler bei Kategorie: ${cat}</p>`;
-      setActiveTab(cat);
-    }
-  }
-
-  // --------------------------------------------
-  // 4) Inicijalizacija tabova i swipe
-  // --------------------------------------------
-  function initTabs() {
-    const tabsContainer = document.getElementById('tabs-container');
-    if (!tabsContainer) return;
-
-    // Rucno kreiramo 2 tab-a (Neueste, Aktuell)
-    const neuesteBtn = document.createElement('button');
-    neuesteBtn.classList.add('tab');
-    neuesteBtn.setAttribute('data-tab', 'Neueste');
-    neuesteBtn.textContent = 'Neueste';
-    neuesteBtn.addEventListener('click', () => {
-      displayNeueste();
-    });
-    tabsContainer.appendChild(neuesteBtn);
-
-    const aktuellBtn = document.createElement('button');
-    aktuellBtn.classList.add('tab');
-    aktuellBtn.setAttribute('data-tab', 'Aktuell');
-    aktuellBtn.textContent = 'Aktuell';
-    aktuellBtn.addEventListener('click', () => {
-      displayAktuell();
-    });
-    tabsContainer.appendChild(aktuellBtn);
-
-    // Ostale kategorije
-    baseCategories.forEach(cat => {
-      const btn = document.createElement('button');
-      btn.classList.add('tab');
-      btn.setAttribute('data-tab', cat);
-      btn.textContent = cat;
-      btn.addEventListener('click', () => {
-        displayCategory(cat);
-      });
-      tabsContainer.appendChild(btn);
-    });
-  }
-
-  function initSwipe() {
-    const swipeContainer = document.getElementById('news-container');
-    let startX = 0, endX = 0;
-    const threshold = 50;
-
-    // Redosled za swipe
-    const swipeOrder = ["Neueste","Aktuell", ...baseCategories];
-
-    function handleGesture() {
-      if (endX < startX - threshold) {
-        showNextCat();
-      } else if (endX > startX + threshold) {
-        showPrevCat();
-      }
-    }
-
-    function showNextCat() {
-      const activeTab = document.querySelector('.tab.active');
-      if (!activeTab) return;
-      const currentCat = activeTab.getAttribute('data-tab');
-      let idx = swipeOrder.indexOf(currentCat);
-      if (idx < 0) idx = 0;
-      if (idx < swipeOrder.length - 1) {
-        idx++;
-        const nextCat = swipeOrder[idx];
-        const nextTab = document.querySelector(`.tab[data-tab="${nextCat}"]`);
-        if (nextTab) {
-          nextTab.click();
-          setTimeout(() => {
-            nextTab.scrollIntoView({ behavior: 'smooth', inline: 'center' });
-          }, 100);
-        }
-      }
-    }
-
-    function showPrevCat() {
-      const activeTab = document.querySelector('.tab.active');
-      if (!activeTab) return;
-      const currentCat = activeTab.getAttribute('data-tab');
-      let idx = swipeOrder.indexOf(currentCat);
-      if (idx < 0) idx = 0;
-      if (idx > 0) {
-        idx--;
-        const prevCat = swipeOrder[idx];
-        const prevTab = document.querySelector(`.tab[data-tab="${prevCat}"]`);
-        if (prevTab) {
-          prevTab.click();
-          setTimeout(() => {
-            prevTab.scrollIntoView({ behavior: 'smooth', inline: 'center' });
-          }, 100);
-        }
-      }
-    }
-
-    if (swipeContainer) {
-      swipeContainer.addEventListener('touchstart', e => {
-        startX = e.changedTouches[0].screenX;
-      });
-      swipeContainer.addEventListener('touchend', e => {
-        endX = e.changedTouches[0].screenX;
-        handleGesture();
-      });
-    }
-  }
-
-  // --------------------------------------------
-  // 5) Settings Meni (tema, font-size itd.)
-  // --------------------------------------------
   function openSettingsModal() {
     const settingsModal = document.getElementById('settings-modal');
     if (settingsModal) {
       settingsModal.style.display = 'flex';
     }
   }
-
   function closeSettingsModal() {
     const settingsModal = document.getElementById('settings-modal');
     if (settingsModal) {
@@ -381,127 +559,126 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  const root = document.documentElement;
-  function toggleTheme() {
-    const currentTheme = root.getAttribute('data-theme');
-    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-    root.setAttribute('data-theme', newTheme);
-    const themeToggleBtn = document.getElementById('theme-toggle');
-    if (themeToggleBtn) {
-      themeToggleBtn.textContent = newTheme === 'light' ? 'Dark Modus' : 'Licht Modus';
-    }
-    localStorage.setItem('theme', newTheme);
+  if (menuButton) {
+    menuButton.addEventListener('click', openSettingsModal);
+  }
+  if (closeSettingsButton) {
+    closeSettingsButton.addEventListener('click', closeSettingsModal);
+  }
+  if (themeToggleBtn) {
+    themeToggleBtn.addEventListener('click', () => {
+      toggleTheme();
+      closeSettingsModal();
+    });
+  }
+  if (fontIncreaseButton) {
+    fontIncreaseButton.addEventListener('click', () => changeFontSize(1));
+  }
+  if (fontDecreaseButton) {
+    fontDecreaseButton.addEventListener('click', () => changeFontSize(-1));
   }
 
-  function changeFontSize(delta) {
-    const body = document.body;
-    const currentSize = parseInt(window.getComputedStyle(body).fontSize);
-    const newSize = currentSize + delta;
-    if (newSize >= 12 && newSize <= 24) {
-      body.style.fontSize = newSize + 'px';
-      localStorage.setItem('fontSize', newSize);
-    }
+  // Učitaj prethodno sačuvana podešavanja teme
+  const savedTheme = localStorage.getItem('theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', savedTheme);
+  if (themeToggleBtn) {
+    themeToggleBtn.textContent = savedTheme === 'light' ? 'Dark Modus' : 'Licht Modus';
+  }
+}
+
+/**
+ * Glavna funkcija koja se poziva kada je DOM spreman:
+ * - Inicijalizuje overlay tutorial, tabove, swipe, settings...
+ */
+document.addEventListener("DOMContentLoaded", () => {
+  // Tutorial overlay
+  checkAndShowTutorial();
+  const closeTutorialBtn = document.getElementById('close-tutorial');
+  if (closeTutorialBtn) {
+    closeTutorialBtn.addEventListener('click', closeTutorialOverlay);
   }
 
-  // Ovaj listener za DOMContentLoaded je pored glavnog, pa pazimo da se ne sudare
-  document.addEventListener('DOMContentLoaded', () => {
-    const menuButton = document.getElementById('menu-button');
-    const closeSettingsButton = document.getElementById('close-settings');
-    const themeToggleBtn = document.getElementById('theme-toggle');
-    const fontIncreaseButton = document.getElementById('font-increase');
-    const fontDecreaseButton = document.getElementById('font-decrease');
-    const blockSourcesButton = document.getElementById('block-sources');
-    const blockCategoriesButton = document.getElementById('block-categories');
-    const rearrangeTabsButton = document.getElementById('rearrange-tabs');
+  // Sakrij zeleni okvir za prvi tab
+  hideGreenRectangle();
 
-    if (menuButton) {
-      menuButton.addEventListener('click', openSettingsModal);
-    }
-    if (closeSettingsButton) {
-      closeSettingsButton.addEventListener('click', closeSettingsModal);
-    }
-    if (themeToggleBtn) {
-      themeToggleBtn.addEventListener('click', () => {
-        toggleTheme();
-        closeSettingsModal();
-      });
-    }
-    if (fontIncreaseButton) {
-      fontIncreaseButton.addEventListener('click', () => changeFontSize(1));
-    }
-    if (fontDecreaseButton) {
-      fontDecreaseButton.addEventListener('click', () => changeFontSize(-1));
-    }
-    if (blockSourcesButton) {
-      blockSourcesButton.addEventListener('click', () => {
-        closeSettingsModal();
-        // ... (Implementacija openBlockSourcesModal() ako postoji)
-      });
-    }
-    if (blockCategoriesButton) {
-      blockCategoriesButton.addEventListener('click', () => {
-        closeSettingsModal();
-        // ... (Implementacija openBlockCategoriesModal() ako postoji)
-      });
-    }
-    if (rearrangeTabsButton) {
-      rearrangeTabsButton.addEventListener('click', () => {
-        closeSettingsModal();
-        // ... (Implementacija openRearrangeModal() ako postoji)
-      });
-    }
+  // Inicijalizuj podešavanja (tema, font, itd.)
+  initSettings();
 
-    const savedFontSize = localStorage.getItem('fontSize');
-    if (savedFontSize) {
-      document.body.style.fontSize = savedFontSize + 'px';
-    }
-    const savedTheme = localStorage.getItem('theme') || 'dark';
-    root.setAttribute('data-theme', savedTheme);
-    if (themeToggleBtn) {
-      themeToggleBtn.textContent = savedTheme === 'light' ? 'Dark Modus' : 'Licht Modus';
-    }
-  });
-
-  // --------------------------------------------
-  // 6) Glavni tok
-  // --------------------------------------------
-  console.log("[scripts.js] Inicijalizacija...");
-
-  // Inicijalizujemo tabove (Neueste, Aktuell, i ostale) i swipe
-  initTabs();
+  // Swipe logika
   initSwipe();
 
-  // Po defaultu -> Neueste
-  displayNeueste();
+  // Kategorije
+  const categories = [
+    "Technologie",
+    "Gesundheit",
+    "Sport",
+    "Wirtschaft",
+    "Kultur",
+    "Auto",
+    "Reisen",
+    "Lifestyle",
+    "Panorama",
+    "Politik",
+    "Unterhaltung",
+    "Welt",
+    "LGBT+",
+    "Ohne Kategorie"
+  ];
 
-  // Lazy load fallback (ako je već nema)
-  document.addEventListener("DOMContentLoaded", function() {
-    const container = document.getElementById('news-container');
-    if (!container) return;
-    const lazyImages = container.querySelectorAll('img.lazy');
-    if ("IntersectionObserver" in window) {
-      const imageObserver = new IntersectionObserver((entries, observer) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            const img = entry.target;
-            img.src = img.dataset.src;
-            img.classList.remove("lazy");
-            img.classList.add("loaded");
-            observer.unobserve(img);
-          }
+  const neuesteTab = document.querySelector('.tab[data-tab="Neueste"]');
+  const aktuellTab = document.querySelector('.tab[data-tab="Aktuell"]');
+  const tabsContainer = document.getElementById('tabs-container');
+
+  // Klik: Neueste
+  if (neuesteTab) {
+    neuesteTab.addEventListener('click', async (e) => {
+      removeActiveClass();
+      e.target.classList.add('active');
+      e.target.setAttribute('aria-selected', 'true');
+      await displayNeuesteFeeds();
+      showGreenRectangle();
+      saveAppState("Neueste");
+    });
+  }
+
+  // Klik: Aktuell
+  if (aktuellTab) {
+    aktuellTab.addEventListener('click', async (e) => {
+      removeActiveClass();
+      e.target.classList.add('active');
+      e.target.setAttribute('aria-selected', 'true');
+      await displayAktuellFeeds();
+      showGreenRectangle();
+      saveAppState("Aktuell");
+    });
+  }
+
+  // Generišemo ostale kategorije (tabove) posle Neueste i Aktuell
+  if (tabsContainer) {
+    const skipList = ["Neueste", "Aktuell"];
+    categories
+      .filter(cat => !skipList.includes(cat))
+      .forEach(cat => {
+        const btn = document.createElement('button');
+        btn.classList.add('tab');
+        btn.setAttribute('data-tab', cat);
+        btn.setAttribute('role', 'tab');
+        btn.setAttribute('aria-selected', 'false');
+        btn.textContent = cat;
+
+        btn.addEventListener('click', async (ev) => {
+          removeActiveClass();
+          ev.target.classList.add('active');
+          ev.target.setAttribute('aria-selected', 'true');
+          showGreenRectangle();
+          await displayNewsByCategory(cat);
+          saveAppState(cat);
         });
-      }, {
-        rootMargin: "0px 0px 50px 0px",
-        threshold: 0.01
+
+        tabsContainer.appendChild(btn);
       });
-      lazyImages.forEach(img => {
-        imageObserver.observe(img);
-      });
-    } else {
-      lazyImages.forEach(img => {
-        img.src = img.dataset.src;
-        img.classList.remove("lazy");
-      });
-    }
-  });
+  }
+
+  // Ako postoji sacuvan state, vratimo ga. U suprotnom: Neueste
+  restoreAppState();
 });
