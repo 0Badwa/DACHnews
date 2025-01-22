@@ -137,7 +137,7 @@ async function sendBatchToGPT(feedBatch) {
 - Unterhaltung
 - Welt
 
-Pri kategorizaciji, obavezno vodi računa o specifičnostima tih zemalja i njihove političke, društvene i kulturne karakteristike. Ako vest sadrži informacije koje se jasno odnose na neku od gore navedenih kategorija, postavi je u odgovarajuću. Ako je vest o Donaldu Trampu, stavi je u kategoriju Welt. Pokušaj da budeš što precizniji u prepoznavanju ključnih reči i konteksta, posebno kada se radi o poznatim ličnostima ili važnim događajima koji mogu imati specifičnu kategoriju. Molim te vrati isključivo JSON niz gde je svaki element: { "id": "...", "category": "..." }`
+Pri kategorizaciji, obavezno vodi računa o specifičnostima tih zemalja i njihove političke, društvene i kulturne karakteristike. Ako vest sadrži informacije koje se jasno odnose na neku od gore navedenih kategorija, postavi je u odgovarajuću. Ako je vest o Donaldu Trampu ili o svetskim političarima (svi političari osim onih iz Nemačke, Austrije i Švajcarske), stavi je u kategoriju Welt. Pokušaj da budeš što precizniji u prepoznavanju ključnih reči i konteksta, posebno kada se radi o poznatim ličnostima ili važnim događajima koji mogu imati specifičnu kategoriju. Molim te vrati isključivo JSON niz gde je svaki element: { "id": "...", "category": "..." }`
       },
       {
         role: "user",
