@@ -13,7 +13,7 @@
     <div class="menu">
       <button id="menu-button" class="menu-button">☰</button>
       <div class="dropdown" id="dropdown-menu">
-        <!-- Ovaj deo dropdown menija je sada deo Settings modala -->
+        <!-- Sada prazan, sve prebačeno u Settings modal -->
       </div>
     </div>
     <img src="src/icons/dachnewslogo.png" alt="DACH.news" />
@@ -30,20 +30,19 @@
   <div class="category-indicator">Home</div>
 
   <!-- Kontejner za vesti -->
-  <div id="news-container">
-    <!-- Vesti će se dinamički generisati unutar .js fajlova -->
-  </div>
+  <div id="news-container"></div>
 
   <!-- Moderni tutorial overlay (skriven na početku) -->
   <div id="tutorial-overlay" class="tutorial-overlay" style="display: none;">
     <div class="tutorial-content">
       <h2>Willkommen!</h2>
-      <p>Wischen Sie nach LINKS, um Kategorien zu wechseln.</p>
+      <p>Diese Version ist jetzt für mobile Endgeräte optimiert.
+         Wischen Sie nach LINKS, um Kategorien zu wechseln.</p>
       <button id="close-tutorial" class="tutorial-close-btn">Verstanden</button>
     </div>
   </div>
 
-  <!-- Modal za Tabs anordnen -->
+  <!-- Modal za Tabs anordnen (staro) - možete ukloniti ili prilagoditi -->
   <div id="rearrange-modal" class="modal" style="display: none;">
     <div class="rearrange-modal-content">
       <div class="modal-title">Tabs anordnen</div>
@@ -56,43 +55,29 @@
     </div>
   </div>
 
-  <!-- Modal za blokiranje izvora -->
-  <div id="block-sources-modal" class="modal" style="display: none;">
-    <div class="rearrange-modal-content">
-      <div class="modal-title">Quellen blockieren</div>
-      <div class="modal-buttons">
-        <button class="save-button" id="close-block-sources">Schließen</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal za settings -->
+  <!-- Modal za Settings -->
   <div id="settings-modal" class="modal" style="display: none;">
-    <div class="rearrange-modal-content">
+    <div class="rearrange-modal-content settings-modal-content">
       <div class="modal-title">Einstellungen</div>
       <div class="settings-list">
         <div class="settings-item">
-          <span>Quellen blockieren</span>
-          <button id="block-sources" class="settings-action-button">Öffnen</button>
+          <span>Quellen</span>
+          <button id="quellen-button" class="settings-action-button">Öffnen</button>
         </div>
         <div class="settings-item">
-          <span>Kategorie blockieren</span>
-          <button id="block-categories" class="settings-action-button">Öffnen</button>
-        </div>
-        <div class="settings-item">
-          <span>Tabs anordnen</span>
-          <button id="rearrange-tabs" class="settings-action-button">Öffnen</button>
-        </div>
-        <div class="settings-item">
-          <span>Dark Modus</span>
-          <button id="theme-toggle" class="settings-action-button">Aktivieren</button>
+          <span>Kategorien</span>
+          <button id="kategorien-button" class="settings-action-button">Öffnen</button>
         </div>
         <div class="settings-item">
           <span>Schriftgröße</span>
           <div class="font-size-buttons">
-            <button type="button" id="font-decrease" class="font-button" style="width: 22px; height: 28px;">-</button>
-            <button type="button" id="font-increase" class="font-button" style="width: 22px; height: 28px;">+</button>
+            <button type="button" id="font-decrease" class="font-button">-</button>
+            <button type="button" id="font-increase" class="font-button">+</button>
           </div>
+        </div>
+        <div class="settings-item">
+          <span>Über</span>
+          <button id="uber-button" class="settings-action-button">Öffnen</button>
         </div>
       </div>
       <div class="modal-buttons">
@@ -101,13 +86,55 @@
     </div>
   </div>
 
-  <!-- NOVO: Modal za pojedinačnu vest -->
+  <!-- Modal za Quellen -->
+  <div id="quellen-modal" class="modal" style="display: none;">
+    <div class="rearrange-modal-content quellen-modal-content">
+      <div class="modal-title">Quellen verwalten</div>
+      <input type="text" id="quellen-search" placeholder="Suchen..." style="width: 90%; margin-bottom: 0.5rem;" />
+      <div class="quellen-list">
+        <!-- Dinamički spisak izvora i checkbox za sakrivanje -->
+      </div>
+      <div class="modal-buttons">
+        <button class="save-button" id="close-quellen-modal">Schließen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal za Kategorien -->
+  <div id="kategorien-modal" class="modal" style="display: none;">
+    <div class="rearrange-modal-content kategorien-modal-content">
+      <div class="modal-title">Kategorien verwalten</div>
+      <div class="kategorien-list">
+        <!-- Dinamička lista kategorija (bez Neueste, Aktuell, Sonstiges),
+             uz mogućnost sakrivanja i rearrange-a -->
+      </div>
+      <div class="modal-buttons">
+        <button class="save-button" id="close-kategorien-modal">Schließen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal za Über -->
+  <div id="uber-modal" class="modal" style="display: none;">
+    <div class="rearrange-modal-content uber-modal-content">
+      <div class="modal-title">Über diese App</div>
+      <p style="margin: 1rem 0;">
+        <!-- Placeholder: tekst dodati kasnije -->
+        Hier kommt später ein Text über die App...
+      </p>
+      <div class="modal-buttons">
+        <button class="save-button" id="close-uber-modal">Schließen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal za pojedinačnu vest -->
   <div id="news-modal" class="modal" style="display: none;">
     <div class="rearrange-modal-content news-modal-content">
-      <img id="news-modal-image" src="" alt="News Image" style="width: 240px; height: auto; margin-bottom: 1rem;" />
-      <h2 id="news-modal-title" style="margin-top: 0.5rem; margin-bottom: 0.5rem; color: var(--primary-color);"></h2>
-      <p id="news-modal-description" style="margin: 1rem 0; line-height: 1.4;"></p>
-      <p id="news-modal-source-time" style="margin-bottom: 1rem; font-size: 0.9rem; color: var(--text-color);"></p>
+      <img id="news-modal-image" src="" alt="News Image" />
+      <h2 id="news-modal-title"></h2>
+      <p id="news-modal-description"></p>
+      <p id="news-modal-source-time"></p>
       <div class="modal-buttons">
         <button class="save-button" id="close-news-modal">Schließen</button>
         <button class="save-button" id="news-modal-weiter">Weiter</button>
@@ -115,7 +142,7 @@
     </div>
   </div>
 
-  <!-- Glavni JS fajl (koji zatim povlači ostale module) -->
+  <!-- Glavni JS fajl -->
   <script type="module" src="src/js/main.js"></script>
 </body>
 </html>
