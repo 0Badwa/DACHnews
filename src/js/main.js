@@ -2,11 +2,12 @@
  * main.js
  * 
  * Glavni fajl koji se poziva nakon učitavanja DOM-a.
- * Uvozi sve pomoćne module i inicijalizuje događaje, tabove i sl.
+ * Uvešćemo ostale module i inicijalizovati događaje, tabove, itd.
+ * Sada bez LocalStorage za aktivnu kategoriju:
+ * - Po svakom reload-u bira se "Neueste"
  */
 
 import { checkAndShowTutorial, closeTutorialOverlay, removeActiveClass, showGreenRectangle, hideGreenRectangle } from './ui.js';
-import { saveAppState, restoreAppState } from './appState.js';
 import { initSettings } from './settings.js';
 import { initSwipe } from './swipe.js';
 import { displayNeuesteFeeds, displayAktuellFeeds, displayNewsByCategory } from './feeds.js';
@@ -25,10 +26,10 @@ document.addEventListener("DOMContentLoaded", () => {
   // Inicijalizuj podešavanja (tema, font, itd.)
   initSettings();
 
-  // Swipe logika
+  // Swipe logika (horizontalno menjanje kategorija)
   initSwipe();
 
-  // Kategorije (ostale sem Neueste i Aktuell generišemo kasnije)
+  // Definišemo ostale kategorije (osim Neueste, Aktuell)
   const categories = [
     "Technologie",
     "Gesundheit",
@@ -46,6 +47,7 @@ document.addEventListener("DOMContentLoaded", () => {
     "Ohne Kategorie"
   ];
 
+  // Hvatamo tab elemente
   const neuesteTab = document.querySelector('.tab[data-tab="Neueste"]');
   const aktuellTab = document.querySelector('.tab[data-tab="Aktuell"]');
   const tabsContainer = document.getElementById('tabs-container');
@@ -58,7 +60,7 @@ document.addEventListener("DOMContentLoaded", () => {
       e.target.setAttribute('aria-selected', 'true');
       await displayNeuesteFeeds();
       showGreenRectangle();
-      saveAppState("Neueste");
+      // Nema više saveAppState
     });
   }
 
@@ -70,11 +72,10 @@ document.addEventListener("DOMContentLoaded", () => {
       e.target.setAttribute('aria-selected', 'true');
       await displayAktuellFeeds();
       showGreenRectangle();
-      saveAppState("Aktuell");
     });
   }
 
-  // Generišemo ostale kategorije (tabove) posle Neueste i Aktuell
+  // Generišemo ostale kategorije (tabove)
   if (tabsContainer) {
     const skipList = ["Neueste", "Aktuell"];
     categories
@@ -93,13 +94,14 @@ document.addEventListener("DOMContentLoaded", () => {
           ev.target.setAttribute('aria-selected', 'true');
           showGreenRectangle();
           await displayNewsByCategory(cat);
-          saveAppState(cat);
         });
 
         tabsContainer.appendChild(btn);
       });
   }
 
-  // Ako postoji sacuvan state, vratimo ga. U suprotnom: Neueste
-  restoreAppState();
+  // Po svakom refresh-u -> uvek Neueste tab
+  if (neuesteTab) {
+    neuesteTab.click();
+  }
 });
