@@ -3,6 +3,7 @@
  * 
  * Klikom na 'Weiter' -> otvori link u novom tabu,
  * a modal zatvori posle 3 sekunde.
+ * Slike su lazy + async decode radi bolje optimizacije.
  */
 
 export function openNewsModal(feed) {
@@ -19,12 +20,15 @@ export function openNewsModal(feed) {
     return;
   }
 
-  // Postavimo sliku
+  // Postavimo sliku: 240px širina (CSS), lazy load, async decode
   modalImage.src = feed.image || 'https://via.placeholder.com/240';
+  modalImage.loading = 'lazy';
+  modalImage.decoding = 'async';
 
-  // Naslov i opis
+  // Naslov i opis: isključena hifenacija, multiline, levo poravnanje u okviru 240px
   modalTitle.classList.add('no-hyphenation');
   modalDescription.classList.add('no-hyphenation');
+
   modalTitle.textContent = feed.title || 'No title';
   modalDescription.textContent = feed.content_text || 'Keine Beschreibung';
 
@@ -50,7 +54,7 @@ export function openNewsModal(feed) {
     : (datePart ? ` • ${datePart}` : (timePart ? ` • ${timePart}` : ''));
   modalSourceTime.innerHTML = `<span class="modal-source-bold-green">${sourceName}</span>${dateTimeString}`;
 
-  // Prikažemo modal
+  // Pokažemo modal
   modal.style.display = 'flex';
 
   // Dugme X -> odmah zatvara
@@ -65,6 +69,6 @@ export function openNewsModal(feed) {
     }
     setTimeout(() => {
       modal.style.display = 'none';
-    }, 3000); // sada 3 sekunde
+    }, 3000);
   };
 }
