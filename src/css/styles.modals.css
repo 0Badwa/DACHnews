@@ -1,0 +1,120 @@
+/* Osnovni stil za poluprovidne modale */
+.modal {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0,0,0,0.7);
+  z-index: 2000;
+}
+.rearrange-modal-content {
+  background-color: var(--background-color);
+  padding: 1rem;
+  border-radius: 8px;
+  max-width: 500px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 0 15px rgba(0,0,0,0.6);
+}
+
+/* Settings modal content */
+.settings-modal-content {
+  /* margin: 0 2rem; -> Radimo inline style u index.html */
+}
+
+/* Quellen, kategorien, uber modal content */
+.quellen-modal-content,
+.kategorien-modal-content,
+.uber-modal-content {
+  /* margin: 0 2rem; -> Radimo inline style */
+  background-color: var(--background-color);
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 0 15px rgba(0,0,0,0.6);
+}
+
+/* modal-title i dugmad */
+.modal-title {
+  font-size: 1.1rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  text-align: center;
+  color: var(--text-color);
+}
+
+.settings-list .settings-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+.settings-action-button {
+  background-color: var(--primary-color);
+  color: #fff;
+  border: none;
+  padding: 0.3rem 0.8rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.font-size-buttons button {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 0.25rem 0.5rem;
+  margin-left: 0.25rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.modal-buttons {
+  text-align: center;
+  margin-top: 1rem;
+}
+.save-button {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* News modal - slika 320px */
+.news-modal-content img#news-modal-image {
+  display: block;
+  margin: 1rem auto;
+  width: 320px;
+  height: auto;
+  box-shadow: 0 0 12px var(--primary-color);
+  border-radius: 10px;
+}
+.news-modal-content h2,
+.news-modal-content p {
+  text-align: center;
+  margin: 1rem 10px;
+  padding: 0rem 1rem;
+}
+
+/* quellen-list, kategorien-list, checkboxes i sl. */
+.quellen-list label,
+.kategorien-list .kategorie-item {
+  display: block;
+  margin-bottom: 0.4rem;
+}
+
+/* Drag & drop handle - user moze prevlaciti .kategorie-item */
+.kategorie-item[draggable="true"] {
+  cursor: move;
+  background-color: var(--secondary-color);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 0.5rem;
+}
+
+/* Ako zelite custom stil pri drag & drop */
+.kategorie-item.dragging {
+  opacity: 0.5;
+}
