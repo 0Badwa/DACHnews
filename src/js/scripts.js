@@ -216,14 +216,33 @@ function initializeLazyLoading() {
 
 /**
  * Funkcija koja dohvata 50 najnovijih feed-ova sa servera ("/api/feeds") i vraća ih.
+ * Dodata provera da li je prošlo dovoljno vremena od poslednjeg fetch-a.
  */
-async function fetchAllFeedsFromServer() {
+async function fetchAllFeedsFromServer(forceRefresh = false) {
   try {
+    const lastFetchKey = 'feeds-Aktuell-lastFetch';
+    const cachedFeedsKey = 'feeds-Aktuell';
+    const lastFetchTime = localStorage.getItem(lastFetchKey);
+
+    // Ako nije forceRefresh i ako je fetch rađen u poslednjih 10 min -> koristimo keš
+    if (!forceRefresh && lastFetchTime && (Date.now() - new Date(lastFetchTime).getTime()) < 10 * 60 * 1000) {
+      const cachedFeeds = localStorage.getItem(cachedFeedsKey);
+      if (cachedFeeds) {
+        const data = JSON.parse(cachedFeeds);
+        data.sort((a, b) => new Date(b.date_published).getTime() - new Date(a.date_published).getTime());
+        return data.slice(0, 50);
+      }
+    }
+
+    // Inače, pravimo novi poziv ka serveru
     const response = await fetch("/api/feeds");
     if (!response.ok) throw new Error("Neuspešno preuzimanje /api/feeds");
     const data = await response.json();
-    // Sortiranje i ograničavanje
     data.sort((a, b) => new Date(b.date_published).getTime() - new Date(a.date_published).getTime());
+
+    // Čuvamo u localStorage i beležimo vreme
+    localStorage.setItem(cachedFeedsKey, JSON.stringify(data));
+    localStorage.setItem(lastFetchKey, new Date().toISOString());
     return data.slice(0, 50);
   } catch (error) {
     console.error(error);
@@ -233,18 +252,36 @@ async function fetchAllFeedsFromServer() {
 
 /**
  * Funkcija koja dohvata 50 najnovijih feed-ova za određenu kategoriju
- * ("/api/feeds-by-category/<cat>") i vraća ih.
+ * ("/api/feeds-by-category/<cat>") i vraća ih, uz keširanje.
  */
-async function fetchCategoryFeeds(category) {
+async function fetchCategoryFeeds(category, forceRefresh = false) {
   // Zamenjujemo "Ohne Kategorie" -> "Uncategorized" za fetch
   const catForUrl = (category === "Ohne Kategorie") ? "Uncategorized" : category;
   try {
+    const lastFetchKey = `feeds-${catForUrl}-lastFetch`;
+    const cachedFeedsKey = `feeds-${catForUrl}`;
+    const lastFetchTime = localStorage.getItem(lastFetchKey);
+
+    // Ako nije forceRefresh i nije prošlo više od 10 min -> uzmi keš
+    if (!forceRefresh && lastFetchTime && (Date.now() - new Date(lastFetchTime).getTime()) < 10 * 60 * 1000) {
+      const cached = localStorage.getItem(cachedFeedsKey);
+      if (cached) {
+        let data = JSON.parse(cached);
+        data.sort((a, b) => new Date(b.date_published).getTime() - new Date(a.date_published).getTime());
+        return data.slice(0, 50);
+      }
+    }
+
+    // Novi fetch
     const url = `/api/feeds-by-category/${encodeURIComponent(catForUrl)}`;
     const response = await fetch(url);
     if (!response.ok) throw new Error(`Neuspešno preuzimanje ${url}`);
     let data = await response.json();
-    // Sortiranje i ograničavanje
     data.sort((a, b) => new Date(b.date_published).getTime() - new Date(a.date_published).getTime());
+
+    // Upis u localStorage i beleženje vremena
+    localStorage.setItem(cachedFeedsKey, JSON.stringify(data));
+    localStorage.setItem(lastFetchKey, new Date().toISOString());
     return data.slice(0, 50);
   } catch (error) {
     console.error(error);
@@ -285,15 +322,7 @@ async function displayAktuellFeeds() {
   const container = document.getElementById('news-container');
   if (!container) return;
 
-  let cached = localStorage.getItem('feeds-Aktuell');
-  let allFeeds = [];
-  if (cached) {
-    allFeeds = JSON.parse(cached);
-  } else {
-    // Fetch sa servera i čuvamo
-    allFeeds = await fetchAllFeedsFromServer();
-    localStorage.setItem('feeds-Aktuell', JSON.stringify(allFeeds));
-  }
+  let allFeeds = await fetchAllFeedsFromServer();
   displayFeedsList(allFeeds, "Aktuell");
 }
 
@@ -310,12 +339,7 @@ async function displayNeuesteFeeds() {
   container.innerHTML = '';
 
   // 1) Dohvatimo prvih 4 iz Aktuell
-  let aktuellFeeds = JSON.parse(localStorage.getItem('feeds-Aktuell') || '[]');
-  if (aktuellFeeds.length === 0) {
-    // Ako nije keširano, fetchujemo
-    aktuellFeeds = await fetchAllFeedsFromServer();
-    localStorage.setItem('feeds-Aktuell', JSON.stringify(aktuellFeeds));
-  }
+  let aktuellFeeds = await fetchAllFeedsFromServer();
   aktuellFeeds.sort((a, b) => new Date(b.date_published).getTime() - new Date(a.date_published).getTime());
   const top4Aktuell = aktuellFeeds.slice(0, 4);
 
@@ -345,12 +369,7 @@ async function displayNeuesteFeeds() {
 
   // Paralelno dohvatamo feedove
   const fetchPromises = categories.map(async (cat) => {
-    const localKey = `feeds-${cat}`;
-    let catFeeds = JSON.parse(localStorage.getItem(localKey) || '[]');
-    if (catFeeds.length === 0) {
-      catFeeds = await fetchCategoryFeeds(cat);
-      localStorage.setItem(localKey, JSON.stringify(catFeeds));
-    }
+    let catFeeds = await fetchCategoryFeeds(cat);
     return { cat, feeds: catFeeds };
   });
 
@@ -416,13 +435,7 @@ async function displayNewsByCategory(category) {
     return;
   }
 
-  const localKey = `feeds-${category}`;
-  let catFeeds = JSON.parse(localStorage.getItem(localKey) || '[]');
-
-  if (catFeeds.length === 0) {
-    catFeeds = await fetchCategoryFeeds(category);
-    localStorage.setItem(localKey, JSON.stringify(catFeeds));
-  }
+  let catFeeds = await fetchCategoryFeeds(category);
   displayFeedsList(catFeeds, category);
 }
 
@@ -524,7 +537,6 @@ function initSwipe() {
 
 /**
  * Funkcija za inicijalizaciju podešavanja (tema, font, itd.).
- * Ograničavamo font-size samo na news-card (pomoću varijable --card-font-size).
  */
 function initSettings() {
   // Učitavamo iz localStorage, ili default 16
@@ -541,6 +553,9 @@ function initSettings() {
   // Odmah primenimo vrednost
   applyCardFontSize(currentCardFontSize);
 
+  /**
+   * Funkcija za promenu teme (dark/light).
+   */
   function toggleTheme() {
     const root = document.documentElement;
     const currentTheme = root.getAttribute('data-theme') || 'dark';
@@ -555,7 +570,7 @@ function initSettings() {
   }
 
   /**
-   * Menja veličinu fonta za kartice (po 2px).
+   * Funkcija za menjanje veličine fonta kartica (+/- 2px).
    */
   function changeFontSize(delta) {
     currentCardFontSize += delta;
