@@ -246,7 +246,7 @@ nav .menu button {
   top: 0; left: 0; width: 100%; height: 100%;
   align-items: center;
   justify-content: center;
-  background-color: rgba(0,0,0,0.7); /* poluprovidno */
+  background-color: rgba(0,0,0,0.7); 
   z-index: 2000;
 }
 .rearrange-modal-content {
@@ -416,8 +416,12 @@ img.lazy.loaded {
   min-height: 50vh;
 }
 
-/* Quellen, Kategorien, Uber */
-.quellen-modal-content, .kategorien-modal-content, .uber-modal-content {
+/* quellen, kategorien, uber -> margin 0 1rem se može dodati inline style 
+   ili ovde po želji: */
+.quellen-modal-content,
+.kategorien-modal-content,
+.uber-modal-content {
+  margin: 0 1rem;
   background-color: var(--background-color);
   padding: 1rem;
   border-radius: 8px;
