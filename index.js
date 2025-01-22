@@ -365,7 +365,14 @@ function getRandomInterval() {
 
 // Periodično, npr. svakih ~13 minuta, radimo processFeeds
 setInterval(processFeeds, getRandomInterval());
-processFeeds();
+ // Ručno pokrećemo processFeeds() jednom na startu i logujemo broj upisanih stavki
+ processFeeds().then(async () => {
+   // Proveravamo koliko ima ključeva "category:*" u Redis-u
+   const client = await getRedisClient();
+   const keys = await client.keys("category:*");
+   console.log(`[processFeeds] Na startu pronađeno ključeva: ${keys.length}`);
+   await releaseRedisClient(client);
+ });
 
 /**
  * processLGBTFeed - Učitava LGBT+ feed u Redis (bez GPT), uz pipeline
