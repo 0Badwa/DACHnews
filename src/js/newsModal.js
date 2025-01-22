@@ -3,10 +3,12 @@
  * 
  * Ovaj fajl sadrži logiku za otvaranje i zatvaranje novog modala
  * koji prikazuje detalje o pojedinačnoj vesti (slika, naslov, opis, izvor, vreme).
+ * Sada modal ostaje otvoren i zatvara se tek kada se korisnik vrati (focus) u tab iz originalnog linka.
  */
 
+let closeOnFocusReturn = false;
+
 export function openNewsModal(feed) {
-  // Nađemo elemente modala
   const modal = document.getElementById('news-modal');
   const modalImage = document.getElementById('news-modal-image');
   const modalTitle = document.getElementById('news-modal-title');
@@ -20,17 +22,18 @@ export function openNewsModal(feed) {
     return;
   }
 
-  // Popuni modal
+  // Postavimo sliku
   modalImage.src = feed.image || 'https://via.placeholder.com/240';
 
-  // Naslov i opis bez hifenacije
+  // Naslov i opis - bez hifenacije
   modalTitle.classList.add('no-hyphenation');
   modalDescription.classList.add('no-hyphenation');
 
   modalTitle.textContent = feed.title || 'No title';
   modalDescription.textContent = feed.content_text || 'Keine Beschreibung';
 
-  // Izvor (velikim slovima) + datum + vreme
+  // Izvor (velikim slovima, bold + zelena boja),
+  // dok datum i vreme ostaju u normalnoj boji
   const sourceName = (feed.source || 'Unbekannte Quelle').toUpperCase();
 
   let datePart = '';
@@ -47,22 +50,40 @@ export function openNewsModal(feed) {
       timePart = `${hours}:${minutes}`;
     }
   }
-  // Primer formata: BILD • 22.01.2025. • 20:10
-  modalSourceTime.textContent = `${sourceName}${datePart ? ' • ' + datePart : ''}${timePart ? ' • ' + timePart : ''}`;
 
-  // Pokažemo modal (flex -> centrirano)
+  // Izvor i vreme stavljamo u innerHTML, da bi izvor bio posebno stilizovan
+  // Primer: <span class="modal-source-bold-green">BILD</span> • 22.01.2025. • 20:10
+  const dateTimeString = datePart && timePart 
+    ? ` • ${datePart} • ${timePart}`
+    : (datePart ? ` • ${datePart}` : (timePart ? ` • ${timePart}` : ''));
+  modalSourceTime.innerHTML = `<span class="modal-source-bold-green">${sourceName}</span>${dateTimeString}`;
+
+  // Pokažemo modal
   modal.style.display = 'flex';
 
-  // Dugme za zatvaranje modala
+  // Dugme X
   closeModalButton.onclick = () => {
     modal.style.display = 'none';
   };
 
-  // Dugme Weiter -> zatvori modal + otvori link
+  // "Weiter" -> otvaranje linka u novom tabu, 
+  // i setovanje "closeOnFocusReturn=true" da se modal zatvori kad se korisnik vrati
   weiterButton.onclick = () => {
-    modal.style.display = 'none';
     if (feed.url) {
+      closeOnFocusReturn = true; // Kad se vrati u prozor, zatvaramo modal
       window.open(feed.url, '_blank');
     }
   };
+
+  // Event za zatvaranje modala pri povratku (fokus) sa sajta
+  window.addEventListener('focus', handleFocus);
+  
+  // Pomoćna funkcija
+  function handleFocus() {
+    if (closeOnFocusReturn) {
+      modal.style.display = 'none';
+      closeOnFocusReturn = false; 
+      window.removeEventListener('focus', handleFocus);
+    }
+  }
 }
