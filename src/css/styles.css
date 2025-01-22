@@ -241,7 +241,7 @@ nav .menu button {
   text-transform: lowercase;
 }
 
-/* Modal => sada čista crna pozadina (umesto rgba(0,0,0,0.5)) */
+/* Modal => sada čista crna pozadina */
 .modal {
   display: none;
   position: fixed;
@@ -375,21 +375,32 @@ img.lazy.loaded {
   font-size: 1rem;
 }
 
-/* NOVO: Klasu za isključivanje hifenacije */
+/* Onemogućavanje hifenacije */
 .no-hyphenation {
   hyphens: none;
   word-break: break-word; 
 }
 
-/* NOVO: blagi zeleni glow oko slike u modalu */
+/* Blagi zeleni glow oko slike (border-radius 10px) */
 #news-modal-image {
   width: 240px;
   height: auto;
   margin-bottom: 1rem;
   box-shadow: 0 0 8px var(--primary-color);
+  border-radius: 10px;
 }
 
-/* Ovaj .news-modal-content je već postojao, ali ostaje isto,
+/* Podesimo i margine za naslov i opis da budu slične slici */
+#news-modal-title {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+#news-modal-description {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+/* Ova .news-modal-content je već postojao, ali ostaje isto,
    ili minimalno prilagođen za text-align: center, itd. */
 .news-modal-content {
   text-align: center;
