@@ -3,7 +3,7 @@
  ************************************************/
 
 /**
- * Prikaži overlay tutorijal samo jednom.
+ * Funkcija koja prikazuje overlay tutorijal samo jednom.
  */
 function checkAndShowTutorial() {
   const tutorialShown = localStorage.getItem('tutorialShown');
@@ -52,7 +52,7 @@ function restoreActiveTab() {
 }
 
 /**
- * formatiranje "vor X Minuten/Stunden/Tagen..."
+ * Vraća formatiran string "vor X Minuten/Stunden/Tagen..."
  */
 function timeAgo(dateString) {
   if (!dateString) return '';
@@ -79,7 +79,7 @@ function timeAgo(dateString) {
 }
 
 /**
- * Kreiramo news-card, sa placeholderom za "Bild"
+ * Kreiramo news-card, sa placeholderom ako je izvor "Bild".
  */
 function createNewsCard(feed) {
   const card = document.createElement('div');
@@ -163,13 +163,14 @@ function hideGreenRectangle() {
 function animateNewsContainer() {
   const container = document.getElementById('news-container');
   if (!container) return;
-  container.classList.remove('fade-slide'); 
-  void container.offsetWidth;    // Forsira reflow
+  container.classList.remove('fade-slide');
+  // Forsira reflow
+  void container.offsetWidth;
   container.classList.add('fade-slide');
 }
 
 /**
- * Lazy load
+ * Lazy load slika.
  */
 function initializeLazyLoading() {
   const lazyImages = document.querySelectorAll('img.lazy');
@@ -202,41 +203,54 @@ function initializeLazyLoading() {
 }
 
 /**
- * Dohvata do 50 feedova
+ * Ako /api/feeds vrati grešku, prikažemo nemački tekst
+ * "Derzeit können die Nachrichten nicht geladen werden."
  */
 async function fetchAllFeedsFromServer() {
   try {
     const resp = await fetch("/api/feeds");
-    if (!resp.ok) throw new Error("Neuspešno preuzimanje /api/feeds");
-    const data = await resp.json();
-    data.sort((a, b) => new Date(b.date_published) - new Date(a.date_published));
-    return data.slice(0, 50);
-  } catch (err) {
-    console.error(err);
-    return [];
-  }
-}
-
-/**
- * Dohvata do 50 feedova za kategoriju
- */
-async function fetchCategoryFeeds(category) {
-  let catUrl = category === "Ohne Kategorie" ? "Uncategorized" : category;
-  try {
-    const resp = await fetch(`/api/feeds-by-category/${encodeURIComponent(catUrl)}`);
-    if (!resp.ok) throw new Error("Neuspešno preuzimanje kategorije: " + catUrl);
+    if (!resp.ok) {
+      throw new Error("Fehler beim Abrufen der Feeds.");
+    }
     let data = await resp.json();
     data.sort((a, b) => new Date(b.date_published) - new Date(a.date_published));
     return data.slice(0, 50);
   } catch (err) {
     console.error(err);
+    const container = document.getElementById('news-container');
+    if (container) {
+      container.innerHTML = "<p style='color:red'>Derzeit können die Nachrichten nicht geladen werden.</p>";
+    }
     return [];
   }
 }
 
 /**
- * displayFeedsList: Prikazuje feed-ove + heading (ako zadat).
- * Heading menja veličinu zajedno sa news-cards (var(--card-font-size)).
+ * Ako /api/feeds-by-category vrati grešku, isto (nemački tekst).
+ */
+async function fetchCategoryFeeds(category) {
+  const catUrl = (category === "Ohne Kategorie") ? "Uncategorized" : category;
+  try {
+    const resp = await fetch(`/api/feeds-by-category/${encodeURIComponent(catUrl)}`);
+    if (!resp.ok) {
+      throw new Error("Fehler beim Abrufen der Kategorie: " + catUrl);
+    }
+    let data = await resp.json();
+    data.sort((a, b) => new Date(b.date_published) - new Date(a.date_published));
+    return data.slice(0, 50);
+  } catch (err) {
+    console.error(err);
+    const container = document.getElementById('news-container');
+    if (container) {
+      container.innerHTML = "<p style='color:red'>Derzeit können die Nachrichten nicht geladen werden (Kategorie).</p>";
+    }
+    return [];
+  }
+}
+
+/**
+ * Prikazuje feed-ove + heading (ako zadat).
+ * Heading menja veličinu teksta zajedno sa news-cards.
  */
 function displayFeedsList(feedsList, headingTitle = "") {
   const container = document.getElementById('news-container');
@@ -253,10 +267,7 @@ function displayFeedsList(feedsList, headingTitle = "") {
     heading.style.marginTop = "0.4rem";
     heading.style.marginBottom = "4px";
     heading.style.textAlign = "center";
-
-    // heading menja veličinu zajedno sa news-card
     heading.style.fontSize = "var(--card-font-size)";
-
     container.appendChild(heading);
   }
 
@@ -277,27 +288,19 @@ function displayFeedsList(feedsList, headingTitle = "") {
 }
 
 /**
- * "Aktuell" feed (sve vesti) + heading "Aktuell"
- * i setActiveTabInUI("Aktuell").
+ * "Aktuell" - 50 najnovijih, bez uklanjanja duplikata.
  */
 async function displayAktuellFeeds() {
-   // Uvek uzimamo sveže feedove sa servera (bez localStorage keša):
-  const response = await fetch("/api/feeds");
-  if (!response.ok) {
-    displayFeedsList([], "Aktuell"); // ili ispišite grešku
-    return;
-  }
-  const allFeeds = await response.json();
-  // Ako je allFeeds.length == 0, "Keine News verfügbar."
+  const allFeeds = await fetchAllFeedsFromServer(); // do 50
   displayFeedsList(allFeeds, "Aktuell");
   setActiveTabInUI("Aktuell");
- }
+}
 
 /**
  * "Neueste":
- *  - heading "Neueste" iznad prva 4 iz Aktuell
- *  - zatim 4 iz svake kategorije
- *  - posle toga setActiveTabInUI("Neueste")
+ *  - heading "Neueste"
+ *  - Prve 4 random (mlađe od 2h / 4h / 1 day), 
+ *  - zatim 4 iz svake druge kategorije
  */
 async function displayNeuesteFeeds() {
   const container = document.getElementById('news-container');
@@ -305,7 +308,7 @@ async function displayNeuesteFeeds() {
 
   container.innerHTML = "";
 
-  // 1) heading "Neueste"
+  // Crni box "Neueste"
   const headingNeueste = document.createElement('h2');
   headingNeueste.textContent = "Neueste";
   headingNeueste.style.backgroundColor = "#000";
@@ -317,21 +320,61 @@ async function displayNeuesteFeeds() {
   headingNeueste.style.fontSize = "var(--card-font-size)";
   container.appendChild(headingNeueste);
 
-  // 2) prvih 4 iz "Aktuell"
-  let aktuellFeeds = JSON.parse(localStorage.getItem('feeds-Aktuell') || '[]');
-  if (aktuellFeeds.length === 0) {
-    aktuellFeeds = await fetchAllFeedsFromServer();
-    localStorage.setItem('feeds-Aktuell', JSON.stringify(aktuellFeeds));
+  // 1) Uzimamo sve feedove (iz /api/feeds)
+  const allFeeds = await fetchAllFeedsFromServer(); // do 50
+
+  // Filtriramo vesti mlade od 2h / 4h / 1 day
+  const now = Date.now();
+  const twoHours = 2 * 60 * 60 * 1000;
+  const fourHours = 4 * 60 * 60 * 1000;
+  const oneDay   = 24 * 60 * 60 * 1000;
+
+  function randomPick(count, arr) {
+    if (arr.length <= count) return arr.slice();
+    let result = [];
+    const temp = arr.slice();
+    while (result.length < count && temp.length > 0) {
+      let i = Math.floor(Math.random() * temp.length);
+      result.push(temp.splice(i, 1)[0]);
+    }
+    return result;
   }
-  aktuellFeeds.sort((a, b) => new Date(b.date_published) - new Date(a.date_published));
-  const top4Aktuell = aktuellFeeds.slice(0, 4);
 
-  top4Aktuell.forEach(feed => {
-    const card = createNewsCard(feed);
-    container.appendChild(card);
-  });
+  let last2h = allFeeds.filter(f => (now - new Date(f.date_published).getTime()) < twoHours);
+  if (last2h.length >= 4) {
+    const fourRandom = randomPick(4, last2h);
+    fourRandom.forEach(feed => {
+      const card = createNewsCard(feed);
+      container.appendChild(card);
+    });
+  } else {
+    let last4h = allFeeds.filter(f => (now - new Date(f.date_published).getTime()) < fourHours);
+    if (last4h.length >= 4) {
+      const fourRandom = randomPick(4, last4h);
+      fourRandom.forEach(feed => {
+        const card = createNewsCard(feed);
+        container.appendChild(card);
+      });
+    } else {
+      let lastDay = allFeeds.filter(f => (now - new Date(f.date_published).getTime()) < oneDay);
+      if (lastDay.length >= 4) {
+        const fourRandom = randomPick(4, lastDay);
+        fourRandom.forEach(feed => {
+          const card = createNewsCard(feed);
+          container.appendChild(card);
+        });
+      } else {
+        // ako ni toga nema, onda uzmemo 4 random iz allFeeds
+        const fallbackRandom = randomPick(4, allFeeds);
+        fallbackRandom.forEach(feed => {
+          const card = createNewsCard(feed);
+          container.appendChild(card);
+        });
+      }
+    }
+  }
 
-  // 3) Ostale kategorije
+  // 2) Ostale kategorije (po 4)
   const catList = [
     "Technologie",
     "Gesundheit",
@@ -349,23 +392,11 @@ async function displayNeuesteFeeds() {
     "Ohne Kategorie"
   ];
 
-  const fetchPromises = catList.map(async (cat) => {
-    const key = `feeds-${cat}`;
-    let feeds = JSON.parse(localStorage.getItem(key) || '[]');
-    if (feeds.length === 0) {
-      feeds = await fetchCategoryFeeds(cat);
-      localStorage.setItem(key, JSON.stringify(feeds));
-    }
-    return { cat, feeds };
-  });
-
-  const results = await Promise.all(fetchPromises);
-
-  // Za svaku kategoriju heading + 4
-  results.forEach(({ cat, feeds }) => {
-    if (!feeds || feeds.length === 0) return;
-    feeds.sort((a, b) => new Date(b.date_published) - new Date(a.date_published));
-    const top4 = feeds.slice(0, 4);
+  for (const cat of catList) {
+    const catFeeds = await fetchCategoryFeeds(cat);
+    if (!catFeeds || catFeeds.length === 0) continue;
+    catFeeds.sort((a, b) => new Date(b.date_published) - new Date(a.date_published));
+    const top4 = catFeeds.slice(0, 4);
 
     const heading = document.createElement('h2');
     heading.textContent = cat;
@@ -375,7 +406,7 @@ async function displayNeuesteFeeds() {
     heading.style.marginTop = "0.4rem";
     heading.style.marginBottom = "4px";
     heading.style.textAlign = "center";
-    heading.style.fontSize = "var(--card-font-size)"; // menja se zajedno
+    heading.style.fontSize = "var(--card-font-size)";
 
     container.appendChild(heading);
 
@@ -383,7 +414,7 @@ async function displayNeuesteFeeds() {
       const card = createNewsCard(feed);
       container.appendChild(card);
     });
-  });
+  }
 
   animateNewsContainer();
   initializeLazyLoading();
@@ -415,12 +446,7 @@ async function displayNewsByCategory(category) {
     return;
   }
 
-  const key = `feeds-${category}`;
-  let catFeeds = JSON.parse(localStorage.getItem(key) || '[]');
-  if (catFeeds.length === 0) {
-    catFeeds = await fetchCategoryFeeds(category);
-    localStorage.setItem(key, JSON.stringify(catFeeds));
-  }
+  const catFeeds = await fetchCategoryFeeds(category);
   displayFeedsList(catFeeds, category);
   setActiveTabInUI(category);
 }
@@ -429,15 +455,12 @@ async function displayNewsByCategory(category) {
  * setActiveTabInUI - tab se označi prema nazivu kategorije
  */
 function setActiveTabInUI(category) {
-  // remove old
   removeActiveClass();
-  // find
   const tabBtn = document.querySelector(`.tab[data-tab="${category}"]`);
   if (tabBtn) {
     tabBtn.classList.add('active');
     tabBtn.setAttribute('aria-selected', 'true');
   }
-  // snimi localStorage
   saveActiveTab(category);
 }
 
@@ -509,7 +532,10 @@ function initSwipe() {
       const nextTab = document.querySelector(`.tab[data-tab="${nextCat}"]`);
       if (nextTab) {
         nextTab.click();
-        setTimeout(() => window.scrollTo(0,0), 50);
+        setTimeout(() => {
+          window.scrollTo(0,0);
+          nextTab.scrollIntoView({ behavior: 'smooth', inline: 'center' });
+        }, 50);
       }
     }
   }
@@ -526,7 +552,10 @@ function initSwipe() {
       const prevTab = document.querySelector(`.tab[data-tab="${prevCat}"]`);
       if (prevTab) {
         prevTab.click();
-        setTimeout(() => window.scrollTo(0,0), 50);
+        setTimeout(() => {
+          window.scrollTo(0,0);
+          prevTab.scrollIntoView({ behavior: 'smooth', inline: 'center' });
+        }, 50);
       }
     }
   }
@@ -620,7 +649,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initSettings();
   initSwipe();
 
-  // Definišemo ostale kategorije (posle Neueste i Aktuell)
+  // Definišemo ostale kategorije
   const categories = [
     "Technologie",
     "Gesundheit",
