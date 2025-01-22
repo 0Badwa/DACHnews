@@ -5,6 +5,11 @@
  * - fetchAllFeedsFromServer, fetchCategoryFeeds
  * - displayFeedsList, displayNeuesteFeeds, displayAktuellFeeds, displayNewsByCategory
  * - pomoćne funkcije: timeAgo, pickRandom, createNewsCard
+ * 
+ * Dodatno je implementirana logika:
+ *  - "Ohne Kategorie" je zamenjeno sa "Sonstiges"
+ *  - Sakrivanje feedova iz određenih izvora (hiddenSources) ili kategorija (hiddenCategories),
+ *    čuvano u LocalStorage (korisničke postavke). Te vesti se više ne prikazuju.
  */
 
 import { initializeLazyLoading, updateCategoryIndicator } from './ui.js';
@@ -38,8 +43,51 @@ function timeAgo(dateString) {
 }
 
 /**
+ * Dohvata iz LocalStorage listu skrivenih izvora (lowercase stringovi).
+ */
+function getHiddenSources() {
+  try {
+    return JSON.parse(localStorage.getItem('hiddenSources') || '[]');
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Dohvata iz LocalStorage listu skrivenih kategorija.
+ */
+function getHiddenCategories() {
+  try {
+    return JSON.parse(localStorage.getItem('hiddenCategories') || '[]');
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Proverava da li je feed sakriven zbog izvora ili kategorije.
+ * "Ohne Kategorie" -> "Sonstiges" (u smislu filtriranja).
+ */
+function isHiddenFeed(feed) {
+  const hiddenSources = getHiddenSources();
+  const hiddenCats = getHiddenCategories();
+
+  // Ako feed.category === "Ohne Kategorie", tretiramo je kao "Sonstiges"
+  const cat = (feed.category === "Ohne Kategorie") ? "Sonstiges" : feed.category;
+
+  if (hiddenCats.includes(cat)) {
+    return true;
+  }
+  if (feed.source && hiddenSources.includes(feed.source.toLowerCase())) {
+    return true;
+  }
+  return false;
+}
+
+/**
  * Pomoćna funkcija koja dohvata 50 najnovijih feed-ova sa servera ("/api/feeds") i vraća ih.
  * Uz keširanje u localStorage na 10 minuta (osim ako se zatraži forceRefresh).
+ * Dodatno filtrira sakrivene feedove (izvor/kategorija).
  */
 export async function fetchAllFeedsFromServer(forceRefresh = false) {
   try {
@@ -51,8 +99,10 @@ export async function fetchAllFeedsFromServer(forceRefresh = false) {
     if (!forceRefresh && lastFetchTime && (Date.now() - new Date(lastFetchTime).getTime()) < 10 * 60 * 1000) {
       const cachedFeeds = localStorage.getItem(cachedFeedsKey);
       if (cachedFeeds) {
-        const data = JSON.parse(cachedFeeds);
+        let data = JSON.parse(cachedFeeds);
         data.sort((a, b) => new Date(b.date_published).getTime() - new Date(a.date_published).getTime());
+        // Filtriraj sakrivene feedove
+        data = data.filter(feed => !isHiddenFeed(feed));
         return data.slice(0, 50);
       }
     }
@@ -60,12 +110,16 @@ export async function fetchAllFeedsFromServer(forceRefresh = false) {
     // Inače, pravimo novi poziv ka serveru
     const response = await fetch("/api/feeds");
     if (!response.ok) throw new Error("Neuspešno preuzimanje /api/feeds");
-    const data = await response.json();
+    let data = await response.json();
+
     data.sort((a, b) => new Date(b.date_published).getTime() - new Date(a.date_published).getTime());
+    // Filtriraj sakrivene feedove
+    data = data.filter(feed => !isHiddenFeed(feed));
 
     // Čuvamo u localStorage i beležimo vreme
     localStorage.setItem(cachedFeedsKey, JSON.stringify(data));
     localStorage.setItem(lastFetchKey, new Date().toISOString());
+
     return data.slice(0, 50);
   } catch (error) {
     console.error(error);
@@ -76,9 +130,14 @@ export async function fetchAllFeedsFromServer(forceRefresh = false) {
 /**
  * Funkcija koja dohvata 50 najnovijih feed-ova za određenu kategoriju
  * ("/api/feeds-by-category/<cat>") i vraća ih, uz keširanje.
+ * "Ohne Kategorie" je sada "Sonstiges", a pri fetch-u serveru šaljemo "Uncategorized".
  */
 export async function fetchCategoryFeeds(category, forceRefresh = false) {
-  const catForUrl = (category === "Ohne Kategorie") ? "Uncategorized" : category;
+  // Ako je tražena kategorija "Ohne Kategorie", koristimo "Sonstiges" logiku
+  // ali već smo dogovorili da umesto "Ohne Kategorie" koristimo "Sonstiges" 
+  // i mapiramo je na "Uncategorized" za server.
+  const catForUrl = (category === "Sonstiges") ? "Uncategorized" : category;
+
   try {
     const lastFetchKey = `feeds-${catForUrl}-lastFetch`;
     const cachedFeedsKey = `feeds-${catForUrl}`;
@@ -89,6 +148,8 @@ export async function fetchCategoryFeeds(category, forceRefresh = false) {
       if (cached) {
         let data = JSON.parse(cached);
         data.sort((a, b) => new Date(b.date_published).getTime() - new Date(a.date_published).getTime());
+        // Filtriramo sakrivene feedove
+        data = data.filter(feed => !isHiddenFeed(feed));
         return data.slice(0, 50);
       }
     }
@@ -97,10 +158,14 @@ export async function fetchCategoryFeeds(category, forceRefresh = false) {
     const response = await fetch(url);
     if (!response.ok) throw new Error(`Neuspešno preuzimanje ${url}`);
     let data = await response.json();
+
     data.sort((a, b) => new Date(b.date_published).getTime() - new Date(a.date_published).getTime());
+    // Filtriramo sakrivene feedove
+    data = data.filter(feed => !isHiddenFeed(feed));
 
     localStorage.setItem(cachedFeedsKey, JSON.stringify(data));
     localStorage.setItem(lastFetchKey, new Date().toISOString());
+
     return data.slice(0, 50);
   } catch (error) {
     console.error(error);
@@ -122,7 +187,7 @@ function createNewsCard(feed) {
     openNewsModal(feed);
   });
 
-  // Slika
+  // Slika 80x80
   const img = document.createElement('img');
   img.className = "news-card-image lazy";
   img.dataset.src = feed.image || 'https://via.placeholder.com/80';
@@ -131,7 +196,7 @@ function createNewsCard(feed) {
   const contentDiv = document.createElement('div');
   contentDiv.className = "news-card-content";
 
-  // Naslov skraćen
+  // Naslov skraćen na 3 linije, bez hifenacije
   const title = document.createElement('h3');
   title.className = "news-title truncated-title";
   title.textContent = feed.title || 'No title';
@@ -258,6 +323,7 @@ export async function displayNeuesteFeeds() {
   });
 
   // 2) Ostale kategorije (osim Aktuell)
+  //    Umesto "Ohne Kategorie" koristimo "Sonstiges"
   const categories = [
     "Technologie",
     "Gesundheit",
@@ -272,7 +338,7 @@ export async function displayNeuesteFeeds() {
     "Unterhaltung",
     "Welt",
     "LGBT+",
-    "Ohne Kategorie"
+    "Sonstiges"  // rename
   ];
 
   // Paralelno dohvatamo feedove
@@ -320,6 +386,7 @@ export async function displayNewsByCategory(category) {
   const container = document.getElementById('news-container');
   if (!container) return;
 
+  // Dodajemo "Sonstiges" umesto "Ohne Kategorie"
   const validCategories = [
     "Technologie",
     "Gesundheit",
@@ -334,7 +401,7 @@ export async function displayNewsByCategory(category) {
     "Unterhaltung",
     "Welt",
     "LGBT+",
-    "Ohne Kategorie"
+    "Sonstiges"
   ];
 
   // Ako nije validna -> Aktuell

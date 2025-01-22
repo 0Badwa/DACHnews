@@ -1,44 +1,27 @@
 /**
  * settings.js
  * 
- * Ovaj fajl sadrži logiku za podešavanje teme (dark/light),
- * menjanje veličine fonta i otvaranje/ zatvaranje "Einstellungen" modala.
+ * Novi izgled menija: Quellen, Kategorien, Schriftgröße, Über.
+ * Uklonjena opcija Dark/Licht modus. 
+ * Kad kliknemo na Quellen/Kategorien, zatvori se Settings i otvori se odgovarajući modal.
+ * 
+ * Kod 'Schriftgröße' -> menja font-size "u živo" i 
+ * ostavljamo polu-providan modal (opcionalno, ili zadržavamo normalnu pozadinu).
  */
 
 export function initSettings() {
-  // Učitavamo iz localStorage, ili default 16
   let currentCardFontSize = parseInt(localStorage.getItem('cardFontSize') || '16');
 
-  /**
-   * Primeni veličinu fonta na .news-card preko CSS varijable.
-   */
   function applyCardFontSize(size) {
     const root = document.documentElement;
     root.style.setProperty('--card-font-size', size + 'px');
+    // Možemo i title font
+    root.style.setProperty('--news-title-font-size', (size * 0.9) + 'px');
   }
 
-  // Odmah primenimo vrednost
+  // Odmah primenimo
   applyCardFontSize(currentCardFontSize);
 
-  /**
-   * Funkcija za promenu teme (dark/light).
-   */
-  function toggleTheme() {
-    const root = document.documentElement;
-    const currentTheme = root.getAttribute('data-theme') || 'dark';
-    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-    root.setAttribute('data-theme', newTheme);
-    localStorage.setItem('theme', newTheme);
-
-    const themeToggleBtn = document.getElementById('theme-toggle');
-    if (themeToggleBtn) {
-      themeToggleBtn.textContent = newTheme === 'light' ? 'Dark Modus' : 'Licht Modus';
-    }
-  }
-
-  /**
-   * Menja veličinu fonta za kartice (po 2px).
-   */
   function changeFontSize(delta) {
     currentCardFontSize += delta;
     if (currentCardFontSize < 12) currentCardFontSize = 12;
@@ -49,7 +32,11 @@ export function initSettings() {
 
   const menuButton = document.getElementById('menu-button');
   const closeSettingsButton = document.getElementById('close-settings');
-  const themeToggleBtn = document.getElementById('theme-toggle');
+  // Nove stavke:
+  const quellenButton = document.getElementById('quellen-button');
+  const kategorienButton = document.getElementById('kategorien-button');
+  const uberButton = document.getElementById('uber-button');
+
   const fontIncreaseButton = document.getElementById('font-increase');
   const fontDecreaseButton = document.getElementById('font-decrease');
 
@@ -57,6 +44,9 @@ export function initSettings() {
     const settingsModal = document.getElementById('settings-modal');
     if (settingsModal) {
       settingsModal.style.display = 'flex';
+      // Da bi se video newsContainer ispod, možemo umesto full black 
+      // staviti npr. background-color: rgba(0,0,0,0.5) u .modal 
+      // (u styles.css)
     }
   }
   function closeSettingsModal() {
@@ -72,12 +62,23 @@ export function initSettings() {
   if (closeSettingsButton) {
     closeSettingsButton.addEventListener('click', closeSettingsModal);
   }
-  if (themeToggleBtn) {
-    themeToggleBtn.addEventListener('click', () => {
-      toggleTheme();
+
+  // Kada kliknemo na "Quellen" -> zatvori Settings, otvori quellen modal
+  if (quellenButton) {
+    quellenButton.addEventListener('click', () => {
       closeSettingsModal();
+      openQuellenModal();
     });
   }
+  // Isto za Kategorien
+  if (kategorienButton) {
+    kategorienButton.addEventListener('click', () => {
+      closeSettingsModal();
+      openKategorienModal();
+    });
+  }
+
+  // Schriftgröße
   if (fontIncreaseButton) {
     fontIncreaseButton.addEventListener('click', () => changeFontSize(2));
   }
@@ -85,10 +86,56 @@ export function initSettings() {
     fontDecreaseButton.addEventListener('click', () => changeFontSize(-2));
   }
 
-  // Učitaj prethodno sačuvana podešavanja teme
-  const savedTheme = localStorage.getItem('theme') || 'dark';
-  document.documentElement.setAttribute('data-theme', savedTheme);
-  if (themeToggleBtn) {
-    themeToggleBtn.textContent = savedTheme === 'light' ? 'Dark Modus' : 'Licht Modus';
+  // Über
+  if (uberButton) {
+    uberButton.addEventListener('click', () => {
+      closeSettingsModal();
+      openUberModal();
+    });
+  }
+}
+
+/**
+ * Funkcije za otvaranje modala quellen / kategorien / über
+ * Minimalna logika; u praksi treba popuniti spiskove, itd.
+ */
+function openQuellenModal() {
+  const modal = document.getElementById('quellen-modal');
+  if (modal) {
+    modal.style.display = 'flex';
+    // Ovde možete popuniti .quellen-list prema available sources...
+  }
+  const closeBtn = document.getElementById('close-quellen-modal');
+  if (closeBtn) {
+    closeBtn.onclick = () => {
+      modal.style.display = 'none';
+    };
+  }
+}
+
+function openKategorienModal() {
+  const modal = document.getElementById('kategorien-modal');
+  if (modal) {
+    modal.style.display = 'flex';
+    // popuniti listu kategorija
+  }
+  const closeBtn = document.getElementById('close-kategorien-modal');
+  if (closeBtn) {
+    closeBtn.onclick = () => {
+      modal.style.display = 'none';
+    };
+  }
+}
+
+function openUberModal() {
+  const modal = document.getElementById('uber-modal');
+  if (modal) {
+    modal.style.display = 'flex';
+  }
+  const closeBtn = document.getElementById('close-uber-modal');
+  if (closeBtn) {
+    closeBtn.onclick = () => {
+      modal.style.display = 'none';
+    };
   }
 }
