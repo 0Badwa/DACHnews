@@ -25,14 +25,14 @@ function closeTutorialOverlay() {
 }
 
 /**
- * Čuvamo samo koji tab je poslednji aktivan (string).
+ * Čuvamo poslednji aktivni tab u LocalStorage.
  */
 function saveActiveTab(tabName) {
   localStorage.setItem('activeTab', tabName);
 }
 
 /**
- * Vraćamo se na prethodni tab (ako postoji),
+ * Vraćamo se na prethodni aktivni tab (ako postoji),
  * inače idemo na "Neueste".
  */
 function restoreActiveTab() {
@@ -79,12 +79,13 @@ function timeAgo(dateString) {
 }
 
 /**
- * Kreiramo news-card, sa placeholderom ako je izvor "Bild".
+ * Kreiramo news-card; placeholder za "Bild".
  */
 function createNewsCard(feed) {
   const card = document.createElement('div');
   card.className = "news-card";
 
+  // Ako je izvor "Bild", koristimo poseban placeholder
   let placeholderImg = 'https://via.placeholder.com/80';
   if (feed.source && feed.source.toLowerCase().includes("bild")) {
     placeholderImg = 'src/icons/bildplaceholder.jpg';
@@ -148,7 +149,7 @@ function showGreenRectangle() {
 }
 
 /**
- * Skriva "active-green" na početku
+ * Skriva "active-green" na početku (kod Neueste).
  */
 function hideGreenRectangle() {
   const neuesteTab = document.querySelector('.tab[data-tab="Neueste"]');
@@ -291,7 +292,8 @@ function displayFeedsList(feedsList, headingTitle = "") {
  * "Aktuell" - 50 najnovijih, bez uklanjanja duplikata.
  */
 async function displayAktuellFeeds() {
-  const allFeeds = await fetchAllFeedsFromServer(); // do 50
+  // Uvek sveže s /api/feeds (50 newest)
+  const allFeeds = await fetchAllFeedsFromServer();
   displayFeedsList(allFeeds, "Aktuell");
   setActiveTabInUI("Aktuell");
 }
@@ -299,7 +301,7 @@ async function displayAktuellFeeds() {
 /**
  * "Neueste":
  *  - heading "Neueste"
- *  - Prve 4 random (mlađe od 2h / 4h / 1 day), 
+ *  - prve 4 random (mlađe od 2h, pa 4h, pa 1 day)
  *  - zatim 4 iz svake druge kategorije
  */
 async function displayNeuesteFeeds() {
@@ -395,7 +397,7 @@ async function displayNeuesteFeeds() {
   for (const cat of catList) {
     const catFeeds = await fetchCategoryFeeds(cat);
     if (!catFeeds || catFeeds.length === 0) continue;
-    catFeeds.sort((a, b) => new Date(b.date_published) - new Date(a.date_published));
+    catFeeds.sort((a, b) => new Date(b.date_published).getTime() - new Date(a.date_published).getTime());
     const top4 = catFeeds.slice(0, 4);
 
     const heading = document.createElement('h2');
@@ -506,6 +508,7 @@ function initSwipe() {
 
       const deltaX = endX - startX;
       const deltaY = endY - startY;
+      // horizontal only (math > threshold)
       if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > threshold) {
         if (!firstSwipeOccurred) {
           firstSwipeOccurred = true;
@@ -630,8 +633,8 @@ function initSettings() {
   // Učitaj temu
   const savedTheme = localStorage.getItem('theme') || 'dark';
   document.documentElement.setAttribute('data-theme', savedTheme);
-  if (themeBtn) {
-    themeBtn.textContent = (savedTheme === 'light') ? 'Dark Modus' : 'Licht Modus';
+  if (themeToggle) {
+    themeToggle.textContent = (savedTheme === 'light') ? 'Dark Modus' : 'Licht Modus';
   }
 }
 
