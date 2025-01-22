@@ -67,6 +67,6 @@ export function openNewsModal(feed) {
     }
     setTimeout(() => {
       modal.style.display = 'none';
-    }, 1000);
+    }, 3000);
   };
 }
