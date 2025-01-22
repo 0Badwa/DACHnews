@@ -22,18 +22,17 @@ export function openNewsModal(feed) {
 
   // Popuni modal
   modalImage.src = feed.image || 'https://via.placeholder.com/240';
-  
-  // Dodajemo klasu za isključivanje hifenacije
+
+  // Naslov i opis bez hifenacije
   modalTitle.classList.add('no-hyphenation');
   modalDescription.classList.add('no-hyphenation');
 
   modalTitle.textContent = feed.title || 'No title';
   modalDescription.textContent = feed.content_text || 'Keine Beschreibung';
 
-  // Pretvaramo izvor u all-caps
+  // Izvor (velikim slovima) + datum + vreme
   const sourceName = (feed.source || 'Unbekannte Quelle').toUpperCase();
 
-  // Formatiramo datum i vreme
   let datePart = '';
   let timePart = '';
   if (feed.date_published) {
@@ -48,8 +47,7 @@ export function openNewsModal(feed) {
       timePart = `${hours}:${minutes}`;
     }
   }
-
-  // Primer: BILD • 22.01.2025. • 20:10
+  // Primer formata: BILD • 22.01.2025. • 20:10
   modalSourceTime.textContent = `${sourceName}${datePart ? ' • ' + datePart : ''}${timePart ? ' • ' + timePart : ''}`;
 
   // Pokažemo modal (flex -> centrirano)
@@ -60,8 +58,9 @@ export function openNewsModal(feed) {
     modal.style.display = 'none';
   };
 
-  // Dugme Weiter -> otvaranje feed.url u novom tabu
+  // Dugme Weiter -> zatvori modal + otvori link
   weiterButton.onclick = () => {
+    modal.style.display = 'none';
     if (feed.url) {
       window.open(feed.url, '_blank');
     }
