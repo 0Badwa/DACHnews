@@ -40,7 +40,17 @@ app.use(
 app.use(express.json());
 
 // Posluži statiku iz "src" (gde je scripts.js, css, sl.)
-app.use('/src', express.static(path.join(__dirname, 'src')));
+app.use(
+  '/src',
+  express.static(path.join(__dirname, 'src'), {
+    setHeaders: (res, filePath) => {
+      if (filePath.endsWith('.js')) {
+        res.setHeader('Content-Type', 'application/javascript');
+      }
+    }
+  })
+);
+
 
 // Poveži se na Redis
 await initRedis();
