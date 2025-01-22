@@ -22,15 +22,37 @@ export function openNewsModal(feed) {
 
   // Popuni modal
   modalImage.src = feed.image || 'https://via.placeholder.com/240';
+  
+  // Dodajemo klasu za isključivanje hifenacije
+  modalTitle.classList.add('no-hyphenation');
+  modalDescription.classList.add('no-hyphenation');
+
   modalTitle.textContent = feed.title || 'No title';
   modalDescription.textContent = feed.content_text || 'Keine Beschreibung';
-  
-  // Formatiramo izvor i vreme
-  const sourceName = feed.source || 'Unbekannte Quelle';
-  const dateString = feed.date_published || '';
-  modalSourceTime.textContent = `${sourceName} | ${dateString}`;
 
-  // Pokažemo modal
+  // Pretvaramo izvor u all-caps
+  const sourceName = (feed.source || 'Unbekannte Quelle').toUpperCase();
+
+  // Formatiramo datum i vreme
+  let datePart = '';
+  let timePart = '';
+  if (feed.date_published) {
+    const d = new Date(feed.date_published);
+    if (!isNaN(d.getTime())) {
+      const day = String(d.getDate()).padStart(2, '0');
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const year = d.getFullYear();
+      const hours = String(d.getHours()).padStart(2, '0');
+      const minutes = String(d.getMinutes()).padStart(2, '0');
+      datePart = `${day}.${month}.${year}.`;
+      timePart = `${hours}:${minutes}`;
+    }
+  }
+
+  // Primer: BILD • 22.01.2025. • 20:10
+  modalSourceTime.textContent = `${sourceName}${datePart ? ' • ' + datePart : ''}${timePart ? ' • ' + timePart : ''}`;
+
+  // Pokažemo modal (flex -> centrirano)
   modal.style.display = 'flex';
 
   // Dugme za zatvaranje modala
@@ -38,7 +60,7 @@ export function openNewsModal(feed) {
     modal.style.display = 'none';
   };
 
-  // Dugme Weiter -> otvaranje feed.url
+  // Dugme Weiter -> otvaranje feed.url u novom tabu
   weiterButton.onclick = () => {
     if (feed.url) {
       window.open(feed.url, '_blank');

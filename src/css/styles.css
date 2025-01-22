@@ -164,7 +164,7 @@ nav .menu button {
   margin-bottom: 0.1rem;
   transition: transform 0.2s;
   font-size: var(--card-font-size);
-  cursor: pointer; /* da bude jasno da je klikabilno */
+  cursor: pointer;
 }
 .news-card:hover {
   transform: scale(1.02);
@@ -185,8 +185,7 @@ nav .menu button {
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
-  hyphens: none;
-  word-wrap: break-word;
+  hyphens: none; /* onemogućava hifenaciju */
   margin: 0 0 0.1rem;
   font-weight: bold;
 }
@@ -242,7 +241,7 @@ nav .menu button {
   text-transform: lowercase;
 }
 
-/* Modal */
+/* Modal => sada čista crna pozadina (umesto rgba(0,0,0,0.5)) */
 .modal {
   display: none;
   position: fixed;
@@ -252,7 +251,7 @@ nav .menu button {
   height: 100%;
   align-items: center;
   justify-content: center;
-  background-color: rgba(0,0,0,0.5);
+  background-color: #000; /* preko cele strane */
   z-index: 2000;
 }
 .rearrange-modal-content {
@@ -376,8 +375,22 @@ img.lazy.loaded {
   font-size: 1rem;
 }
 
-/* NOVO: stil za modal prikaza pojedinačne vesti */
+/* NOVO: Klasu za isključivanje hifenacije */
+.no-hyphenation {
+  hyphens: none;
+  word-break: break-word; 
+}
+
+/* NOVO: blagi zeleni glow oko slike u modalu */
+#news-modal-image {
+  width: 240px;
+  height: auto;
+  margin-bottom: 1rem;
+  box-shadow: 0 0 8px var(--primary-color);
+}
+
+/* Ovaj .news-modal-content je već postojao, ali ostaje isto,
+   ili minimalno prilagođen za text-align: center, itd. */
 .news-modal-content {
-  /* Može i dodatni stil, ali za sada koristimo isto kao .rearrange-modal-content */
   text-align: center;
 }
