@@ -123,7 +123,7 @@ nav .menu button {
   /* Bele boje i zeleni glow */
   color: #fff;
   text-shadow: 0 0 5px #32CD32;
-  background: #1c1c1c;
+  background:  var(--secondary-color);
   font-family: var(--font-family);
   font-size: 1.1em;
   font-weight: bold;
@@ -161,7 +161,12 @@ nav .menu button {
   height: 80px;
   object-fit: cover;
   margin-right: 0.8rem;
+/* Neon glow efekat */
+  box-shadow: 0 0 10px 5px rgba(0, 255, 0, 0.6), /* Unutrašnji glow */
+              0 0 20px 10px rgba(0, 255, 0, 0.4), /* Srednji glow */
+              0 0 30px 15px rgba(0, 255, 0, 0.2); /* Vanjski glow */
 }
+  
 .truncated-title {
   display: -webkit-box;
   -webkit-line-clamp: 3; 
