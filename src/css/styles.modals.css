@@ -19,23 +19,12 @@
   box-shadow: 0 0 15px rgba(0,0,0,0.6);
 }
 
-/* Settings modal content */
-.settings-modal-content {
-  /* margin: 0 2rem; -> Radimo inline style u index.html */
-}
+/* Settings modal content -> inline style margin: 0 3rem; */
 
-/* Quellen, kategorien, uber modal content */
-.quellen-modal-content,
-.kategorien-modal-content,
-.uber-modal-content {
-  /* margin: 0 2rem; -> Radimo inline style */
-  background-color: var(--background-color);
-  padding: 1rem;
-  border-radius: 8px;
-  box-shadow: 0 0 15px rgba(0,0,0,0.6);
-}
+/* Quellen, kategorien, uber modal content -> margin: 0 3rem inline */
+/* Sadržaj izvorno unutar index.html -> spisak, checkboxes... */
 
-/* modal-title i dugmad */
+/* .modal-title */
 .modal-title {
   font-size: 1.1rem;
   font-weight: bold;
@@ -44,6 +33,7 @@
   color: var(--text-color);
 }
 
+/* dugmad (quellen-block, kategorien-block, itd.) */
 .settings-list .settings-item {
   display: flex;
   justify-content: space-between;
@@ -98,23 +88,94 @@
   padding: 0rem 1rem;
 }
 
-/* quellen-list, kategorien-list, checkboxes i sl. */
-.quellen-list label,
-.kategorien-list .kategorie-item {
+/* ***** KATEGORIEN REARRANGE ***** */
+#sortable-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+#sortable-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0.8rem;
+  margin-bottom: 0.2rem;
+  background: var(--secondary-color);
+  border: 0.5px solid var(--border-color);
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+#sortable-list li span {
+  margin-left: auto;
+  padding-left: 20px;
+  text-align: right;
+  display: flex;
+  gap: 5px;
+}
+#sortable-list li button {
+  background: none;
+  border: none;
+  color: inherit;
+  font-size: inherit;
+  margin-left: 0.5rem;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+#sortable-list li:hover {
+  background-color: #d8f9d8;
+}
+[data-theme="dark"] #sortable-list li:hover {
+  background-color: #333333;
+}
+#close-modal {
+  position: relative;
+  margin: 1rem auto 0;
+  background: var(--primary-color);
+  color: #ffffff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
   display: block;
-  margin-bottom: 0.4rem;
+}
+#close-modal:hover {
+  background: #028a5e;
 }
 
-/* Drag & drop handle - user moze prevlaciti .kategorie-item */
-.kategorie-item[draggable="true"] {
-  cursor: move;
+/* ***** QUELLEN LIST ***** */
+.sources-list {
+  margin-bottom: 1.5rem;
+}
+.source-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  margin: 0.5rem 0;
   background-color: var(--secondary-color);
-  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 1rem;
+}
+.block-button {
+  background-color: #ff4444;
+  color: white;
+  border: none;
   border-radius: 4px;
-  padding: 0.5rem;
+  padding: 0.4rem 0.8rem;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+.unblock-button {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 0.4rem 0.8rem;
+  cursor: pointer;
+  font-size: 0.8rem;
 }
 
-/* Ako zelite custom stil pri drag & drop */
-.kategorie-item.dragging {
-  opacity: 0.5;
-}
+/* #block-sources-modal i #block-categories-modal -> 
+   u ovom projektu koristimo quellen-modal i kategorien-modal direktno */

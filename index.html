@@ -15,17 +15,17 @@
     <div class="menu">
       <button id="menu-button" class="menu-button">☰</button>
       <div class="dropdown" id="dropdown-menu">
-        <!-- Ovaj deo dropdown menija je sada deo Settings modala -->
+        <!-- Sve prebačeno u Settings modal -->
       </div>
     </div>
     <img src="src/icons/dachnewslogo.png" alt="DACH.news" />
   </nav>
 
-  <!-- Dinamički generisani tabovi + statički Neueste i Aktuell -->
+  <!-- Tabs container koji prati feedove -->
   <div class="tabs-container" role="tablist" id="tabs-container">
     <button class="tab active" data-tab="Neueste" role="tab" aria-selected="true">Neueste</button>
     <button class="tab" data-tab="Aktuell" role="tab" aria-selected="false">Aktuell</button>
-    <!-- Ostale kategorije generisaće se iz JavaScript-a -->
+    <!-- Ostale kategorije ubacuje main.js dinamički, ili ovde po potrebi -->
   </div>
 
   <!-- Indikator kategorije -->
@@ -34,24 +34,22 @@
   <!-- Kontejner za vesti -->
   <div id="news-container"></div>
 
-  <!-- Tutorial overlay (skriven) -->
+  <!-- Tutorial overlay -->
   <div id="tutorial-overlay" class="tutorial-overlay" style="display: none;">
     <div class="tutorial-content">
       <h2>Willkommen!</h2>
-      <!-- Izbačena prva rečenica, ostaje samo wischen: -->
+      <!-- Izbačena prva rečenica, ostaje samo wischen -->
       <p>Wischen Sie nach LINKS, um Kategorien zu wechseln.</p>
       <button id="close-tutorial" class="tutorial-close-btn">Verstanden</button>
     </div>
   </div>
 
-  <!-- Modal za Settings (Einstellungen) -->
+  <!-- Settings modal (Einstellungen) -->
   <div id="settings-modal" class="modal" style="display: none;">
-    <div class="rearrange-modal-content settings-modal-content" style="margin: 0 2rem;">
-      <!-- Uvećan, zelen i bold, 20% veći font -->
+    <div class="rearrange-modal-content settings-modal-content" style="margin: 0 3rem;">
       <div class="modal-title" style="color: var(--primary-color); font-weight: bold; font-size: 120%;">
         Einstellungen
       </div>
-      <!-- Razmak 1rem između naslova i prvog item-a -->
       <div class="settings-list" style="margin-top: 1rem;">
         <div class="settings-item">
           <span>Quellen</span>
@@ -79,32 +77,14 @@
     </div>
   </div>
 
-  <!-- Modal za Quellen (naslov: Quelle verbergen, margin 2rem) -->
+  <!-- Modal za Quellen: "Quelle verbergen" -->
   <div id="quellen-modal" class="modal" style="display: none;">
-    <div class="rearrange-modal-content quellen-modal-content" style="margin: 0 2rem;">
-      <!-- Stil naslova kao kod Einstellungen -->
+    <div class="rearrange-modal-content quellen-modal-content" style="margin: 0 3rem;">
       <div class="modal-title" style="color: var(--primary-color); font-weight: bold; font-size: 120%;">
         Quelle verbergen
       </div>
-      <div class="quellen-list" style="margin-top: 1rem;">
-        <!-- Primer spiska izvora s checkbox opcijom za sakrivanje -->
-        <label style="display: block; margin-bottom: 0.5rem;">
-          <input type="checkbox" class="quellen-checkbox" data-source="Bild" />
-          Bild
-        </label>
-        <label style="display: block; margin-bottom: 0.5rem;">
-          <input type="checkbox" class="quellen-checkbox" data-source="Zeit" />
-          Zeit
-        </label>
-        <label style="display: block; margin-bottom: 0.5rem;">
-          <input type="checkbox" class="quellen-checkbox" data-source="Blick" />
-          Blick
-        </label>
-        <label style="display: block; margin-bottom: 0.5rem;">
-          <input type="checkbox" class="quellen-checkbox" data-source="Heise" />
-          Heise
-        </label>
-        <!-- Dodajte još izvora po potrebi... -->
+      <div class="sources-list" id="sources-list" style="margin-top: 1rem;">
+        <!-- Dinamički spisak izvora (zavisi od newsSources niza u main.js) -->
       </div>
       <div class="modal-buttons">
         <button class="save-button" id="close-quellen-modal">Schließen</button>
@@ -112,51 +92,26 @@
     </div>
   </div>
 
-  <!-- Modal za Kategorien (naslov: "Verbergen und anordnen"), margin 2rem -->
+  <!-- Modal za Kategorien: "Verbergen und anordnen" -->
   <div id="kategorien-modal" class="modal" style="display: none;">
-    <div class="rearrange-modal-content kategorien-modal-content" style="margin: 0 2rem;">
-      <!-- Stil naslova kao kod Einstellungen -->
+    <div class="rearrange-modal-content kategorien-modal-content" style="margin: 0 3rem;">
       <div class="modal-title" style="color: var(--primary-color); font-weight: bold; font-size: 120%;">
         Verbergen und anordnen
       </div>
-      <p style="margin: 0.5rem 0;">
-        <!-- Spisak svih kategorija osim Neueste i Aktuell, 
-             user može da ih sakrije (checkbox) i rearanžira (drag & drop) -->
-      </p>
-      <div class="kategorien-list">
-        <!-- Primer:
-            1) check za sakrivanje
-            2) draggable handle za rearrange
-         -->
-        <div class="kategorie-item" draggable="true" style="margin-bottom: 0.5rem;">
-          <input type="checkbox" class="kategorie-hide-cb" data-cat="Technologie" />
-          <span style="margin-left: 0.5rem;">Technologie</span>
-        </div>
-        <div class="kategorie-item" draggable="true" style="margin-bottom: 0.5rem;">
-          <input type="checkbox" class="kategorie-hide-cb" data-cat="Sport" />
-          <span style="margin-left: 0.5rem;">Sport</span>
-        </div>
-        <div class="kategorie-item" draggable="true" style="margin-bottom: 0.5rem;">
-          <input type="checkbox" class="kategorie-hide-cb" data-cat="Wirtschaft" />
-          <span style="margin-left: 0.5rem;">Wirtschaft</span>
-        </div>
-        <div class="kategorie-item" draggable="true" style="margin-bottom: 0.5rem;">
-          <input type="checkbox" class="kategorie-hide-cb" data-cat="Kultur" />
-          <span style="margin-left: 0.5rem;">Kultur</span>
-        </div>
-        <!-- Dodajte ostale kategorije: Politik, Lifestyle, Panorma, LGBT+, usw.
-             Nepominjemo Neueste i Aktuell, ni Sonstiges (ili prikazati prema želji) -->
-      </div>
+      <!-- Drag & drop lista -->
+      <ul id="sortable-list" class="rearrange-list" style="margin: 1rem 0;">
+        <!-- Popunjava se dinamički u main.js, 
+             svaka <li> ima drag & drop i checkbox za sakrivanje -->
+      </ul>
       <div class="modal-buttons">
         <button class="save-button" id="close-kategorien-modal">Schließen</button>
       </div>
     </div>
   </div>
 
-  <!-- Modal za Über (margin 2rem) -->
+  <!-- Modal za Über -->
   <div id="uber-modal" class="modal" style="display: none;">
-    <div class="rearrange-modal-content uber-modal-content" style="margin: 0 2rem;">
-      <!-- Stil naslova kao kod Einstellungen -->
+    <div class="rearrange-modal-content uber-modal-content" style="margin: 0 3rem;">
       <div class="modal-title" style="color: var(--primary-color); font-weight: bold; font-size: 120%;">
         Über diese App
       </div>
