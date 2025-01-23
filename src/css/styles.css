@@ -225,7 +225,7 @@ img.lazy.loaded {
 /* Kad kreiramo <h2> iz feeda, da bude bele boje i blagi zeleni glow */
 #news-container h2 {
   color: #fff;
-  text-shadow: 0 0 5px #32CD32; /* glow efekat za tekst */
+  text-shadow: 0 0 7px #32CD32; /* glow efekat za tekst */
   background-color: #000; /* crna pozadina */
   margin-bottom: 4px;
   font-size: 1.1rem;
@@ -302,11 +302,11 @@ img.lazy.loaded {
 }
 
 /* ========== 9) NEWS MODAL ========== */
-/* Slika 240px */
+/* Slika 220px */
 .news-modal-content img#news-modal-image {
   display: block;
   margin: 1rem auto;
-  width: 240px; 
+  width: 220px; 
   height: auto;
   box-shadow: 0 0 12px var(--primary-color); /* #32CD32 */
   border-radius: 10px;
@@ -318,14 +318,13 @@ img.lazy.loaded {
   font-size: 1rem;
   color: var(--primary-color); /* #32CD32 */
   text-align: center;
-  margin: 1rem auto;
-}
+ margin: 1rem 0.5rem; /* gore i dole 1rem, levo i desno 0.5rem */}
 
 /* Izvor, datum i vreme -> Roboto Condensed, izvor zelen */
 .news-modal-content p {
   text-align: center;
-  margin: 1rem 10px;
-  padding: 0rem 1rem;
+  margin: 1.5rem 0.5rem 1rem 0.5rem; /* gore: 1.5rem, desno: 0.5rem, dole: 1rem, levo: 0.5rem */
+  padding: 0rem 0.5rem;
   font-family: 'Roboto Condensed', sans-serif; /* cond */
   color: #fff; /* default white, override za .source ispod */
 }
