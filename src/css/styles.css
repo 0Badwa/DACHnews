@@ -183,7 +183,7 @@ nav .menu button {
   overflow: hidden;
   text-overflow: ellipsis;
   hyphens: none;
-  margin: 0 0 0; /* Uklonjen dodatni margin-bottom */
+  margin: 0.2rem 0 0; /* Dodatni razmak između naslova i vrha kartice */  
   padding-bottom: 0.5rem; /* Dodato za sigurnost */
   font-weight: bold;
   line-height: 1.2; /* Prilagodite ovu vrednost po potrebi */
