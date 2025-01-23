@@ -146,7 +146,9 @@ nav .menu button {
   border: 1px solid var(--border-color);
   border-radius: 5px;
   padding: 0.2rem;
-  margin-bottom: 0.1rem;
+  margin-bottom: 0.2rem;
+margin-left: 0.3rem;
+  margin-right: 0.3rem;
   transition: transform 0.2s;
   cursor: pointer;
   /* Primeni var(--card-font-size) */
