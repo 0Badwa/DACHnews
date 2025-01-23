@@ -397,16 +397,16 @@ img.lazy.loaded {
   transition: background-color 0.2s, transform 0.2s; /* Dodata animacija za hover */
 }
 
-/* Kategorija je sakrivena (crvena pozadina) */
-#sortable-list li.hidden {
-  background-color: rgba(255, 68, 68, 0.2); /* Crvena pozadina sa providnošću */
-  border: 1px solid #ff4444; /* Crvena granica */
-}
-
-/* Kategorija je vidljiva (zelena pozadina) */
-#sortable-list li.visible {
+/* Kategorija je verbergen (zelena pozadina) */
+#sortable-list li.verbergen {
   background-color: rgba(50, 205, 50, 0.2); /* Zelena pozadina sa providnošću */
   border: 1px solid var(--primary-color); /* Zelena granica */
+}
+
+/* Kategorija je entsperren (crvena pozadina) */
+#sortable-list li.entsperren {
+  background-color: rgba(255, 68, 68, 0.2); /* Crvena pozadina sa providnošću */
+  border: 1px solid #ff4444; /* Crvena granica */
 }
 
 #sortable-list li:hover {
@@ -447,16 +447,16 @@ img.lazy.loaded {
   transition: background-color 0.2s, transform 0.2s; /* Animacija za hover */
 }
 
-/* Izvor je sakriven (crvena pozadina) */
-.source-item.hidden {
-  background-color: rgba(255, 68, 68, 0.2); /* Crvena pozadina sa providnošću */
-  border: 1px solid #ff4444; /* Crvena granica */
-}
-
-/* Izvor je vidljiv (zelena pozadina) */
-.source-item.visible {
+/* Izvor je verbergen (zelena pozadina) */
+.source-item.verbergen {
   background-color: rgba(50, 205, 50, 0.2); /* Zelena pozadina sa providnošću */
   border: 1px solid var(--primary-color); /* Zelena granica */
+}
+
+/* Izvor je entsperren (crvena pozadina) */
+.source-item.entsperren {
+  background-color: rgba(255, 68, 68, 0.2); /* Crvena pozadina sa providnošću */
+  border: 1px solid #ff4444; /* Crvena granica */
 }
 
 .source-item:hover {
@@ -490,7 +490,6 @@ img.lazy.loaded {
 .unblock-button:hover {
   background-color: rgba(50, 205, 50, 0.8); /* Svetlija zelena na hover */
 }
-
 
 /* ========== 11) TUTORIAL OVERLAY ========== */
 .tutorial-overlay {
