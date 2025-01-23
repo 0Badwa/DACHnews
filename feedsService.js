@@ -81,7 +81,7 @@ async function sendBatchToGPT(feedBatch) {
 - Unterhaltung
 - Welt
 
-Ako je vest o Donaldu Trampu, stavi je u 'Welt'. Vrati isključivo JSON niz oblika [{ "id": "...", "category": "..." }].`
+Pri kategorizaciji, obavezno vodi računa o specifičnostima tih zemalja. Ako vest sadrži informacije koje se jasno odnose na neku od gore navedenih kategorija, postavi je u odgovarajuću. Ako je vest o Donaldu Trampu ili nekom svetskom političaru, stavi je u kategoriju Welt. Ako je vest o saobraćajnim nezgodama, stavi je u kategoriju Panorama, a ne u Auto. Molim te vrati isključivo JSON niz gde je svaki element: { "id": "...", "category": "..." }`
       },
       {
         role: "user",
@@ -126,18 +126,26 @@ async function smanjiSliku(buffer) {
 }
 
 /**
- * Čuva smanjenu sliku u Redis kao bajt-niz (pod ključem "img:<id>").
+ * Čuva smanjenu sliku u Redis u Base64 formatu (pod ključem "img:<id>").
  * Vraća true ako uspe, false inače.
  */
 async function storeImageInRedis(imageUrl, id) {
   if (!imageUrl) return false;
   try {
+    // Preuzimamo originalnu sliku
     const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
     const buffer = Buffer.from(response.data);
+
+    // Smanjimo na 320px širine
     const optimized = await smanjiSliku(buffer);
     if (!optimized) return false;
 
-    await redisClient.set(`img:${id}`, optimized);
+    // Konvertujemo u Base64 string
+    const base64 = optimized.toString('base64');
+
+    // Čuvamo u Redis
+    await redisClient.set(`img:${id}`, base64);
+
     console.log(`[storeImageInRedis] Slika za ID:${id} uspešno snimljena (320px).`);
     return true;
   } catch (error) {
@@ -165,8 +173,6 @@ const limit = pLimit(3);
  * Dodavanje jedne vesti u Redis, sa smanjenom slikom (ako postoji).
  */
 export async function addItemToRedis(item, category) {
-  // Komentar: funkcija služi da primi jednu vest i kategoriju,
-  // smanji sliku (ako može) i upiše rezultat u Redis.
   const newsObj = {
     id: item.id,
     title: item.title,
@@ -174,17 +180,16 @@ export async function addItemToRedis(item, category) {
     url: item.url || null,
     content_text: item.content_text || "",
     category,
-    source: (item.authors && item.authors.length > 0) 
-      ? item.authors[0].name 
+    source: (item.authors && item.authors.length > 0)
+      ? item.authors[0].name
       : extractSource(item.url),
   };
 
   if (item.image) {
     const success = await storeImageInRedis(item.image, item.id);
-    // *** IZMENJENO OVDE: fallback na original item.image ako optimizacija neuspe.
+    // Ako je optimizacija uspela, koristimo /image/:id, inače ostavljamo original
     newsObj.image = success ? `/image/${item.id}` : item.image;
   } else {
-    // Ako ni nema originalnu sliku
     newsObj.image = null;
   }
 
@@ -203,7 +208,6 @@ export async function addItemToRedis(item, category) {
  * Vraća sve vesti iz Redis-a (spaja iz svih "category:*" listi).
  */
 export async function getAllFeedsFromRedis() {
-  // Komentar: vraća spisak svih vesti iz Redis-a
   const keys = await redisClient.keys("category:*");
   let all = [];
   for (const key of keys) {
@@ -211,7 +215,6 @@ export async function getAllFeedsFromRedis() {
     const parsed = items.map(x => JSON.parse(x));
     all = all.concat(parsed);
   }
-  // Uklanjamo duplikate
   const mapById = {};
   for (const obj of all) {
     mapById[obj.id] = obj;
@@ -221,13 +224,8 @@ export async function getAllFeedsFromRedis() {
 
 /**
  * Glavna funkcija za obradu feed-ova.
- * 1) Preuzmemo feed
- * 2) Filtriramo nove
- * 3) Ako ih je bar 2 -> šaljemo GPT, inače preskačemo
- * 4) Upisujemo u Redis s concurrency limitom
  */
 export async function processFeeds() {
-  // Komentar: pokreće obradu feedova (preuzimanje, GPT kategorizacija itd.)
   console.log("[processFeeds] Počinje procesiranje feed-ova...");
 
   const allItems = await fetchRSSFeed();
