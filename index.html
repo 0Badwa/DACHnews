@@ -20,13 +20,7 @@
     <img src="src/icons/dachnewslogo.png" alt="DACH.news" />
   </nav>
 
-  <!-- Dodati loader i error-container -->
-  <div id="loader" style="display:none; text-align:center; margin-top:100px;">
-    <p style="color: #32CD32; font-weight: bold;">Loading...</p>
-  </div>
-  <div id="error-container" style="display:none; text-align:center; margin-top:100px; color:red;"></div>
-
-  <!-- Tabs container koji prati feedove -->
+  <!-- Tabs container koji prati feedove, uvek fiksiran na vrhu -->
   <div class="tabs-container" role="tablist" id="tabs-container">
     <button class="tab active" data-tab="Neueste" role="tab" aria-selected="true">Neueste</button>
     <button class="tab" data-tab="Aktuell" role="tab" aria-selected="false">Aktuell</button>
@@ -36,7 +30,7 @@
   <!-- Indikator kategorije -->
   <div class="category-indicator">Home</div>
 
-  <!-- Kontejner za vesti -->
+  <!-- Kontejner za vesti (scrollable) -->
   <div id="news-container"></div>
 
   <!-- Tutorial overlay -->
@@ -87,6 +81,9 @@
       <div class="modal-title" style="color: var(--primary-color); font-weight: bold; font-size: 120%;">
         Quelle verbergen
       </div>
+      <!-- DODALI SMO SEARCH ISPOD NASLOVA -->
+      <input type="text" id="quellen-search" placeholder="Suchen..." class="search-input" />
+
       <div class="sources-list" id="sources-list" style="margin-top: 1rem;">
         <!-- Dinamički spisak izvora iz main.js -->
       </div>
