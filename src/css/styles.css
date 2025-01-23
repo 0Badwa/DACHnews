@@ -76,20 +76,21 @@ nav .menu button {
 }
 
 .tabs-container {
-  position: fixed; 
-  top: 60px; 
-  left: 0; 
+  position: fixed;
+  top: 60px;
+  left: 0;
   right: 0;
-  height: 30px; 
-  z-index: 999;
+  height: 30px;
+  z-index: 2000; /* Povećali da bude iznad vesti i sl. */
   background-color: var(--secondary-color); /* #000 */
   border-bottom: 2px solid var(--border-color);
   overflow-x: auto;
   white-space: nowrap;
-  display: flex; 
+  display: flex;
   align-items: center;
   padding: 0.4rem 0;
 }
+
 .tabs-container button {
   background: none;
   border: none;
@@ -133,15 +134,32 @@ nav .menu button {
 
 /* ========== 5) NEWS CONTAINER & CARDS ========== */
 #news-container {
-  margin-top: 130px;
-  overflow-y: auto; /* Prikazuje scrollbar samo kad je potreban */
+  margin-top: 130px; /* da tabs i indicator ne preklope vesti */
+  overflow-y: auto;
   padding: 0.3rem;
-  /* Skriva scrollbar */
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  scrollbar-width: none; 
+  -ms-overflow-style: none; 
 }
 #news-container::-webkit-scrollbar {
-  display: none; /* Chrome, Safari i Edge */
+  display: none;
+}
+
+/* Search input za Quellen modal */
+#quellen-search.search-input {
+  width: 100%;
+  margin-top: 0.5rem;
+  padding: 0.4rem;
+  font-size: 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background-color: #222; /* ili #000, po želji */
+  color: #fff; 
+  outline: none;
+}
+
+/* Dodatni hover/fokus efekti ako želite */
+#quellen-search.search-input:focus {
+  border-color: var(--primary-color);
 }
 
 
