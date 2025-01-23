@@ -356,21 +356,18 @@ function initSwipe() {
     clickTab(cats[idx]);
   }
 
-  function clickTab(cat) {
+ function clickTab(cat) {
     const tab = document.querySelector(`.tab[data-tab="${cat}"]`);
-    if (!tab) {
-      const neueste = document.querySelector('.tab[data-tab="Neueste"]');
-      if (neueste) neueste.click();
-      return;
-    }
+    if (!tab) return;
     tab.click();
-    // Nakon što smo kliknuli, pričekamo 300ms i skrolujemo na vrh
+    // Posle male pauze -> skrol na vrh i levo
     setTimeout(() => {
       swipeContainer.scrollTop = 0;
+      swipeContainer.scrollLeft = 0; // ako postoji horizontalni skrol
     }, 300);
   }
-
-  swipeContainer.addEventListener('touchstart', e => {
+    
+ swipeContainer.addEventListener('touchstart', e => {
     const t = e.changedTouches[0];
     touchstartX = t.screenX;
     touchstartY = t.screenY;
