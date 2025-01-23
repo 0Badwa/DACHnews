@@ -5,29 +5,29 @@
 import {
   displayNeuesteFeeds,
   displayAktuellFeeds,
-  displayNewsByCategory
+  displayNewsByCategory,
+  fetchAllFeedsFromServer // import za dobijanje feedova
 } from './feeds.js';
 
-// Glavni redosled kategorija
 let categoriesOrder = [
   "Technologie", "Gesundheit", "Sport", "Wirtschaft", "Kultur",
   "Unterhaltung", "Reisen", "Lifestyle", "Auto",
   "Welt", "Politik", "Panorama", "Sonstiges"
 ];
 
-// Učitavamo iz localStorage postojeće blokirane izvore i kategorije
 let blockedSources = JSON.parse(localStorage.getItem('blockedSources') || '[]');
 let blockedCategories = JSON.parse(localStorage.getItem('blockedCategories') || '[]');
 
-// Dinamička promenljiva za font-size (za news-cards)
+// Ovo je font-size samo za .news-card (naslov i meta).
 let currentCardFontSize = localStorage.getItem('cardFontSize')
   ? parseInt(localStorage.getItem('cardFontSize'), 10)
   : 16;
 
 /**
- * Funkcija: Postavlja var(--card-font-size) i osvežava aktivni feed.
+ * Funkcija: primeni var(--card-font-size) i osveži aktivni feed
  */
 function applyCardFontSize() {
+  // Ažuriramo CSS varijablu (koristi se i za naslov i za .news-meta)
   document.documentElement.style.setProperty('--card-font-size', currentCardFontSize + 'px');
   localStorage.setItem('cardFontSize', currentCardFontSize);
 
@@ -53,7 +53,7 @@ function applyCardFontSize() {
 }
 
 /**
- * Funkcije za blokiranje/deblokiranje izvora.
+ * Blokiranje/deblokiranje izvora
  */
 function blockSource(src) {
   if (!blockedSources.includes(src)) {
@@ -70,7 +70,7 @@ function isSourceBlocked(src) {
 }
 
 /**
- * Funkcije za blokiranje/deblokiranje kategorija.
+ * Blokiranje/deblokiranje kategorije
  */
 function blockCategory(cat) {
   if (!blockedCategories.includes(cat)) {
@@ -87,23 +87,22 @@ function isCategoryBlocked(cat) {
 }
 
 /**
- * Dinamičko kreiranje tabova (preskačemo blokirane kategorije).
+ * Dinamičko kreiranje tabova (sem Neueste, Aktuell),
+ * preskačemo blokirane kategorije.
  */
 function buildTabs() {
   const tabsContainer = document.getElementById('tabs-container');
   if (!tabsContainer) return;
 
-  // Uklonimo sve osim "Neueste" i "Aktuell"
+  // Brišemo sve osim Neueste, Aktuell
   const existingTabs = tabsContainer.querySelectorAll('.tab:not([data-tab="Neueste"]):not([data-tab="Aktuell"])');
   existingTabs.forEach(t => t.remove());
 
-  // Ako postoji sačuvani redosled, koristimo ga
   const savedOrder = localStorage.getItem('categoriesOrder');
   if (savedOrder) {
     categoriesOrder = JSON.parse(savedOrder);
   }
 
-  // Kreiramo tab za svaku kategoriju (ako nije blokirana)
   categoriesOrder.forEach(cat => {
     if (isCategoryBlocked(cat)) return;
     const btn = document.createElement('button');
@@ -115,7 +114,7 @@ function buildTabs() {
 }
 
 /**
- * Drag & Drop za kategorije (openRearrangeModal).
+ * KATEGORIJEN - Drag & Drop
  */
 function openRearrangeModal() {
   const kategorienModal = document.getElementById('kategorien-modal');
@@ -138,18 +137,15 @@ function openRearrangeModal() {
 
     const isBlockedCat = isCategoryBlocked(cat);
     const btn = document.createElement('button');
-    // Ako je blokirana -> red (unblock), inače -> green (block)
     btn.className = isBlockedCat ? 'unblock-button' : 'block-button';
     btn.textContent = isBlockedCat ? 'Entsperren' : 'Verbergen';
 
     btn.onclick = () => {
       if (isCategoryBlocked(cat)) {
-        // prelazimo na "Verbergen" (zelena)
         unblockCategory(cat);
         btn.className = 'block-button';
         btn.textContent = 'Verbergen';
       } else {
-        // prelazimo na "Entsperren" (crvena)
         blockCategory(cat);
         btn.className = 'unblock-button';
         btn.textContent = 'Entsperren';
@@ -166,9 +162,6 @@ function openRearrangeModal() {
   });
 }
 
-/**
- * Zatvaranje kategorija modala i čuvanje novog redosleda.
- */
 function closeKategorienModal() {
   const kategorienModal = document.getElementById('kategorien-modal');
   if (kategorienModal) {
@@ -177,12 +170,8 @@ function closeKategorienModal() {
 
   const ul = document.getElementById('sortable-list');
   if (!ul) return;
-  // Uzimamo nazive kategorija (bez teksta 'Verbergen'/'Entsperren')
   const items = [...ul.children].map(li =>
-    li.textContent
-      .replace('Verbergen', '')
-      .replace('Entsperren', '')
-      .trim()
+    li.textContent.replace('Verbergen', '').replace('Entsperren', '').trim()
   );
   categoriesOrder = items;
   localStorage.setItem('categoriesOrder', JSON.stringify(categoriesOrder));
@@ -191,7 +180,6 @@ function closeKategorienModal() {
   loadFeeds();
 }
 
-/** Drag & drop pomoćne funkcije */
 function handleDragStart(e) {
   e.dataTransfer.setData('text/plain', e.target.textContent.trim());
   e.target.style.opacity = '0.4';
@@ -221,11 +209,8 @@ function handleDrop(e) {
 }
 
 /**
- * Modal za Quellen (otvaranje).
- * Sada dinamički dobijamo sve izvore iz feeda -> automatski se pojave i novi.
+ * QUELLEN Modal
  */
-import { fetchAllFeedsFromServer } from './feeds.js'; // Ne zaboravite da imate ovu import na vrhu ili ovde
-
 async function openQuellenModal() {
   const quellenModal = document.getElementById('quellen-modal');
   if (!quellenModal) return;
@@ -235,15 +220,16 @@ async function openQuellenModal() {
   if (!sourcesListEl) return;
   sourcesListEl.innerHTML = '';
 
-  // Dinamički uzmemo sve feedove pa izvučemo source
+  // Dinamički dohvatamo sve feedove i izvlačimo "source"
   let allFeeds = [];
   try {
-    allFeeds = await fetchAllFeedsFromServer(false);
+    allFeeds = await fetchAllFeedsFromServer(false); // Uzmi sve, bez slice
   } catch (err) {
     console.error("[openQuellenModal] Greška pri dohvatu feedova:", err);
+    allFeeds = [];
   }
 
-  // Napravimo set unikatnih izvora
+  // Napravimo Set unikatnih izvora
   const uniqueSources = new Set();
   allFeeds.forEach(feed => {
     if (feed.source) {
@@ -251,9 +237,10 @@ async function openQuellenModal() {
     }
   });
 
-  // Sortiramo i za svaki kreiramo box
+  // Sortiramo -> spisak svih izvora
   const sortedSources = Array.from(uniqueSources).sort();
 
+  // Kreiramo red za svaki izvor
   sortedSources.forEach(src => {
     const sourceItem = document.createElement('div');
     sourceItem.className = 'source-item';
@@ -261,7 +248,6 @@ async function openQuellenModal() {
     const spanName = document.createElement('span');
     spanName.textContent = src;
 
-    // Proveravamo da li je blokiran
     const isBlocked = isSourceBlocked(src);
     const blockBtn = document.createElement('button');
     blockBtn.className = isBlocked ? 'unblock-button' : 'block-button';
@@ -287,9 +273,6 @@ async function openQuellenModal() {
   });
 }
 
-/**
- * Zatvaranje Quellen modala
- */
 function closeQuellenModal() {
   const quellenModal = document.getElementById('quellen-modal');
   if (quellenModal) {
@@ -299,7 +282,7 @@ function closeQuellenModal() {
 }
 
 /**
- * Swipe levo-desno za promenu kategorija
+ * Swipe - levo/desno za kategorije
  */
 function initSwipe() {
   const swipeContainer = document.getElementById('news-container');
@@ -374,7 +357,7 @@ function initSwipe() {
 }
 
 /**
- * Funkcija loadFeeds -> simuliramo klik na zadati tab, default "Neueste".
+ * loadFeeds -> simuliramo klik na "Neueste" (ili prosleđeni default)
  */
 function loadFeeds(defaultTab = 'Neueste') {
   const tabBtn = document.querySelector(`.tab[data-tab="${defaultTab}"]`);
@@ -384,7 +367,7 @@ function loadFeeds(defaultTab = 'Neueste') {
 }
 
 /**
- * Povećavanje / smanjenje veličine fonta
+ * Font-size + i -
  */
 function increaseFontSize() {
   currentCardFontSize++;
@@ -401,23 +384,19 @@ function decreaseFontSize() {
  * Glavni init
  */
 document.addEventListener('DOMContentLoaded', () => {
-  // Primena font-size
+  // 1) Primeni font
   applyCardFontSize();
-
-  // Kreiramo tabove
+  // 2) Tabovi
   buildTabs();
-
-  // Inicijalizujemo swipe
+  // 3) Swipe
   initSwipe();
-
-  // Klik na tab -> prikaz feeda
+  // 4) Klik na tab => prikaz feeda
   const tabsContainer = document.getElementById('tabs-container');
   if (tabsContainer) {
     tabsContainer.addEventListener('click', async (e) => {
       const tab = e.target.closest('.tab');
       if (!tab) return;
 
-      // Skidamo 'active' sa drugih tabova
       const allTabs = document.querySelectorAll('.tab');
       allTabs.forEach(t => {
         t.classList.remove('active');
@@ -430,7 +409,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const container = document.getElementById('news-container');
       if (!container) return;
 
-      // Prikaz feeda u zavisnosti od kategorije
       if (cat === 'Neueste') {
         await displayNeuesteFeeds();
       } else if (cat === 'Aktuell') {
@@ -442,10 +420,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Pokrećemo prikaz "Neueste"
+  // Pokreni feed -> Neueste
   loadFeeds();
 
-  // Settings (Einstellungen) modal
+  // Settings / menu
   const menuButton = document.getElementById('menu-button');
   const settingsModal = document.getElementById('settings-modal');
   const closeSettingsBtn = document.getElementById('close-settings');
@@ -460,7 +438,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
-  // Quellen (Izvori)
+  // Quellen
   const quellenButton = document.getElementById('quellen-button');
   if (quellenButton) {
     quellenButton.onclick = () => {
@@ -488,13 +466,13 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
-  // Podesavanje font size
+  // Font-size
   const incBtn = document.getElementById('font-increase');
   if (incBtn) incBtn.onclick = increaseFontSize;
   const decBtn = document.getElementById('font-decrease');
   if (decBtn) decBtn.onclick = decreaseFontSize;
 
-  // Über modal
+  // Über
   const uberButton = document.getElementById('uber-button');
   const uberModal = document.getElementById('uber-modal');
   const closeUberBtn = document.getElementById('close-uber-modal');
@@ -510,7 +488,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
-  // Tutorial overlay
+  // Tutorial
   const closeTutorialBtn = document.getElementById('close-tutorial');
   if (closeTutorialBtn) {
     closeTutorialBtn.onclick = () => {
