@@ -160,8 +160,6 @@ function extractSource(url) {
   }
 }
 
-import pLimit from 'p-limit';
-const limit = pLimit(3);
 
 /**
  * Dodavanje jedne vesti u Redis.
