@@ -63,7 +63,7 @@ async function sendBatchToGPT(feedBatch) {
   }));
 
   const payload = {
-    model: "gpt-4o-mini",
+    model: "gpt-4",
     messages: [
       {
         role: "system",
@@ -81,7 +81,7 @@ async function sendBatchToGPT(feedBatch) {
 - Unterhaltung
 - Welt
 
-Pri kategorizaciji, obavezno vodi računa o specifičnostima tih zemalja. Ako vest sadrži informacije koje se jasno odnose na neku od gore navedenih kategorija, postavi je u odgovarajuću. Ako je vest o Donaldu Trampu, stavi je u kategoriju Welt. Ako je vest o saobraćajnim nezgodama, stavi je u kategoriju Panorama, a ne u Auto. Molim te vrati isključivo JSON niz gde je svaki element: { "id": "...", "category": "..." }`
+Ako je vest o Donaldu Trampu, stavi je u 'Welt'. Vrati isključivo JSON niz oblika [{ "id": "...", "category": "..." }].`
       },
       {
         role: "user",
@@ -164,7 +164,9 @@ const limit = pLimit(3);
 /**
  * Dodavanje jedne vesti u Redis, sa smanjenom slikom (ako postoji).
  */
-async function addItemToRedis(item, category) {
+export async function addItemToRedis(item, category) {
+  // Komentar: funkcija služi da primi jednu vest i kategoriju,
+  // smanji sliku (ako može) i upiše rezultat u Redis.
   const newsObj = {
     id: item.id,
     title: item.title,
@@ -177,15 +179,14 @@ async function addItemToRedis(item, category) {
       : extractSource(item.url),
   };
 
-  // Fallback za sliku
-  let finalImageUrl = null;
   if (item.image) {
     const success = await storeImageInRedis(item.image, item.id);
-    if (success) {
-      finalImageUrl = `/image/${item.id}`;
-    }
+    // *** IZMENJENO OVDE: fallback na original item.image ako optimizacija neuspe.
+    newsObj.image = success ? `/image/${item.id}` : item.image;
+  } else {
+    // Ako ni nema originalnu sliku
+    newsObj.image = null;
   }
-  newsObj.image = finalImageUrl;
 
   const redisKey = `category:${category}`;
   await redisClient.rPush(redisKey, JSON.stringify(newsObj));
@@ -202,6 +203,7 @@ async function addItemToRedis(item, category) {
  * Vraća sve vesti iz Redis-a (spaja iz svih "category:*" listi).
  */
 export async function getAllFeedsFromRedis() {
+  // Komentar: vraća spisak svih vesti iz Redis-a
   const keys = await redisClient.keys("category:*");
   let all = [];
   for (const key of keys) {
@@ -225,6 +227,7 @@ export async function getAllFeedsFromRedis() {
  * 4) Upisujemo u Redis s concurrency limitom
  */
 export async function processFeeds() {
+  // Komentar: pokreće obradu feedova (preuzimanje, GPT kategorizacija itd.)
   console.log("[processFeeds] Počinje procesiranje feed-ova...");
 
   const allItems = await fetchRSSFeed();
