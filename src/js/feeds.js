@@ -1,16 +1,15 @@
 /**
  * feeds.js
- * 
- * - Uklanjamo svuda "LGBT+"
- * - Dodajemo loader i error message oko fetch-a
- * - Pomoćne funkcije za prikaz vesti
+ *
+ * Ovde smo uklonili sva ograničenja (slice) da bi se prikazale SVE vesti i samim tim SVI izvori.
+ * Sortiranje po datumu (od najnovijih ka starijima) ostaje, ali više ne "sečemo" na 50 rezultata.
  */
 
 import { initializeLazyLoading, updateCategoryIndicator, showLoader, hideLoader, showErrorMessage } from './ui.js';
 import { openNewsModal } from './newsModal.js';
 
 /**
- * Vreme "pre X minuta/sati/dana"
+ * timeAgo format "vor X Minuten" itd.
  */
 function timeAgo(dateString) {
   if (!dateString) return '';
@@ -52,11 +51,13 @@ function getHiddenCategories() {
   }
 }
 
+/**
+ * Provera da li je feed sakriven zbog izvora/kategorije.
+ * "Ohne Kategorie" tretiramo kao "Sonstiges".
+ */
 function isHiddenFeed(feed) {
   const hiddenSources = getHiddenSources();
   const hiddenCats = getHiddenCategories();
-
-  // "Ohne Kategorie" -> "Sonstiges"
   const cat = (feed.category === "Ohne Kategorie") ? "Sonstiges" : feed.category;
 
   if (hiddenCats.includes(cat)) return true;
@@ -65,8 +66,7 @@ function isHiddenFeed(feed) {
 }
 
 /**
- * Fetch 50 najnovijih feed-ova ("/api/feeds"), keširano 10 min.
- * Dodajemo showLoader/hideLoader i showErrorMessage.
+ * fetchAllFeedsFromServer - uklonili smo slice(0,50).
  */
 export async function fetchAllFeedsFromServer(forceRefresh = false) {
   showLoader();
@@ -75,13 +75,14 @@ export async function fetchAllFeedsFromServer(forceRefresh = false) {
     const cachedFeedsKey = 'feeds-Aktuell';
     const lastFetchTime = localStorage.getItem(lastFetchKey);
 
+    // Keš 10 minuta
     if (!forceRefresh && lastFetchTime && (Date.now() - new Date(lastFetchTime).getTime()) < 10 * 60 * 1000) {
       const cachedFeeds = localStorage.getItem(cachedFeedsKey);
       if (cachedFeeds) {
         let data = JSON.parse(cachedFeeds);
         data.sort((a, b) => new Date(b.date_published).getTime() - new Date(a.date_published).getTime());
         data = data.filter(feed => !isHiddenFeed(feed));
-        return data.slice(0, 50);
+        return data; // više ne sečemo
       }
     }
 
@@ -95,7 +96,7 @@ export async function fetchAllFeedsFromServer(forceRefresh = false) {
     localStorage.setItem(cachedFeedsKey, JSON.stringify(data));
     localStorage.setItem(lastFetchKey, new Date().toISOString());
 
-    return data.slice(0, 50);
+    return data; // vraćamo sve, bez slice
   } catch (error) {
     console.error(error);
     showErrorMessage("Fehler: /api/feeds konnte nicht geladen werden.");
@@ -106,12 +107,11 @@ export async function fetchAllFeedsFromServer(forceRefresh = false) {
 }
 
 /**
- * Fetch 50 najnovijih feedova za kategoriju, keširano 10 min.
+ * fetchCategoryFeeds - više ne sečemo na 50.
  */
 export async function fetchCategoryFeeds(category, forceRefresh = false) {
   showLoader();
   try {
-    // "Sonstiges" -> "Uncategorized" za server
     const catForUrl = (category === "Sonstiges") ? "Uncategorized" : category;
     const lastFetchKey = `feeds-${catForUrl}-lastFetch`;
     const cachedFeedsKey = `feeds-${catForUrl}`;
@@ -123,7 +123,7 @@ export async function fetchCategoryFeeds(category, forceRefresh = false) {
         let data = JSON.parse(cached);
         data.sort((a, b) => new Date(b.date_published).getTime() - new Date(a.date_published).getTime());
         data = data.filter(feed => !isHiddenFeed(feed));
-        return data.slice(0, 50);
+        return data;
       }
     }
 
@@ -138,7 +138,7 @@ export async function fetchCategoryFeeds(category, forceRefresh = false) {
     localStorage.setItem(cachedFeedsKey, JSON.stringify(data));
     localStorage.setItem(lastFetchKey, new Date().toISOString());
 
-    return data.slice(0, 50);
+    return data;
   } catch (error) {
     console.error(error);
     showErrorMessage(`Fehler: /api/feeds-by-category/${category} konnte nicht geladen werden.`);
@@ -150,6 +150,7 @@ export async function fetchCategoryFeeds(category, forceRefresh = false) {
 
 /**
  * Kreira jednu "news card".
+ * font-size se dobija iz var(--card-font-size) (vidi main.js).
  */
 function createNewsCard(feed) {
   const card = document.createElement('div');
@@ -206,6 +207,7 @@ export function displayFeedsList(feedsList, categoryName) {
     return;
   }
 
+  // Sortiramo najnovije na vrh
   feedsList.sort((a, b) => {
     return new Date(b.date_published).getTime() - new Date(a.date_published).getTime();
   });
@@ -220,7 +222,7 @@ export function displayFeedsList(feedsList, categoryName) {
 }
 
 /**
- * "Aktuell" -> sve vesti
+ * "Aktuell" -> sve vesti.
  */
 export async function displayAktuellFeeds() {
   const container = document.getElementById('news-container');
@@ -231,7 +233,7 @@ export async function displayAktuellFeeds() {
 }
 
 /**
- * Uzimanje slučajnih elemenata.
+ * pickRandom
  */
 function pickRandom(array, count) {
   if (array.length <= count) return array;
@@ -240,7 +242,7 @@ function pickRandom(array, count) {
 }
 
 /**
- * "Neueste" -> 4 vesti iz poslednjih X sati, zatim po 4 iz svake kategorije.
+ * "Neueste" -> 4 nasumične iz poslednjih X sati, + 4 iz svake kategorije
  */
 export async function displayNeuesteFeeds() {
   const container = document.getElementById('news-container');
@@ -275,7 +277,7 @@ export async function displayNeuesteFeeds() {
     container.appendChild(card);
   });
 
-  // Kategorije bez "LGBT+"
+  // Ostale kategorije
   const categories = [
     "Technologie",
     "Gesundheit",
@@ -308,7 +310,7 @@ export async function displayNeuesteFeeds() {
     const heading = document.createElement('h2');
     heading.textContent = cat;
     heading.style.backgroundColor = "#000";
-    heading.style.color = "var(--primary-color)";
+    heading.style.color = "#fff"; // ili var(--text-color)
     heading.style.padding = "4px";
     heading.style.marginTop = "0.4rem";
     heading.style.marginBottom = "4px";
@@ -327,7 +329,7 @@ export async function displayNeuesteFeeds() {
 }
 
 /**
- * Prikaz vesti po kategoriji, "Sonstiges" umesto "Ohne Kategorie".
+ * displayNewsByCategory
  */
 export async function displayNewsByCategory(category) {
   const container = document.getElementById('news-container');
