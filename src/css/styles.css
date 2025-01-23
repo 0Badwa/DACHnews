@@ -388,8 +388,8 @@ img.lazy.loaded {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.5rem 0.8rem;
-  margin-bottom: 0.5rem; /* Veći razmak između stavki */
+  padding: 0.2rem 0.8rem;
+  margin-bottom: 0.2rem; /* Veći razmak između stavki */
   background-color: #000; /* Podrazumevana pozadina */
   border: 1px solid var(--border-color); /* Granica */
   border-radius: 5px; /* Zaobljeni uglovi */
