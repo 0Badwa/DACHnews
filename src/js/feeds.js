@@ -344,7 +344,6 @@ export async function displayNeuesteFeeds() {
   const fetchPromises = categories.map(async (cat) => {
     let catFeeds = await fetchCategoryFeeds(cat);
     return { cat, feeds: catFeeds };
-     }  
   });
 
   const results = await Promise.all(fetchPromises);
