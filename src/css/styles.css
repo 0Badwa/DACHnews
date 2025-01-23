@@ -182,6 +182,8 @@ nav .menu button {
   color: var(--primary-color); /* #32CD32 */
   text-decoration: none;
   line-height: 1.3;
+  font-family: 'Roboto Condensed', sans-serif; /* Dodavanje fonta */
+
 }
 .news-meta {
   font-size: 0.7rem;
