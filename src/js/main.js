@@ -140,7 +140,16 @@ function openRearrangeModal() {
         btn.textContent = 'Verbergen';
       } else {
         blockCategory(cat);
-        btn.textContent = 'Entsperren';
+   btn.textContent = isCategoryBlocked(cat) ? 'Entsperren' : 'Verbergen';
+  btn.onclick = () => {
+  if (isCategoryBlocked(cat)) {
+    unblockCategory(cat);
+    btn.textContent = 'Verbergen';
+  } else {
+    blockCategory(cat);
+    btn.textContent = 'Entsperren';
+  }
+};
       }
     };
 
