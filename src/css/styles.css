@@ -183,7 +183,8 @@ nav .menu button {
   overflow: hidden;
   text-overflow: ellipsis;
   hyphens: none;
-  margin: 0 0 0.1rem;
+  margin: 0 0 0; /* Uklonjen dodatni margin-bottom */
+  padding-bottom: 0; /* Dodato za sigurnost */
   font-weight: bold;
 }
 .news-title {
@@ -223,23 +224,46 @@ img.lazy.loaded {
 /* Kad kreiramo <h2> iz feeda, da bude bele boje i blagi zeleni glow */
 #news-container h2 {
   color: #fff;
-  text-shadow: 0 0 5px #32CD32; /* glow */
-  background-color: #000;
+  text-shadow: 0 0 5px #32CD32; /* glow efekat za tekst */
+  background-color: #000; /* crna pozadina */
   margin-bottom: 4px;
-  font-size: 1.1rem; 
+  font-size: 1.1rem;
   text-align: center;
   padding: 4px;
+  box-shadow: 0 0 0 2px #000; /* crni outline */
 }
 
 /* ========== 7) RESPONSIVE ========== */
-@media (max-width: 768px) {
+/* Mobilni telefoni (do 480px) */
+@media (max-width: 480px) {
   nav img {
-    height: 40px;
+    height: 30px; /* Manja visina loga za mobilne telefone */
   }
   .tabs-container button {
-    font-size: 0.9rem;
-    font-weight: bold;
-    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem; /* Manja veličina fonta za dugmad */
+    padding: 0.3rem 0.6rem; /* Manji padding za dugmad */
+  }
+}
+
+/* Tableti (481px - 768px) */
+@media (min-width: 481px) and (max-width: 768px) {
+  nav img {
+    height: 40px; /* Srednja visina loga za tablete */
+  }
+  .tabs-container button {
+    font-size: 0.9rem; /* Srednja veličina fonta za dugmad */
+    padding: 0.4rem 0.8rem; /* Srednji padding za dugmad */
+  }
+}
+
+/* Desktop (769px i više) */
+@media (min-width: 769px) {
+  nav img {
+    height: 50px; /* Veća visina loga za desktop */
+  }
+  .tabs-container button {
+    font-size: 1rem; /* Standardna veličina fonta za dugmad */
+    padding: 0.5rem 1rem; /* Standardni padding za dugmad */
   }
 }
 
@@ -262,7 +286,7 @@ img.lazy.loaded {
   padding: 1rem;
   border-radius: 8px;
   max-width: 500px; 
-  width: 90%;
+  width: 80%;
   max-height: 80vh;
   overflow-y: auto;
   box-shadow: 0 0 15px rgba(0,0,0,0.6);
