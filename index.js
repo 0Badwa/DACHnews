@@ -10,7 +10,12 @@ import helmet from 'helmet';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-import { initRedis, redisClient, processFeeds, getAllFeedsFromRedis } from './feedsService.js';
+import {
+  initRedis,
+  redisClient,
+  processFeeds,
+  getAllFeedsFromRedis
+} from './feedsService.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -24,7 +29,7 @@ app.use(
 );
 app.use(express.json());
 
-// Za statiku (scripts.js, css, icons itd.)
+// Služenje statičkog sadržaja
 app.use('/src', express.static(path.join(__dirname, 'src'), {
   setHeaders: (res, filePath) => {
     if (filePath.endsWith('.js')) {
@@ -69,15 +74,23 @@ app.get('/api/feeds-by-category/:category', async (req, res) => {
   }
 });
 
-// Dohvat slike iz Redis-a (kompresovane)
+/**
+ * Ruta za dohvatanje slike iz Redis-a.
+ * Pošto Redis v4 nema getBuffer(), koristimo get() i dekodiramo Base64 u buffer.
+ */
 app.get('/image/:id', async (req, res) => {
   const imgKey = `img:${req.params.id}`;
   try {
-    const buffer = await redisClient.getBuffer(imgKey);
-    if (!buffer) {
+    // Uzimamo Base64 string iz Redis-a
+    const base64 = await redisClient.get(imgKey);
+    if (!base64) {
       console.log(`[Route /image/:id] Nema slike za ključ: ${imgKey}`);
       return res.status(404).send("Image not found.");
     }
+
+    // Pretvaramo Base64 nazad u buffer
+    const buffer = Buffer.from(base64, 'base64');
+
     res.setHeader('Content-Type', 'image/jpeg');
     res.send(buffer);
   } catch (error) {
@@ -91,6 +104,6 @@ app.listen(PORT, () => {
   console.log(`[Express] Server pokrenut na portu ${PORT}`);
 });
 
-// Periodična obrada feedova - fiksno 12 minuta
+// Periodična obrada feedova (12 minuta)
 setInterval(processFeeds, 12 * 60 * 1000);
 processFeeds();
