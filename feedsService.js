@@ -10,7 +10,7 @@ import { createClient } from 'redis';
 import sharp from 'sharp';
 import pLimit from 'p-limit';
 
-// Glavne konstante
+// Konstante
 const SEVEN_DAYS = 60 * 60 * 24 * 7;
 const RSS_FEED_URL = "https://rss.app/feeds/v1.1/_sf1gbLo1ZadJmc5e.json"; // Glavni feed
 const GPT_API_URL = "https://api.openai.com/v1/chat/completions";
@@ -62,8 +62,9 @@ async function sendBatchToGPT(feedBatch) {
     description: (item.description || item.content_text || "").slice(0, 500)
   }));
 
+  // == OVDE PAŽNJA: koristimo "gpt-4o-mini" umesto gpt-4 ==
   const payload = {
-    model: "gpt-4",
+    model: "gpt-4o-mini",
     messages: [
       {
         role: "system",
@@ -81,7 +82,7 @@ async function sendBatchToGPT(feedBatch) {
 - Unterhaltung
 - Welt
 
-Ako je vest o Donaldu Trampu, stavi je u 'Welt'. Vrati isključivo JSON niz oblika [{ "id": "...", "category": "..." }].`
+Pri kategorizaciji, obavezno vodi računa o specifičnostima tih zemalja. Ako vest sadrži informacije koje se jasno odnose na neku od gore navedenih kategorija, postavi je u odgovarajuću. Ako je vest o Donaldu Trampu ili nekom svetskom političaru, stavi je u kategoriju Welt. Ako je vest o saobraćajnim nezgodama, stavi je u kategoriju Panorama, a ne u Auto. Molim te vrati isključivo JSON niz gde je svaki element: { "id": "...", "category": "..." }`
       },
       {
         role: "user",
@@ -100,6 +101,7 @@ Ako je vest o Donaldu Trampu, stavi je u 'Welt'. Vrati isključivo JSON niz obli
       }
     });
     let gptText = response.data.choices?.[0]?.message?.content?.trim() || '';
+    // Sklonimo eventualno ```json
     if (gptText.startsWith("```json")) {
       gptText = gptText.replace(/^```json\n?/, '').replace(/```$/, '');
     }
@@ -126,18 +128,26 @@ async function smanjiSliku(buffer) {
 }
 
 /**
- * Čuva smanjenu sliku u Redis kao bajt-niz (pod ključem "img:<id>").
+ * Čuva smanjenu sliku u Redis u Base64 formatu (pod ključem "img:<id>").
  * Vraća true ako uspe, false inače.
  */
 async function storeImageInRedis(imageUrl, id) {
   if (!imageUrl) return false;
   try {
+    // Preuzimamo originalnu sliku
     const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
     const buffer = Buffer.from(response.data);
+
+    // Smanjimo na 320px
     const optimized = await smanjiSliku(buffer);
     if (!optimized) return false;
 
-    await redisClient.set(`img:${id}`, optimized);
+    // Konvertujemo u Base64
+    const base64 = optimized.toString('base64');
+
+    // Čuvamo u Redis
+    await redisClient.set(`img:${id}`, base64);
+
     console.log(`[storeImageInRedis] Slika za ID:${id} uspešno snimljena (320px).`);
     return true;
   } catch (error) {
@@ -164,7 +174,7 @@ const limit = pLimit(3);
 /**
  * Dodavanje jedne vesti u Redis, sa smanjenom slikom (ako postoji).
  */
-async function addItemToRedis(item, category) {
+export async function addItemToRedis(item, category) {
   const newsObj = {
     id: item.id,
     title: item.title,
@@ -172,20 +182,19 @@ async function addItemToRedis(item, category) {
     url: item.url || null,
     content_text: item.content_text || "",
     category,
-    source: (item.authors && item.authors.length > 0) 
-      ? item.authors[0].name 
+    source: (item.authors && item.authors.length > 0)
+      ? item.authors[0].name
       : extractSource(item.url),
   };
 
-  // Fallback za sliku
-  let finalImageUrl = null;
+  // Ako ima sliku, pokušaj optimizacije
   if (item.image) {
     const success = await storeImageInRedis(item.image, item.id);
-    if (success) {
-      finalImageUrl = `/image/${item.id}`;
-    }
+    // Ako je optimizacija uspela, koristimo /image/:id, inače ostavljamo original
+    newsObj.image = success ? `/image/${item.id}` : item.image;
+  } else {
+    newsObj.image = null;
   }
-  newsObj.image = finalImageUrl;
 
   const redisKey = `category:${category}`;
   await redisClient.rPush(redisKey, JSON.stringify(newsObj));
@@ -209,7 +218,6 @@ export async function getAllFeedsFromRedis() {
     const parsed = items.map(x => JSON.parse(x));
     all = all.concat(parsed);
   }
-  // Uklanjamo duplikate
   const mapById = {};
   for (const obj of all) {
     mapById[obj.id] = obj;
@@ -219,10 +227,6 @@ export async function getAllFeedsFromRedis() {
 
 /**
  * Glavna funkcija za obradu feed-ova.
- * 1) Preuzmemo feed
- * 2) Filtriramo nove
- * 3) Ako ih je bar 2 -> šaljemo GPT, inače preskačemo
- * 4) Upisujemo u Redis s concurrency limitom
  */
 export async function processFeeds() {
   console.log("[processFeeds] Počinje procesiranje feed-ova...");
@@ -235,7 +239,7 @@ export async function processFeeds() {
     return;
   }
 
-  // Filtriramo nove
+  // 1) Filtriramo nove (po ID)
   let newItems = [];
   for (const item of allItems) {
     const alreadyProcessed = await redisClient.sIsMember("processed_ids", item.id);
@@ -243,15 +247,37 @@ export async function processFeeds() {
       newItems.push(item);
     }
   }
-  // Uklanjamo duplikate
+
+  // 2) Uklanjamo duplikate po ID
   newItems = [...new Map(newItems.map(item => [item.id, item])).values()];
+
+  // 3) Uklanjamo duplikate po title (ostavljamo samo noviju vest)
+  //    Ako su dve vesti sa istim naslovom, gledamo date_published.
+  const titleMap = new Map();
+  for (const it of newItems) {
+    // Pokušamo da nadjemo veću vest s istim naslovom
+    const existing = titleMap.get(it.title);
+    if (!existing) {
+      // Ako je nema, samo dodajemo
+      titleMap.set(it.title, it);
+    } else {
+      // Uporedimo datume; ako je it noviji, menjamo
+      const itTime = (it.date_published) ? new Date(it.date_published).getTime() : 0;
+      const existingTime = (existing.date_published) ? new Date(existing.date_published).getTime() : 0;
+      if (itTime > existingTime) {
+        titleMap.set(it.title, it);
+      }
+    }
+  }
+  newItems = Array.from(titleMap.values());
+
   if (newItems.length === 0) {
-    console.log("[processFeeds] Sve vesti su već obrađene.");
+    console.log("[processFeeds] Sve vesti su već obrađene posle dupl. provere.");
     return;
   }
-  console.log(`[processFeeds] Nađeno ${newItems.length} novih vesti.`);
+  console.log(`[processFeeds] Posle dupl. provere ostalo ${newItems.length} vesti.`);
 
-  // Ako je vrlo malo novih (npr. 1), preskočimo GPT do sledećeg ciklusa
+  // Ako je < 2 nove, preskačemo GPT do sledećeg ciklusa
   if (newItems.length < 2) {
     console.log("[processFeeds] Manje od 2 nove vesti, preskačemo GPT za sada.");
     return;
