@@ -10,7 +10,7 @@ import helmet from 'helmet';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-import { initRedis, redisClient, processFeeds, processLGBTFeed, getAllFeedsFromRedis } from './feedsService.js';
+import { initRedis, redisClient, processFeeds, getAllFeedsFromRedis } from './feedsService.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -27,7 +27,6 @@ app.use(express.json());
 // Za statiku (scripts.js, css, icons itd.)
 app.use('/src', express.static(path.join(__dirname, 'src'), {
   setHeaders: (res, filePath) => {
-    // MIME fix za .js
     if (filePath.endsWith('.js')) {
       res.setHeader('Content-Type', 'application/javascript');
     }
@@ -70,17 +69,15 @@ app.get('/api/feeds-by-category/:category', async (req, res) => {
   }
 });
 
-// NOVO: dohvat slike iz Redis-a (kompresovane)
+// Dohvat slike iz Redis-a (kompresovane)
 app.get('/image/:id', async (req, res) => {
   const imgKey = `img:${req.params.id}`;
   try {
     const buffer = await redisClient.getBuffer(imgKey);
     if (!buffer) {
-      // Nema slike u Redis-u, po želji ili 404 ili fallback
       console.log(`[Route /image/:id] Nema slike za ključ: ${imgKey}`);
       return res.status(404).send("Image not found.");
     }
-    // Ako imamo bajtove, šaljemo
     res.setHeader('Content-Type', 'image/jpeg');
     res.send(buffer);
   } catch (error) {
@@ -89,22 +86,11 @@ app.get('/image/:id', async (req, res) => {
   }
 });
 
-// Pokreni server
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`[Express] Server pokrenut na portu ${PORT}`);
 });
 
-// Periodične obrade feedova
-function getRandomInterval() {
-  const minMinutes = 12;
-  const maxMinutes = 14;
-  const randomMinutes = Math.floor(Math.random() * (maxMinutes - minMinutes + 1)) + minMinutes;
-  return randomMinutes * 60 * 1000;
-}
-setInterval(processFeeds, getRandomInterval());
+// Periodična obrada feedova - fiksno 12 minuta
+setInterval(processFeeds, 12 * 60 * 1000);
 processFeeds();
-
-// LGBT feed na 13 minuta
-setInterval(processLGBTFeed, 13 * 60 * 1000);
-processLGBTFeed();

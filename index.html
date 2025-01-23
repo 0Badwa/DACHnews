@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <link rel="icon" href="src/icons/favicon.ico" type="image/x-icon" />
   <title>DACH.news</title>
-<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,700;1,400;1,700&family=Roboto+Condensed:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,700;1,400;1,700&family=Roboto+Condensed:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
   <link rel="stylesheet" type="text/css" href="src/css/styles.css?v=1">
 </head>
 <body data-theme="dark">
@@ -19,6 +19,12 @@
     </div>
     <img src="src/icons/dachnewslogo.png" alt="DACH.news" />
   </nav>
+
+  <!-- Dodati loader i error-container -->
+  <div id="loader" style="display:none; text-align:center; margin-top:100px;">
+    <p style="color: #32CD32; font-weight: bold;">Loading...</p>
+  </div>
+  <div id="error-container" style="display:none; text-align:center; margin-top:100px; color:red;"></div>
 
   <!-- Tabs container koji prati feedove -->
   <div class="tabs-container" role="tablist" id="tabs-container">
@@ -37,7 +43,6 @@
   <div id="tutorial-overlay" class="tutorial-overlay" style="display: none;">
     <div class="tutorial-content">
       <h2>Willkommen!</h2>
-      <!-- Izbačena prva rečenica, ostaje samo wischen -->
       <p>Wischen Sie nach LINKS, um Kategorien zu wechseln.</p>
       <button id="close-tutorial" class="tutorial-close-btn">Verstanden</button>
     </div>
@@ -83,7 +88,7 @@
         Quelle verbergen
       </div>
       <div class="sources-list" id="sources-list" style="margin-top: 1rem;">
-        <!-- Dinamički spisak izvora (npr. Bild, Zeit...) iz main.js -->
+        <!-- Dinamički spisak izvora iz main.js -->
       </div>
       <div class="modal-buttons">
         <button class="save-button" id="close-quellen-modal">Schließen</button>
@@ -97,7 +102,6 @@
       <div class="modal-title" style="color: var(--primary-color); font-weight: bold; font-size: 120%;">
         Verbergen und anordnen
       </div>
-      <!-- Drag & drop lista -->
       <ul id="sortable-list" class="rearrange-list" style="margin: 1rem 0;">
         <!-- Popunjava se dinamički iz main.js (drag & drop) -->
       </ul>
