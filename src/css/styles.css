@@ -76,31 +76,20 @@ nav .menu button {
 }
 
 .tabs-container {
-  position: fixed;
-  top: 60px; /* Ispod navigacije (60px visine nav) */
-  left: 0;
+  position: fixed; 
+  top: 60px; 
+  left: 0; 
   right: 0;
-  height: 30px;
-  z-index: 2000; /* dovoljno veliko da uvek bude ispred vesti */
+  height: 30px; 
+  z-index: 999;
   background-color: var(--secondary-color); /* #000 */
   border-bottom: 2px solid var(--border-color);
+  overflow-x: auto;
+  white-space: nowrap;
   display: flex; 
   align-items: center;
-  /* Ako ima više tabova, dozvoljavamo horizontalni skrol unutar .tabs-container */
-  white-space: nowrap;
-  overflow-x: auto; 
-  overflow-y: hidden;
-  /* Može i padding ako treba */
   padding: 0.4rem 0;
 }
-
-.tabs-container::-webkit-scrollbar {
-  height: 0px; /* ili 0 ako ne želite scrollbar */
-}
-.tabs-container::-webkit-scrollbar-thumb {
-  background-color: var(--border-color);
-}
-
 .tabs-container button {
   background: none;
   border: none;
@@ -124,117 +113,35 @@ nav .menu button {
 /* ========== 4) CATEGORY INDICATOR ========== */
 .category-indicator {
   position: fixed;
-  top: 100px; /* ispod nav(60px) i tabs(30px) = 90 ili 100, malo lufta */
-  left: 0;
+  top: 100px;
+  left: 0; 
   right: 0;
   height: 30px;
   line-height: 30px;
-  text-align: center;
-  z-index: 1999; /* malo ispod tabs (2000), ali iznad news-container */
+  padding: 3px 2px 2px;
+  margin: 1px;
+  /* Bele boje i zeleni glow */
   color: #fff;
-  background: var(--secondary-color);
-  text-shadow: 0 0 7px var(--primary-color);
-  font-weight: bold;
+  text-shadow: 0 0 7px #32CD32;
+  background:  var(--secondary-color);
+  font-family: var(--font-family);
   font-size: 1.1em;
+  font-weight: bold;
+  text-align: center;
+  z-index: 998;
 }
 
 /* ========== 5) NEWS CONTAINER & CARDS ========== */
 #news-container {
-  margin-top: 130px; /* 60px nav + 30px tab + ~40px category-indicator */
-  overflow-y: auto; /* vertikalni skrol */
-  /* Ako je potreban horizontalni skrol za vesti: */
-  overflow-x: auto; 
+  margin-top: 130px;
+  overflow-y: auto; /* Prikazuje scrollbar samo kad je potreban */
   padding: 0.3rem;
+  /* Skriva scrollbar */
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* Internet Explorer 10+ */
 }
 #news-container::-webkit-scrollbar {
-  display: none; /* Sakriva scrollbar ako želimo */
-}
-
-/* Search input za Quellen modal */
-/* ========== .tabs-container ========== */
-/* Uvek na vrhu (fiksirano), i "prati" horizontalni skrol. 
-   Zato postavljamo left:0; right:0; top:60px i z-index da bude iznad.
-*/
-.tabs-container {
-  position: fixed;
-  top: 60px; /* Ispod navigacije (60px visine nav) */
-  left: 0;
-  right: 0;
-  height: 30px;
-  z-index: 2000; /* dovoljno veliko da uvek bude ispred vesti */
-  background-color: var(--secondary-color); /* #000 */
-  border-bottom: 2px solid var(--border-color);
-  display: flex; 
-  align-items: center;
-  /* Ako ima više tabova, dozvoljavamo horizontalni skrol unutar .tabs-container */
-  white-space: nowrap;
-  overflow-x: auto; 
-  overflow-y: hidden;
-  /* Može i padding ako treba */
-  padding: 0.4rem 0;
-}
-
-.tabs-container::-webkit-scrollbar {
-  height: 4px; /* ili 0 ako ne želite scrollbar */
-}
-.tabs-container::-webkit-scrollbar-thumb {
-  background-color: var(--border-color);
-}
-
-/* ========== #news-container ========== */
-/* Da se ne preklapa sa tabs-container, pomerimo ga nadole */
-#news-container {
-  margin-top: 130px; /* 60px nav + 30px tab + ~40px category-indicator */
-  overflow-y: auto; /* vertikalni skrol */
-  /* Ako je potreban horizontalni skrol za vesti: */
-  overflow-x: auto; 
-  padding: 0.3rem;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* Internet Explorer 10+ */
-}
-#news-container::-webkit-scrollbar {
-  display: none; /* Sakriva scrollbar ako želimo */
-}
-
-/* ========== Category indicator ========== */
-.category-indicator {
-  position: fixed;
-  top: 100px; /* ispod nav(60px) i tabs(30px) = 90 ili 100, malo lufta */
-  left: 0;
-  right: 0;
-  height: 30px;
-  line-height: 30px;
-  text-align: center;
-  z-index: 1999; /* malo ispod tabs (2000), ali iznad news-container */
-  color: #fff;
-  background: var(--secondary-color);
-  text-shadow: 0 0 7px var(--primary-color);
-  font-weight: bold;
-  font-size: 1.1em;
-}
-
-/* ========== Quellen search input ========== */
-#quellen-search.search-input {
-  width: 100%;
-  margin-top: 0.5rem;
-  padding: 0.4rem;
-  font-size: 1rem;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  background-color: #222;
-  color: #fff;
-  outline: none;
-}
-#quellen-search.search-input:focus {
-  border-color: var(--primary-color);
-}
-
-
-/* Dodatni hover/fokus efekti ako želite */
-#quellen-search.search-input:focus {
-  border-color: var(--primary-color);
+  display: none; /* Chrome, Safari i Edge */
 }
 
 
@@ -419,27 +326,6 @@ background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z
   width: 90%; /* Širina sadržaja */
   margin: 0 auto; /* Centriranje sadržaja */
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.6);
-  position: relative; /* za absolutely-positioned .news-modal-icons */
-}
-
-.news-modal-icons {
-  position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
-  display: flex;
-  gap: 0.5rem;
-}
-.news-icon-button {
-  background: rgba(0,0,0,0.6);
-  color: #fff;
-  border: 1px solid var(--primary-color);
-  border-radius: 4px;
-  font-size: 1.2rem;
-  cursor: pointer;
-  padding: 0.2rem 0.5rem;
-}
-.news-icon-button:hover {
-  background: rgba(0,0,0,0.9);
 }
 
 /* Slika u news-modal */
@@ -716,50 +602,4 @@ background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z
   cursor: pointer;
   font-weight: bold;
   font-size: 1rem;
-}
-
-
-/* Dodata zvezdica pored hamburger menija */
-.menu .favorites-button {
-  background: none;
-  color: #fff;
-  border: 2px solid var(--primary-color);
-  padding: 0.32rem;
-  margin-left: 0.4rem; /* Malo razmaka od hamburgera */
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 1rem;
-  outline: none;
-}
-
-/* NOVI Favorites modal */
-.favorites-modal-content {
-  background-color: #000;
-  padding: 1rem;
-  border-radius: 8px;
-  max-width: 600px;
-  width: 90%;
-  max-height: 80vh;
-  overflow-y: auto;
-}
-.favorites-list {
-  margin-top: 1rem;
-}
-.favorites-list .fav-item {
-  display: flex;
-  align-items: flex-start;
-  background-color: #111;
-  border: 1px solid var(--border-color);
-  border-radius: 5px;
-  padding: 0.4rem;
-  margin-bottom: 0.3rem;
-  cursor: pointer;
-}
-.fav-item .fav-title {
-  font-weight: bold;
-  color: var(--primary-color);
-  margin-right: 0.5rem;
-}
-.fav-item:hover {
-  background-color: #222;
 }
