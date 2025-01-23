@@ -9,9 +9,7 @@ import {
   fetchAllFeedsFromServer
 } from './feeds.js';
 
-/**
- * Redosled kategorija i blokirane liste
- */
+// Globalne promenljive
 let categoriesOrder = [
   "Technologie", "Gesundheit", "Sport", "Wirtschaft", "Kultur",
   "Unterhaltung", "Reisen", "Lifestyle", "Auto",
@@ -19,17 +17,16 @@ let categoriesOrder = [
 ];
 let blockedSources = JSON.parse(localStorage.getItem('blockedSources') || '[]');
 let blockedCategories = JSON.parse(localStorage.getItem('blockedCategories') || '[]');
-
-// Omiljeni (favorites)
 let favoriteIds = JSON.parse(localStorage.getItem('favoriteIds') || '[]');
 
-// Promenljiva za font-size naslova i izvora (.news-card)
+// Dinamička promenljiva za font-size
 let currentCardFontSize = localStorage.getItem('cardFontSize')
   ? parseInt(localStorage.getItem('cardFontSize'), 10)
   : 16;
 
 /**
- * Funkcija koja primenjuje font-size i osvežava aktivni feed
+ * Funkcija koja primenjuje font-size (var(--card-font-size))
+ * i osvežava prikaz aktivne kategorije.
  */
 function applyCardFontSize() {
   document.documentElement.style.setProperty('--card-font-size', currentCardFontSize + 'px');
@@ -42,14 +39,17 @@ function applyCardFontSize() {
   if (!cat || !container) return;
 
   if (cat === 'Neueste') {
-    displayNeuesteFeeds().then(() => container.scrollTop = 0);
+    displayNeuesteFeeds().then(() => { container.scrollTop = 0; });
   } else if (cat === 'Aktuell') {
-    displayAktuellFeeds().then(() => container.scrollTop = 0);
+    displayAktuellFeeds().then(() => { container.scrollTop = 0; });
   } else {
-    displayNewsByCategory(cat).then(() => container.scrollTop = 0);
+    displayNewsByCategory(cat).then(() => { container.scrollTop = 0; });
   }
 }
 
+/**
+ * Povećavanje i smanjivanje font-size
+ */
 function increaseFontSize() {
   currentCardFontSize++;
   if (currentCardFontSize > 40) currentCardFontSize = 40;
@@ -61,7 +61,9 @@ function decreaseFontSize() {
   applyCardFontSize();
 }
 
-// (Un)block sources
+/**
+ * Blokiranje/deblokiranje izvora
+ */
 function blockSource(src) {
   if (!blockedSources.includes(src)) {
     blockedSources.push(src);
@@ -76,7 +78,9 @@ function isSourceBlocked(src) {
   return blockedSources.includes(src);
 }
 
-// (Un)block categories
+/**
+ * Blokiranje/deblokiranje kategorije
+ */
 function blockCategory(cat) {
   if (!blockedCategories.includes(cat)) {
     blockedCategories.push(cat);
@@ -92,7 +96,7 @@ function isCategoryBlocked(cat) {
 }
 
 /**
- * Favoriti (zvezdica):
+ * Favoriti (zvezdica)
  */
 function addFavorite(id) {
   if (!favoriteIds.includes(id)) {
@@ -109,13 +113,14 @@ function isFavorite(id) {
 }
 
 /**
- * Dinamičko kreiranje tabova
+ * Dinamičko kreiranje tabova (osim Neueste, Aktuell),
+ * preskačemo blokirane kategorije.
  */
 function buildTabs() {
   const tabsContainer = document.getElementById('tabs-container');
   if (!tabsContainer) return;
 
-  // Uklonimo sve osim Neueste, Aktuell
+  // Uklonimo sve osim Neueste i Aktuell
   const existingTabs = tabsContainer.querySelectorAll('.tab:not([data-tab="Neueste"]):not([data-tab="Aktuell"])');
   existingTabs.forEach(t => t.remove());
 
@@ -137,12 +142,7 @@ function buildTabs() {
 /**
  * Modal za Quellen
  */
-import { openNewsModal } from './newsModal.js'; // ako koristite
-// ili ako ste sve spakovali u main.js, nije bitno
-
 let allSortedSources = [];
-
-/** openQuellenModal - definisano u starom kodu */
 async function openQuellenModal() {
   const quellenModal = document.getElementById('quellen-modal');
   if (!quellenModal) return;
@@ -156,7 +156,7 @@ async function openQuellenModal() {
   try {
     allFeeds = await fetchAllFeedsFromServer(false);
   } catch (err) {
-    console.error("[openQuellenModal] Greška:", err);
+    console.error("[openQuellenModal] Error:", err);
     allFeeds = [];
   }
 
@@ -178,16 +178,12 @@ async function openQuellenModal() {
   }
 }
 
-/**
- * OVO JE FUNKCIJA KOJA JE NEDOSTAJALA
- * closeQuellenModal - da isključimo Quellen modal
- */
 function closeQuellenModal() {
   const quellenModal = document.getElementById('quellen-modal');
   if (quellenModal) {
     quellenModal.style.display = 'none';
   }
-  // Po želji -> loadFeeds();
+  // if we want -> loadFeeds();
 }
 
 function renderQuellenList(sourceArray) {
@@ -233,7 +229,7 @@ function handleQuellenSearch(e) {
 }
 
 /**
- * Kategorije (drag & drop)
+ * Modal za Kategorien (drag & drop)
  */
 function openRearrangeModal() {
   const kategorienModal = document.getElementById('kategorien-modal');
@@ -261,12 +257,12 @@ function openRearrangeModal() {
     btn.onclick = () => {
       if (isCategoryBlocked(cat)) {
         unblockCategory(cat);
-        btn.className = 'block-button';
         btn.textContent = 'Verbergen';
+        btn.className = 'block-button';
       } else {
         blockCategory(cat);
-        btn.className = 'unblock-button';
         btn.textContent = 'Entsperren';
+        btn.className = 'unblock-button';
       }
     };
 
@@ -285,7 +281,6 @@ function closeKategorienModal() {
   if (kategorienModal) {
     kategorienModal.style.display = 'none';
   }
-
   const ul = document.getElementById('sortable-list');
   if (!ul) return;
   const items = [...ul.children].map(li =>
@@ -327,7 +322,7 @@ function handleDrop(e) {
 }
 
 /**
- * Swipe levo-desno
+ * Swipe
  */
 function initSwipe() {
   const swipeContainer = document.getElementById('news-container');
@@ -422,7 +417,7 @@ function initSwipe() {
 }
 
 /**
- * loadFeeds -> simulira klik na defaultTab
+ * loadFeeds -> simuliramo klik na “Neueste”
  */
 function loadFeeds(defaultTab = 'Neueste') {
   const tabBtn = document.querySelector(`.tab[data-tab="${defaultTab}"]`);
@@ -439,7 +434,6 @@ document.addEventListener('DOMContentLoaded', () => {
   buildTabs();
   initSwipe();
 
-  // Klik na tab -> menja feed
   const tabsContainer = document.getElementById('tabs-container');
   if (tabsContainer) {
     tabsContainer.addEventListener('click', async (e) => {
@@ -496,8 +490,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   const closeQuellenBtn = document.getElementById('close-quellen-modal');
   if (closeQuellenBtn) {
-    // OVDE JE BILA GREŠKA -> definisana onclick=closeQuellenModal, a func nije postojala
-    closeQuellenBtn.onclick = closeQuellenModal;
+    closeQuellenBtn.onclick = closeQuellenModal; // OVO SAD POSTOJI
   }
 
   // Kategorien
@@ -554,4 +547,4 @@ document.addEventListener('DOMContentLoaded', () => {
     const tutOverlay = document.getElementById('tutorial-overlay');
     if (tutOverlay) tutOverlay.style.display = 'flex';
   }
-);
+});
