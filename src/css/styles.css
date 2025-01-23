@@ -338,13 +338,14 @@ background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z
 /* Izvor (source) -> #32CD32 */
 .news-modal-content .source {
   font-size: 0.8rem;
+  font-weight: bold;
   color: var(--primary-color); /* #32CD32 */
 }
 
 /* Ako hoćemo i vreme zeleno, možemo: 
 .news-modal-content .time {
  font-size: 0.8rem;
-color: var(--primary-color);
+/*  color: var(--primary-color);
 } 
 */
 
