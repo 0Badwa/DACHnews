@@ -178,15 +178,15 @@ nav .menu button {
   
 .truncated-title {
   display: -webkit-box;
-  -webkit-line-clamp: 3; 
+  -webkit-line-clamp: 2; 
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
   hyphens: none;
   margin: 0 0 0; /* Uklonjen dodatni margin-bottom */
-  padding-bottom: 0; /* Dodato za sigurnost */
+  padding-bottom: 0.5rem; /* Dodato za sigurnost */
   font-weight: bold;
-  line-height: 1.1; /* Prilagodite ovu vrednost po potrebi */
+  line-height: 1.2; /* Prilagodite ovu vrednost po potrebi */
 }
 .news-title {
   font-size: 1rem;
