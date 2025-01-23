@@ -225,7 +225,7 @@ img.lazy.loaded {
 /* ========== 6) HEADINGS U SVAKOJ KATEGORIJI ========== */
 /* Kad kreiramo <h2> iz feeda, da bude bele boje i blagi zeleni glow */
 #news-container h2 {
-  color: #fff;
+color: #fff !important;
   text-shadow: 0 0 7px #32CD32; /* glow efekat za tekst */
   background-color: #000; /* crna pozadina */
   margin-bottom: 4px;
@@ -409,6 +409,25 @@ background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z
 }
 
 /* KATEGORIEN DRAG & DROP */
+/* U okviru kategorien-modal-content */
+.kategorien-modal-content .block-button {
+  /* Pretpostavimo da "block-button" znači "Verbergen" */
+  background-color: #32CD32; /* zelena */
+}
+.kategorien-modal-content .block-button:hover {
+  background-color: rgba(50, 205, 50, 0.8);
+}
+
+.kategorien-modal-content .unblock-button {
+  /* Pretpostavimo da "unblock-button" znači "Entsperren" */
+  background-color: #ff4444; /* crvena */
+}
+.kategorien-modal-content .unblock-button:hover {
+  background-color: rgba(255, 68, 68, 0.8);
+}
+
+
+
 #sortable-list {
   list-style: none;
   margin: 0;
@@ -461,21 +480,44 @@ background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z
 }
 
 /* QUELLEN LIST */
+.quellen-modal-content .block-button {
+  background-color: #32CD32;
+}
+.quellen-modal-content .block-button:hover {
+  background-color: rgba(50, 205, 50, 0.8);
+}
+
+.quellen-modal-content .unblock-button {
+  background-color: #ff4444;
+}
+.quellen-modal-content .unblock-button:hover {
+  background-color: rgba(255, 68, 68, 0.8);
+}
+
+
+
 .sources-list {
   margin-bottom: 1.5rem;
 }
 
+/* ========================
+   .source-item sličan .rearrange-list li
+======================== */
 .source-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.8rem 1rem; /* Usklađen padding */
-  margin: 0.5rem 0;
-  background-color: #000; /* Podrazumevana pozadina */
-  border: 1px solid var(--border-color); /* Granica */
-  border-radius: 5px; /* Zaobljeni uglovi */
-  font-size: 1rem;
-  transition: background-color 0.2s, transform 0.2s; /* Animacija za hover */
+  padding: 0.2rem 0.8rem;
+  margin-bottom: 0.2rem; /* Isto kao kategorije */
+  background-color: #000; 
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.2s;
+}
+.source-item:hover {
+  background-color: #222;
+  transform: scale(1.02);
 }
 
 /* Izvor je verbergen (zelena pozadina) */
@@ -495,31 +537,27 @@ background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z
   transform: scale(1.02); /* Blago uvećanje na hover */
 }
 
-.block-button,
-.unblock-button {
-  color: #fff; /* Beli tekst */
-  border: none;
-  padding: 0.4rem 0.8rem; /* Usklađen padding */
-  border-radius: 4px; /* Zaobljeni uglovi */
-  cursor: pointer;
-  font-size: 0.9rem; /* Veličina fonta */
-  transition: background-color 0.2s; /* Animacija za hover */
-}
-
 .block-button {
-  background-color: #ff4444; /* Crvena pozadina */
+  background-color: #32CD32;
+  color: #fff;
+  border: none;
+  padding: 0.3rem 0.8rem;
+  border-radius: 4px;
+  cursor: pointer;
 }
-
 .block-button:hover {
-  background-color: rgba(255, 68, 68, 0.8); /* Svetlija crvena na hover */
+  background-color: rgba(50,205,50,0.8);
 }
-
 .unblock-button {
-  background-color: var(--primary-color); /* Zelena pozadina */
+  background-color: #ff4444;
+  color: #fff;
+  border: none;
+  padding: 0.3rem 0.8rem;
+  border-radius: 4px;
+  cursor: pointer;
 }
-
 .unblock-button:hover {
-  background-color: rgba(50, 205, 50, 0.8); /* Svetlija zelena na hover */
+  background-color: rgba(255,68,68,0.8);
 }
 
 /* ========== 11) TUTORIAL OVERLAY ========== */
