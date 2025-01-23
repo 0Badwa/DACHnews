@@ -13,6 +13,8 @@
   <nav>
     <div class="menu">
       <button id="menu-button" class="menu-button">☰</button>
+      <!-- DODATA zvezdica pored hamburgera -->
+      <button id="favorites-button" class="menu-button favorites-button">★</button>
       <div class="dropdown" id="dropdown-menu">
         <!-- Sve prebačeno u Settings modal -->
       </div>
@@ -20,20 +22,15 @@
     <img src="src/icons/dachnewslogo.png" alt="DACH.news" />
   </nav>
 
-  <!-- Tabs container koji prati feedove, uvek fiksiran na vrhu -->
   <div class="tabs-container" role="tablist" id="tabs-container">
     <button class="tab active" data-tab="Neueste" role="tab" aria-selected="true">Neueste</button>
     <button class="tab" data-tab="Aktuell" role="tab" aria-selected="false">Aktuell</button>
     <!-- Ostale kategorije dinamički iz main.js -->
   </div>
 
-  <!-- Indikator kategorije -->
-  <div class="category-indicator">Home</div>
-
-  <!-- Kontejner za vesti (scrollable) -->
+  <div class="category-indicator">Neueste Nachrichten</div>
   <div id="news-container"></div>
 
-  <!-- Tutorial overlay -->
   <div id="tutorial-overlay" class="tutorial-overlay" style="display: none;">
     <div class="tutorial-content">
       <h2>Willkommen!</h2>
@@ -42,7 +39,6 @@
     </div>
   </div>
 
-  <!-- Settings modal (Einstellungen) -->
   <div id="settings-modal" class="modal" style="display: none;">
     <div class="rearrange-modal-content settings-modal-content" style="margin: 0 3rem;">
       <div class="modal-title" style="color: var(--primary-color); font-weight: bold; font-size: 120%;">
@@ -81,11 +77,8 @@
       <div class="modal-title" style="color: var(--primary-color); font-weight: bold; font-size: 120%;">
         Quelle verbergen
       </div>
-      <!-- DODALI SMO SEARCH ISPOD NASLOVA -->
       <input type="text" id="quellen-search" placeholder="Suchen..." class="search-input" />
-
       <div class="sources-list" id="sources-list" style="margin-top: 1rem;">
-        <!-- Dinamički spisak izvora iz main.js -->
       </div>
       <div class="modal-buttons">
         <button class="save-button" id="close-quellen-modal">Schließen</button>
@@ -100,7 +93,6 @@
         Verbergen und anordnen
       </div>
       <ul id="sortable-list" class="rearrange-list" style="margin: 1rem 0;">
-        <!-- Popunjava se dinamički iz main.js (drag & drop) -->
       </ul>
       <div class="modal-buttons">
         <button class="save-button" id="close-kategorien-modal">Schließen</button>
@@ -108,7 +100,21 @@
     </div>
   </div>
 
-  <!-- Modal za Über -->
+  <!-- NOVI: Modal za Favorites -->
+  <div id="favorites-modal" class="modal" style="display: none;">
+    <div class="rearrange-modal-content favorites-modal-content" style="margin: 0 3rem;">
+      <div class="modal-title" style="color: var(--primary-color); font-weight: bold; font-size: 120%;">
+        Meine Favoriten
+      </div>
+      <input type="text" id="favorites-search" placeholder="Suchen..." class="search-input" />
+      <div class="favorites-list" id="favorites-list" style="margin-top: 1rem;">
+      </div>
+      <div class="modal-buttons">
+        <button class="save-button" id="close-favorites-modal">Schließen</button>
+      </div>
+    </div>
+  </div>
+
   <div id="uber-modal" class="modal" style="display: none;">
     <div class="rearrange-modal-content uber-modal-content" style="margin: 0 3rem;">
       <div class="modal-title" style="color: var(--primary-color); font-weight: bold; font-size: 120%;">
@@ -126,6 +132,11 @@
   <!-- Modal za pojedinačnu vest -->
   <div id="news-modal" class="modal" style="display: none;">
     <div class="rearrange-modal-content news-modal-content">
+      <!-- Ikonice (zvezda i lupa) iznad slike, u gornjem desnom uglu -->
+      <div class="news-modal-icons">
+        <button id="news-fav-button" class="news-icon-button">★</button>
+        <button id="news-search-button" class="news-icon-button">🔍</button>
+      </div>
       <img id="news-modal-image" src="" alt="News Image" />
       <h2 id="news-modal-title"></h2>
       <p id="news-modal-description"></p>
@@ -137,7 +148,6 @@
     </div>
   </div>
 
-  <!-- Glavni JS fajl -->
   <script type="module" src="src/js/main.js"></script>
 </body>
 </html>
