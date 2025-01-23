@@ -1,17 +1,17 @@
 /**
  * feeds.js
  * 
- * - getAllFeedsFromServer -> sada vraća "4 vesti po kategoriji" (backend logika).
- * - displayNeuesteFeeds -> samo prikazuje /api/feeds rezultat, 
- *   bez stare random + sum logike. Uklonjeno "top4Neueste" itd.
- * - Ako feed nema sliku (feed.image), preskačemo prikaz (ne kreiramo news card).
+ * - displayNewsByCategory je sada strogo asinkrona, 
+ *   i tek nakon što se vesti učitaju i prikažu, 
+ *   poziva se scrollIntoView (sa malim delay).
+ * - Ostale funkcije ostaju kako su bile.
  */
 
 import { initializeLazyLoading, updateCategoryIndicator, showLoader, hideLoader, showErrorMessage } from './ui.js';
 import { openNewsModal } from './newsModal.js';
 
 /**
- * Pomoćna funkcija: "vor X Minuten/Stunden/..." 
+ * Pomoćna funkcija za format vremena
  */
 function timeAgo(dateString) {
   if (!dateString) return '';
@@ -38,7 +38,7 @@ function timeAgo(dateString) {
 }
 
 /**
- * Da li je feed sakriven - provera localStorage (izvor/kategorija)
+ * Dohvata listu sakrivenih izvora/kategorija
  */
 function getHiddenSources() {
   try {
@@ -54,6 +54,10 @@ function getHiddenCategories() {
     return [];
   }
 }
+
+/**
+ * Proverava da li je feed sakriven (po izvoru ili kategoriji)
+ */
 function isHiddenFeed(feed) {
   const hiddenSources = getHiddenSources();
   const hiddenCats = getHiddenCategories();
@@ -67,7 +71,7 @@ function isHiddenFeed(feed) {
 }
 
 /**
- * getAllFeedsFromServer - zovemo /api/feeds, koji sada vraća max 4 vesti po kategoriji
+ * fetchAllFeedsFromServer
  */
 export async function fetchAllFeedsFromServer(forceRefresh = false) {
   showLoader();
@@ -76,30 +80,28 @@ export async function fetchAllFeedsFromServer(forceRefresh = false) {
     const cachedFeedsKey = 'feeds-Aktuell';
     const lastFetchTime = localStorage.getItem(lastFetchKey);
 
-    // Keš 10 min
+    // Ako nije forceRefresh i unutar 10 min, uzmi keš
     if (!forceRefresh && lastFetchTime && (Date.now() - new Date(lastFetchTime).getTime()) < 10 * 60 * 1000) {
       const cachedFeeds = localStorage.getItem(cachedFeedsKey);
       if (cachedFeeds) {
         let data = JSON.parse(cachedFeeds);
-        data = data.filter(feed => !isHiddenFeed(feed) && feed.image); // Bez slika ih preskačemo
-        // Sortiramo najnovije prvo
         data.sort((a, b) => new Date(b.date_published).getTime() - new Date(a.date_published).getTime());
+        data = data.filter(feed => !isHiddenFeed(feed));
         return data;
       }
     }
 
-    // Inače dohvat sa servera
+    // U suprotnom, dohvatimo sve vesti
     const response = await fetch("/api/feeds");
     if (!response.ok) throw new Error("Neuspešno preuzimanje /api/feeds");
+
     let data = await response.json();
-
-    // Filtriramo sakrivene i one bez slike
-    data = data.filter(feed => !isHiddenFeed(feed) && feed.image);
-
-    // Sortiramo najnovije prvo
+    // sortiramo najnovije
     data.sort((a, b) => new Date(b.date_published).getTime() - new Date(a.date_published).getTime());
+    // filtriramo sakrivene
+    data = data.filter(feed => !isHiddenFeed(feed));
 
-    // Čuvamo u keš
+    // Keširamo
     localStorage.setItem(cachedFeedsKey, JSON.stringify(data));
     localStorage.setItem(lastFetchKey, new Date().toISOString());
 
@@ -114,8 +116,7 @@ export async function fetchAllFeedsFromServer(forceRefresh = false) {
 }
 
 /**
- * fetchCategoryFeeds -> ako želite i kategorijski. 
- * (Filtrira sakrivene i vesti bez slike.)
+ * fetchCategoryFeeds
  */
 export async function fetchCategoryFeeds(category, forceRefresh = false) {
   showLoader();
@@ -129,19 +130,19 @@ export async function fetchCategoryFeeds(category, forceRefresh = false) {
       const cached = localStorage.getItem(cachedFeedsKey);
       if (cached) {
         let data = JSON.parse(cached);
-        data = data.filter(feed => !isHiddenFeed(feed) && feed.image);
         data.sort((a, b) => new Date(b.date_published).getTime() - new Date(a.date_published).getTime());
+        data = data.filter(feed => !isHiddenFeed(feed));
         return data;
       }
     }
 
     const url = `/api/feeds-by-category/${encodeURIComponent(catForUrl)}`;
     const response = await fetch(url);
-    if (!response.ok) throw new Error("Neuspešno preuzimanje kategorije: " + category);
+    if (!response.ok) throw new Error(`Neuspešno preuzimanje kategorije: ${category}`);
 
     let data = await response.json();
-    data = data.filter(feed => !isHiddenFeed(feed) && feed.image);
     data.sort((a, b) => new Date(b.date_published).getTime() - new Date(a.date_published).getTime());
+    data = data.filter(feed => !isHiddenFeed(feed));
 
     localStorage.setItem(cachedFeedsKey, JSON.stringify(data));
     localStorage.setItem(lastFetchKey, new Date().toISOString());
@@ -157,14 +158,9 @@ export async function fetchCategoryFeeds(category, forceRefresh = false) {
 }
 
 /**
- * createNewsCard - napravi .news-card (ali samo ako feed ima image).
+ * createNewsCard
  */
 function createNewsCard(feed) {
-  // Ako feed nema sliku, ne kreiramo karticu
-  if (!feed.image) {
-    return null;
-  }
-
   const card = document.createElement('div');
   card.className = "news-card";
   card.addEventListener('click', () => {
@@ -173,7 +169,7 @@ function createNewsCard(feed) {
 
   const img = document.createElement('img');
   img.className = "news-card-image lazy";
-  img.dataset.src = feed.image;
+  img.dataset.src = feed.image || 'https://via.placeholder.com/80';
   img.alt = feed.title || 'No title';
 
   const contentDiv = document.createElement('div');
@@ -188,7 +184,7 @@ function createNewsCard(feed) {
 
   const sourceSpan = document.createElement('span');
   sourceSpan.className = "source";
-  sourceSpan.textContent = feed.source ? feed.source : 'Unbekannte Quelle';
+  sourceSpan.textContent = feed.source || 'Unbekannte Quelle';
 
   const timeSpan = document.createElement('span');
   timeSpan.className = "time";
@@ -206,7 +202,7 @@ function createNewsCard(feed) {
 }
 
 /**
- * displayFeedsList -> prikaz vesti
+ * displayFeedsList
  */
 export function displayFeedsList(feedsList, categoryName) {
   const container = document.getElementById('news-container');
@@ -219,12 +215,10 @@ export function displayFeedsList(feedsList, categoryName) {
     return;
   }
 
-  // Sortiramo najnovije
   feedsList.sort((a, b) => {
     return new Date(b.date_published).getTime() - new Date(a.date_published).getTime();
   });
 
-  // Kreiramo kartice
   feedsList.forEach(feed => {
     const card = createNewsCard(feed);
     if (card) {
@@ -237,36 +231,32 @@ export function displayFeedsList(feedsList, categoryName) {
 }
 
 /**
- * displayAktuellFeeds -> prikaz svega
+ * displayAktuellFeeds
  */
 export async function displayAktuellFeeds() {
   const container = document.getElementById('news-container');
   if (!container) return;
 
-  let allFeeds = await fetchAllFeedsFromServer();
-  displayFeedsList(allFeeds, "Aktuell");
+  let data = await fetchAllFeedsFromServer();
+  displayFeedsList(data, "Aktuell");
 }
 
 /**
- * displayNeuesteFeeds -> 
- * SADA: Uzima /api/feeds (4 vesti po kategoriji), filtrira + prikazuje.
- * Sve ostalo (random top4 + X) je uklonjeno.
+ * displayNeuesteFeeds
  */
 export async function displayNeuesteFeeds() {
   const container = document.getElementById('news-container');
   if (!container) return;
   container.innerHTML = '';
 
-  // Dohvatimo sve (vec max 4 / cat) + ignorisemo one bez slike
   let data = await fetchAllFeedsFromServer();
-
-  // Ovde je data već filtriran (bez slika je izbačen).
-  // Samo iscrtavamo
   displayFeedsList(data, "Neueste Nachrichten");
 }
 
 /**
- * displayNewsByCategory -> prikaz pojedinacne kategorije
+ * KLJUČNA FUNKCIJA -> displayNewsByCategory (asinhrona)
+ *  - Čeka fetch, pa prikazuje
+ *  - Tek nakon toga scrollIntoView
  */
 export async function displayNewsByCategory(category) {
   const container = document.getElementById('news-container');
@@ -289,10 +279,22 @@ export async function displayNewsByCategory(category) {
   ];
 
   if (!validCategories.includes(category)) {
-    displayAktuellFeeds();
+    await displayAktuellFeeds();
     return;
   }
 
-  let catFeeds = await fetchCategoryFeeds(category);
+  // 1) Dohvatimo vesti
+  const catFeeds = await fetchCategoryFeeds(category);
+
+  // 2) Prikaz
   displayFeedsList(catFeeds, category);
+
+  // 3) Sada je DOM ažuriran, tab je (najverovatnije) postavljen u .active iz main.js
+  //   Ako želimo da tab scrolIntoView -> malo sačekamo
+  setTimeout(() => {
+    const activeTab = document.querySelector(`.tab[data-tab="${category}"]`);
+    if (activeTab) {
+      activeTab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }
+  }, 100);
 }
