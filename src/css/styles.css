@@ -186,14 +186,14 @@ nav .menu button {
   margin: 0.2rem 0 0; /* Dodatni razmak između naslova i vrha kartice */  
   padding-bottom: 0.5rem; /* Dodato za sigurnost */
   font-weight: bold;
-  line-height: 1.2; /* Prilagodite ovu vrednost po potrebi */
-   max-height: calc(1.2em * 2); /* Ograničava visinu na dva reda */
+  line-height: 1.3; /* Prilagodite ovu vrednost po potrebi */
+   max-height: calc(1.3em * 2); /* Ograničava visinu na dva reda */
 }
 .news-title {
   font-size: 1rem;
   color: var(--primary-color); /* #32CD32 */
   text-decoration: none;
-  line-height: 1.2;
+  line-height: 1.3;
   font-family: 'Roboto Condensed', sans-serif; /* Dodavanje fonta */
   margin-right: 0.3rem; /* Razmak samo za naslov */
 
