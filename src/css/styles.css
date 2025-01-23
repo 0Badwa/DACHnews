@@ -353,7 +353,7 @@ background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z
   margin: 1.5rem 0.5rem 1rem 0.5rem; /* gore: 1.5rem, desno: 0.5rem, dole: 1rem, levo: 0.5rem */
   padding: 0rem 0.5rem;
   font-family: 'Roboto Condensed', sans-serif; /* cond */
-  font-size: 0.8rem;
+  font-size: 1rem; /* Beli tekst za opis */
   color: #fff; /* default white, override za .source ispod */
 }
 
