@@ -300,6 +300,7 @@ background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z
   color: #fff; /* Beli tekst */
 }
 
+
 /* ========== 9) NEWS MODAL ========== */
 /* Potpuno crna pozadina za news-modal, preko cele stranice minus 60px od vrha */
 .news-modal {
@@ -312,6 +313,8 @@ background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z
   background-color: #000 !important; /* Potpuno crna pozadina */
   z-index: 2000; /* Visok z-index da bude iznad ostalog sadržaja */
   overflow-y: auto; /* Omogući skrolovanje ako je potrebno */
+  margin: 0; /* Ukloni margine */
+  padding: 0; /* Ukloni padding */
 }
 
 /* Unutrašnji kontejner za sadržaj modala */
