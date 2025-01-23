@@ -7,6 +7,7 @@
  * - pomoćne funkcije: timeAgo, pickRandom, createNewsCard
  * 
  * Dodatno je implementirana logika:
+ *  - "Ohne Kategorie" je zamenjeno sa "Sonstiges"
  *  - Sakrivanje feedova iz određenih izvora (hiddenSources) ili kategorija (hiddenCategories),
  *    čuvano u LocalStorage (korisničke postavke). Te vesti se više ne prikazuju.
  */
@@ -412,10 +413,3 @@ export async function displayNewsByCategory(category) {
   let catFeeds = await fetchCategoryFeeds(category);
   displayFeedsList(catFeeds, category);
 }
-
-/** loadFeeds -> simuliramo klik na Neueste */
-/** function loadFeeds(defaultTab = 'Neueste') {
-/**   const tabBtn = document.querySelector(`.tab[data-tab="${defaultTab}"]`);
-/**   if (tabBtn) {
-/**     tabBtn.click();
- /**  }
