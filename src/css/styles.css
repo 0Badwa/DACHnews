@@ -379,22 +379,41 @@ img.lazy.loaded {
 
 /* KATEGORIEN DRAG & DROP */
 #sortable-list {
-  list-style: none; 
-  margin: 0; 
+  list-style: none;
+  margin: 0;
   padding: 0;
 }
+
 #sortable-list li {
-  display: flex; 
-  justify-content: space-between; 
+  display: flex;
+  justify-content: space-between;
   align-items: center;
-  padding: 0.5rem 0.8rem; 
+  padding: 0.5rem 0.8rem;
   margin-bottom: 0.5rem; /* Veći razmak između stavki */
- background-color: #000; /* Crna pozadina */
+  background-color: #000; /* Podrazumevana pozadina */
   border: 1px solid var(--border-color); /* Granica */
   border-radius: 5px; /* Zaobljeni uglovi */
   cursor: pointer;
   transition: background-color 0.2s, transform 0.2s; /* Dodata animacija za hover */
 }
+
+/* Kategorija je sakrivena (crvena pozadina) */
+#sortable-list li.hidden {
+  background-color: rgba(255, 68, 68, 0.2); /* Crvena pozadina sa providnošću */
+  border: 1px solid #ff4444; /* Crvena granica */
+}
+
+/* Kategorija je vidljiva (zelena pozadina) */
+#sortable-list li.visible {
+  background-color: rgba(50, 205, 50, 0.2); /* Zelena pozadina sa providnošću */
+  border: 1px solid var(--primary-color); /* Zelena granica */
+}
+
+#sortable-list li:hover {
+  background-color: #222; /* Tamnija pozadina na hover */
+  transform: scale(1.02); /* Blago uvećanje na hover */
+}
+
 #sortable-list li button {
   background-color: var(--primary-color); /* Zelena pozadina dugmeta */
   color: #fff; /* Beli tekst */
@@ -405,9 +424,9 @@ img.lazy.loaded {
   font-size: 0.9rem; /* Veličina fonta */
   transition: background-color 0.2s; /* Animacija za hover */
 }
-#sortable-list li:hover {
-  background-color: #222; /* Tamnija pozadina na hover */
-  transform: scale(1.02); /* Blago uvećanje na hover */
+
+#sortable-list li button:hover {
+  background-color: rgba(50, 205, 50, 0.8); /* Svetlija zelena na hover */
 }
 
 /* QUELLEN LIST */
@@ -421,11 +440,23 @@ img.lazy.loaded {
   align-items: center;
   padding: 0.8rem 1rem; /* Usklađen padding */
   margin: 0.5rem 0;
-  background-color: #000; /* Crna pozadina */
+  background-color: #000; /* Podrazumevana pozadina */
   border: 1px solid var(--border-color); /* Granica */
   border-radius: 5px; /* Zaobljeni uglovi */
   font-size: 1rem;
   transition: background-color 0.2s, transform 0.2s; /* Animacija za hover */
+}
+
+/* Izvor je sakriven (crvena pozadina) */
+.source-item.hidden {
+  background-color: rgba(255, 68, 68, 0.2); /* Crvena pozadina sa providnošću */
+  border: 1px solid #ff4444; /* Crvena granica */
+}
+
+/* Izvor je vidljiv (zelena pozadina) */
+.source-item.visible {
+  background-color: rgba(50, 205, 50, 0.2); /* Zelena pozadina sa providnošću */
+  border: 1px solid var(--primary-color); /* Zelena granica */
 }
 
 .source-item:hover {
