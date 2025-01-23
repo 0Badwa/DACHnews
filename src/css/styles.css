@@ -199,7 +199,7 @@ nav .menu button {
 }
 .news-meta {
   font-size: 0.7rem;
-  margin-top: 0rem; /* Dodaje razmak iznad meta informacija */
+  margin-top: 0.2rem; /* Dodaje razmak iznad meta informacija */
   color: var(--text-color);
 }
 .news-meta .source {
