@@ -186,6 +186,7 @@ nav .menu button {
   margin: 0 0 0; /* Uklonjen dodatni margin-bottom */
   padding-bottom: 0; /* Dodato za sigurnost */
   font-weight: bold;
+  line-height: 1.1; /* Prilagodite ovu vrednost po potrebi */
 }
 .news-title {
   font-size: 1rem;
