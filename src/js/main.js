@@ -6,25 +6,25 @@ import {
   displayNeuesteFeeds,
   displayAktuellFeeds,
   displayNewsByCategory,
-  fetchAllFeedsFromServer // da dohvatimo sve feedove za quellen
+  fetchAllFeedsFromServer
 } from './feeds.js';
 
+// Kategorije i blokirani entiteti
 let categoriesOrder = [
   "Technologie", "Gesundheit", "Sport", "Wirtschaft", "Kultur",
   "Unterhaltung", "Reisen", "Lifestyle", "Auto",
   "Welt", "Politik", "Panorama", "Sonstiges"
 ];
-
 let blockedSources = JSON.parse(localStorage.getItem('blockedSources') || '[]');
 let blockedCategories = JSON.parse(localStorage.getItem('blockedCategories') || '[]');
 
-// Dinamička promenljiva za font-size vesti (naslovi i meta)
+// Font-size news-cards
 let currentCardFontSize = localStorage.getItem('cardFontSize')
   ? parseInt(localStorage.getItem('cardFontSize'), 10)
   : 16;
 
 /**
- * Poveć/smanji font-size i osveži aktivnu kategoriju
+ * Primeni var(--card-font-size) i osveži prikaz
  */
 function applyCardFontSize() {
   document.documentElement.style.setProperty('--card-font-size', currentCardFontSize + 'px');
@@ -51,6 +51,7 @@ function applyCardFontSize() {
   }
 }
 
+// Poveć/smanji
 function increaseFontSize() {
   currentCardFontSize++;
   if (currentCardFontSize > 40) currentCardFontSize = 40;
@@ -62,9 +63,7 @@ function decreaseFontSize() {
   applyCardFontSize();
 }
 
-/**
- * Funkcije za (un)block izvora
- */
+// Izvori
 function blockSource(src) {
   if (!blockedSources.includes(src)) {
     blockedSources.push(src);
@@ -79,9 +78,7 @@ function isSourceBlocked(src) {
   return blockedSources.includes(src);
 }
 
-/**
- * Funkcije za (un)block kategorije
- */
+// Kategorije
 function blockCategory(cat) {
   if (!blockedCategories.includes(cat)) {
     blockedCategories.push(cat);
@@ -96,15 +93,11 @@ function isCategoryBlocked(cat) {
   return blockedCategories.includes(cat);
 }
 
-/**
- * buildTabs -> prikazuje sve tabove (osim Neueste, Aktuell), 
- * preskačući blokirane
- */
+// buildTabs
 function buildTabs() {
   const tabsContainer = document.getElementById('tabs-container');
   if (!tabsContainer) return;
 
-  // Uklonimo sve sem Neueste, Aktuell
   const existingTabs = tabsContainer.querySelectorAll('.tab:not([data-tab="Neueste"]):not([data-tab="Aktuell"])');
   existingTabs.forEach(t => t.remove());
 
@@ -123,9 +116,7 @@ function buildTabs() {
   });
 }
 
-/**
- * openRearrangeModal -> modal za kategorije, drag&drop + (un)block
- */
+// Kategorije modal
 function openRearrangeModal() {
   const kategorienModal = document.getElementById('kategorien-modal');
   if (!kategorienModal) return;
@@ -190,7 +181,7 @@ function closeKategorienModal() {
   loadFeeds();
 }
 
-/** Drag & drop helperi */
+// Drag & drop
 function handleDragStart(e) {
   e.dataTransfer.setData('text/plain', e.target.textContent.trim());
   e.target.style.opacity = '0.4';
@@ -219,9 +210,9 @@ function handleDrop(e) {
   draggedItem.style.opacity = '1';
 }
 
-/**
- * openQuellenModal -> prikaz svih izvora (sorteiranih abecedno)
- */
+// Quellen modal
+let allSortedSources = []; // čuva sve sortirane izvore (za search filter)
+
 async function openQuellenModal() {
   const quellenModal = document.getElementById('quellen-modal');
   if (!quellenModal) return;
@@ -231,16 +222,16 @@ async function openQuellenModal() {
   if (!sourcesListEl) return;
   sourcesListEl.innerHTML = '';
 
+  // Uzimamo sve feedove
   let allFeeds = [];
   try {
-    // Ovde NEMA slice(0,10) itd, uzimamo sve
     allFeeds = await fetchAllFeedsFromServer(false);
   } catch (err) {
     console.error("[openQuellenModal] Greška:", err);
     allFeeds = [];
   }
 
-  // Napravimo set izvora
+  // Set izvora
   const uniqueSources = new Set();
   allFeeds.forEach(feed => {
     if (feed.source) {
@@ -248,10 +239,29 @@ async function openQuellenModal() {
     }
   });
 
-  // Abecedno
-  const sortedSources = Array.from(uniqueSources).sort();
+  // Sortiramo
+  allSortedSources = Array.from(uniqueSources).sort();
 
-  sortedSources.forEach(src => {
+  // Inicijalno prikažemo sve
+  renderQuellenList(allSortedSources);
+
+  // Search bar logika
+  const searchInput = document.getElementById('quellen-search');
+  if (searchInput) {
+    searchInput.value = ''; // obrišemo prethodno
+    searchInput.removeEventListener('input', handleQuellenSearch); // za svaki slučaj, da ne dupliramo
+    searchInput.addEventListener('input', handleQuellenSearch);
+  }
+}
+
+// Funkcija za prikaz liste izvora
+function renderQuellenList(sourceArray) {
+  const sourcesListEl = document.getElementById('sources-list');
+  if (!sourcesListEl) return;
+
+  sourcesListEl.innerHTML = '';
+
+  sourceArray.forEach(src => {
     const sourceItem = document.createElement('div');
     sourceItem.className = 'source-item';
 
@@ -282,6 +292,13 @@ async function openQuellenModal() {
   });
 }
 
+// Input event za search
+function handleQuellenSearch(e) {
+  const searchTerm = e.target.value.toLowerCase();
+  const filtered = allSortedSources.filter(src => src.toLowerCase().includes(searchTerm));
+  renderQuellenList(filtered);
+}
+
 function closeQuellenModal() {
   const quellenModal = document.getElementById('quellen-modal');
   if (quellenModal) {
@@ -290,9 +307,7 @@ function closeQuellenModal() {
   loadFeeds();
 }
 
-/**
- * initSwipe -> prelazak između kategorija dodirom
- */
+// Swipe
 function initSwipe() {
   const swipeContainer = document.getElementById('news-container');
   if (!swipeContainer) return;
@@ -317,8 +332,11 @@ function initSwipe() {
     const distX = touchendX - touchstartX;
     const distY = touchendY - touchstartY;
     if (Math.abs(distX) > Math.abs(distY) && Math.abs(distX) > swipeThreshold) {
-      if (distX < 0) moveCategory(1);
-      else moveCategory(-1);
+      if (distX < 0) {
+        moveCategory(1);
+      } else {
+        moveCategory(-1);
+      }
     }
   }
 
@@ -341,12 +359,12 @@ function initSwipe() {
   function clickTab(cat) {
     const tab = document.querySelector(`.tab[data-tab="${cat}"]`);
     if (!tab) {
-      // fallback
       const neueste = document.querySelector('.tab[data-tab="Neueste"]');
       if (neueste) neueste.click();
       return;
     }
     tab.click();
+    // Nakon što smo kliknuli, pričekamo 300ms i skrolujemo na vrh
     setTimeout(() => {
       swipeContainer.scrollTop = 0;
     }, 300);
@@ -365,9 +383,7 @@ function initSwipe() {
   });
 }
 
-/**
- * loadFeeds -> simuliramo klik na "Neueste"
- */
+// loadFeeds (simulacija klika na defaultTab)
 function loadFeeds(defaultTab = 'Neueste') {
   const tabBtn = document.querySelector(`.tab[data-tab="${defaultTab}"]`);
   if (tabBtn) {
@@ -375,14 +391,13 @@ function loadFeeds(defaultTab = 'Neueste') {
   }
 }
 
-/**
- * Glavni init
- */
+// INIT
 document.addEventListener('DOMContentLoaded', () => {
   applyCardFontSize();
   buildTabs();
   initSwipe();
 
+  // Tabs event
   const tabsContainer = document.getElementById('tabs-container');
   if (tabsContainer) {
     tabsContainer.addEventListener('click', async (e) => {
