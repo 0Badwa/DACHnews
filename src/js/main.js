@@ -6,31 +6,29 @@ import {
   displayNeuesteFeeds,
   displayAktuellFeeds,
   displayNewsByCategory,
-  fetchAllFeedsFromServer
+  fetchAllFeedsFromServer // da dohvatimo sve feedove za quellen
 } from './feeds.js';
 
-// Globalne promenljive
 let categoriesOrder = [
   "Technologie", "Gesundheit", "Sport", "Wirtschaft", "Kultur",
   "Unterhaltung", "Reisen", "Lifestyle", "Auto",
   "Welt", "Politik", "Panorama", "Sonstiges"
 ];
+
 let blockedSources = JSON.parse(localStorage.getItem('blockedSources') || '[]');
 let blockedCategories = JSON.parse(localStorage.getItem('blockedCategories') || '[]');
-let favoriteIds = JSON.parse(localStorage.getItem('favoriteIds') || '[]');
 
-// Dinamička promenljiva za font-size
+// Dinamička promenljiva za font-size vesti (naslovi i meta)
 let currentCardFontSize = localStorage.getItem('cardFontSize')
   ? parseInt(localStorage.getItem('cardFontSize'), 10)
   : 16;
 
 /**
- * Funkcija koja primenjuje font-size (var(--card-font-size))
- * i osvežava prikaz aktivne kategorije.
+ * Poveć/smanji font-size i osveži aktivnu kategoriju
  */
 function applyCardFontSize() {
   document.documentElement.style.setProperty('--card-font-size', currentCardFontSize + 'px');
-  localStorage.setItem('cardFontSize', currentCardFontSize.toString());
+  localStorage.setItem('cardFontSize', currentCardFontSize);
 
   const activeTab = document.querySelector('.tab.active');
   if (!activeTab) return;
@@ -39,17 +37,20 @@ function applyCardFontSize() {
   if (!cat || !container) return;
 
   if (cat === 'Neueste') {
-    displayNeuesteFeeds().then(() => { container.scrollTop = 0; });
+    displayNeuesteFeeds().then(() => {
+      container.scrollTop = 0;
+    });
   } else if (cat === 'Aktuell') {
-    displayAktuellFeeds().then(() => { container.scrollTop = 0; });
+    displayAktuellFeeds().then(() => {
+      container.scrollTop = 0;
+    });
   } else {
-    displayNewsByCategory(cat).then(() => { container.scrollTop = 0; });
+    displayNewsByCategory(cat).then(() => {
+      container.scrollTop = 0;
+    });
   }
 }
 
-/**
- * Povećavanje i smanjivanje font-size
- */
 function increaseFontSize() {
   currentCardFontSize++;
   if (currentCardFontSize > 40) currentCardFontSize = 40;
@@ -62,7 +63,7 @@ function decreaseFontSize() {
 }
 
 /**
- * Blokiranje/deblokiranje izvora
+ * Funkcije za (un)block izvora
  */
 function blockSource(src) {
   if (!blockedSources.includes(src)) {
@@ -79,7 +80,7 @@ function isSourceBlocked(src) {
 }
 
 /**
- * Blokiranje/deblokiranje kategorije
+ * Funkcije za (un)block kategorije
  */
 function blockCategory(cat) {
   if (!blockedCategories.includes(cat)) {
@@ -96,31 +97,14 @@ function isCategoryBlocked(cat) {
 }
 
 /**
- * Favoriti (zvezdica)
- */
-function addFavorite(id) {
-  if (!favoriteIds.includes(id)) {
-    favoriteIds.push(id);
-    localStorage.setItem('favoriteIds', JSON.stringify(favoriteIds));
-  }
-}
-function removeFavorite(id) {
-  favoriteIds = favoriteIds.filter(x => x !== id);
-  localStorage.setItem('favoriteIds', JSON.stringify(favoriteIds));
-}
-function isFavorite(id) {
-  return favoriteIds.includes(id);
-}
-
-/**
- * Dinamičko kreiranje tabova (osim Neueste, Aktuell),
- * preskačemo blokirane kategorije.
+ * buildTabs -> prikazuje sve tabove (osim Neueste, Aktuell), 
+ * preskačući blokirane
  */
 function buildTabs() {
   const tabsContainer = document.getElementById('tabs-container');
   if (!tabsContainer) return;
 
-  // Uklonimo sve osim Neueste i Aktuell
+  // Uklonimo sve sem Neueste, Aktuell
   const existingTabs = tabsContainer.querySelectorAll('.tab:not([data-tab="Neueste"]):not([data-tab="Aktuell"])');
   existingTabs.forEach(t => t.remove());
 
@@ -140,9 +124,104 @@ function buildTabs() {
 }
 
 /**
- * Modal za Quellen
+ * openRearrangeModal -> modal za kategorije, drag&drop + (un)block
  */
-let allSortedSources = [];
+function openRearrangeModal() {
+  const kategorienModal = document.getElementById('kategorien-modal');
+  if (!kategorienModal) return;
+  kategorienModal.style.display = 'flex';
+
+  const ul = document.getElementById('sortable-list');
+  if (!ul) return;
+  ul.innerHTML = '';
+
+  const savedOrder = localStorage.getItem('categoriesOrder');
+  if (savedOrder) {
+    categoriesOrder = JSON.parse(savedOrder);
+  }
+
+  categoriesOrder.forEach(cat => {
+    const li = document.createElement('li');
+    li.draggable = true;
+    li.textContent = cat;
+
+    const isBlockedCat = isCategoryBlocked(cat);
+    const btn = document.createElement('button');
+    btn.className = isBlockedCat ? 'unblock-button' : 'block-button';
+    btn.textContent = isBlockedCat ? 'Entsperren' : 'Verbergen';
+
+    btn.onclick = () => {
+      if (isCategoryBlocked(cat)) {
+        unblockCategory(cat);
+        btn.className = 'block-button';
+        btn.textContent = 'Verbergen';
+      } else {
+        blockCategory(cat);
+        btn.className = 'unblock-button';
+        btn.textContent = 'Entsperren';
+      }
+    };
+
+    li.appendChild(btn);
+
+    li.addEventListener('dragstart', handleDragStart);
+    li.addEventListener('dragover', handleDragOver);
+    li.addEventListener('drop', handleDrop);
+
+    ul.appendChild(li);
+  });
+}
+
+function closeKategorienModal() {
+  const kategorienModal = document.getElementById('kategorien-modal');
+  if (kategorienModal) {
+    kategorienModal.style.display = 'none';
+  }
+
+  const ul = document.getElementById('sortable-list');
+  if (!ul) return;
+  const items = [...ul.children].map(li =>
+    li.textContent.replace('Verbergen', '').replace('Entsperren', '').trim()
+  );
+  categoriesOrder = items;
+  localStorage.setItem('categoriesOrder', JSON.stringify(categoriesOrder));
+
+  buildTabs();
+  loadFeeds();
+}
+
+/** Drag & drop helperi */
+function handleDragStart(e) {
+  e.dataTransfer.setData('text/plain', e.target.textContent.trim());
+  e.target.style.opacity = '0.4';
+}
+function handleDragOver(e) {
+  e.preventDefault();
+}
+function handleDrop(e) {
+  e.preventDefault();
+  const draggedCat = e.dataTransfer.getData('text/plain');
+  const dropTarget = e.target.closest('li');
+  if (!dropTarget) return;
+
+  const ul = dropTarget.parentNode;
+  const allItems = [...ul.children];
+  const draggedItem = allItems.find(li => li.textContent.includes(draggedCat));
+  if (!draggedItem) return;
+
+  const draggedPos = allItems.indexOf(draggedItem);
+  const dropPos = allItems.indexOf(dropTarget);
+  if (draggedPos < dropPos) {
+    ul.insertBefore(draggedItem, dropTarget.nextSibling);
+  } else {
+    ul.insertBefore(draggedItem, dropTarget);
+  }
+  draggedItem.style.opacity = '1';
+}
+
+/**
+ * openQuellenModal -> prikaz svih izvora (sorteiranih abecedno)
+ */
 async function openQuellenModal() {
   const quellenModal = document.getElementById('quellen-modal');
   if (!quellenModal) return;
@@ -154,12 +233,14 @@ async function openQuellenModal() {
 
   let allFeeds = [];
   try {
+    // Ovde NEMA slice(0,10) itd, uzimamo sve
     allFeeds = await fetchAllFeedsFromServer(false);
   } catch (err) {
-    console.error("[openQuellenModal] Error:", err);
+    console.error("[openQuellenModal] Greška:", err);
     allFeeds = [];
   }
 
+  // Napravimo set izvora
   const uniqueSources = new Set();
   allFeeds.forEach(feed => {
     if (feed.source) {
@@ -167,31 +248,10 @@ async function openQuellenModal() {
     }
   });
 
-  allSortedSources = Array.from(uniqueSources).sort();
-  renderQuellenList(allSortedSources);
+  // Abecedno
+  const sortedSources = Array.from(uniqueSources).sort();
 
-  const searchInput = document.getElementById('quellen-search');
-  if (searchInput) {
-    searchInput.value = '';
-    searchInput.removeEventListener('input', handleQuellenSearch);
-    searchInput.addEventListener('input', handleQuellenSearch);
-  }
-}
-
-function closeQuellenModal() {
-  const quellenModal = document.getElementById('quellen-modal');
-  if (quellenModal) {
-    quellenModal.style.display = 'none';
-  }
-  // if we want -> loadFeeds();
-}
-
-function renderQuellenList(sourceArray) {
-  const sourcesListEl = document.getElementById('sources-list');
-  if (!sourcesListEl) return;
-  sourcesListEl.innerHTML = '';
-
-  sourceArray.forEach(src => {
+  sortedSources.forEach(src => {
     const sourceItem = document.createElement('div');
     sourceItem.className = 'source-item';
 
@@ -222,107 +282,16 @@ function renderQuellenList(sourceArray) {
   });
 }
 
-function handleQuellenSearch(e) {
-  const searchTerm = e.target.value.toLowerCase();
-  const filtered = allSortedSources.filter(s => s.toLowerCase().includes(searchTerm));
-  renderQuellenList(filtered);
-}
-
-/**
- * Modal za Kategorien (drag & drop)
- */
-function openRearrangeModal() {
-  const kategorienModal = document.getElementById('kategorien-modal');
-  if (!kategorienModal) return;
-  kategorienModal.style.display = 'flex';
-
-  const ul = document.getElementById('sortable-list');
-  if (!ul) return;
-  ul.innerHTML = '';
-
-  const savedOrder = localStorage.getItem('categoriesOrder');
-  if (savedOrder) {
-    categoriesOrder = JSON.parse(savedOrder);
+function closeQuellenModal() {
+  const quellenModal = document.getElementById('quellen-modal');
+  if (quellenModal) {
+    quellenModal.style.display = 'none';
   }
-
-  categoriesOrder.forEach(cat => {
-    const li = document.createElement('li');
-    li.draggable = true;
-    li.textContent = cat;
-
-    const btn = document.createElement('button');
-    btn.textContent = isCategoryBlocked(cat) ? 'Entsperren' : 'Verbergen';
-    btn.className = isCategoryBlocked(cat) ? 'unblock-button' : 'block-button';
-
-    btn.onclick = () => {
-      if (isCategoryBlocked(cat)) {
-        unblockCategory(cat);
-        btn.textContent = 'Verbergen';
-        btn.className = 'block-button';
-      } else {
-        blockCategory(cat);
-        btn.textContent = 'Entsperren';
-        btn.className = 'unblock-button';
-      }
-    };
-
-    li.appendChild(btn);
-
-    li.addEventListener('dragstart', handleDragStart);
-    li.addEventListener('dragover', handleDragOver);
-    li.addEventListener('drop', handleDrop);
-
-    ul.appendChild(li);
-  });
-}
-
-function closeKategorienModal() {
-  const kategorienModal = document.getElementById('kategorien-modal');
-  if (kategorienModal) {
-    kategorienModal.style.display = 'none';
-  }
-  const ul = document.getElementById('sortable-list');
-  if (!ul) return;
-  const items = [...ul.children].map(li =>
-    li.textContent.replace('Verbergen', '').replace('Entsperren', '').trim()
-  );
-  categoriesOrder = items;
-  localStorage.setItem('categoriesOrder', JSON.stringify(categoriesOrder));
-
-  buildTabs();
   loadFeeds();
 }
 
-function handleDragStart(e) {
-  e.dataTransfer.setData('text/plain', e.target.textContent.trim());
-  e.target.style.opacity = '0.4';
-}
-function handleDragOver(e) {
-  e.preventDefault();
-}
-function handleDrop(e) {
-  e.preventDefault();
-  const draggedCat = e.dataTransfer.getData('text/plain');
-  const dropTarget = e.target.closest('li');
-  if (!dropTarget) return;
-
-  const ul = dropTarget.parentNode;
-  const allItems = [...ul.children];
-  const draggedItem = allItems.find(li => li.textContent.includes(draggedCat));
-  if (!draggedItem) return;
-
-  const draggedPos = allItems.indexOf(draggedItem);
-  const dropPos = allItems.indexOf(dropTarget);
-  if (draggedPos < dropPos) {
-    ul.insertBefore(draggedItem, dropTarget.nextSibling);
-  } else {
-    ul.insertBefore(draggedItem, dropTarget);
-  }
-  draggedItem.style.opacity = '1';
-}
-
 /**
- * Swipe
+ * initSwipe -> prelazak između kategorija dodirom
  */
 function initSwipe() {
   const swipeContainer = document.getElementById('news-container');
@@ -344,17 +313,21 @@ function initSwipe() {
     return arr;
   }
 
-  async function showNextCategory() {
-    await moveCategory(1);
-  }
-  async function showPreviousCategory() {
-    await moveCategory(-1);
+  function handleGesture() {
+    const distX = touchendX - touchstartX;
+    const distY = touchendY - touchstartY;
+    if (Math.abs(distX) > Math.abs(distY) && Math.abs(distX) > swipeThreshold) {
+      if (distX < 0) moveCategory(1);
+      else moveCategory(-1);
+    }
   }
 
-  async function moveCategory(dir) {
-    const cats = getAllSwipeCategories();
+  function moveCategory(dir) {
     const activeTab = document.querySelector('.tab.active');
-    let currentCat = activeTab ? activeTab.getAttribute('data-tab') : "Neueste";
+    if (!activeTab) return;
+    const currentCat = activeTab.getAttribute('data-tab');
+
+    const cats = getAllSwipeCategories();
     let idx = cats.indexOf(currentCat);
     if (idx < 0) idx = 0;
 
@@ -362,45 +335,21 @@ function initSwipe() {
     if (idx < 0) idx = 0;
     if (idx >= cats.length) idx = cats.length - 1;
 
-    const newCat = cats[idx];
-    await clickTab(newCat);
+    clickTab(cats[idx]);
   }
 
-  async function clickTab(category) {
-    const tab = document.querySelector(`.tab[data-tab="${category}"]`);
-    if (!tab) return;
-
-    const allTabs = document.querySelectorAll('.tab');
-    allTabs.forEach(t => {
-      t.classList.remove('active');
-      t.setAttribute('aria-selected','false');
-    });
-    tab.classList.add('active');
-    tab.setAttribute('aria-selected','true');
-
-    const container = document.getElementById('news-container');
-    if (!container) return;
-
-    if (category === 'Neueste') {
-      await displayNeuesteFeeds();
-    } else if (category === 'Aktuell') {
-      await displayAktuellFeeds();
-    } else {
-      await displayNewsByCategory(category);
+  function clickTab(cat) {
+    const tab = document.querySelector(`.tab[data-tab="${cat}"]`);
+    if (!tab) {
+      // fallback
+      const neueste = document.querySelector('.tab[data-tab="Neueste"]');
+      if (neueste) neueste.click();
+      return;
     }
-    container.scrollTop = 0;
-  }
-
-  function handleGesture() {
-    const distX = touchendX - touchstartX;
-    const distY = touchendY - touchstartY;
-    if (Math.abs(distX) > Math.abs(distY) && Math.abs(distX) > swipeThreshold) {
-      if (distX < 0) {
-        showNextCategory();
-      } else {
-        showPreviousCategory();
-      }
-    }
+    tab.click();
+    setTimeout(() => {
+      swipeContainer.scrollTop = 0;
+    }, 300);
   }
 
   swipeContainer.addEventListener('touchstart', e => {
@@ -417,7 +366,7 @@ function initSwipe() {
 }
 
 /**
- * loadFeeds -> simuliramo klik na “Neueste”
+ * loadFeeds -> simuliramo klik na "Neueste"
  */
 function loadFeeds(defaultTab = 'Neueste') {
   const tabBtn = document.querySelector(`.tab[data-tab="${defaultTab}"]`);
@@ -490,7 +439,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   const closeQuellenBtn = document.getElementById('close-quellen-modal');
   if (closeQuellenBtn) {
-    closeQuellenBtn.onclick = closeQuellenModal; // OVO SAD POSTOJI
+    closeQuellenBtn.onclick = closeQuellenModal;
   }
 
   // Kategorien
@@ -513,9 +462,6 @@ document.addEventListener('DOMContentLoaded', () => {
   if (incBtn) incBtn.onclick = increaseFontSize;
   const decBtn = document.getElementById('font-decrease');
   if (decBtn) decBtn.onclick = decreaseFontSize;
-
-});
-
 
   // Über
   const uberButton = document.getElementById('uber-button');
