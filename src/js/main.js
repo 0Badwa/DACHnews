@@ -8,21 +8,24 @@ import {
   displayNewsByCategory
 } from './feeds.js';
 
+// Glavni redosled kategorija
 let categoriesOrder = [
   "Technologie", "Gesundheit", "Sport", "Wirtschaft", "Kultur",
   "Unterhaltung", "Reisen", "Lifestyle", "Auto",
   "Welt", "Politik", "Panorama", "Sonstiges"
 ];
+
+// Učitavamo iz localStorage postojeće blokirane izvore i kategorije
 let blockedSources = JSON.parse(localStorage.getItem('blockedSources') || '[]');
 let blockedCategories = JSON.parse(localStorage.getItem('blockedCategories') || '[]');
 
-// Promenljiva za font-size isključivo news-cards
+// Dinamička promenljiva za font-size (za news-cards)
 let currentCardFontSize = localStorage.getItem('cardFontSize')
   ? parseInt(localStorage.getItem('cardFontSize'), 10)
   : 16;
 
 /**
- * Primeni var(--card-font-size) i reload aktivni feed
+ * Funkcija: Postavlja var(--card-font-size) i osvežava aktivni feed.
  */
 function applyCardFontSize() {
   document.documentElement.style.setProperty('--card-font-size', currentCardFontSize + 'px');
@@ -50,7 +53,7 @@ function applyCardFontSize() {
 }
 
 /**
- * Blokiranje/deblokiranje izvora
+ * Funkcije za blokiranje/deblokiranje izvora.
  */
 function blockSource(src) {
   if (!blockedSources.includes(src)) {
@@ -67,7 +70,7 @@ function isSourceBlocked(src) {
 }
 
 /**
- * Blokiranje/deblokiranje kategorije
+ * Funkcije za blokiranje/deblokiranje kategorija.
  */
 function blockCategory(cat) {
   if (!blockedCategories.includes(cat)) {
@@ -84,22 +87,23 @@ function isCategoryBlocked(cat) {
 }
 
 /**
- * Dinamičko kreiranje tabova (sem Neueste, Aktuell),
- * preskačemo blokirane kategorije.
+ * Dinamičko kreiranje tabova (preskačemo blokirane kategorije).
  */
 function buildTabs() {
   const tabsContainer = document.getElementById('tabs-container');
   if (!tabsContainer) return;
 
-  // Brišemo sve osim Neueste, Aktuell
+  // Uklonimo sve osim "Neueste" i "Aktuell"
   const existingTabs = tabsContainer.querySelectorAll('.tab:not([data-tab="Neueste"]):not([data-tab="Aktuell"])');
   existingTabs.forEach(t => t.remove());
 
+  // Ako postoji sačuvani redosled, koristimo ga
   const savedOrder = localStorage.getItem('categoriesOrder');
   if (savedOrder) {
     categoriesOrder = JSON.parse(savedOrder);
   }
 
+  // Kreiramo tab za svaku kategoriju (ako nije blokirana)
   categoriesOrder.forEach(cat => {
     if (isCategoryBlocked(cat)) return;
     const btn = document.createElement('button');
@@ -111,7 +115,7 @@ function buildTabs() {
 }
 
 /**
- * Funkcije za Drag & Drop rearrange kategorija
+ * Drag & Drop za kategorije (openRearrangeModal).
  */
 function openRearrangeModal() {
   const kategorienModal = document.getElementById('kategorien-modal');
@@ -132,32 +136,23 @@ function openRearrangeModal() {
     li.draggable = true;
     li.textContent = cat;
 
+    const isBlockedCat = isCategoryBlocked(cat);
     const btn = document.createElement('button');
-    btn.textContent = isCategoryBlocked(cat) ? 'Entsperren' : 'Verbergen';
+    // Ako je blokirana -> red (unblock), inače -> green (block)
+    btn.className = isBlockedCat ? 'unblock-button' : 'block-button';
+    btn.textContent = isBlockedCat ? 'Entsperren' : 'Verbergen';
+
     btn.onclick = () => {
       if (isCategoryBlocked(cat)) {
+        // prelazimo na "Verbergen" (zelena)
         unblockCategory(cat);
+        btn.className = 'block-button';
         btn.textContent = 'Verbergen';
       } else {
+        // prelazimo na "Entsperren" (crvena)
         blockCategory(cat);
-   // NOVI KOD (oko linije 141, u openRearrangeModal funkciji):
-btn.className = isCategoryBlocked(cat) ? 'unblock-button' : 'block-button';
-btn.textContent = isCategoryBlocked(cat) ? 'Entsperren' : 'Verbergen';
-
-btn.onclick = () => {
-  if (isCategoryBlocked(cat)) {
-    unblockCategory(cat);
-    // Sada prelazimo na "Verbergen" (zelena)
-    btn.className = 'block-button';
-    btn.textContent = 'Verbergen';
-  } else {
-    blockCategory(cat);
-    // Sada prelazimo na "Entsperren" (crvena)
-    btn.className = 'unblock-button';
-    btn.textContent = 'Entsperren';
-  }
-};
-
+        btn.className = 'unblock-button';
+        btn.textContent = 'Entsperren';
       }
     };
 
@@ -171,6 +166,9 @@ btn.onclick = () => {
   });
 }
 
+/**
+ * Zatvaranje kategorija modala i čuvanje novog redosleda.
+ */
 function closeKategorienModal() {
   const kategorienModal = document.getElementById('kategorien-modal');
   if (kategorienModal) {
@@ -179,8 +177,12 @@ function closeKategorienModal() {
 
   const ul = document.getElementById('sortable-list');
   if (!ul) return;
+  // Uzimamo nazive kategorija (bez teksta 'Verbergen'/'Entsperren')
   const items = [...ul.children].map(li =>
-    li.textContent.split('Verbergen')[0].split('Entsperren')[0].trim()
+    li.textContent
+      .replace('Verbergen', '')
+      .replace('Entsperren', '')
+      .trim()
   );
   categoriesOrder = items;
   localStorage.setItem('categoriesOrder', JSON.stringify(categoriesOrder));
@@ -189,6 +191,7 @@ function closeKategorienModal() {
   loadFeeds();
 }
 
+/** Drag & drop pomoćne funkcije */
 function handleDragStart(e) {
   e.dataTransfer.setData('text/plain', e.target.textContent.trim());
   e.target.style.opacity = '0.4';
@@ -218,9 +221,12 @@ function handleDrop(e) {
 }
 
 /**
- * Modal za Quellen
+ * Modal za Quellen (otvaranje).
+ * Sada dinamički dobijamo sve izvore iz feeda -> automatski se pojave i novi.
  */
-function openQuellenModal() {
+import { fetchAllFeedsFromServer } from './feeds.js'; // Ne zaboravite da imate ovu import na vrhu ili ovde
+
+async function openQuellenModal() {
   const quellenModal = document.getElementById('quellen-modal');
   if (!quellenModal) return;
   quellenModal.style.display = 'flex';
@@ -229,31 +235,51 @@ function openQuellenModal() {
   if (!sourcesListEl) return;
   sourcesListEl.innerHTML = '';
 
-  const newsSources = ['Bild', 'Zeit', 'Blick', 'Heise', 'Spiegel', 'Falter'];
-  newsSources.forEach(src => {
+  // Dinamički uzmemo sve feedove pa izvučemo source
+  let allFeeds = [];
+  try {
+    allFeeds = await fetchAllFeedsFromServer(false);
+  } catch (err) {
+    console.error("[openQuellenModal] Greška pri dohvatu feedova:", err);
+  }
+
+  // Napravimo set unikatnih izvora
+  const uniqueSources = new Set();
+  allFeeds.forEach(feed => {
+    if (feed.source) {
+      uniqueSources.add(feed.source);
+    }
+  });
+
+  // Sortiramo i za svaki kreiramo box
+  const sortedSources = Array.from(uniqueSources).sort();
+
+  sortedSources.forEach(src => {
     const sourceItem = document.createElement('div');
     sourceItem.className = 'source-item';
 
     const spanName = document.createElement('span');
     spanName.textContent = src;
 
-    // STARI KOD (otprilike line 220):
-const isBlocked = isSourceBlocked(src);
-blockBtn.className = isBlocked ? 'unblock-button' : 'block-button';
-blockBtn.textContent = isBlocked ? 'Entsperren' : 'Verbergen';
+    // Proveravamo da li je blokiran
+    const isBlocked = isSourceBlocked(src);
+    const blockBtn = document.createElement('button');
+    blockBtn.className = isBlocked ? 'unblock-button' : 'block-button';
+    blockBtn.textContent = isBlocked ? 'Entsperren' : 'Verbergen';
 
-blockBtn.onclick = () => {
-  if (isSourceBlocked(src)) {
-    unblockSource(src);
-    blockBtn.className = 'block-button';
-    blockBtn.textContent = 'Verbergen';
-  } else {
-    blockSource(src);
-    blockBtn.className = 'unblock-button';
-    blockBtn.textContent = 'Entsperren';
-  }
-};
-
+    blockBtn.onclick = () => {
+      if (isSourceBlocked(src)) {
+        unblockSource(src);
+        blockBtn.className = 'block-button';
+        blockBtn.textContent = 'Verbergen';
+      } else {
+        blockSource(src);
+        blockBtn.className = 'unblock-button';
+        blockBtn.textContent = 'Entsperren';
+      }
+      // Ponovo učitamo feed
+      loadFeeds();
+    };
 
     sourceItem.appendChild(spanName);
     sourceItem.appendChild(blockBtn);
@@ -261,6 +287,9 @@ blockBtn.onclick = () => {
   });
 }
 
+/**
+ * Zatvaranje Quellen modala
+ */
 function closeQuellenModal() {
   const quellenModal = document.getElementById('quellen-modal');
   if (quellenModal) {
@@ -269,7 +298,9 @@ function closeQuellenModal() {
   loadFeeds();
 }
 
-/** initSwipe */
+/**
+ * Swipe levo-desno za promenu kategorija
+ */
 function initSwipe() {
   const swipeContainer = document.getElementById('news-container');
   if (!swipeContainer) return;
@@ -318,6 +349,7 @@ function initSwipe() {
   function clickTab(cat) {
     const tab = document.querySelector(`.tab[data-tab="${cat}"]`);
     if (!tab) {
+      // fallback
       const neueste = document.querySelector('.tab[data-tab="Neueste"]');
       if (neueste) neueste.click();
       return;
@@ -341,7 +373,9 @@ function initSwipe() {
   });
 }
 
-/** loadFeeds -> simuliramo klik na Neueste */
+/**
+ * Funkcija loadFeeds -> simuliramo klik na zadati tab, default "Neueste".
+ */
 function loadFeeds(defaultTab = 'Neueste') {
   const tabBtn = document.querySelector(`.tab[data-tab="${defaultTab}"]`);
   if (tabBtn) {
@@ -349,7 +383,9 @@ function loadFeeds(defaultTab = 'Neueste') {
   }
 }
 
-/** Poveć/smanji font-size */
+/**
+ * Povećavanje / smanjenje veličine fonta
+ */
 function increaseFontSize() {
   currentCardFontSize++;
   if (currentCardFontSize > 40) currentCardFontSize = 40;
@@ -361,18 +397,27 @@ function decreaseFontSize() {
   applyCardFontSize();
 }
 
-/** Glavni init */
+/**
+ * Glavni init
+ */
 document.addEventListener('DOMContentLoaded', () => {
+  // Primena font-size
   applyCardFontSize();
+
+  // Kreiramo tabove
   buildTabs();
+
+  // Inicijalizujemo swipe
   initSwipe();
 
+  // Klik na tab -> prikaz feeda
   const tabsContainer = document.getElementById('tabs-container');
   if (tabsContainer) {
     tabsContainer.addEventListener('click', async (e) => {
       const tab = e.target.closest('.tab');
       if (!tab) return;
 
+      // Skidamo 'active' sa drugih tabova
       const allTabs = document.querySelectorAll('.tab');
       allTabs.forEach(t => {
         t.classList.remove('active');
@@ -385,6 +430,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const container = document.getElementById('news-container');
       if (!container) return;
 
+      // Prikaz feeda u zavisnosti od kategorije
       if (cat === 'Neueste') {
         await displayNeuesteFeeds();
       } else if (cat === 'Aktuell') {
@@ -396,9 +442,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Pokrećemo prikaz "Neueste"
   loadFeeds();
 
-  // Settings
+  // Settings (Einstellungen) modal
   const menuButton = document.getElementById('menu-button');
   const settingsModal = document.getElementById('settings-modal');
   const closeSettingsBtn = document.getElementById('close-settings');
@@ -413,7 +460,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
-  // Quellen
+  // Quellen (Izvori)
   const quellenButton = document.getElementById('quellen-button');
   if (quellenButton) {
     quellenButton.onclick = () => {
@@ -441,13 +488,13 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
-  // Schriftgröße
+  // Podesavanje font size
   const incBtn = document.getElementById('font-increase');
   if (incBtn) incBtn.onclick = increaseFontSize;
   const decBtn = document.getElementById('font-decrease');
   if (decBtn) decBtn.onclick = decreaseFontSize;
 
-  // Über
+  // Über modal
   const uberButton = document.getElementById('uber-button');
   const uberModal = document.getElementById('uber-modal');
   const closeUberBtn = document.getElementById('close-uber-modal');
@@ -463,7 +510,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
-  // Tutorial
+  // Tutorial overlay
   const closeTutorialBtn = document.getElementById('close-tutorial');
   if (closeTutorialBtn) {
     closeTutorialBtn.onclick = () => {
