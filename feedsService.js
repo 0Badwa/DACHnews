@@ -81,7 +81,7 @@ async function sendBatchToGPT(feedBatch) {
 - Unterhaltung
 - Welt
 
-Ako je vest o Donaldu Trampu, stavi je u 'Welt'. Vrati isključivo JSON niz oblika [{ "id": "...", "category": "..." }].`
+Pri kategorizaciji, obavezno vodi računa o specifičnostima tih zemalja. Ako vest sadrži informacije koje se jasno odnose na neku od gore navedenih kategorija, postavi je u odgovarajuću. Ako je vest o Donaldu Trampu, stavi je u kategoriju Welt. Ako je vest o saobraćajnim nezgodama, stavi je u kategoriju Panorama, a ne u Auto. Molim te vrati isključivo JSON niz gde je svaki element: { "id": "...", "category": "..." }`
       },
       {
         role: "user",
