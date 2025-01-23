@@ -1,15 +1,17 @@
 /**
  * feeds.js
- *
- * Ovde smo uklonili sva ograničenja (slice) da bi se prikazale SVE vesti i samim tim SVI izvori.
- * Sortiranje po datumu (od najnovijih ka starijima) ostaje, ali više ne "sečemo" na 50 rezultata.
+ * 
+ * - getAllFeedsFromServer -> sada vraća "4 vesti po kategoriji" (backend logika).
+ * - displayNeuesteFeeds -> samo prikazuje /api/feeds rezultat, 
+ *   bez stare random + sum logike. Uklonjeno "top4Neueste" itd.
+ * - Ako feed nema sliku (feed.image), preskačemo prikaz (ne kreiramo news card).
  */
 
 import { initializeLazyLoading, updateCategoryIndicator, showLoader, hideLoader, showErrorMessage } from './ui.js';
 import { openNewsModal } from './newsModal.js';
 
 /**
- * timeAgo format "vor X Minuten" itd.
+ * Pomoćna funkcija: "vor X Minuten/Stunden/..." 
  */
 function timeAgo(dateString) {
   if (!dateString) return '';
@@ -35,6 +37,9 @@ function timeAgo(dateString) {
   return `gerade eben`;
 }
 
+/**
+ * Da li je feed sakriven - provera localStorage (izvor/kategorija)
+ */
 function getHiddenSources() {
   try {
     return JSON.parse(localStorage.getItem('hiddenSources') || '[]');
@@ -42,7 +47,6 @@ function getHiddenSources() {
     return [];
   }
 }
-
 function getHiddenCategories() {
   try {
     return JSON.parse(localStorage.getItem('hiddenCategories') || '[]');
@@ -50,14 +54,11 @@ function getHiddenCategories() {
     return [];
   }
 }
-
-/**
- * Provera da li je feed sakriven zbog izvora/kategorije.
- * "Ohne Kategorie" tretiramo kao "Sonstiges".
- */
 function isHiddenFeed(feed) {
   const hiddenSources = getHiddenSources();
   const hiddenCats = getHiddenCategories();
+
+  // "Ohne Kategorie" -> "Sonstiges"
   const cat = (feed.category === "Ohne Kategorie") ? "Sonstiges" : feed.category;
 
   if (hiddenCats.includes(cat)) return true;
@@ -66,7 +67,7 @@ function isHiddenFeed(feed) {
 }
 
 /**
- * fetchAllFeedsFromServer - uklonili smo slice(0,50).
+ * getAllFeedsFromServer - zovemo /api/feeds, koji sada vraća max 4 vesti po kategoriji
  */
 export async function fetchAllFeedsFromServer(forceRefresh = false) {
   showLoader();
@@ -75,28 +76,34 @@ export async function fetchAllFeedsFromServer(forceRefresh = false) {
     const cachedFeedsKey = 'feeds-Aktuell';
     const lastFetchTime = localStorage.getItem(lastFetchKey);
 
-    // Keš 10 minuta
+    // Keš 10 min
     if (!forceRefresh && lastFetchTime && (Date.now() - new Date(lastFetchTime).getTime()) < 10 * 60 * 1000) {
       const cachedFeeds = localStorage.getItem(cachedFeedsKey);
       if (cachedFeeds) {
         let data = JSON.parse(cachedFeeds);
+        data = data.filter(feed => !isHiddenFeed(feed) && feed.image); // Bez slika ih preskačemo
+        // Sortiramo najnovije prvo
         data.sort((a, b) => new Date(b.date_published).getTime() - new Date(a.date_published).getTime());
-        data = data.filter(feed => !isHiddenFeed(feed));
-        return data; // više ne sečemo
+        return data;
       }
     }
 
+    // Inače dohvat sa servera
     const response = await fetch("/api/feeds");
     if (!response.ok) throw new Error("Neuspešno preuzimanje /api/feeds");
-
     let data = await response.json();
-    data.sort((a, b) => new Date(b.date_published).getTime() - new Date(a.date_published).getTime());
-    data = data.filter(feed => !isHiddenFeed(feed));
 
+    // Filtriramo sakrivene i one bez slike
+    data = data.filter(feed => !isHiddenFeed(feed) && feed.image);
+
+    // Sortiramo najnovije prvo
+    data.sort((a, b) => new Date(b.date_published).getTime() - new Date(a.date_published).getTime());
+
+    // Čuvamo u keš
     localStorage.setItem(cachedFeedsKey, JSON.stringify(data));
     localStorage.setItem(lastFetchKey, new Date().toISOString());
 
-    return data; // vraćamo sve, bez slice
+    return data;
   } catch (error) {
     console.error(error);
     showErrorMessage("Fehler: /api/feeds konnte nicht geladen werden.");
@@ -107,7 +114,8 @@ export async function fetchAllFeedsFromServer(forceRefresh = false) {
 }
 
 /**
- * fetchCategoryFeeds - više ne sečemo na 50.
+ * fetchCategoryFeeds -> ako želite i kategorijski. 
+ * (Filtrira sakrivene i vesti bez slike.)
  */
 export async function fetchCategoryFeeds(category, forceRefresh = false) {
   showLoader();
@@ -121,8 +129,8 @@ export async function fetchCategoryFeeds(category, forceRefresh = false) {
       const cached = localStorage.getItem(cachedFeedsKey);
       if (cached) {
         let data = JSON.parse(cached);
+        data = data.filter(feed => !isHiddenFeed(feed) && feed.image);
         data.sort((a, b) => new Date(b.date_published).getTime() - new Date(a.date_published).getTime());
-        data = data.filter(feed => !isHiddenFeed(feed));
         return data;
       }
     }
@@ -132,8 +140,8 @@ export async function fetchCategoryFeeds(category, forceRefresh = false) {
     if (!response.ok) throw new Error("Neuspešno preuzimanje kategorije: " + category);
 
     let data = await response.json();
+    data = data.filter(feed => !isHiddenFeed(feed) && feed.image);
     data.sort((a, b) => new Date(b.date_published).getTime() - new Date(a.date_published).getTime());
-    data = data.filter(feed => !isHiddenFeed(feed));
 
     localStorage.setItem(cachedFeedsKey, JSON.stringify(data));
     localStorage.setItem(lastFetchKey, new Date().toISOString());
@@ -149,10 +157,14 @@ export async function fetchCategoryFeeds(category, forceRefresh = false) {
 }
 
 /**
- * Kreira jednu "news card".
- * font-size se dobija iz var(--card-font-size) (vidi main.js).
+ * createNewsCard - napravi .news-card (ali samo ako feed ima image).
  */
 function createNewsCard(feed) {
+  // Ako feed nema sliku, ne kreiramo karticu
+  if (!feed.image) {
+    return null;
+  }
+
   const card = document.createElement('div');
   card.className = "news-card";
   card.addEventListener('click', () => {
@@ -161,7 +173,7 @@ function createNewsCard(feed) {
 
   const img = document.createElement('img');
   img.className = "news-card-image lazy";
-  img.dataset.src = feed.image || 'https://via.placeholder.com/80';
+  img.dataset.src = feed.image;
   img.alt = feed.title || 'No title';
 
   const contentDiv = document.createElement('div');
@@ -194,7 +206,7 @@ function createNewsCard(feed) {
 }
 
 /**
- * Prikazuje listu vesti.
+ * displayFeedsList -> prikaz vesti
  */
 export function displayFeedsList(feedsList, categoryName) {
   const container = document.getElementById('news-container');
@@ -202,19 +214,22 @@ export function displayFeedsList(feedsList, categoryName) {
 
   container.innerHTML = '';
   if (!feedsList || feedsList.length === 0) {
-    container.innerHTML = `<p>Nema vesti za kategoriju: ${categoryName}</p>`;
+    container.innerHTML = `<p>Keine Nachrichten für: ${categoryName}</p>`;
     updateCategoryIndicator(categoryName);
     return;
   }
 
-  // Sortiramo najnovije na vrh
+  // Sortiramo najnovije
   feedsList.sort((a, b) => {
     return new Date(b.date_published).getTime() - new Date(a.date_published).getTime();
   });
 
+  // Kreiramo kartice
   feedsList.forEach(feed => {
     const card = createNewsCard(feed);
-    container.appendChild(card);
+    if (card) {
+      container.appendChild(card);
+    }
   });
 
   updateCategoryIndicator(categoryName);
@@ -222,7 +237,7 @@ export function displayFeedsList(feedsList, categoryName) {
 }
 
 /**
- * "Aktuell" -> sve vesti.
+ * displayAktuellFeeds -> prikaz svega
  */
 export async function displayAktuellFeeds() {
   const container = document.getElementById('news-container');
@@ -233,103 +248,25 @@ export async function displayAktuellFeeds() {
 }
 
 /**
- * pickRandom
- */
-function pickRandom(array, count) {
-  if (array.length <= count) return array;
-  const shuffled = array.sort(() => 0.5 - Math.random());
-  return shuffled.slice(0, count);
-}
-
-/**
- * "Neueste" -> 4 nasumične iz poslednjih X sati, + 4 iz svake kategorije
+ * displayNeuesteFeeds -> 
+ * SADA: Uzima /api/feeds (4 vesti po kategoriji), filtrira + prikazuje.
+ * Sve ostalo (random top4 + X) je uklonjeno.
  */
 export async function displayNeuesteFeeds() {
   const container = document.getElementById('news-container');
   if (!container) return;
   container.innerHTML = '';
 
-  let allFeeds = await fetchAllFeedsFromServer();
-  const now = Date.now();
+  // Dohvatimo sve (vec max 4 / cat) + ignorisemo one bez slike
+  let data = await fetchAllFeedsFromServer();
 
-  let filtered = allFeeds.filter(feed => {
-    if (!feed.date_published) return false;
-    return (now - new Date(feed.date_published).getTime()) <= (2 * 60 * 60 * 1000);
-  });
-  if (filtered.length < 4) {
-    filtered = allFeeds.filter(feed => {
-      if (!feed.date_published) return false;
-      return (now - new Date(feed.date_published).getTime()) <= (4 * 60 * 60 * 1000);
-    });
-  }
-  if (filtered.length < 4) {
-    filtered = allFeeds.filter(feed => {
-      if (!feed.date_published) return false;
-      return (now - new Date(feed.date_published).getTime()) <= (24 * 60 * 60 * 1000);
-    });
-  }
-
-  const top4Neueste = pickRandom(filtered, 4);
-  top4Neueste.sort((a, b) => new Date(b.date_published).getTime() - new Date(a.date_published).getTime());
-
-  top4Neueste.forEach(feed => {
-    const card = createNewsCard(feed);
-    container.appendChild(card);
-  });
-
-  // Ostale kategorije
-  const categories = [
-    "Technologie",
-    "Gesundheit",
-    "Sport",
-    "Wirtschaft",
-    "Kultur",
-    "Auto",
-    "Reisen",
-    "Lifestyle",
-    "Panorama",
-    "Politik",
-    "Unterhaltung",
-    "Welt",
-    "Sonstiges"
-  ];
-
-  const fetchPromises = categories.map(async (cat) => {
-    let catFeeds = await fetchCategoryFeeds(cat);
-    return { cat, feeds: catFeeds };
-  });
-
-  const results = await Promise.all(fetchPromises);
-
-  results.forEach(({ cat, feeds }) => {
-    if (!feeds || feeds.length === 0) return;
-
-    feeds.sort((a, b) => new Date(b.date_published).getTime() - new Date(a.date_published).getTime());
-    const top4 = feeds.slice(0, 4);
-
-    const heading = document.createElement('h2');
-    heading.textContent = cat;
-    heading.style.backgroundColor = "#000";
-    heading.style.color = "#fff"; // ili var(--text-color)
-    heading.style.padding = "4px";
-    heading.style.marginTop = "0.4rem";
-    heading.style.marginBottom = "4px";
-    heading.style.fontSize = "1.1rem";
-    heading.style.textAlign = "center";
-    container.appendChild(heading);
-
-    top4.forEach(feed => {
-      const card = createNewsCard(feed);
-      container.appendChild(card);
-    });
-  });
-
-  updateCategoryIndicator("Neueste Nachrichten");
-  initializeLazyLoading();
+  // Ovde je data već filtriran (bez slika je izbačen).
+  // Samo iscrtavamo
+  displayFeedsList(data, "Neueste Nachrichten");
 }
 
 /**
- * displayNewsByCategory
+ * displayNewsByCategory -> prikaz pojedinacne kategorije
  */
 export async function displayNewsByCategory(category) {
   const container = document.getElementById('news-container');
