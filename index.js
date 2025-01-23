@@ -22,6 +22,7 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
+// Osnovna sigurnost
 app.use(
   helmet({
     contentSecurityPolicy: false,
@@ -29,11 +30,16 @@ app.use(
 );
 app.use(express.json());
 
-// Služenje statičkog sadržaja
+// Služenje statičkog sadržaja iz foldera "/src"
 app.use('/src', express.static(path.join(__dirname, 'src'), {
   setHeaders: (res, filePath) => {
+    // Ako je .js, MIME -> "application/javascript"
     if (filePath.endsWith('.js')) {
       res.setHeader('Content-Type', 'application/javascript');
+    }
+    // Ako je .ico, MIME -> "image/x-icon"
+    else if (filePath.endsWith('.ico')) {
+      res.setHeader('Content-Type', 'image/x-icon');
     }
   }
 }));
@@ -75,20 +81,17 @@ app.get('/api/feeds-by-category/:category', async (req, res) => {
 });
 
 /**
- * Ruta za dohvatanje slike iz Redis-a.
- * Pošto Redis v4 nema getBuffer(), koristimo get() i dekodiramo Base64 u buffer.
+ * Ruta za dohvatanje slike iz Redis-a (base64 -> buffer).
  */
 app.get('/image/:id', async (req, res) => {
   const imgKey = `img:${req.params.id}`;
   try {
-    // Uzimamo Base64 string iz Redis-a
     const base64 = await redisClient.get(imgKey);
     if (!base64) {
       console.log(`[Route /image/:id] Nema slike za ključ: ${imgKey}`);
       return res.status(404).send("Image not found.");
     }
-
-    // Pretvaramo Base64 nazad u buffer
+    // Dekodiramo Base64 u buffer
     const buffer = Buffer.from(base64, 'base64');
 
     res.setHeader('Content-Type', 'image/jpeg');
@@ -99,6 +102,7 @@ app.get('/image/:id', async (req, res) => {
   }
 });
 
+// Pokretanje servera
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`[Express] Server pokrenut na portu ${PORT}`);
