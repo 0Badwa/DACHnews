@@ -10,9 +10,11 @@ import { createClient } from 'redis';
 import sharp from 'sharp';
 import pLimit from 'p-limit';
 
-// Glavne konstante
+// OVO JE KLJUČNO da bude OVDE, pre upotrebe limit:
+const limit = pLimit(3);
+
 const SEVEN_DAYS = 60 * 60 * 24 * 7;
-const RSS_FEED_URL = "https://rss.app/feeds/v1.1/_sf1gbLo1ZadJmc5e.json"; 
+const RSS_FEED_URL = "https://rss.app/feeds/v1.1/_sf1gbLo1ZadJmc5e.json";
 const GPT_API_URL = "https://api.openai.com/v1/chat/completions";
 
 // Redis konekcija
@@ -63,26 +65,11 @@ async function sendBatchToGPT(feedBatch) {
   }));
 
   const payload = {
-    // PROMENA: koristimo "gpt-4o-mini", ako je takav zahtev
     model: "gpt-4o-mini",
     messages: [
       {
         role: "system",
-        content: `Ti si veštački inteligentni asistent specijalizovan za kategorizaciju vesti za projekat DACH News (nemački jezik). Kategorije:
-- Technologie
-- Gesundheit
-- Sport
-- Wirtschaft
-- Kultur
-- Auto
-- Reisen
-- Lifestyle
-- Panorama
-- Politik
-- Unterhaltung
-- Welt
-
-Ako je vest o Donaldu Trampu, stavi je u 'Welt'. Vrati isključivo JSON niz oblika [{ "id": "...", "category": "..." }].`
+        content: `Ti si veštački inteligentni asistent specijalizovan za kategorizaciju vesti za projekat DACH News...`
       },
       {
         role: "user",
@@ -112,7 +99,7 @@ Ako je vest o Donaldu Trampu, stavi je u 'Welt'. Vrati isključivo JSON niz obli
 }
 
 /**
- * Funkcija za smanjivanje slike (rezanje na 320px, kvalitet 100%) pomoću Sharp.
+ * Funkcija za smanjivanje slike (320px, quality 100%) pomoću Sharp.
  */
 async function smanjiSliku(buffer) {
   try {
@@ -127,7 +114,7 @@ async function smanjiSliku(buffer) {
 }
 
 /**
- * Čuva smanjenu sliku u Redis u Base64 formatu (pod ključem "img:<id>").
+ * Čuva smanjenu sliku u Redis (base64).
  */
 async function storeImageInRedis(imageUrl, id) {
   if (!imageUrl) return false;
@@ -149,7 +136,7 @@ async function storeImageInRedis(imageUrl, id) {
 }
 
 /**
- * Izvlačenje domena iz URL-a.
+ * Helper za izvlačenje domena iz URL-a.
  */
 function extractSource(url) {
   try {
@@ -160,9 +147,8 @@ function extractSource(url) {
   }
 }
 
-
 /**
- * Dodavanje jedne vesti u Redis.
+ * Dodavanje jedne vesti u Redis (nakon GPT kategorizacije).
  */
 export async function addItemToRedis(item, category) {
   const newsObj = {
@@ -188,6 +174,7 @@ export async function addItemToRedis(item, category) {
   await redisClient.rPush(redisKey, JSON.stringify(newsObj));
   await redisClient.expire(redisKey, SEVEN_DAYS);
 
+  // Obeležimo ID kao obrađen
   await redisClient.sAdd("processed_ids", item.id);
   await redisClient.expire("processed_ids", SEVEN_DAYS);
 
@@ -195,42 +182,32 @@ export async function addItemToRedis(item, category) {
 }
 
 /**
- * KLJUČNA IZMJENA:
- * Dohvata poslednje 4 vesti iz svake category:* i sortira po datumu.
+ * getAllFeedsFromRedis - spaja poslednje 4 vesti iz svake category:* (sortirano).
  */
 export async function getAllFeedsFromRedis() {
-  // Pronađemo sve ključeve category:*
   const keys = await redisClient.keys("category:*");
   let combined = [];
 
-  // Za svaku kategoriju uzmemo poslednje 4 (redis lRange -4 -1)
-  // (Pošto su vesti dodavane sa rPush, najstarija je na indexu 0,
-  //  a najnovija na indexu -1. Ako hoćemo 4 najnovije,
-  //  koristimo range: [-4, -1].)
   for (const key of keys) {
-    // lRange -4 -1 -> poslednja 4 elementa
-    // Ako lista ima manje od 4 elemenata, dobićemo sve.
+    // Dohvatamo poslednja 4 elementa iz svake Redis liste
     const items = await redisClient.lRange(key, -4, -1);
     const parsed = items.map(x => JSON.parse(x));
     combined = combined.concat(parsed);
   }
 
-  // Uklanjamo duplikate po ID-u
+  // Uklanjamo duplikate
   const mapById = {};
   for (const obj of combined) {
     mapById[obj.id] = obj;
   }
-
-  // Transformišemo u niz
   let all = Object.values(mapById);
 
-  // Sortiramo po date_published DESC
-  all.sort((a, b) => {
-    const dateA = a.date_published ? new Date(a.date_published).getTime() : 0;
-    const dateB = b.date_published ? new Date(b.date_published).getTime() : 0;
-    return dateB - dateA; 
+  // Sortiramo desc po date_published
+  all.sort((a,b) => {
+    const dA = a.date_published ? new Date(a.date_published).getTime() : 0;
+    const dB = b.date_published ? new Date(b.date_published).getTime() : 0;
+    return dB - dA;
   });
-
   return all;
 }
 
@@ -239,7 +216,6 @@ export async function getAllFeedsFromRedis() {
  */
 export async function processFeeds() {
   console.log("[processFeeds] Počinje procesiranje feed-ova...");
-
   const allItems = await fetchRSSFeed();
   console.log(`[processFeeds] Ukupno preuzeto ${allItems.length} feedova.`);
 
@@ -256,7 +232,6 @@ export async function processFeeds() {
       newItems.push(item);
     }
   }
-  // Uklanjamo duplikate
   newItems = [...new Map(newItems.map(item => [item.id, item])).values()];
   if (newItems.length === 0) {
     console.log("[processFeeds] Sve vesti su već obrađene.");
@@ -264,27 +239,26 @@ export async function processFeeds() {
   }
   console.log(`[processFeeds] Nađeno ${newItems.length} novih vesti.`);
 
-  // Ako je < 2, preskoči GPT
   if (newItems.length < 2) {
     console.log("[processFeeds] Manje od 2 nove vesti, preskačemo GPT za sada.");
     return;
   }
 
-  // Delimo u batch
   const BATCH_SIZE = 20;
   for (let i = 0; i < newItems.length; i += BATCH_SIZE) {
     const batch = newItems.slice(i, i + BATCH_SIZE);
 
     const gptResponse = await sendBatchToGPT(batch);
     if (!gptResponse || !Array.isArray(gptResponse)) {
-      console.error("[processFeeds] GPT odgovor nevalidan. Sve ide u Uncategorized.");
+      console.error("[processFeeds] GPT odgovor nevalidan. Sve ide u 'Uncategorized'.");
       for (const item of batch) {
+        // concurrency limit
         await limit(() => addItemToRedis(item, "Uncategorized"));
       }
       continue;
     }
 
-    // Map ID->kategorija
+    // Mapiramo ID -> category
     const idToCat = {};
     gptResponse.forEach(c => {
       if (c.id && c.category) {
@@ -292,7 +266,7 @@ export async function processFeeds() {
       }
     });
 
-    // Snimamo u Redis
+    // concurrency limit
     await Promise.all(
       batch.map(item => {
         const cat = idToCat[item.id] || "Uncategorized";
