@@ -1,21 +1,26 @@
 /* ========== 1) GLOBAL ========== */
 :root {
-  --background-color: #000;
+  /* 
+    Sada je glavna pozadina tamnosiva (bivša #1c1c1c),
+    a secondary je crna (#000),
+    font-family: "Roboto", sans-serif 
+  */
+  --background-color: #1c1c1c; 
   --text-color: #ffffff;
   --primary-color: #1DB954;
-  --secondary-color: #1c1c1c;
+  --secondary-color: #000; /* news-card će sada biti #000 */
   --border-color: #333;
   --font-size: 16px;
   --news-title-font-size: 1rem;
-  --font-family: Arial, sans-serif;
-  --card-font-size: 16px; /* Menja se iz main.js */
+  --font-family: "Roboto", sans-serif;
+  --card-font-size: 16px;
 }
 
 :root[data-theme="dark"] {
-  --background-color: #000;
+  --background-color: #1c1c1c;
   --text-color: #ffffff;
   --primary-color: #1DB954;
-  --secondary-color: #1c1c1c;
+  --secondary-color: #000;
   --border-color: #333;
 }
 
@@ -79,7 +84,7 @@ nav .menu button {
   right: 0;
   height: 30px;
   z-index: 999;
-  background-color: var(--secondary-color);
+  background-color: var(--secondary-color); /* sad #000 */
   border-bottom: 2px solid var(--border-color);
   overflow-x: auto;
   white-space: nowrap;
@@ -111,7 +116,7 @@ nav .menu button {
 .category-indicator {
   position: fixed;
   top: 100px;
-  left: 0;
+  left: 0; 
   right: 0;
   height: 30px;
   line-height: 30px;
@@ -121,7 +126,7 @@ nav .menu button {
   font-weight: bold;
   text-align: center;
   color: var(--primary-color);
-  background: #000;
+  background: #1c1c1c; /* main background */
   z-index: 998;
   font-family: var(--font-family);
 }
@@ -136,7 +141,8 @@ nav .menu button {
 .news-card {
   display: flex;
   align-items: flex-start;
-  background-color: var(--secondary-color);
+  /* background je sada #000 umesto #1c1c1c */
+  background-color: var(--secondary-color); 
   border: 1px solid var(--border-color);
   border-radius: 5px;
   padding: 0.2rem;
@@ -157,7 +163,7 @@ nav .menu button {
 }
 .truncated-title {
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 3; 
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -207,6 +213,8 @@ img.lazy.loaded {
 }
 
 /* ========== 6) DARK THEME OVERRIDES ========== */
+/* Sada su background i secondary zamenjeni pa 
+   ostaje ovde da se .news-card crta crno */
 :root[data-theme="dark"] .news-card {
   background-color: #000;
   border: 1px solid var(--border-color);
@@ -320,7 +328,7 @@ img.lazy.loaded {
   align-items: center;
   padding: 0.5rem 0.8rem;
   margin-bottom: 0.2rem;
-  background: var(--secondary-color);
+  background: var(--secondary-color); /* #000 */
   border: 0.5px solid var(--border-color);
   border-radius: 5px;
   cursor: pointer;
@@ -352,7 +360,7 @@ img.lazy.loaded {
   align-items: center;
   padding: 1rem;
   margin: 0.5rem 0;
-  background-color: var(--secondary-color);
+  background-color: var(--secondary-color); /* #000 */
   border-radius: 8px;
   font-size: 1rem;
 }
@@ -396,6 +404,7 @@ img.lazy.loaded {
   text-align: center;
   margin: 0 10px;
   box-shadow: 0 0 12px var(--primary-color);
+  font-family: var(--font-family);
 }
 .tutorial-content p {
   color: #fff;
