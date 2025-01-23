@@ -280,8 +280,7 @@ img.lazy.loaded {
   height: 100%;
   align-items: center; 
   justify-content: center;
-  background-color: #000 !important; /* umesto rgba(0,0,0,0.7) */
-  z-index: 2000;
+background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z-index: 2000;
 }
 .rearrange-modal-content {
   background-color: #000; /* unutar modala takođe crna */
@@ -311,6 +310,11 @@ img.lazy.loaded {
   height: auto;
   box-shadow: 0 0 12px var(--primary-color); /* #32CD32 */
   border-radius: 10px;
+}
+
+/* Potpuno crna pozadina za news-modal */
+.news-modal {
+  background-color: #000 !important; /* Potpuno crna pozadina */
 }
 
 /* Naslov: Roboto Condensed, 1rem */
