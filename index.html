@@ -5,10 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <link rel="icon" href="src/icons/favicon.ico" type="image/x-icon" />
   <title>DACH.news</title>
-  <!-- Podeljeni CSS fajlovi -->
-  <link rel="stylesheet" type="text/css" href="src/css/styles.global.css?v=1">
-  <link rel="stylesheet" type="text/css" href="src/css/styles.modals.css?v=1">
-  <link rel="stylesheet" type="text/css" href="src/css/styles.tutorial.css?v=1">
+  <!-- Umesto tri CSS fajla, koristimo jedinstven styles.css -->
+  <link rel="stylesheet" type="text/css" href="src/css/styles.css?v=1">
 </head>
 <body data-theme="dark">
   <nav>
@@ -25,7 +23,7 @@
   <div class="tabs-container" role="tablist" id="tabs-container">
     <button class="tab active" data-tab="Neueste" role="tab" aria-selected="true">Neueste</button>
     <button class="tab" data-tab="Aktuell" role="tab" aria-selected="false">Aktuell</button>
-    <!-- Ostale kategorije ubacuje main.js dinamički, ili ovde po potrebi -->
+    <!-- Ostale kategorije dinamički iz main.js -->
   </div>
 
   <!-- Indikator kategorije -->
@@ -84,7 +82,7 @@
         Quelle verbergen
       </div>
       <div class="sources-list" id="sources-list" style="margin-top: 1rem;">
-        <!-- Dinamički spisak izvora (zavisi od newsSources niza u main.js) -->
+        <!-- Dinamički spisak izvora (npr. Bild, Zeit...) iz main.js -->
       </div>
       <div class="modal-buttons">
         <button class="save-button" id="close-quellen-modal">Schließen</button>
@@ -100,8 +98,7 @@
       </div>
       <!-- Drag & drop lista -->
       <ul id="sortable-list" class="rearrange-list" style="margin: 1rem 0;">
-        <!-- Popunjava se dinamički u main.js, 
-             svaka <li> ima drag & drop i checkbox za sakrivanje -->
+        <!-- Popunjava se dinamički iz main.js (drag & drop) -->
       </ul>
       <div class="modal-buttons">
         <button class="save-button" id="close-kategorien-modal">Schließen</button>
