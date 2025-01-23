@@ -304,6 +304,7 @@ background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z
 /* ========== 9) NEWS MODAL ========== */
 /* Slika 220px */
 .news-modal-content img#news-modal-image {
+  background-color: #000; /* Crna pozadina unutar news-modal */
   display: block;
   margin: 1rem auto;
   width: 220px; 
