@@ -414,8 +414,8 @@ export async function displayNewsByCategory(category) {
 }
 
 /** loadFeeds -> simuliramo klik na Neueste */
-function loadFeeds(defaultTab = 'Neueste') {
-  const tabBtn = document.querySelector(`.tab[data-tab="${defaultTab}"]`);
-  if (tabBtn) {
-    tabBtn.click();
-  }
+/** function loadFeeds(defaultTab = 'Neueste') {
+/**   const tabBtn = document.querySelector(`.tab[data-tab="${defaultTab}"]`);
+/**   if (tabBtn) {
+/**     tabBtn.click();
+ /**  }
