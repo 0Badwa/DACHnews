@@ -140,16 +140,24 @@ function openRearrangeModal() {
         btn.textContent = 'Verbergen';
       } else {
         blockCategory(cat);
-   btn.textContent = isCategoryBlocked(cat) ? 'Entsperren' : 'Verbergen';
-  btn.onclick = () => {
+   // NOVI KOD (oko linije 141, u openRearrangeModal funkciji):
+btn.className = isCategoryBlocked(cat) ? 'unblock-button' : 'block-button';
+btn.textContent = isCategoryBlocked(cat) ? 'Entsperren' : 'Verbergen';
+
+btn.onclick = () => {
   if (isCategoryBlocked(cat)) {
     unblockCategory(cat);
+    // Sada prelazimo na "Verbergen" (zelena)
+    btn.className = 'block-button';
     btn.textContent = 'Verbergen';
   } else {
     blockCategory(cat);
+    // Sada prelazimo na "Entsperren" (crvena)
+    btn.className = 'unblock-button';
     btn.textContent = 'Entsperren';
   }
 };
+
       }
     };
 
@@ -229,23 +237,23 @@ function openQuellenModal() {
     const spanName = document.createElement('span');
     spanName.textContent = src;
 
-    const isBlocked = isSourceBlocked(src);
-    const blockBtn = document.createElement('button');
-    blockBtn.className = isBlocked ? 'unblock-button' : 'block-button';
-    blockBtn.textContent = isBlocked ? 'Entsperren' : 'Verbergen';
+    // STARI KOD (otprilike line 220):
+const isBlocked = isSourceBlocked(src);
+blockBtn.className = isBlocked ? 'unblock-button' : 'block-button';
+blockBtn.textContent = isBlocked ? 'Entsperren' : 'Verbergen';
 
-    blockBtn.onclick = () => {
-      if (isSourceBlocked(src)) {
-        unblockSource(src);
-        blockBtn.className = 'block-button';
-        blockBtn.textContent = 'Verbergen';
-      } else {
-        blockSource(src);
-        blockBtn.className = 'unblock-button';
-        blockBtn.textContent = 'Entsperren';
-      }
-      loadFeeds();
-    };
+blockBtn.onclick = () => {
+  if (isSourceBlocked(src)) {
+    unblockSource(src);
+    blockBtn.className = 'block-button';
+    blockBtn.textContent = 'Verbergen';
+  } else {
+    blockSource(src);
+    blockBtn.className = 'unblock-button';
+    blockBtn.textContent = 'Entsperren';
+  }
+};
+
 
     sourceItem.appendChild(spanName);
     sourceItem.appendChild(blockBtn);
