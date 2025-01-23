@@ -301,31 +301,50 @@ background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z
 }
 
 /* ========== 9) NEWS MODAL ========== */
-/* Slika 220px */
+/* Potpuno crna pozadina za news-modal, preko cele stranice minus 60px od vrha */
+.news-modal {
+  display: none; /* Sakrivanje modala po defaultu */
+  position: fixed;
+  top: 60px; /* 60px od vrha */
+  left: 0;
+  width: 100%;
+  height: calc(100vh - 60px); /* Visina ekrana minus 60px */
+  background-color: #000 !important; /* Potpuno crna pozadina */
+  z-index: 2000; /* Visok z-index da bude iznad ostalog sadržaja */
+  overflow-y: auto; /* Omogući skrolovanje ako je potrebno */
+}
+
+/* Unutrašnji kontejner za sadržaj modala */
+.news-modal-content {
+  background-color: #000; /* Crna pozadina unutar modala */
+  padding: 1rem;
+  border-radius: 8px;
+  max-width: 800px; /* Maksimalna širina sadržaja */
+  width: 90%; /* Širina sadržaja */
+  margin: 0 auto; /* Centriranje sadržaja */
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.6);
+}
+
+/* Slika u news-modal */
 .news-modal-content img#news-modal-image {
-  background-color: #000; /* Crna pozadina unutar news-modal */
   display: block;
   margin: 1rem auto;
-  width: 220px; 
+  width: 220px;
   height: auto;
   box-shadow: 0 0 12px var(--primary-color); /* #32CD32 */
   border-radius: 10px;
 }
 
-/* Potpuno crna pozadina za news-modal */
-.news-modal {
-  background-color: #000 !important; /* Potpuno crna pozadina */
-}
-
-/* Naslov: Roboto Condensed, 1rem */
+/* Naslov u news-modal */
 .news-modal-content h2 {
-  font-family: 'Roboto Condensed', sans-serif; 
+  font-family: 'Roboto Condensed', sans-serif;
   font-size: 1.1rem;
   color: var(--primary-color); /* #32CD32 */
   text-align: center;
- margin: 1rem 0.3rem; /* gore i dole 1rem, levo i desno 0.5rem */}
+  margin: 1rem 0.3rem; /* gore i dole 1rem, levo i desno 0.3rem */
+}
 
-/* Izvor, datum i vreme -> Roboto Condensed, izvor zelen */
+/* Paragrafi u news-modal */
 .news-modal-content p {
   text-align: center;
   margin: 1.5rem 0.5rem 1rem 0.5rem; /* gore: 1.5rem, desno: 0.5rem, dole: 1rem, levo: 0.5rem */
@@ -335,19 +354,18 @@ background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z
   color: #fff; /* default white, override za .source ispod */
 }
 
-/* Izvor (source) -> #32CD32 */
+/* Izvor u news-modal */
 .news-modal-content .source {
   font-size: 0.8rem;
   font-weight: bold;
   color: var(--primary-color); /* #32CD32 */
 }
 
-/* Ako hoćemo i vreme zeleno, možemo: 
+/* Vreme u news-modal (opciono) */
 .news-modal-content .time {
- font-size: 0.8rem;
-/*  color: var(--primary-color);
-} 
-*/
+  font-size: 0.8rem;
+  color: var(--primary-color); /* Zelena boja za vreme */
+}
 
 /* ========== 10) SETTINGS, DRAG & DROP, ETC. ========== */
 .settings-list .settings-item {
