@@ -6,7 +6,7 @@ import {
   displayNeuesteFeeds,
   displayAktuellFeeds,
   displayNewsByCategory,
-  fetchAllFeedsFromServer // import za dobijanje feedova
+  fetchAllFeedsFromServer // da dohvatimo sve feedove za quellen
 } from './feeds.js';
 
 let categoriesOrder = [
@@ -18,16 +18,15 @@ let categoriesOrder = [
 let blockedSources = JSON.parse(localStorage.getItem('blockedSources') || '[]');
 let blockedCategories = JSON.parse(localStorage.getItem('blockedCategories') || '[]');
 
-// Ovo je font-size samo za .news-card (naslov i meta).
+// Dinamička promenljiva za font-size vesti (naslovi i meta)
 let currentCardFontSize = localStorage.getItem('cardFontSize')
   ? parseInt(localStorage.getItem('cardFontSize'), 10)
   : 16;
 
 /**
- * Funkcija: primeni var(--card-font-size) i osveži aktivni feed
+ * Poveć/smanji font-size i osveži aktivnu kategoriju
  */
 function applyCardFontSize() {
-  // Ažuriramo CSS varijablu (koristi se i za naslov i za .news-meta)
   document.documentElement.style.setProperty('--card-font-size', currentCardFontSize + 'px');
   localStorage.setItem('cardFontSize', currentCardFontSize);
 
@@ -52,8 +51,19 @@ function applyCardFontSize() {
   }
 }
 
+function increaseFontSize() {
+  currentCardFontSize++;
+  if (currentCardFontSize > 40) currentCardFontSize = 40;
+  applyCardFontSize();
+}
+function decreaseFontSize() {
+  currentCardFontSize--;
+  if (currentCardFontSize < 10) currentCardFontSize = 10;
+  applyCardFontSize();
+}
+
 /**
- * Blokiranje/deblokiranje izvora
+ * Funkcije za (un)block izvora
  */
 function blockSource(src) {
   if (!blockedSources.includes(src)) {
@@ -70,7 +80,7 @@ function isSourceBlocked(src) {
 }
 
 /**
- * Blokiranje/deblokiranje kategorije
+ * Funkcije za (un)block kategorije
  */
 function blockCategory(cat) {
   if (!blockedCategories.includes(cat)) {
@@ -87,14 +97,14 @@ function isCategoryBlocked(cat) {
 }
 
 /**
- * Dinamičko kreiranje tabova (sem Neueste, Aktuell),
- * preskačemo blokirane kategorije.
+ * buildTabs -> prikazuje sve tabove (osim Neueste, Aktuell), 
+ * preskačući blokirane
  */
 function buildTabs() {
   const tabsContainer = document.getElementById('tabs-container');
   if (!tabsContainer) return;
 
-  // Brišemo sve osim Neueste, Aktuell
+  // Uklonimo sve sem Neueste, Aktuell
   const existingTabs = tabsContainer.querySelectorAll('.tab:not([data-tab="Neueste"]):not([data-tab="Aktuell"])');
   existingTabs.forEach(t => t.remove());
 
@@ -114,7 +124,7 @@ function buildTabs() {
 }
 
 /**
- * KATEGORIJEN - Drag & Drop
+ * openRearrangeModal -> modal za kategorije, drag&drop + (un)block
  */
 function openRearrangeModal() {
   const kategorienModal = document.getElementById('kategorien-modal');
@@ -180,6 +190,7 @@ function closeKategorienModal() {
   loadFeeds();
 }
 
+/** Drag & drop helperi */
 function handleDragStart(e) {
   e.dataTransfer.setData('text/plain', e.target.textContent.trim());
   e.target.style.opacity = '0.4';
@@ -209,7 +220,7 @@ function handleDrop(e) {
 }
 
 /**
- * QUELLEN Modal
+ * openQuellenModal -> prikaz svih izvora (sorteiranih abecedno)
  */
 async function openQuellenModal() {
   const quellenModal = document.getElementById('quellen-modal');
@@ -220,16 +231,16 @@ async function openQuellenModal() {
   if (!sourcesListEl) return;
   sourcesListEl.innerHTML = '';
 
-  // Dinamički dohvatamo sve feedove i izvlačimo "source"
   let allFeeds = [];
   try {
-    allFeeds = await fetchAllFeedsFromServer(false); // Uzmi sve, bez slice
+    // Ovde NEMA slice(0,10) itd, uzimamo sve
+    allFeeds = await fetchAllFeedsFromServer(false);
   } catch (err) {
-    console.error("[openQuellenModal] Greška pri dohvatu feedova:", err);
+    console.error("[openQuellenModal] Greška:", err);
     allFeeds = [];
   }
 
-  // Napravimo Set unikatnih izvora
+  // Napravimo set izvora
   const uniqueSources = new Set();
   allFeeds.forEach(feed => {
     if (feed.source) {
@@ -237,10 +248,9 @@ async function openQuellenModal() {
     }
   });
 
-  // Sortiramo -> spisak svih izvora
+  // Abecedno
   const sortedSources = Array.from(uniqueSources).sort();
 
-  // Kreiramo red za svaki izvor
   sortedSources.forEach(src => {
     const sourceItem = document.createElement('div');
     sourceItem.className = 'source-item';
@@ -263,7 +273,6 @@ async function openQuellenModal() {
         blockBtn.className = 'unblock-button';
         blockBtn.textContent = 'Entsperren';
       }
-      // Ponovo učitamo feed
       loadFeeds();
     };
 
@@ -282,7 +291,7 @@ function closeQuellenModal() {
 }
 
 /**
- * Swipe - levo/desno za kategorije
+ * initSwipe -> prelazak između kategorija dodirom
  */
 function initSwipe() {
   const swipeContainer = document.getElementById('news-container');
@@ -357,7 +366,7 @@ function initSwipe() {
 }
 
 /**
- * loadFeeds -> simuliramo klik na "Neueste" (ili prosleđeni default)
+ * loadFeeds -> simuliramo klik na "Neueste"
  */
 function loadFeeds(defaultTab = 'Neueste') {
   const tabBtn = document.querySelector(`.tab[data-tab="${defaultTab}"]`);
@@ -367,30 +376,13 @@ function loadFeeds(defaultTab = 'Neueste') {
 }
 
 /**
- * Font-size + i -
- */
-function increaseFontSize() {
-  currentCardFontSize++;
-  if (currentCardFontSize > 40) currentCardFontSize = 40;
-  applyCardFontSize();
-}
-function decreaseFontSize() {
-  currentCardFontSize--;
-  if (currentCardFontSize < 10) currentCardFontSize = 10;
-  applyCardFontSize();
-}
-
-/**
  * Glavni init
  */
 document.addEventListener('DOMContentLoaded', () => {
-  // 1) Primeni font
   applyCardFontSize();
-  // 2) Tabovi
   buildTabs();
-  // 3) Swipe
   initSwipe();
-  // 4) Klik na tab => prikaz feeda
+
   const tabsContainer = document.getElementById('tabs-container');
   if (tabsContainer) {
     tabsContainer.addEventListener('click', async (e) => {
@@ -420,10 +412,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Pokreni feed -> Neueste
   loadFeeds();
 
-  // Settings / menu
+  // Settings
   const menuButton = document.getElementById('menu-button');
   const settingsModal = document.getElementById('settings-modal');
   const closeSettingsBtn = document.getElementById('close-settings');
