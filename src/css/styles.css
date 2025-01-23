@@ -344,7 +344,8 @@ img.lazy.loaded {
   display: flex; 
   justify-content: space-between; 
   align-items: center;
-  margin-bottom: 0.5rem;
+  margin-bottom: 1rem;
+  margin-top: 1rem;
 }
 .settings-action-button {
   background-color: var(--primary-color); 
@@ -387,57 +388,76 @@ img.lazy.loaded {
   justify-content: space-between; 
   align-items: center;
   padding: 0.5rem 0.8rem; 
-  margin-bottom: 0.2rem;
-  background: #000; /* Crna */
-  border: 0.5px solid var(--border-color);
-  border-radius: 5px;
+  margin-bottom: 0.5rem; /* Veći razmak između stavki */
+ background-color: #000; /* Crna pozadina */
+  border: 1px solid var(--border-color); /* Granica */
+  border-radius: 5px; /* Zaobljeni uglovi */
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: background-color 0.2s, transform 0.2s; /* Dodata animacija za hover */
 }
 #sortable-list li button {
-  background: none; 
-  border: none; 
-  color: inherit; 
-  font-size: inherit;
-  margin-left: 0.5rem; 
-  cursor: pointer; 
-  transition: color 0.2s;
+  background-color: var(--primary-color); /* Zelena pozadina dugmeta */
+  color: #fff; /* Beli tekst */
+  border: none;
+  padding: 0.3rem 0.8rem; /* Padding dugmeta */
+  border-radius: 4px; /* Zaobljeni uglovi dugmeta */
+  cursor: pointer;
+  font-size: 0.9rem; /* Veličina fonta */
+  transition: background-color 0.2s; /* Animacija za hover */
 }
 #sortable-list li:hover {
-  background-color: #222; 
+  background-color: #222; /* Tamnija pozadina na hover */
+  transform: scale(1.02); /* Blago uvećanje na hover */
 }
 
 /* QUELLEN LIST */
 .sources-list {
   margin-bottom: 1.5rem;
 }
+
 .source-item {
-  display: flex; 
-  justify-content: space-between; 
+  display: flex;
+  justify-content: space-between;
   align-items: center;
-  padding: 1rem; 
+  padding: 0.8rem 1rem; /* Usklađen padding */
   margin: 0.5rem 0;
-  background-color: #000; 
-  border-radius: 8px; 
+  background-color: #000; /* Crna pozadina */
+  border: 1px solid var(--border-color); /* Granica */
+  border-radius: 5px; /* Zaobljeni uglovi */
   font-size: 1rem;
+  transition: background-color 0.2s, transform 0.2s; /* Animacija za hover */
 }
-.block-button {
-  background-color: #ff4444;
-  color: #fff; 
-  border: none; 
-  border-radius: 4px;
-  padding: 0.4rem 0.8rem; 
-  cursor: pointer; 
-  font-size: 0.8rem;
+
+.source-item:hover {
+  background-color: #222; /* Tamnija pozadina na hover */
+  transform: scale(1.02); /* Blago uvećanje na hover */
 }
+
+.block-button,
 .unblock-button {
-  background-color: var(--primary-color); 
-  color: #fff;
-  border: none; 
-  border-radius: 4px;
-  padding: 0.4rem 0.8rem; 
-  cursor: pointer; 
-  font-size: 0.8rem;
+  color: #fff; /* Beli tekst */
+  border: none;
+  padding: 0.4rem 0.8rem; /* Usklađen padding */
+  border-radius: 4px; /* Zaobljeni uglovi */
+  cursor: pointer;
+  font-size: 0.9rem; /* Veličina fonta */
+  transition: background-color 0.2s; /* Animacija za hover */
+}
+
+.block-button {
+  background-color: #ff4444; /* Crvena pozadina */
+}
+
+.block-button:hover {
+  background-color: rgba(255, 68, 68, 0.8); /* Svetlija crvena na hover */
+}
+
+.unblock-button {
+  background-color: var(--primary-color); /* Zelena pozadina */
+}
+
+.unblock-button:hover {
+  background-color: rgba(50, 205, 50, 0.8); /* Svetlija zelena na hover */
 }
 
 /* ========== 11) TUTORIAL OVERLAY ========== */
