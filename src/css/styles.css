@@ -192,16 +192,18 @@ nav .menu button {
   text-decoration: none;
   line-height: 1.2;
   font-family: 'Roboto Condensed', sans-serif; /* Dodavanje fonta */
+  margin-right: 0.3rem; /* Razmak samo za naslov */
 
 }
 .news-meta {
   font-size: 0.7rem;
-  margin-top: 0.2rem; /* Dodaje razmak iznad meta informacija */
+  margin-top: 0.3rem; /* Dodaje razmak iznad meta informacija */
   color: var(--text-color);
 }
 .news-meta .source {
   text-transform: uppercase;
-  color: var(--primary-color); /* #32CD32 */
+  color: var(--text-color);
+  font-weight: bold; /* Bold tekst */
 }
 .news-meta .time {
   text-transform: lowercase;
