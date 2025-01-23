@@ -419,6 +419,27 @@ background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z
   width: 90%; /* Širina sadržaja */
   margin: 0 auto; /* Centriranje sadržaja */
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.6);
+  position: relative; /* za absolutely-positioned .news-modal-icons */
+}
+
+.news-modal-icons {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  display: flex;
+  gap: 0.5rem;
+}
+.news-icon-button {
+  background: rgba(0,0,0,0.6);
+  color: #fff;
+  border: 1px solid var(--primary-color);
+  border-radius: 4px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0.2rem 0.5rem;
+}
+.news-icon-button:hover {
+  background: rgba(0,0,0,0.9);
 }
 
 /* Slika u news-modal */
@@ -695,4 +716,50 @@ background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z
   cursor: pointer;
   font-weight: bold;
   font-size: 1rem;
+}
+
+
+/* Dodata zvezdica pored hamburger menija */
+.menu .favorites-button {
+  background: none;
+  color: #fff;
+  border: 2px solid var(--primary-color);
+  padding: 0.32rem;
+  margin-left: 0.4rem; /* Malo razmaka od hamburgera */
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+  outline: none;
+}
+
+/* NOVI Favorites modal */
+.favorites-modal-content {
+  background-color: #000;
+  padding: 1rem;
+  border-radius: 8px;
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+.favorites-list {
+  margin-top: 1rem;
+}
+.favorites-list .fav-item {
+  display: flex;
+  align-items: flex-start;
+  background-color: #111;
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+  padding: 0.4rem;
+  margin-bottom: 0.3rem;
+  cursor: pointer;
+}
+.fav-item .fav-title {
+  font-weight: bold;
+  color: var(--primary-color);
+  margin-right: 0.5rem;
+}
+.fav-item:hover {
+  background-color: #222;
 }
