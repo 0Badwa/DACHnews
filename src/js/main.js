@@ -554,4 +554,4 @@ document.addEventListener('DOMContentLoaded', () => {
     const tutOverlay = document.getElementById('tutorial-overlay');
     if (tutOverlay) tutOverlay.style.display = 'flex';
   }
-});
+);
