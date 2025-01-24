@@ -359,12 +359,12 @@ function decreaseFontSize() {
 }
 
 /** Glavni init */
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   applyCardFontSize();
   buildTabs();
   initSwipe();
 
-// Učitaj slike za sve kategorije u pozadini čim se stranica učita
+  // Učitaj slike za sve kategorije u pozadini čim se stranica učita
   const allFeeds = await fetchAllFeedsFromServer();
   preloadImages(allFeeds);
   
