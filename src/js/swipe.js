@@ -1,6 +1,5 @@
 /**
  * swipe.js
- * Uklonili "LGBT+" iz niza kategorija.
  */
 
 import { showGreenRectangle } from './ui.js';

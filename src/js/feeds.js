@@ -5,7 +5,7 @@
  * Sortiranje po datumu (od najnovijih ka starijima) ostaje, ali više ne "sečemo" na 50 rezultata.
  */
 
-import { initializeLazyLoading, updateCategoryIndicator, showLoader, hideLoader, showErrorMessage } from './ui.js';
+import { updateCategoryIndicator, showLoader, hideLoader, showErrorMessage } from './ui.js';
 import { openNewsModal } from './newsModal.js';
 
 /**
@@ -218,7 +218,6 @@ export function displayFeedsList(feedsList, categoryName) {
   });
 
   updateCategoryIndicator(categoryName);
-  initializeLazyLoading();
 }
 
 /**
