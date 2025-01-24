@@ -5,7 +5,9 @@
 import {
   displayNeuesteFeeds,
   displayAktuellFeeds,
-  displayNewsByCategory
+  displayNewsByCategory,
+  fetchAllFeedsFromServer, // Dodato
+  preloadImages           // Dodato
 } from './feeds.js';
 
 let categoriesOrder = [
