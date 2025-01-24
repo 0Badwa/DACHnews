@@ -91,7 +91,7 @@ app.get('/image/:id', async (req, res) => {
     // Pretvaramo Base64 nazad u buffer
     const buffer = Buffer.from(base64, 'base64');
 
-    res.setHeader('Content-Type', 'image/jpeg');
+    res.setHeader('Content-Type', 'image/webp');
     res.send(buffer);
   } catch (error) {
     console.error("[Route /image/:id] Greska:", error);
