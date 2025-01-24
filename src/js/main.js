@@ -9,7 +9,7 @@ import {
   initInfiniteScroll,
   fetchAllFeedsFromServer, // Dodato
   preloadImages,
-  loadFeeds            // Uveri se da je loadFeeds eksportovano iz feeds.js
+  loadFeeds
 } from './feeds.js';
 
 let categoriesOrder = [
@@ -342,13 +342,6 @@ function initSwipe() {
   });
 }
 
-/** loadFeeds -> simuliramo klik na Neueste */
-function loadFeeds(defaultTab = 'Neueste') {
-  const tabBtn = document.querySelector(`.tab[data-tab="${defaultTab}"]`);
-  if (tabBtn) {
-    tabBtn.click();
-  }
-}
 
 /** Poveć/smanji font-size */
 function increaseFontSize() {
