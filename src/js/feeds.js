@@ -144,17 +144,7 @@ export async function fetchCategoryFeeds(category, forceRefresh = false) {
   }
 }
 
-/**
- * Funkcija za preload slika u pozadini
- */
-function preloadImages(feeds) {
-  feeds.forEach(feed => {
-    if (feed.image) {
-      const img = new Image();
-      img.src = feed.image;
-    }
-  });
-}
+
 
 /**
  * Kreira jednu "news card".
