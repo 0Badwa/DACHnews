@@ -9,7 +9,7 @@ import {
   initInfiniteScroll,
   fetchAllFeedsFromServer, // Dodato
   preloadImages,
-  loadFeeds
+  loadFeeds // Importovana iz feeds.js
 } from './feeds.js';
 
 let categoriesOrder = [
@@ -138,6 +138,7 @@ function openRearrangeModal() {
         blockCategory(cat);
         btn.textContent = 'Entsperren';
       }
+      loadFeeds(); // Poziva importovanu funkciju
     };
 
     li.appendChild(btn);
@@ -165,7 +166,7 @@ function closeKategorienModal() {
   localStorage.setItem('categoriesOrder', JSON.stringify(categoriesOrder));
 
   buildTabs();
-  loadFeeds();
+  loadFeeds(); // Poziva importovanu funkciju
 }
 
 function handleDragStart(e) {
@@ -231,7 +232,7 @@ function openQuellenModal() {
         blockBtn.className = 'unblock-button';
         blockBtn.textContent = 'Entsperren';
       }
-      loadFeeds();
+      loadFeeds(); // Poziva importovanu funkciju
     };
 
     sourceItem.appendChild(spanName);
@@ -245,7 +246,7 @@ function closeQuellenModal() {
   if (quellenModal) {
     quellenModal.style.display = 'none';
   }
-  loadFeeds();
+  loadFeeds(); // Poziva importovanu funkciju
 }
 
 /** initSwipe */
@@ -342,7 +343,6 @@ function initSwipe() {
   });
 }
 
-
 /** Poveć/smanji font-size */
 function increaseFontSize() {
   currentCardFontSize++;
@@ -398,7 +398,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  loadFeeds();
+  loadFeeds(); // Poziva importovanu funkciju
 
   // Settings
   const menuButton = document.getElementById('menu-button');
