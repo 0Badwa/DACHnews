@@ -6,7 +6,7 @@
  * - Pomoćne funkcije za prikaz vesti
  */
 
-import { initializeLazyLoading, updateCategoryIndicator, showLoader, hideLoader, showErrorMessage } from './ui.js';
+import { updateCategoryIndicator, showLoader, hideLoader, showErrorMessage } from './ui.js';
 import { openNewsModal } from './newsModal.js';
 
 /**
@@ -145,6 +145,18 @@ export async function fetchCategoryFeeds(category, forceRefresh = false) {
 }
 
 /**
+ * Funkcija za preload slika u pozadini
+ */
+function preloadImages(feeds) {
+  feeds.forEach(feed => {
+    if (feed.image) {
+      const img = new Image();
+      img.src = feed.image;
+    }
+  });
+}
+
+/**
  * Kreira jednu "news card".
  */
 function createNewsCard(feed) {
@@ -155,8 +167,7 @@ function createNewsCard(feed) {
   });
 
   const img = document.createElement('img');
-  img.className = "news-card-image lazy";
-  img.dataset.src = feed.image || 'https://via.placeholder.com/80';
+  img.src = feed.image || 'https://via.placeholder.com/80'; // Učitaj sliku odmah
   img.alt = feed.title || 'No title';
 
   const contentDiv = document.createElement('div');
@@ -212,8 +223,10 @@ export function displayFeedsList(feedsList, categoryName) {
     container.appendChild(card);
   });
 
+  // Učitaj sve slike u pozadini
+  preloadImages(feedsList);
+
   updateCategoryIndicator(categoryName);
-  initializeLazyLoading();
 
   // >>> Dodato: posle renderovanja vrati scrollTop na 0
   requestAnimationFrame(() => {
@@ -324,7 +337,6 @@ export async function displayNeuesteFeeds() {
   });
 
   updateCategoryIndicator("Neueste Nachrichten");
-  initializeLazyLoading();
 
   // >>> posle renderovanja vrati scrollTop na 0
   requestAnimationFrame(() => {
