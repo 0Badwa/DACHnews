@@ -5,10 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <link rel="icon" href="src/icons/favicon.ico" type="image/x-icon" />
   <title>DACH.news</title>
- <link rel="preload" href="src/css/styles.css" as="style">
-  <link rel="preload" href="src/js/main.js" as="script">
-  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Roboto+Condensed:wght@400;700&display=swap" as="style">
-    <link rel="stylesheet" href="src/css/styles.css">
+
+  <!-- Prefetch kritičnih resursa -->
+  <link rel="preload" href="src/css/styles.css" as="style">
+
+  <!-- Preconnect za Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <!-- Učitaj CSS -->
+  <link rel="stylesheet" href="src/css/styles.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Roboto+Condensed:wght@400;700&display=swap">
 </head>
 <body data-theme="dark">
   <nav>
@@ -28,11 +35,11 @@
   <div id="error-container" style="display:none; text-align:center; margin-top:100px; color:red;"></div>
 
   <!-- Tabs container koji prati feedove -->
-<div class="tabs-container" 
-     role="tablist" 
-     id="tabs-container" 
-     style="scroll-behavior: smooth;">
-  <button class="tab active" data-tab="Neueste" role="tab" aria-selected="true">Neueste</button>
+  <div class="tabs-container" 
+       role="tablist" 
+       id="tabs-container" 
+       style="scroll-behavior: smooth;">
+    <button class="tab active" data-tab="Neueste" role="tab" aria-selected="true">Neueste</button>
     <button class="tab" data-tab="Aktuell" role="tab" aria-selected="false">Aktuell</button>
     <!-- Ostale kategorije dinamički iz main.js -->
   </div>
@@ -145,6 +152,6 @@
   </div>
 
   <!-- Glavni JS fajl -->
-  <script type="module" src="src/js/main.js"></script>
+  <script type="module" src="src/js/main.js" defer></script>
 </body>
 </html>
