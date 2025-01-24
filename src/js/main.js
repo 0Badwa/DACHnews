@@ -5,31 +5,30 @@
 import {
   displayNeuesteFeeds,
   displayAktuellFeeds,
-  displayNewsByCategory,
-  fetchAllFeedsFromServer // da dohvatimo sve feedove za quellen
+  displayNewsByCategory
 } from './feeds.js';
 
 let categoriesOrder = [
   "Technologie", "Gesundheit", "Sport", "Wirtschaft", "Kultur",
-  "Unterhaltung", "Reisen", "Lifestyle", "Auto",
+  "LGBT+", "Unterhaltung", "Reisen", "Lifestyle", "Auto",
   "Welt", "Politik", "Panorama", "Sonstiges"
 ];
-
 let blockedSources = JSON.parse(localStorage.getItem('blockedSources') || '[]');
 let blockedCategories = JSON.parse(localStorage.getItem('blockedCategories') || '[]');
 
-// Dinamička promenljiva za font-size vesti (naslovi i meta)
+// Promenljiva za font-size isključivo news-cards
 let currentCardFontSize = localStorage.getItem('cardFontSize')
   ? parseInt(localStorage.getItem('cardFontSize'), 10)
   : 16;
 
 /**
- * Poveć/smanji font-size i osveži aktivnu kategoriju
+ * Primeni var(--card-font-size) i reload aktivni feed
  */
 function applyCardFontSize() {
   document.documentElement.style.setProperty('--card-font-size', currentCardFontSize + 'px');
   localStorage.setItem('cardFontSize', currentCardFontSize);
 
+  // Ponovo učitaj feed za aktivnu kategoriju
   const activeTab = document.querySelector('.tab.active');
   if (!activeTab) return;
   const cat = activeTab.getAttribute('data-tab');
@@ -51,19 +50,8 @@ function applyCardFontSize() {
   }
 }
 
-function increaseFontSize() {
-  currentCardFontSize++;
-  if (currentCardFontSize > 40) currentCardFontSize = 40;
-  applyCardFontSize();
-}
-function decreaseFontSize() {
-  currentCardFontSize--;
-  if (currentCardFontSize < 10) currentCardFontSize = 10;
-  applyCardFontSize();
-}
-
 /**
- * Funkcije za (un)block izvora
+ * Blokiranje/deblokiranje izvora
  */
 function blockSource(src) {
   if (!blockedSources.includes(src)) {
@@ -80,7 +68,7 @@ function isSourceBlocked(src) {
 }
 
 /**
- * Funkcije za (un)block kategorije
+ * Blokiranje/deblokiranje kategorije
  */
 function blockCategory(cat) {
   if (!blockedCategories.includes(cat)) {
@@ -97,14 +85,14 @@ function isCategoryBlocked(cat) {
 }
 
 /**
- * buildTabs -> prikazuje sve tabove (osim Neueste, Aktuell), 
- * preskačući blokirane
+ * Dinamičko kreiranje tabova (sem Neueste, Aktuell),
+ * preskačemo blokirane kategorije.
  */
 function buildTabs() {
   const tabsContainer = document.getElementById('tabs-container');
   if (!tabsContainer) return;
 
-  // Uklonimo sve sem Neueste, Aktuell
+  // Brišemo sve osim Neueste, Aktuell
   const existingTabs = tabsContainer.querySelectorAll('.tab:not([data-tab="Neueste"]):not([data-tab="Aktuell"])');
   existingTabs.forEach(t => t.remove());
 
@@ -124,7 +112,7 @@ function buildTabs() {
 }
 
 /**
- * openRearrangeModal -> modal za kategorije, drag&drop + (un)block
+ * Funkcije za Drag & Drop rearrange kategorija
  */
 function openRearrangeModal() {
   const kategorienModal = document.getElementById('kategorien-modal');
@@ -145,19 +133,15 @@ function openRearrangeModal() {
     li.draggable = true;
     li.textContent = cat;
 
-    const isBlockedCat = isCategoryBlocked(cat);
+    // Verbergen / Entsperren
     const btn = document.createElement('button');
-    btn.className = isBlockedCat ? 'unblock-button' : 'block-button';
-    btn.textContent = isBlockedCat ? 'Entsperren' : 'Verbergen';
-
+    btn.textContent = isCategoryBlocked(cat) ? 'Entsperren' : 'Verbergen';
     btn.onclick = () => {
       if (isCategoryBlocked(cat)) {
         unblockCategory(cat);
-        btn.className = 'block-button';
         btn.textContent = 'Verbergen';
       } else {
         blockCategory(cat);
-        btn.className = 'unblock-button';
         btn.textContent = 'Entsperren';
       }
     };
@@ -181,7 +165,7 @@ function closeKategorienModal() {
   const ul = document.getElementById('sortable-list');
   if (!ul) return;
   const items = [...ul.children].map(li =>
-    li.textContent.replace('Verbergen', '').replace('Entsperren', '').trim()
+    li.textContent.split('Verbergen')[0].split('Entsperren')[0].trim()
   );
   categoriesOrder = items;
   localStorage.setItem('categoriesOrder', JSON.stringify(categoriesOrder));
@@ -190,7 +174,6 @@ function closeKategorienModal() {
   loadFeeds();
 }
 
-/** Drag & drop helperi */
 function handleDragStart(e) {
   e.dataTransfer.setData('text/plain', e.target.textContent.trim());
   e.target.style.opacity = '0.4';
@@ -220,9 +203,9 @@ function handleDrop(e) {
 }
 
 /**
- * openQuellenModal -> prikaz svih izvora (sorteiranih abecedno)
+ * Modal za Quellen
  */
-async function openQuellenModal() {
+function openQuellenModal() {
   const quellenModal = document.getElementById('quellen-modal');
   if (!quellenModal) return;
   quellenModal.style.display = 'flex';
@@ -231,27 +214,9 @@ async function openQuellenModal() {
   if (!sourcesListEl) return;
   sourcesListEl.innerHTML = '';
 
-  let allFeeds = [];
-  try {
-    // Ovde NEMA slice(0,10) itd, uzimamo sve
-    allFeeds = await fetchAllFeedsFromServer(false);
-  } catch (err) {
-    console.error("[openQuellenModal] Greška:", err);
-    allFeeds = [];
-  }
-
-  // Napravimo set izvora
-  const uniqueSources = new Set();
-  allFeeds.forEach(feed => {
-    if (feed.source) {
-      uniqueSources.add(feed.source);
-    }
-  });
-
-  // Abecedno
-  const sortedSources = Array.from(uniqueSources).sort();
-
-  sortedSources.forEach(src => {
+  // Hardkodovani izvori (ili dohvatiti dinamički iz feeda)
+  const newsSources = ['Bild', 'Zeit', 'Blick', 'Heise', 'Spiegel', 'Falter'];
+  newsSources.forEach(src => {
     const sourceItem = document.createElement('div');
     sourceItem.className = 'source-item';
 
@@ -290,9 +255,7 @@ function closeQuellenModal() {
   loadFeeds();
 }
 
-/**
- * initSwipe -> prelazak između kategorija dodirom
- */
+/** initSwipe - ispravljeno: .click() + setTimeout(() => scrollTop=0, 300) */
 function initSwipe() {
   const swipeContainer = document.getElementById('news-container');
   if (!swipeContainer) return;
@@ -346,7 +309,9 @@ function initSwipe() {
       if (neueste) neueste.click();
       return;
     }
+    // Kliknemo -> feed se učita (async). 
     tab.click();
+    // Posle 300ms, skrolujemo gore
     setTimeout(() => {
       swipeContainer.scrollTop = 0;
     }, 300);
@@ -365,9 +330,7 @@ function initSwipe() {
   });
 }
 
-/**
- * loadFeeds -> simuliramo klik na "Neueste"
- */
+/** loadFeeds -> simuliramo klik na Neueste */
 function loadFeeds(defaultTab = 'Neueste') {
   const tabBtn = document.querySelector(`.tab[data-tab="${defaultTab}"]`);
   if (tabBtn) {
@@ -375,20 +338,37 @@ function loadFeeds(defaultTab = 'Neueste') {
   }
 }
 
-/**
- * Glavni init
- */
-document.addEventListener('DOMContentLoaded', () => {
+/** Poveć/smanji font-size */
+function increaseFontSize() {
+  currentCardFontSize++;
+  if (currentCardFontSize > 40) currentCardFontSize = 40;
   applyCardFontSize();
+}
+function decreaseFontSize() {
+  currentCardFontSize--;
+  if (currentCardFontSize < 10) currentCardFontSize = 10;
+  applyCardFontSize();
+}
+
+/** Glavni init */
+document.addEventListener('DOMContentLoaded', () => {
+  // 1) Primeni font
+  applyCardFontSize();
+
+  // 2) Napravi tabove
   buildTabs();
+
+  // 3) Omogući swipe
   initSwipe();
 
+  // 4) Tabs event
   const tabsContainer = document.getElementById('tabs-container');
   if (tabsContainer) {
     tabsContainer.addEventListener('click', async (e) => {
       const tab = e.target.closest('.tab');
       if (!tab) return;
 
+      // Deaktiviraj stare
       const allTabs = document.querySelectorAll('.tab');
       allTabs.forEach(t => {
         t.classList.remove('active');
@@ -401,6 +381,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const container = document.getElementById('news-container');
       if (!container) return;
 
+      // async ucitavanje feeda
       if (cat === 'Neueste') {
         await displayNeuesteFeeds();
       } else if (cat === 'Aktuell') {
@@ -408,10 +389,12 @@ document.addEventListener('DOMContentLoaded', () => {
       } else {
         await displayNewsByCategory(cat);
       }
+      // Posle ucitavanja, skrol na vrh
       container.scrollTop = 0;
     });
   }
 
+  // default -> Neueste
   loadFeeds();
 
   // Settings
@@ -457,7 +440,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
-  // Font-size
+  // Schriftgröße
   const incBtn = document.getElementById('font-increase');
   if (incBtn) incBtn.onclick = increaseFontSize;
   const decBtn = document.getElementById('font-decrease');

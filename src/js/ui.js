@@ -1,53 +1,13 @@
 /**
  * ui.js
  * 
- * Dodate funkcije showLoader/hideLoader i showErrorMessage/hideErrorMessage
- * Uklonjene sve reference na LGBT+ (nije ih ni bilo).
+ * Ovaj fajl se bavi prikazom korisničkog interfejsa (UI) - tutorial overlay,
+ * ažuriranje indicatora, lazy loading, manipulacija tabovima (dodavanje/uklanjanje klasa).
  */
 
-const loaderEl = document.getElementById('loader');
-const errorEl = document.getElementById('error-container');
-
 /**
- * Funkcija za prikaz loadera
- */
-export function showLoader() {
-  if (loaderEl) {
-    loaderEl.style.display = 'block';
-  }
-}
-
-/**
- * Funkcija za sakrivanje loadera
- */
-export function hideLoader() {
-  if (loaderEl) {
-    loaderEl.style.display = 'none';
-  }
-}
-
-/**
- * Funkcija za prikaz greške
- */
-export function showErrorMessage(msg) {
-  if (errorEl) {
-    errorEl.textContent = msg;
-    errorEl.style.display = 'block';
-  }
-}
-
-/**
- * Sakrij error poruku
- */
-export function hideErrorMessage() {
-  if (errorEl) {
-    errorEl.style.display = 'none';
-    errorEl.textContent = '';
-  }
-}
-
-/**
- * Funkcija za prikaz tutorial overlaya, ako treba...
+ * Funkcija za prikazivanje modernog tutorial overlaya
+ * samo pri prvom pokretanju aplikacije.
  */
 export function checkAndShowTutorial() {
   const tutorialShown = localStorage.getItem('tutorialShown');
@@ -58,7 +18,8 @@ export function checkAndShowTutorial() {
 }
 
 /**
- * Zatvaranje tutorial overlaya
+ * Funkcija za zatvaranje tutorial overlaya i setovanje
+ * localStorage flag-a da se ne prikazuje ponovo.
  */
 export function closeTutorialOverlay() {
   const overlay = document.getElementById('tutorial-overlay');
@@ -69,7 +30,7 @@ export function closeTutorialOverlay() {
 }
 
 /**
- * Uklanja "active" sa svih tabova
+ * Funkcija koja uklanja klasu 'active' sa svih tabova.
  */
 export function removeActiveClass() {
   const allTabs = document.querySelectorAll('.tab');
@@ -81,7 +42,7 @@ export function removeActiveClass() {
 }
 
 /**
- * Zeleni okvir oko aktivnog taba
+ * Funkcija koja prikazuje zeleni okvir oko aktivnog taba.
  */
 export function showGreenRectangle() {
   const activeTab = document.querySelector('.tab.active');
@@ -91,7 +52,7 @@ export function showGreenRectangle() {
 }
 
 /**
- * Uklanja zeleni okvir
+ * Funkcija koja uklanja zeleni okvir (koristi se samo na početku).
  */
 export function hideGreenRectangle() {
   const homeTab = document.querySelector('.tab[data-tab="Neueste"]');
@@ -101,7 +62,7 @@ export function hideGreenRectangle() {
 }
 
 /**
- * Ažuriranje category indicator-a
+ * Funkcija za ažuriranje naziva prikazane kategorije (category indicator).
  */
 export function updateCategoryIndicator(categoryName) {
   const categoryIndicator = document.querySelector('.category-indicator');
@@ -118,4 +79,35 @@ export function updateCategoryIndicator(categoryName) {
   }
 }
 
+/**
+ * Funkcija koja inicijalizuje lazy loading za slike.
+ */
+export function initializeLazyLoading() {
+  const lazyImages = document.querySelectorAll('img.lazy');
+  if ("IntersectionObserver" in window) {
+    const imageObserver = new IntersectionObserver((entries, observer) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const img = entry.target;
+          img.src = img.dataset.src;
+          img.classList.remove("lazy");
+          img.classList.add("loaded");
+          observer.unobserve(img);
+        }
+      });
+    }, {
+      rootMargin: "0px 0px 50px 0px",
+      threshold: 0.01
+    });
 
+    lazyImages.forEach(img => {
+      imageObserver.observe(img);
+    });
+  } else {
+    // Fallback
+    lazyImages.forEach(img => {
+      img.src = img.dataset.src;
+      img.classList.remove("lazy");
+    });
+  }
+}

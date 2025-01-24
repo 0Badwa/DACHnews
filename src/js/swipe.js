@@ -1,5 +1,9 @@
 /**
  * swipe.js
+ * 
+ * Uklanjamo "Ohne Kategorie" i koristimo "Sonstiges".
+ * Ostalo je slično - kad menjamo kategoriju swipe-om, 
+ * skrolujemo news-container na vrh (da se vidi prva vest).
  */
 
 import { showGreenRectangle } from './ui.js';
@@ -13,6 +17,7 @@ export function initSwipe() {
   let touchendY = 0;
   const swipeThreshold = 50;
 
+  // pun redosled
   const categories = [
     "Neueste",
     "Aktuell",
@@ -28,6 +33,7 @@ export function initSwipe() {
     "Politik",
     "Unterhaltung",
     "Welt",
+    "LGBT+",
     "Sonstiges"
   ];
 
@@ -41,6 +47,21 @@ export function initSwipe() {
         showPreviousCategory();
       }
     }
+  }
+
+  if (swipeContainer) {
+    swipeContainer.addEventListener('touchstart', e => {
+      const t = e.changedTouches[0];
+      touchstartX = t.screenX;
+      touchstartY = t.screenY;
+    });
+
+    swipeContainer.addEventListener('touchend', e => {
+      const t = e.changedTouches[0];
+      touchendX = t.screenX;
+      touchendY = t.screenY;
+      handleGesture();
+    });
   }
 
   function showNextCategory() {
@@ -73,28 +94,15 @@ export function initSwipe() {
     clickTab(categories[idx]);
   }
 
-  function clickTab(cat) {
+  async function clickTab(cat) {
     const tab = document.querySelector(`.tab[data-tab="${cat}"]`);
     if (!tab) return;
     tab.click();
     setTimeout(() => {
+      // skrolujemo news-container na vrh
       if (swipeContainer) {
         swipeContainer.scrollTop = 0;
       }
     }, 300);
-  }
-
-  if (swipeContainer) {
-    swipeContainer.addEventListener('touchstart', e => {
-      const t = e.changedTouches[0];
-      touchstartX = t.screenX;
-      touchstartY = t.screenY;
-    });
-    swipeContainer.addEventListener('touchend', e => {
-      const t = e.changedTouches[0];
-      touchendX = t.screenX;
-      touchendY = t.screenY;
-      handleGesture();
-    });
   }
 }
