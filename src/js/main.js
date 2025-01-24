@@ -364,6 +364,10 @@ document.addEventListener('DOMContentLoaded', () => {
   buildTabs();
   initSwipe();
 
+// Učitaj slike za sve kategorije u pozadini čim se stranica učita
+  const allFeeds = await fetchAllFeedsFromServer();
+  preloadImages(allFeeds);
+  
   const tabsContainer = document.getElementById('tabs-container');
   if (tabsContainer) {
     tabsContainer.addEventListener('click', async (e) => {
