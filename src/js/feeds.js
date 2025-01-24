@@ -375,3 +375,16 @@ export async function displayNewsByCategory(category) {
   let catFeeds = await fetchCategoryFeeds(category);
   displayFeedsList(catFeeds, category);
 }
+
+
+/**
+ * Funkcija za preload slika u pozadini
+ */
+export function preloadImages(feeds) {
+  feeds.forEach(feed => {
+    if (feed.image) {
+      const img = new Image();
+      img.src = feed.image;
+    }
+  });
+}
