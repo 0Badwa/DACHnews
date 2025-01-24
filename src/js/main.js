@@ -6,8 +6,10 @@ import {
   displayNeuesteFeeds,
   displayAktuellFeeds,
   displayNewsByCategory,
+  initInfiniteScroll,
   fetchAllFeedsFromServer, // Dodato
-  preloadImages           // Dodato
+  preloadImages,
+  loadFeeds            // Uveri se da je loadFeeds eksportovano iz feeds.js
 } from './feeds.js';
 
 let categoriesOrder = [
