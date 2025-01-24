@@ -81,7 +81,7 @@ nav .menu button {
   left: 0; 
   right: 0;
   height: 30px; 
-  z-index: 999;
+  z-index: 1001;
   background-color: var(--secondary-color); /* #000 */
   border-bottom: 2px solid var(--border-color);
   overflow-x: auto;
@@ -90,6 +90,7 @@ nav .menu button {
   align-items: center;
   padding: 0.4rem 0;
     scroll-behavior: smooth; /* Smooth scroll animacija */
+    scroll-snap-type: x mandatory; 
   scroll-padding: 0 50%; /* Centriraj aktivni tab prilikom scroll-a */
 }
 .tabs-container button {
@@ -111,6 +112,11 @@ nav .menu button {
   border-radius: 5px;
   padding: 0.5rem 1rem;
   scroll-margin: 0 50px; /* Ostavi prostora sa strane prilikom scroll-a */
+}
+
+/* Novo: tab scroll-snap-align */
+.tab {
+  scroll-snap-align: start;
 }
 
 /* ========== 4) CATEGORY INDICATOR ========== */
