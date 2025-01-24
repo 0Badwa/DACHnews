@@ -299,6 +299,10 @@ function initSwipe() {
     clickTab(cats[idx]);
   }
 
+  /**
+   * Funkcija koja programatski aktivira tab i
+   * skroluje tabs-container ka tom tabu.
+   */
   function clickTab(cat) {
     const tab = document.querySelector(`.tab[data-tab="${cat}"]`);
     if (!tab) {
@@ -306,10 +310,10 @@ function initSwipe() {
       if (neueste) neueste.click();
       return;
     }
+    // Aktiviramo tab (što pokreće event listener za prikaz vesti)
     tab.click();
-    setTimeout(() => {
-      swipeContainer.scrollTop = 0;
-    }, 300);
+    // Pomeri tabs-container da centriramo izabrani tab
+    tab.scrollIntoView({ behavior: 'smooth', inline: 'center' });
   }
 
   swipeContainer.addEventListener('touchstart', e => {
@@ -364,6 +368,9 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       tab.classList.add('active');
       tab.setAttribute('aria-selected','true');
+
+      // Centriranje aktivnog taba unutar tabs-containera
+      tab.scrollIntoView({ behavior: 'smooth', inline: 'center' });
 
       const cat = tab.getAttribute('data-tab');
       const container = document.getElementById('news-container');
