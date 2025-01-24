@@ -1,16 +1,24 @@
-/**
+/************************************************
  * feeds.js
  *
- * - Uklanjamo svuda "LGBT+"
- * - Dodajemo loader i error message oko fetch-a
- * - Pomoćne funkcije za prikaz vesti
- */
+ * - Uklonjene eventualne reference na "Neueste" kategoriju.
+ * - Dodati loader i error message (već implementirano u main.js).
+ * - Dodatna funkcija za prikaz svih kategorija ("displayAllCategories"),
+ *   uklonjena greška "container is not defined".
+ ************************************************/
 
-import { initializeLazyLoading, updateCategoryIndicator, showLoader, hideLoader, showErrorMessage } from './ui.js';
+import {
+  initializeLazyLoading,
+  updateCategoryIndicator,
+  showLoader,
+  hideLoader,
+  showErrorMessage
+} from './ui.js';
+
 import { openNewsModal } from './newsModal.js';
 
 /**
- * Vreme "pre X minuta/sati/dana"
+ * Formatira datum u stil "vor X Minuten/Stunden/Tagen..." (nemački).
  */
 function timeAgo(dateString) {
   if (!dateString) return '';
@@ -36,6 +44,9 @@ function timeAgo(dateString) {
   return `gerade eben`;
 }
 
+/**
+ * Dohvata niz skrivenih izvora iz localStorage.
+ */
 function getHiddenSources() {
   try {
     return JSON.parse(localStorage.getItem('hiddenSources') || '[]');
@@ -44,6 +55,9 @@ function getHiddenSources() {
   }
 }
 
+/**
+ * Dohvata niz skrivenih kategorija iz localStorage.
+ */
 function getHiddenCategories() {
   try {
     return JSON.parse(localStorage.getItem('hiddenCategories') || '[]');
@@ -52,27 +66,39 @@ function getHiddenCategories() {
   }
 }
 
+/**
+ * Proverava da li treba sakriti dati feed na osnovu izvora ili kategorije.
+ */
 function isHiddenFeed(feed) {
   const hiddenSources = getHiddenSources();
   const hiddenCats = getHiddenCategories();
 
+  // "Ohne Kategorie" tretiramo kao "Sonstiges"
   const cat = (feed.category === "Ohne Kategorie") ? "Sonstiges" : feed.category;
+
   if (hiddenCats.includes(cat)) return true;
   if (feed.source && hiddenSources.includes(feed.source.toLowerCase())) return true;
+
   return false;
 }
 
 /**
- * Fetch 50 najnovijih feed-ova ("/api/feeds"), keširano 10 min.
+ * Fetch 50 najnovijih feed-ova ("/api/feeds"), keširano 10 minuta.
  */
 export async function fetchAllFeedsFromServer(forceRefresh = false) {
   showLoader();
+
   try {
     const lastFetchKey = 'feeds-Aktuell-lastFetch';
     const cachedFeedsKey = 'feeds-Aktuell';
     const lastFetchTime = localStorage.getItem(lastFetchKey);
 
-    if (!forceRefresh && lastFetchTime && (Date.now() - new Date(lastFetchTime).getTime()) < 10 * 60 * 1000) {
+    // Ako nije forceRefresh i imamo keš kraći od 10 min, vrati iz localStorage
+    if (
+      !forceRefresh &&
+      lastFetchTime &&
+      (Date.now() - new Date(lastFetchTime).getTime()) < 10 * 60 * 1000
+    ) {
       const cachedFeeds = localStorage.getItem(cachedFeedsKey);
       if (cachedFeeds) {
         let data = JSON.parse(cachedFeeds);
@@ -82,6 +108,7 @@ export async function fetchAllFeedsFromServer(forceRefresh = false) {
       }
     }
 
+    // Inače fetchujemo sa servera
     const response = await fetch("/api/feeds");
     if (!response.ok) throw new Error("Neuspešno preuzimanje /api/feeds");
 
@@ -89,10 +116,12 @@ export async function fetchAllFeedsFromServer(forceRefresh = false) {
     data.sort((a, b) => new Date(b.date_published).getTime() - new Date(a.date_published).getTime());
     data = data.filter(feed => !isHiddenFeed(feed));
 
+    // Skladištimo u keš
     localStorage.setItem(cachedFeedsKey, JSON.stringify(data));
     localStorage.setItem(lastFetchKey, new Date().toISOString());
 
     return data.slice(0, 50);
+
   } catch (error) {
     console.error(error);
     showErrorMessage("Fehler: /api/feeds konnte nicht geladen werden.");
@@ -103,17 +132,24 @@ export async function fetchAllFeedsFromServer(forceRefresh = false) {
 }
 
 /**
- * Fetch 50 najnovijih feedova za kategoriju, keširano 10 min.
+ * Fetch 50 najnovijih feedova za kategoriju, keširano 10 minuta.
  */
 export async function fetchCategoryFeeds(category, forceRefresh = false) {
   showLoader();
+
   try {
+    // "Sonstiges" => "Uncategorized" na serveru
     const catForUrl = (category === "Sonstiges") ? "Uncategorized" : category;
     const lastFetchKey = `feeds-${catForUrl}-lastFetch`;
     const cachedFeedsKey = `feeds-${catForUrl}`;
     const lastFetchTime = localStorage.getItem(lastFetchKey);
 
-    if (!forceRefresh && lastFetchTime && (Date.now() - new Date(lastFetchTime).getTime()) < 10 * 60 * 1000) {
+    // Ako nije forceRefresh i imamo keš kraći od 10 min, vrati iz localStorage
+    if (
+      !forceRefresh &&
+      lastFetchTime &&
+      (Date.now() - new Date(lastFetchTime).getTime()) < 10 * 60 * 1000
+    ) {
       const cached = localStorage.getItem(cachedFeedsKey);
       if (cached) {
         let data = JSON.parse(cached);
@@ -123,6 +159,7 @@ export async function fetchCategoryFeeds(category, forceRefresh = false) {
       }
     }
 
+    // Inače, fetchujemo za tu kategoriju
     const url = `/api/feeds-by-category/${encodeURIComponent(catForUrl)}`;
     const response = await fetch(url);
     if (!response.ok) throw new Error("Neuspešno preuzimanje kategorije: " + category);
@@ -131,10 +168,12 @@ export async function fetchCategoryFeeds(category, forceRefresh = false) {
     data.sort((a, b) => new Date(b.date_published).getTime() - new Date(a.date_published).getTime());
     data = data.filter(feed => !isHiddenFeed(feed));
 
+    // Skladištimo u keš
     localStorage.setItem(cachedFeedsKey, JSON.stringify(data));
     localStorage.setItem(lastFetchKey, new Date().toISOString());
 
     return data.slice(0, 50);
+
   } catch (error) {
     console.error(error);
     showErrorMessage(`Fehler: /api/feeds-by-category/${category} konnte nicht geladen werden.`);
@@ -145,7 +184,7 @@ export async function fetchCategoryFeeds(category, forceRefresh = false) {
 }
 
 /**
- * Kreira jednu "news card".
+ * Kreira jednu "news card" za prikaz.
  */
 function createNewsCard(feed) {
   const card = document.createElement('div');
@@ -180,8 +219,10 @@ function createNewsCard(feed) {
 
   meta.appendChild(sourceSpan);
   meta.appendChild(timeSpan);
+
   contentDiv.appendChild(title);
   contentDiv.appendChild(meta);
+
   card.appendChild(img);
   card.appendChild(contentDiv);
 
@@ -189,7 +230,7 @@ function createNewsCard(feed) {
 }
 
 /**
- * Prikazuje listu vesti.
+ * Prikazuje listu feedova (vesti) unutar #news-container.
  */
 export function displayFeedsList(feedsList, categoryName) {
   const container = document.getElementById('news-container');
@@ -215,14 +256,14 @@ export function displayFeedsList(feedsList, categoryName) {
   updateCategoryIndicator(categoryName);
   initializeLazyLoading();
 
-  // >>> Dodato: posle renderovanja vrati scrollTop na 0
+  // Posle renderovanja, vrati scrollTop na 0
   requestAnimationFrame(() => {
     container.scrollTop = 0;
   });
 }
 
 /**
- * "Aktuell" -> sve vesti
+ * Prikazuje "Aktuell" feedove (sve najnovije).
  */
 export async function displayAktuellFeeds() {
   const container = document.getElementById('news-container');
@@ -233,103 +274,12 @@ export async function displayAktuellFeeds() {
 }
 
 /**
- * Uzimanje slučajnih elemenata.
+ * Uzima nasumične elemente iz niza.
  */
 function pickRandom(array, count) {
   if (array.length <= count) return array;
   const shuffled = array.sort(() => 0.5 - Math.random());
   return shuffled.slice(0, count);
-}
-
-/**
- * "Neueste" -> 4 vesti iz poslednjih X sati, zatim po 4 iz svake kategorije.
- */
-export async function displayNeuesteFeeds() {
-  const container = document.getElementById('news-container');
-  if (!container) return;
-  container.innerHTML = '';
-
-  let allFeeds = await fetchAllFeedsFromServer();
-  const now = Date.now();
-
-  let filtered = allFeeds.filter(feed => {
-    if (!feed.date_published) return false;
-    return (now - new Date(feed.date_published).getTime()) <= (2 * 60 * 60 * 1000);
-  });
-  if (filtered.length < 4) {
-    filtered = allFeeds.filter(feed => {
-      if (!feed.date_published) return false;
-      return (now - new Date(feed.date_published).getTime()) <= (4 * 60 * 60 * 1000);
-    });
-  }
-  if (filtered.length < 4) {
-    filtered = allFeeds.filter(feed => {
-      if (!feed.date_published) return false;
-      return (now - new Date(feed.date_published).getTime()) <= (24 * 60 * 60 * 1000);
-    });
-  }
-
-  const top4Neueste = pickRandom(filtered, 4);
-  top4Neueste.sort((a, b) => new Date(b.date_published).getTime() - new Date(a.date_published).getTime());
-
-  top4Neueste.forEach(feed => {
-    const card = createNewsCard(feed);
-    container.appendChild(card);
-  });
-
-  const categories = [
-    "Technologie",
-    "Gesundheit",
-    "Sport",
-    "Wirtschaft",
-    "Kultur",
-    "Auto",
-    "Reisen",
-    "Lifestyle",
-    "Panorama",
-    "Politik",
-    "Unterhaltung",
-    "Welt",
-    "Sonstiges"
-  ];
-
-  const fetchPromises = categories.map(async (cat) => {
-    let catFeeds = await fetchCategoryFeeds(cat);
-    return { cat, feeds: catFeeds };
-  });
-
-  const results = await Promise.all(fetchPromises);
-
-  results.forEach(({ cat, feeds }) => {
-    if (!feeds || feeds.length === 0) return;
-
-    feeds.sort((a, b) => new Date(b.date_published).getTime() - new Date(a.date_published).getTime());
-    const top4 = feeds.slice(0, 4);
-
-    const heading = document.createElement('h2');
-    heading.textContent = cat;
-    heading.style.backgroundColor = "#000";
-    heading.style.color = "var(--primary-color)";
-    heading.style.padding = "4px";
-    heading.style.marginTop = "0.4rem";
-    heading.style.marginBottom = "4px";
-    heading.style.fontSize = "1.1rem";
-    heading.style.textAlign = "center";
-    container.appendChild(heading);
-
-    top4.forEach(feed => {
-      const card = createNewsCard(feed);
-      container.appendChild(card);
-    });
-  });
-
-  updateCategoryIndicator("Neueste Nachrichten");
-  initializeLazyLoading();
-
-  // >>> posle renderovanja vrati scrollTop na 0
-  requestAnimationFrame(() => {
-    container.scrollTop = 0;
-  });
 }
 
 /**
@@ -362,4 +312,70 @@ export async function displayNewsByCategory(category) {
 
   let catFeeds = await fetchCategoryFeeds(category);
   displayFeedsList(catFeeds, category);
+}
+
+/**
+ * Prikazuje sve definisane kategorije (po 4 feed-a) unutar #news-container.
+ * Može se prilagoditi po želji (npr. za stranicu "Home" ili slično).
+ */
+export async function displayAllCategories() {
+  const container = document.getElementById('news-container');
+  if (!container) return;
+
+  // Definišemo koje kategorije želimo
+  const categories = [
+    "Technologie",
+    "Gesundheit",
+    "Sport",
+    "Wirtschaft",
+    "Kultur",
+    "Auto",
+    "Reisen",
+    "Lifestyle",
+    "Panorama",
+    "Politik",
+    "Unterhaltung",
+    "Welt",
+    "Sonstiges"
+  ];
+
+  // Fetchujemo svaku kategoriju paralelno
+  const fetchPromises = categories.map(async (cat) => {
+    let catFeeds = await fetchCategoryFeeds(cat);
+    return { cat, feeds: catFeeds };
+  });
+
+  // Čekamo da se svi fetch-ovi završe
+  const results = await Promise.all(fetchPromises);
+
+  // Za svaku kategoriju, prikazujemo h2 i 4 najnovije vesti
+  results.forEach(({ cat, feeds }) => {
+    if (!feeds || feeds.length === 0) return;
+
+    feeds.sort((a, b) => new Date(b.date_published).getTime() - new Date(a.date_published).getTime());
+    const top4 = feeds.slice(0, 4);
+
+    // Naslov kategorije
+    const heading = document.createElement('h2');
+    heading.textContent = cat;
+    heading.style.backgroundColor = "#000";
+    heading.style.color = "var(--primary-color)";
+    heading.style.padding = "4px";
+    heading.style.marginTop = "0.4rem";
+    heading.style.marginBottom = "4px";
+    heading.style.fontSize = "1.1rem";
+    heading.style.textAlign = "center";
+    container.appendChild(heading);
+
+    // Kartice feedova
+    top4.forEach(feed => {
+      const card = createNewsCard(feed);
+      container.appendChild(card);
+    });
+  });
+
+  // Posle renderovanja, vrati scrollTop na 0
+  requestAnimationFrame(() => {
+    container.scrollTop = 0;
+  });
 }

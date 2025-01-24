@@ -3,7 +3,6 @@
  ************************************************/
 
 import {
-  displayNeuesteFeeds,
   displayAktuellFeeds,
   displayNewsByCategory
 } from './feeds.js';
@@ -33,11 +32,7 @@ function applyCardFontSize() {
   const container = document.getElementById('news-container');
   if (!cat || !container) return;
 
-  if (cat === 'Neueste') {
-    displayNeuesteFeeds().then(() => {
-      container.scrollTop = 0;
-    });
-  } else if (cat === 'Aktuell') {
+  if (cat === 'Aktuell') {
     displayAktuellFeeds().then(() => {
       container.scrollTop = 0;
     });
@@ -77,14 +72,14 @@ function isCategoryBlocked(cat) {
 }
 
 /**
- * Dinamičko kreiranje tabova (sem Neueste, Aktuell),
+ * Dinamičko kreiranje tabova (sem Aktuell),
  * preskačemo blokirane kategorije.
  */
 function buildTabs() {
   const tabsContainer = document.getElementById('tabs-container');
   if (!tabsContainer) return;
 
-  const existingTabs = tabsContainer.querySelectorAll('.tab:not([data-tab="Neueste"]):not([data-tab="Aktuell"])');
+  const existingTabs = tabsContainer.querySelectorAll('.tab:not([data-tab="Aktuell"])');
   existingTabs.forEach(t => t.remove());
 
   const savedOrder = localStorage.getItem('categoriesOrder');
@@ -256,7 +251,7 @@ function initSwipe() {
   const swipeThreshold = 50;
 
   function getAllSwipeCategories() {
-    const arr = ["Neueste", "Aktuell"];
+    const arr = ["Aktuell"];
     categoriesOrder.forEach(cat => {
       if (!isCategoryBlocked(cat)) {
         arr.push(cat);
@@ -264,6 +259,7 @@ function initSwipe() {
     });
     return arr;
   }
+  
 
   function handleGesture() {
     const distX = touchendX - touchstartX;
@@ -302,11 +298,14 @@ function initSwipe() {
     const tabsContainer = document.getElementById('tabs-container');
     const swipeContainer = document.getElementById('news-container');
     const tab = document.querySelector(`.tab[data-tab="${cat}"]`);
+  
+    // Ako tab nije pronađen, prebacujemo se na "Aktuell" kao podrazumevani
     if (!tab) {
-      const neueste = document.querySelector('.tab[data-tab="Neueste"]');
-      if (neueste) neueste.click();
+      const aktuell = document.querySelector('.tab[data-tab="Aktuell"]');
+      if (aktuell) aktuell.click();
       return;
     }
+  
 
     // Ručno centriranje taba unutar tabsContainer
     if (tabsContainer && tab) {
@@ -338,8 +337,8 @@ function initSwipe() {
   });
 }
 
-/** loadFeeds -> simuliramo klik na Neueste */
-function loadFeeds(defaultTab = 'Neueste') {
+/** loadFeeds -> simuliramo klik na Aktuell */
+function loadFeeds(defaultTab = 'Aktuell') {
   const tabBtn = document.querySelector(`.tab[data-tab="${defaultTab}"]`);
   if (tabBtn) {
     tabBtn.click();
@@ -382,13 +381,12 @@ document.addEventListener('DOMContentLoaded', () => {
       const container = document.getElementById('news-container');
       if (!container) return;
 
-      if (cat === 'Neueste') {
-        await displayNeuesteFeeds();
-      } else if (cat === 'Aktuell') {
+      if (cat === 'Aktuell') {
         await displayAktuellFeeds();
       } else {
         await displayNewsByCategory(cat);
       }
+      
 
       // Posle učitavanja, resetuj scroll
       requestAnimationFrame(() => {

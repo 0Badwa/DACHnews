@@ -27,10 +27,10 @@ export function restoreAppState() {
       tabButton.click();
     }
   } else {
-    // Ako nema sacuvanog taba, kliknemo na Neueste
-    const neuesteTab = document.querySelector('.tab[data-tab="Neueste"]');
-    if (neuesteTab) {
-      neuesteTab.click();
+    // Ako nema sacuvanog taba, kliknemo na Aktuell
+    const aktuellTab = document.querySelector('.tab[data-tab="Aktuell"]');
+    if (aktuellTab) {
+      aktuellTab.click();
     }
   }
   if (savedPosition) {

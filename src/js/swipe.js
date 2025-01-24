@@ -15,7 +15,6 @@ export function initSwipe() {
   const swipeThreshold = 50;
 
   const categories = [
-    "Neueste",
     "Aktuell",
     "Technologie",
     "Gesundheit",

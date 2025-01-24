@@ -316,3 +316,6 @@ export async function processFeeds() {
 
   console.log("[processFeeds] Završeno dodavanje novih feedova u Redis.");
 }
+
+// Primer koda koji se dodaje
+console.log("[DEBUG] Debugging message for feedsService.js");

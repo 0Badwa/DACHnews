@@ -90,15 +90,6 @@ export function showGreenRectangle() {
   }
 }
 
-/**
- * Uklanja zeleni okvir
- */
-export function hideGreenRectangle() {
-  const homeTab = document.querySelector('.tab[data-tab="Neueste"]');
-  if (homeTab) {
-    homeTab.classList.remove('active-green');
-  }
-}
 
 /**
  * Ažuriranje category indicator-a
