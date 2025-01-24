@@ -119,7 +119,7 @@ async function smanjiSliku(buffer) {
   try {
     return await sharp(buffer)
       .resize(320, null, { fit: 'inside' })
-      .jpeg({ quality: 100 })
+      .webp({ quality: 80 })
       .toBuffer();
   } catch (error) {
     console.error("[smanjiSliku] Greška pri resize-u:", error);
