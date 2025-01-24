@@ -89,6 +89,7 @@ nav .menu button {
   display: flex; 
   align-items: center;
   padding: 0.4rem 0;
+  scroll-padding: 0 50%; /* Centriraj aktivni tab prilikom scroll-a */
 }
 .tabs-container button {
   background: none;
@@ -108,6 +109,7 @@ nav .menu button {
   color: #fff;
   border-radius: 5px;
   padding: 0.5rem 1rem;
+  scroll-margin: 0 50px; /* Ostavi prostora sa strane prilikom scroll-a */
 }
 
 /* ========== 4) CATEGORY INDICATOR ========== */
