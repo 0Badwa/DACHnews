@@ -16,7 +16,6 @@ let categoriesOrder = [
 let blockedSources = JSON.parse(localStorage.getItem('blockedSources') || '[]');
 let blockedCategories = JSON.parse(localStorage.getItem('blockedCategories') || '[]');
 
-// Promenljiva za font-size isključivo news-cards
 let currentCardFontSize = localStorage.getItem('cardFontSize')
   ? parseInt(localStorage.getItem('cardFontSize'), 10)
   : 16;
@@ -49,9 +48,6 @@ function applyCardFontSize() {
   }
 }
 
-/**
- * Blokiranje/deblokiranje izvora
- */
 function blockSource(src) {
   if (!blockedSources.includes(src)) {
     blockedSources.push(src);
@@ -66,9 +62,6 @@ function isSourceBlocked(src) {
   return blockedSources.includes(src);
 }
 
-/**
- * Blokiranje/deblokiranje kategorije
- */
 function blockCategory(cat) {
   if (!blockedCategories.includes(cat)) {
     blockedCategories.push(cat);
@@ -91,7 +84,6 @@ function buildTabs() {
   const tabsContainer = document.getElementById('tabs-container');
   if (!tabsContainer) return;
 
-  // Brišemo sve osim Neueste, Aktuell
   const existingTabs = tabsContainer.querySelectorAll('.tab:not([data-tab="Neueste"]):not([data-tab="Aktuell"])');
   existingTabs.forEach(t => t.remove());
 
@@ -276,7 +268,9 @@ function initSwipe() {
   function handleGesture() {
     const distX = touchendX - touchstartX;
     const distY = touchendY - touchstartY;
-    document.getElementById('news-container').scrollTop = 0;
+    // Uvek resetuj vertical scroll pre prelaska
+    swipeContainer.scrollTop = 0;
+
     if (Math.abs(distX) > Math.abs(distY) && Math.abs(distX) > swipeThreshold) {
       if (distX < 0) moveCategory(1);
       else moveCategory(-1);
@@ -297,23 +291,38 @@ function initSwipe() {
     if (idx >= cats.length) idx = cats.length - 1;
 
     clickTab(cats[idx]);
+
+    // Dodatno, za svaki slučaj, skroluj na vrh nakon malog delay-a
+    setTimeout(() => {
+      swipeContainer.scrollTop = 0;
+    }, 300);
   }
 
-  /**
-   * Funkcija koja programatski aktivira tab i
-   * skroluje tabs-container ka tom tabu.
-   */
   function clickTab(cat) {
+    const tabsContainer = document.getElementById('tabs-container');
+    const swipeContainer = document.getElementById('news-container');
     const tab = document.querySelector(`.tab[data-tab="${cat}"]`);
     if (!tab) {
       const neueste = document.querySelector('.tab[data-tab="Neueste"]');
       if (neueste) neueste.click();
       return;
     }
-    // Aktiviramo tab (što pokreće event listener za prikaz vesti)
+
+    // Ručno centriranje taba unutar tabsContainer
+    if (tabsContainer && tab) {
+      const leftPos = tab.offsetLeft - (tabsContainer.offsetWidth / 2) + (tab.offsetWidth / 2);
+      tabsContainer.scrollTo({
+        left: Math.max(leftPos, 0),
+        behavior: 'smooth'
+      });
+    }
+
     tab.click();
-    // Pomeri tabs-container da centriramo izabrani tab
-    tab.scrollIntoView({ behavior: 'smooth', inline: 'center' });
+
+    // Posle klika, osiguramo da news-container ide na vrh
+    requestAnimationFrame(() => {
+      if (swipeContainer) swipeContainer.scrollTop = 0;
+    });
   }
 
   swipeContainer.addEventListener('touchstart', e => {
@@ -369,9 +378,6 @@ document.addEventListener('DOMContentLoaded', () => {
       tab.classList.add('active');
       tab.setAttribute('aria-selected','true');
 
-      // Centriranje aktivnog taba unutar tabs-containera
-      tab.scrollIntoView({ behavior: 'smooth', inline: 'center' });
-
       const cat = tab.getAttribute('data-tab');
       const container = document.getElementById('news-container');
       if (!container) return;
@@ -383,7 +389,11 @@ document.addEventListener('DOMContentLoaded', () => {
       } else {
         await displayNewsByCategory(cat);
       }
-      container.scrollTop = 0;
+
+      // Posle učitavanja, resetuj scroll
+      requestAnimationFrame(() => {
+        container.scrollTop = 0;
+      });
     });
   }
 
