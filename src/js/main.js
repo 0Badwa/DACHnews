@@ -5,11 +5,7 @@
 import {
   displayNeuesteFeeds,
   displayAktuellFeeds,
-  displayNewsByCategory,
-  initInfiniteScroll,
-  fetchAllFeedsFromServer, // Dodato
-  preloadImages,
-  loadFeeds // Importovana iz feeds.js
+  displayNewsByCategory
 } from './feeds.js';
 
 let categoriesOrder = [
@@ -138,7 +134,6 @@ function openRearrangeModal() {
         blockCategory(cat);
         btn.textContent = 'Entsperren';
       }
-      loadFeeds(); // Poziva importovanu funkciju
     };
 
     li.appendChild(btn);
@@ -166,7 +161,7 @@ function closeKategorienModal() {
   localStorage.setItem('categoriesOrder', JSON.stringify(categoriesOrder));
 
   buildTabs();
-  loadFeeds(); // Poziva importovanu funkciju
+  loadFeeds();
 }
 
 function handleDragStart(e) {
@@ -232,7 +227,7 @@ function openQuellenModal() {
         blockBtn.className = 'unblock-button';
         blockBtn.textContent = 'Entsperren';
       }
-      loadFeeds(); // Poziva importovanu funkciju
+      loadFeeds();
     };
 
     sourceItem.appendChild(spanName);
@@ -246,7 +241,7 @@ function closeQuellenModal() {
   if (quellenModal) {
     quellenModal.style.display = 'none';
   }
-  loadFeeds(); // Poziva importovanu funkciju
+  loadFeeds();
 }
 
 /** initSwipe */
@@ -343,6 +338,14 @@ function initSwipe() {
   });
 }
 
+/** loadFeeds -> simuliramo klik na Neueste */
+function loadFeeds(defaultTab = 'Neueste') {
+  const tabBtn = document.querySelector(`.tab[data-tab="${defaultTab}"]`);
+  if (tabBtn) {
+    tabBtn.click();
+  }
+}
+
 /** Poveć/smanji font-size */
 function increaseFontSize() {
   currentCardFontSize++;
@@ -356,15 +359,11 @@ function decreaseFontSize() {
 }
 
 /** Glavni init */
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', () => {
   applyCardFontSize();
   buildTabs();
   initSwipe();
 
-  // Učitaj slike za sve kategorije u pozadini čim se stranica učita
-  const allFeeds = await fetchAllFeedsFromServer();
-  preloadImages(allFeeds);
-  
   const tabsContainer = document.getElementById('tabs-container');
   if (tabsContainer) {
     tabsContainer.addEventListener('click', async (e) => {
@@ -398,7 +397,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  loadFeeds(); // Poziva importovanu funkciju
+  loadFeeds();
 
   // Settings
   const menuButton = document.getElementById('menu-button');
