@@ -1,6 +1,6 @@
 /**
  * feeds.js
- * 
+ *
  * - Uklanjamo svuda "LGBT+"
  * - Dodajemo loader i error message oko fetch-a
  * - Pomoćne funkcije za prikaz vesti
@@ -56,9 +56,7 @@ function isHiddenFeed(feed) {
   const hiddenSources = getHiddenSources();
   const hiddenCats = getHiddenCategories();
 
-  // "Ohne Kategorie" -> "Sonstiges"
   const cat = (feed.category === "Ohne Kategorie") ? "Sonstiges" : feed.category;
-
   if (hiddenCats.includes(cat)) return true;
   if (feed.source && hiddenSources.includes(feed.source.toLowerCase())) return true;
   return false;
@@ -66,7 +64,6 @@ function isHiddenFeed(feed) {
 
 /**
  * Fetch 50 najnovijih feed-ova ("/api/feeds"), keširano 10 min.
- * Dodajemo showLoader/hideLoader i showErrorMessage.
  */
 export async function fetchAllFeedsFromServer(forceRefresh = false) {
   showLoader();
@@ -111,7 +108,6 @@ export async function fetchAllFeedsFromServer(forceRefresh = false) {
 export async function fetchCategoryFeeds(category, forceRefresh = false) {
   showLoader();
   try {
-    // "Sonstiges" -> "Uncategorized" za server
     const catForUrl = (category === "Sonstiges") ? "Uncategorized" : category;
     const lastFetchKey = `feeds-${catForUrl}-lastFetch`;
     const cachedFeedsKey = `feeds-${catForUrl}`;
@@ -200,6 +196,7 @@ export function displayFeedsList(feedsList, categoryName) {
   if (!container) return;
 
   container.innerHTML = '';
+
   if (!feedsList || feedsList.length === 0) {
     container.innerHTML = `<p>Nema vesti za kategoriju: ${categoryName}</p>`;
     updateCategoryIndicator(categoryName);
@@ -217,6 +214,11 @@ export function displayFeedsList(feedsList, categoryName) {
 
   updateCategoryIndicator(categoryName);
   initializeLazyLoading();
+
+  // >>> Dodato: posle renderovanja vrati scrollTop na 0
+  requestAnimationFrame(() => {
+    container.scrollTop = 0;
+  });
 }
 
 /**
@@ -275,7 +277,6 @@ export async function displayNeuesteFeeds() {
     container.appendChild(card);
   });
 
-  // Kategorije bez "LGBT+"
   const categories = [
     "Technologie",
     "Gesundheit",
@@ -324,6 +325,11 @@ export async function displayNeuesteFeeds() {
 
   updateCategoryIndicator("Neueste Nachrichten");
   initializeLazyLoading();
+
+  // >>> posle renderovanja vrati scrollTop na 0
+  requestAnimationFrame(() => {
+    container.scrollTop = 0;
+  });
 }
 
 /**
