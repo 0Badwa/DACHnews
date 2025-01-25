@@ -5,6 +5,8 @@
  * - Dodati loader i error message (već implementirano u main.js).
  * - Dodatna funkcija za prikaz svih kategorija ("displayAllCategories"),
  *   uklonjena greška "container is not defined".
+ * - Ispravljeno ažuriranje kategorije i resetovanje skrola.
+ * - Dodano osvežavanje aplikacije kada postane aktivna.
  ************************************************/
 
 import {
@@ -83,17 +85,26 @@ function isHiddenFeed(feed) {
 }
 
 /**
- * Fetch 50 najnovijih feed-ova ("/api/feeds"), keširano 10 minuta.
+ * Funkcija za preuzimanje do 50 najnovijih feed-ova iz "Aktuell" kategorije,
+ * umesto "/api/feeds" poziva "/api/feeds-by-category/Aktuell".
+ * Ako ruta ne postoji ili vraća grešku, ispisuje poruku i vraća prazan niz.
+ * Dodat je forceRefresh parametar za forsiranje osvežavanja keša.
  */
 export async function fetchAllFeedsFromServer(forceRefresh = false) {
   showLoader();
-
   try {
     const lastFetchKey = 'feeds-Aktuell-lastFetch';
     const cachedFeedsKey = 'feeds-Aktuell';
+
+    // Ako je forceRefresh, obriši keš
+    if (forceRefresh) {
+      localStorage.removeItem(lastFetchKey);
+      localStorage.removeItem(cachedFeedsKey);
+    }
+
     const lastFetchTime = localStorage.getItem(lastFetchKey);
 
-    // Ako nije forceRefresh i imamo keš kraći od 10 min, vrati iz localStorage
+    // Ako nije forceRefresh i cache je mlađi od 10 min, vrati keš.
     if (
       !forceRefresh &&
       lastFetchTime &&
@@ -108,22 +119,26 @@ export async function fetchAllFeedsFromServer(forceRefresh = false) {
       }
     }
 
-    // Inače fetchujemo sa servera
+    // U suprotnom, fetchujemo sa servera "Aktuell" kategoriju
     const response = await fetch("/api/feeds");
-    if (!response.ok) throw new Error("Neuspešno preuzimanje /api/feeds");
+    if (!response.ok) {
+      console.error("[fetchAllFeedsFromServer] Server returned status:", response.status);
+      showErrorMessage("Fehler: /api/feeds konnte nicht geladen werden.");
+      return [];
+    }
 
     let data = await response.json();
     data.sort((a, b) => new Date(b.date_published).getTime() - new Date(a.date_published).getTime());
     data = data.filter(feed => !isHiddenFeed(feed));
 
-    // Skladištimo u keš
+    // Skladištimo u localStorage keš
     localStorage.setItem(cachedFeedsKey, JSON.stringify(data));
     localStorage.setItem(lastFetchKey, new Date().toISOString());
 
     return data.slice(0, 50);
 
   } catch (error) {
-    console.error(error);
+    console.error("[fetchAllFeedsFromServer] Greška:", error);
     showErrorMessage("Fehler: /api/feeds konnte nicht geladen werden.");
     return [];
   } finally {
@@ -132,11 +147,10 @@ export async function fetchAllFeedsFromServer(forceRefresh = false) {
 }
 
 /**
- * Fetch 50 najnovijih feedova za kategoriju, keširano 10 minuta.
+ * Preuzima do 50 feedova iz odabrane kategorije ("/api/feeds-by-category/..."), keširano 10 min.
  */
 export async function fetchCategoryFeeds(category, forceRefresh = false) {
   showLoader();
-
   try {
     // "Sonstiges" => "Uncategorized" na serveru
     const catForUrl = (category === "Sonstiges") ? "Uncategorized" : category;
@@ -144,7 +158,7 @@ export async function fetchCategoryFeeds(category, forceRefresh = false) {
     const cachedFeedsKey = `feeds-${catForUrl}`;
     const lastFetchTime = localStorage.getItem(lastFetchKey);
 
-    // Ako nije forceRefresh i imamo keš kraći od 10 min, vrati iz localStorage
+    // Ako nije forceRefresh i cache je mlađi od 10 min, vrati keš.
     if (
       !forceRefresh &&
       lastFetchTime &&
@@ -159,23 +173,27 @@ export async function fetchCategoryFeeds(category, forceRefresh = false) {
       }
     }
 
-    // Inače, fetchujemo za tu kategoriju
+    // Ako nema keša ili je star, fetchujemo...
     const url = `/api/feeds-by-category/${encodeURIComponent(catForUrl)}`;
     const response = await fetch(url);
-    if (!response.ok) throw new Error("Neuspešno preuzimanje kategorije: " + category);
+    if (!response.ok) {
+      console.error(`[fetchCategoryFeeds] Server returned status ${response.status} za kategoriju: ${catForUrl}`);
+      showErrorMessage(`Fehler: /api/feeds-by-category/${category} konnte nicht geladen werden.`);
+      return [];
+    }
 
     let data = await response.json();
     data.sort((a, b) => new Date(b.date_published).getTime() - new Date(a.date_published).getTime());
     data = data.filter(feed => !isHiddenFeed(feed));
 
-    // Skladištimo u keš
+    // Čuvamo u keš
     localStorage.setItem(cachedFeedsKey, JSON.stringify(data));
     localStorage.setItem(lastFetchKey, new Date().toISOString());
 
     return data.slice(0, 50);
 
   } catch (error) {
-    console.error(error);
+    console.error("[fetchCategoryFeeds] Greška:", error);
     showErrorMessage(`Fehler: /api/feeds-by-category/${category} konnte nicht geladen werden.`);
     return [];
   } finally {
@@ -184,7 +202,7 @@ export async function fetchCategoryFeeds(category, forceRefresh = false) {
 }
 
 /**
- * Kreira jednu "news card" za prikaz.
+ * Kreira jednu "news card" za prikaz feed-a.
  */
 function createNewsCard(feed) {
   const card = document.createElement('div');
@@ -230,11 +248,14 @@ function createNewsCard(feed) {
 }
 
 /**
- * Prikazuje listu feedova (vesti) unutar #news-container.
+ * Prikazuje listu feedova (vesti) u #news-container.
  */
 export function displayFeedsList(feedsList, categoryName) {
   const container = document.getElementById('news-container');
   if (!container) return;
+
+// Postavi scrollTop na 0 pre učitavanja sadržaja
+container.scrollTop = 0;
 
   container.innerHTML = '';
 
@@ -254,16 +275,12 @@ export function displayFeedsList(feedsList, categoryName) {
   });
 
   updateCategoryIndicator(categoryName);
-  initializeLazyLoading();
-
-  // Posle renderovanja, vrati scrollTop na 0
-  requestAnimationFrame(() => {
-    container.scrollTop = 0;
-  });
+  
+  ;
 }
 
 /**
- * Prikazuje "Aktuell" feedove (sve najnovije).
+ * Prikazuje "Aktuell" feedove (sve najnovije) tako što poziva fetchAllFeedsFromServer().
  */
 export async function displayAktuellFeeds() {
   const container = document.getElementById('news-container');
@@ -274,7 +291,7 @@ export async function displayAktuellFeeds() {
 }
 
 /**
- * Uzima nasumične elemente iz niza.
+ * Pomoćna funkcija za uzimanje nasumičnih elemenata iz niza.
  */
 function pickRandom(array, count) {
   if (array.length <= count) return array;
@@ -283,7 +300,8 @@ function pickRandom(array, count) {
 }
 
 /**
- * Prikaz vesti po kategoriji, "Sonstiges" umesto "Ohne Kategorie".
+ * Prikaz vesti po kategoriji.
+ * "Sonstiges" => "Uncategorized" za fetch na serveru, a nazad prikažemo kao "Sonstiges".
  */
 export async function displayNewsByCategory(category) {
   const container = document.getElementById('news-container');
@@ -305,6 +323,7 @@ export async function displayNewsByCategory(category) {
     "Sonstiges"
   ];
 
+  // Ako je nepoznata kategorija, prebacujemo se na "Aktuell"
   if (!validCategories.includes(category)) {
     displayAktuellFeeds();
     return;
@@ -315,14 +334,13 @@ export async function displayNewsByCategory(category) {
 }
 
 /**
- * Prikazuje sve definisane kategorije (po 4 feed-a) unutar #news-container.
- * Može se prilagoditi po želji (npr. za stranicu "Home" ili slično).
+ * Prikazuje sve definisane kategorije (po 4 feed-a svaka) unutar #news-container.
  */
 export async function displayAllCategories() {
   const container = document.getElementById('news-container');
   if (!container) return;
 
-  // Definišemo koje kategorije želimo
+  // Kategorije koje želimo da prikažemo
   const categories = [
     "Technologie",
     "Gesundheit",
@@ -348,7 +366,7 @@ export async function displayAllCategories() {
   // Čekamo da se svi fetch-ovi završe
   const results = await Promise.all(fetchPromises);
 
-  // Za svaku kategoriju, prikazujemo h2 i 4 najnovije vesti
+  // Za svaku kategoriju prikazujemo h2 i najnovija 4 feeda
   results.forEach(({ cat, feeds }) => {
     if (!feeds || feeds.length === 0) return;
 
@@ -374,8 +392,73 @@ export async function displayAllCategories() {
     });
   });
 
-  // Posle renderovanja, vrati scrollTop na 0
+  // Posle renderisanja, skrol na vrh
   requestAnimationFrame(() => {
     container.scrollTop = 0;
   });
 }
+
+/**
+ * Dodaje event listener za osvežavanje aplikacije kada postane aktivna.
+ */
+export function initAppRefreshOnVisibilityChange() {
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      const activeTab = document.querySelector('.tab.active');
+      const category = activeTab ? activeTab.getAttribute('data-tab') : 'Aktuell';
+      
+      // Force refresh with cache bypass
+      if (category === 'Aktuell') {
+        displayAktuellFeeds(true); // true za force refresh
+      } else {
+        displayNewsByCategory(category, true);
+      }
+      
+      updateCategoryIndicator(category);
+    }
+  });
+}
+
+/**
+ * Inicijalizuje sve potrebne funkcije prilikom učitavanja skripte.
+ */
+export function initFeeds() {
+  // Dodajemo event listener za sve tabove
+  const tabs = document.querySelectorAll('.tab');
+  tabs.forEach(tab => {
+    tab.addEventListener('click', async () => {
+      if (tab.classList.contains('active')) return; // Ako je već aktivan, ništa ne radi
+      // Ukloni active klasu sa svih tabova
+      removeActiveClass();
+      // Dodaj active klasu na kliknuti tab
+      tab.classList.add('active');
+      // Dobavi kategoriju iz data atributa
+      const category = tab.getAttribute('data-tab');
+      // Prikaži vesti za tu kategoriju
+      await displayNewsByCategory(category);
+    });
+  });
+
+  // Inicijalizujemo osvežavanje aplikacije kada postane aktivna
+  initAppRefreshOnVisibilityChange();
+
+  // Prikazujemo početnu kategoriju (npr. Aktuell)
+  displayAktuellFeeds();
+}
+
+/**
+ * Uklanja "active" klasu sa svih tabova.
+ */
+function removeActiveClass() {
+  const allTabs = document.querySelectorAll('.tab');
+  allTabs.forEach(tab => {
+    tab.classList.remove('active');
+    tab.setAttribute('aria-selected', 'false');
+    tab.classList.remove('active-green');
+  });
+}
+
+// Inicijalizujemo feeds.js kada je DOM spreman
+document.addEventListener('DOMContentLoaded', () => {
+  initFeeds();
+});

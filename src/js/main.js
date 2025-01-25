@@ -381,10 +381,20 @@ document.addEventListener('DOMContentLoaded', () => {
       const container = document.getElementById('news-container');
       if (!container) return;
 
+      container.scrollTop = 0;
+
       if (cat === 'Aktuell') {
         await displayAktuellFeeds();
       } else {
         await displayNewsByCategory(cat);
+      // Dodati ovo u DOMContentLoaded event listener:
+document.getElementById('news-container').addEventListener('scroll', function() {
+  const activeTab = document.querySelector('.tab.active');
+  if (activeTab) {
+    const currentCat = activeTab.getAttribute('data-tab');
+    localStorage.setItem(`${currentCat}_scroll`, this.scrollTop);
+  }
+});
       }
       
 
