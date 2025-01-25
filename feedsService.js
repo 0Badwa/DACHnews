@@ -319,3 +319,23 @@ export async function processFeeds() {
 
 // Primer koda koji se dodaje
 console.log("[DEBUG] Debugging message for feedsService.js");
+
+/**
+ * Dohvata sve izvore iz Redis-a.
+ */
+export async function getAllSourcesFromRedis() {
+  try {
+    const keys = await redisClient.keys("source:*");
+    const sources = [];
+    for (const key of keys) {
+      const source = await redisClient.get(key);
+      if (source) {
+        sources.push(JSON.parse(source));
+      }
+    }
+    return sources;
+  } catch (error) {
+    console.error("[getAllSourcesFromRedis] Greška pri dohvaćanju izvora iz Redis-a:", error);
+    return [];
+  }
+}
