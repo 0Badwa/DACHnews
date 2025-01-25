@@ -142,7 +142,7 @@ nav .menu button {
 
 /* ========== 5) NEWS CONTAINER & CARDS ========== */
 #news-container {
-  margin-top: 0px;
+  margin-top: 130px;
   overflow-y: auto; /* Prikazuje scrollbar samo kad je potreban */
   padding: 0.3rem;
   /* Skriva scrollbar */
@@ -169,8 +169,6 @@ nav .menu button {
   cursor: pointer;
   /* Primeni var(--card-font-size) */
   font-size: var(--card-font-size);
-  transition: opacity 0.3s ease;
-  opacity: 0;
 }
 .news-card:hover {
   transform: scale(1.02);
@@ -224,8 +222,13 @@ nav .menu button {
   color: var(--text-color);
 }
 
-.news-card.loaded {
-  opacity: 1;
+/* Lazy loading */
+img.lazy {
+  filter: blur(5px);
+  transition: filter 0.3s;
+}
+img.lazy.loaded {
+  filter: none;
 }
 
 /* ========== 6) HEADINGS U SVAKOJ KATEGORIJI ========== */
