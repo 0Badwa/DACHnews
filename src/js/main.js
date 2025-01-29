@@ -215,7 +215,12 @@ function handleDrop(e) {
 /**
  * Modal za Quellen
  */
-  const sourcesListEl = document.getElementById('sources-list');
+function openQuellenModal() {
+  const quellenModal = document.getElementById('quellen-modal');
+  if (!quellenModal) return;
+  quellenModal.style.display = 'flex'; 
+
+const sourcesListEl = document.getElementById('sources-list');
   if (!sourcesListEl) return;
   sourcesListEl.innerHTML = '';
 
@@ -259,11 +264,7 @@ const newsSources = [
   });
 }
 
-function openQuellenModal() {
-  const quellenModal = document.getElementById('quellen-modal');
-  if (!quellenModal) return;
-  quellenModal.style.display = 'flex';
-  
+ 
 function closeQuellenModal() {
   const quellenModal = document.getElementById('quellen-modal');
   if (quellenModal) {
