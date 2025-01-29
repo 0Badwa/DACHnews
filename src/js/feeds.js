@@ -239,7 +239,7 @@ export function displayFeedsList(feedsList, categoryName) {
   container.innerHTML = '';
 
   if (!feedsList || feedsList.length === 0) {
-    container.innerHTML = `<p>Nema vesti za kategoriju: ${categoryName}</p>`;
+    container.innerHTML = `<p>Es gibt keine Nachrichten für die Kategorie: ${categoryName}</p>`;
     updateCategoryIndicator(categoryName);
     return;
   }
