@@ -515,7 +515,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (tutOverlay) tutOverlay.style.display = 'flex';
   }
 });
-
+/** iphone ide na blank page 
 document.addEventListener("DOMContentLoaded", function () {
   const closeTutorialBtn = document.getElementById("close-tutorial");
 
@@ -535,3 +535,4 @@ document.addEventListener("DOMContentLoaded", function () {
     };
   }
 });
+               */
