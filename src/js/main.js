@@ -199,7 +199,15 @@ function openQuellenModal() {
   if (!sourcesListEl) return;
   sourcesListEl.innerHTML = '';
 
-  const newsSources = ['Bild', 'Zeit', 'Blick', 'Heise', 'Spiegel', 'Falter'];
+const newsSources = [
+  'Aargauer Zeitung – AZ', 'AK - Analyse & Kritik', 'Augustin', 'Blick', 
+  'Cruiser Magazin', 'DER SPIEGEL', 'Der Freitag', 'Der Standard', 
+  'Die Tageszeitung', 'Die Wochenzeitung - WOZ', 'DISPLAY-Magazin', 
+  'Du und Ich', 'Falter', 'Jungle World', 'Kurier.at', 'Neues Deutschland', 
+  'P.S. Zeitung', 'Profil', 'queer.de', 'Salzburger Nachrichten', 
+  'SIEGESSÄULE', 'St. Galler Tagblatt', 'Süddeutsche', 'Tage Anzeiger', 
+  'Volksstimme', 'Vorwärts', 'Wiener Zeitung Online', 'ZEIT'
+];
   newsSources.forEach(src => {
     const sourceItem = document.createElement('div');
     sourceItem.className = 'source-item';
