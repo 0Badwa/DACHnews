@@ -189,9 +189,12 @@ export async function fetchCategoryFeeds(category, forceRefresh = false) {
 function createNewsCard(feed) {
   const card = document.createElement('div');
   card.className = "news-card";
-  card.addEventListener('click', () => {
-    openNewsModal(feed);
-  });
+ card.onclick = () => {
+  document.querySelectorAll('.news-card').forEach(card => card.classList.remove('active')); // Uklanja 'active' sa svih kartica
+  newsCard.classList.add('active'); // Postavlja 'active' na kliknutu karticu
+  openNewsModal(feed);
+};
+
 
   const img = document.createElement('img');
   img.className = "news-card-image lazy";
