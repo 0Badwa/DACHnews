@@ -61,6 +61,10 @@ async function blockSource(src) {
   }
 }
 
+function isSourceBlocked(src) {
+  return blockedSources.includes(src);
+}
+
 async function unblockSource(src) {
   blockedSources = blockedSources.filter(s => s !== src);
   localStorage.setItem('blockedSources', JSON.stringify(blockedSources));
