@@ -43,19 +43,40 @@ function applyCardFontSize() {
   }
 }
 
-function blockSource(src) {
+async function blockSource(src) {
   if (!blockedSources.includes(src)) {
     blockedSources.push(src);
     localStorage.setItem('blockedSources', JSON.stringify(blockedSources));
+
+    // Sačuvaj u Redis-u
+    try {
+      await fetch('/api/block-source', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ source: src })
+      });
+    } catch (err) {
+      console.error("Greška pri slanju blokiranog izvora u Redis:", err);
+    }
   }
 }
-function unblockSource(src) {
+
+async function unblockSource(src) {
   blockedSources = blockedSources.filter(s => s !== src);
   localStorage.setItem('blockedSources', JSON.stringify(blockedSources));
+
+  // Ukloni iz Redis-a
+  try {
+    await fetch('/api/unblock-source', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ source: src })
+    });
+  } catch (err) {
+    console.error("Greška pri uklanjanju blokiranog izvora iz Redis-a:", err);
+  }
 }
-function isSourceBlocked(src) {
-  return blockedSources.includes(src);
-}
+
 
 function blockCategory(cat) {
   if (!blockedCategories.includes(cat)) {
