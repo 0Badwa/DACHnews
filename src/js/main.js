@@ -515,3 +515,23 @@ document.addEventListener('DOMContentLoaded', () => {
     if (tutOverlay) tutOverlay.style.display = 'flex';
   }
 });
+
+document.addEventListener("DOMContentLoaded", function () {
+  const closeTutorialBtn = document.getElementById("close-tutorial");
+
+  if (closeTutorialBtn) {
+    closeTutorialBtn.onclick = function () {
+      document.getElementById("tutorial-overlay").style.display = "none";
+
+      // Provera da li je uređaj iPhone
+      if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+        window.close(); // Pokušaj zatvaranja taba
+
+        // Ako zatvaranje taba ne uspe, preusmeri korisnika na praznu stranicu
+        setTimeout(() => {
+          window.location.href = "about:blank";
+        }, 500);
+      }
+    };
+  }
+});
