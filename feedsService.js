@@ -11,7 +11,7 @@ import sharp from 'sharp';
 import pLimit from 'p-limit';
 
 // Konstante
-const SEVEN_DAYS = 60 * 60 * 24 * 7;
+const SEVEN_DAYS = 60 * 60 * 24 * 3;
 const RSS_FEED_URL = "https://rss.app/feeds/v1.1/_sf1gbLo1ZadJmc5e.json"; // Glavni feed
 const GPT_API_URL = "https://api.openai.com/v1/chat/completions";
 
@@ -213,17 +213,29 @@ export async function addItemToRedis(item, category) {
 export async function getAllFeedsFromRedis() {
   const keys = await redisClient.keys("category:*");
   let all = [];
+
+  // Dohvati blokirane izvore iz localStorage (ili baze ako koristiš backend za to)
+  let blockedSources = [];
+  try {
+    const stored = await redisClient.get("blockedSources");
+    blockedSources = stored ? JSON.parse(stored) : [];
+  } catch (err) {
+    console.error("[Redis] Greška pri čitanju blokiranih izvora:", err);
+  }
+
   for (const key of keys) {
     const items = await redisClient.lRange(key, 0, -1);
-    const parsed = items.map(x => JSON.parse(x));
+    let parsed = items.map(x => JSON.parse(x));
+
+    // Filtriraj blokirane izvore
+    parsed = parsed.filter(item => !blockedSources.includes(item.source));
+
     all = all.concat(parsed);
   }
-  const mapById = {};
-  for (const obj of all) {
-    mapById[obj.id] = obj;
-  }
-  return Object.values(mapById);
+
+  return all;
 }
+
 
 /**
  * Glavna funkcija za obradu feed-ova.

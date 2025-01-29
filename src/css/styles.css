@@ -471,8 +471,8 @@ background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.8rem 1rem; /* Usklađen padding */
-  margin: 0.5rem 0;
+  padding: 0.4rem 1rem; /* Usklađen padding */
+  margin: 0.4rem 0;
   background-color: #000; /* Podrazumevana pozadina */
   border: 1px solid var(--border-color); /* Granica */
   border-radius: 5px; /* Zaobljeni uglovi */
@@ -482,13 +482,13 @@ background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z
 
 /* Izvor je verbergen (zelena pozadina) */
 .source-item.verbergen {
-  background-color: rgba(50, 205, 50, 0.2); /* Zelena pozadina sa providnošću */
+  background-color: rgb(50, 205, 50); /* Zelena pozadina  */
   border: 1px solid var(--primary-color); /* Zelena granica */
 }
 
 /* Izvor je entsperren (crvena pozadina) */
 .source-item.entsperren {
-  background-color: rgba(255, 68, 68, 0.2); /* Crvena pozadina sa providnošću */
+  background-color: rgb(255, 68, 68); /* Crvena pozadina */
   border: 1px solid #ff4444; /* Crvena granica */
 }
 

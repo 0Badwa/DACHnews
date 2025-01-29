@@ -108,3 +108,38 @@ app.listen(PORT, '0.0.0.0', () => {
 // Periodična obrada feedova (12 minuta)
 setInterval(processFeeds, 12 * 60 * 1000);
 processFeeds();
+
+app.post('/api/block-source', async (req, res) => {
+  const { source } = req.body;
+  if (!source) return res.status(400).send("Source required");
+
+  try {
+    let blockedSources = await redisClient.get("blockedSources");
+    blockedSources = blockedSources ? JSON.parse(blockedSources) : [];
+    if (!blockedSources.includes(source)) {
+      blockedSources.push(source);
+      await redisClient.set("blockedSources", JSON.stringify(blockedSources));
+    }
+    res.status(200).send("Source blocked");
+  } catch (error) {
+    console.error("Greška pri blokiranju izvora:", error);
+    res.status(500).send("Server error");
+  }
+});
+
+app.post('/api/unblock-source', async (req, res) => {
+  const { source } = req.body;
+  if (!source) return res.status(400).send("Source required");
+
+  try {
+    let blockedSources = await redisClient.get("blockedSources");
+    blockedSources = blockedSources ? JSON.parse(blockedSources) : [];
+    blockedSources = blockedSources.filter(s => s !== source);
+    await redisClient.set("blockedSources", JSON.stringify(blockedSources));
+    res.status(200).send("Source unblocked");
+  } catch (error) {
+    console.error("Greška pri uklanjanju izvora:", error);
+    res.status(500).send("Server error");
+  }
+});
+
