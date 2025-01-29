@@ -8,9 +8,9 @@ import {
 } from './feeds.js';
 
 let categoriesOrder = [
-  "Technologie", "Gesundheit", "Sport", "Wirtschaft", "Kultur",
+ "Welt", "Politik", "Technologie", "Gesundheit", "Sport", "Wirtschaft", "Kultur",
   "Unterhaltung", "Reisen", "Lifestyle", "Auto",
-  "Welt", "Politik", "Panorama", "Sonstiges"
+   "Panorama", "Sonstiges"
 ];
 let blockedSources = JSON.parse(localStorage.getItem('blockedSources') || '[]');
 let blockedCategories = JSON.parse(localStorage.getItem('blockedCategories') || '[]');
