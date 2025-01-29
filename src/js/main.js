@@ -231,7 +231,7 @@ function openQuellenModal() {
     'Du und Ich', 'Falter', 'Jungle World', 'Kurier.at', 'Neues Deutschland', 
     'P.S. Zeitung', 'Profil', 'Queer.de', 'Salzburger Nachrichten', 
     'SIEGESSÄULE', 'St. Galler Tagblatt', 'Süddeutsche', 'Tage Anzeiger', 
-    'Volksstimme', 'Vorwärts', 'Wiener Zeitung Online', 'ZEIT'
+    'Volksstimme', 'Vorwärts', 'Wiener Zeitung Online', 'ZEIT ONLINE'
   ];
 
   newsSources.forEach(src => {
