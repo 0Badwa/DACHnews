@@ -220,19 +220,20 @@ function openQuellenModal() {
   if (!quellenModal) return;
   quellenModal.style.display = 'flex'; 
 
-const sourcesListEl = document.getElementById('sources-list');
-  if (!sourcesListEl) return;
+  const sourcesListEl = document.getElementById('sources-list');
+  if (!sourcesListEl) return; // ✅ Ovo je sada unutar funkcije
   sourcesListEl.innerHTML = '';
 
-const newsSources = [
-  'Aargauer Zeitung – AZ', 'AK - Analyse & Kritik', 'Augustin', 'Blick', 
-  'Cruiser Magazin', 'DER SPIEGEL', 'Der Freitag', 'Der Standard', 
-  'Die Tageszeitung', 'Die Wochenzeitung - WOZ', 'DISPLAY-Magazin', 
-  'Du und Ich', 'Falter', 'Jungle World', 'Kurier.at', 'Neues Deutschland', 
-  'P.S. Zeitung', 'Profil', 'Queer.de', 'Salzburger Nachrichten', 
-  'SIEGESSÄULE', 'St. Galler Tagblatt', 'Süddeutsche', 'Tage Anzeiger', 
-  'Volksstimme', 'Vorwärts', 'Wiener Zeitung Online', 'ZEIT'
-];
+  const newsSources = [
+    'Aargauer Zeitung – AZ', 'AK - Analyse & Kritik', 'Augustin', 'Blick', 
+    'Cruiser Magazin', 'DER SPIEGEL', 'Der Freitag', 'Der Standard', 
+    'Die Tageszeitung', 'Die Wochenzeitung - WOZ', 'DISPLAY-Magazin', 
+    'Du und Ich', 'Falter', 'Jungle World', 'Kurier.at', 'Neues Deutschland', 
+    'P.S. Zeitung', 'Profil', 'Queer.de', 'Salzburger Nachrichten', 
+    'SIEGESSÄULE', 'St. Galler Tagblatt', 'Süddeutsche', 'Tage Anzeiger', 
+    'Volksstimme', 'Vorwärts', 'Wiener Zeitung Online', 'ZEIT'
+  ];
+
   newsSources.forEach(src => {
     const sourceItem = document.createElement('div');
     sourceItem.className = 'source-item';
@@ -264,7 +265,9 @@ const newsSources = [
   });
 }
 
- 
+/**
+ * Zatvaranje modala Quellen
+ */
 function closeQuellenModal() {
   const quellenModal = document.getElementById('quellen-modal');
   if (quellenModal) {
@@ -272,6 +275,7 @@ function closeQuellenModal() {
   }
   loadFeeds();
 }
+
 
 /** initSwipe */
 function initSwipe() {
