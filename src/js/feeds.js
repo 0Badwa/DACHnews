@@ -77,7 +77,10 @@ function isHiddenFeed(feed) {
   const cat = (feed.category === "Ohne Kategorie") ? "Sonstiges" : feed.category;
 
   if (hiddenCats.includes(cat)) return true;
-  if (feed.source && hiddenSources.includes(feed.source.toLowerCase())) return true;
+if (feed.source) {
+  const normalizedSource = feed.source.trim().toLowerCase();
+  if (hiddenSources.map(s => s.trim().toLowerCase()).includes(normalizedSource)) return true;
+}
 
   return false;
 }
