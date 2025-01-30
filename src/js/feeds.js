@@ -196,7 +196,7 @@ function createNewsCard(feed) {
   // Corrected the variable reference from 'newsCard' to 'card'
   card.onclick = () => {
     // Remove 'active' class from all news cards
-    document.querySelectorAll('.news-card').forEach(card => card.classList.remove('active'));
+    document.querySelectorAll('.news-card').forEach(existingCard => existingCard.classList.remove('active'));
     
     // Add 'active' class to the clicked card
     card.classList.add('active');
