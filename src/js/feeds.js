@@ -192,12 +192,18 @@ export async function fetchCategoryFeeds(category, forceRefresh = false) {
 function createNewsCard(feed) {
   const card = document.createElement('div');
   card.className = "news-card";
- card.onclick = () => {
-  document.querySelectorAll('.news-card').forEach(card => card.classList.remove('active')); // Uklanja 'active' sa svih kartica
-  newsCard.classList.add('active'); // Postavlja 'active' na kliknutu karticu
-  openNewsModal(feed);
-};
-
+  
+  // Corrected the variable reference from 'newsCard' to 'card'
+  card.onclick = () => {
+    // Remove 'active' class from all news cards
+    document.querySelectorAll('.news-card').forEach(card => card.classList.remove('active'));
+    
+    // Add 'active' class to the clicked card
+    card.classList.add('active');
+    
+    // Open the modal with the feed details
+    openNewsModal(feed);
+  };
 
   const img = document.createElement('img');
   img.className = "news-card-image lazy";
@@ -234,6 +240,7 @@ function createNewsCard(feed) {
 
   return card;
 }
+
 
 /**
  * Prikazuje listu feedova (vesti) unutar #news-container.
