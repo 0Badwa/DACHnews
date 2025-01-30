@@ -225,8 +225,8 @@ function openQuellenModal() {
   sourcesListEl.innerHTML = '';
 
   const newsSources = [
-    'Aargauer Zeitung', 'AK - Analyse & Kritik', 'Augustin', 'Blick', 
-    'Cruiser Magazin', 'DERSPIEGEL', 'Der Freitag', 'Der Standard', 
+    'Aargauer Zeitung – AZ', 'AK - Analyse & Kritik', 'Augustin', 'Blick', 
+    'Cruiser Magazin', 'DER SPIEGEL', 'Der Freitag', 'Der Standard', 
     'Die Tageszeitung', 'Die Wochenzeitung - WOZ', 'DISPLAY-Magazin', 
     'Du und Ich', 'Falter', 'Jungle World', 'Kurier.at', 'Neues Deutschland', 
     'P.S. Zeitung', 'Profil', 'Queer.de', 'Salzburger Nachrichten', 
