@@ -20,44 +20,29 @@ export function openNewsModal(feed) {
     return;
   }
 
-  // Postavimo sliku: 240px širina (CSS), lazy load, async decode
+  // Pronalazimo aktivnu news karticu (newsCard) koja je kliknuta
+  const activeNewsCard = document.querySelector('.news-card.active');
+
+  // Ako postoji aktivna kartica, uzimamo izvor iz nje, inače koristimo feed.source
+  const sourceName = activeNewsCard 
+    ? activeNewsCard.querySelector('.source').textContent 
+    : (feed.source || 'Unbekannte Quelle');
+
+  // Postavljamo izvor u modal
+  modalSourceTime.innerHTML = `<span class="modal-source-bold-green">${sourceName.toUpperCase()}</span>`;
+
+  // Ostali elementi modala
   modalImage.src = feed.image || 'https://via.placeholder.com/240';
   modalImage.loading = 'lazy';
   modalImage.decoding = 'async';
 
-  // Naslov i opis: isključena hifenacija, multiline, levo poravnanje u okviru 240px
-  modalTitle.classList.add('no-hyphenation');
-  modalDescription.classList.add('no-hyphenation');
-
   modalTitle.textContent = feed.title || 'No title';
   modalDescription.textContent = feed.content_text || 'Keine Beschreibung';
 
-  // Izvor (velika slova, zeleno/bold), datum i vreme
-  const sourceName = (feed.source || 'Unbekannte Quelle').toUpperCase();
-  let datePart = '';
-  let timePart = '';
-  if (feed.date_published) {
-    const d = new Date(feed.date_published);
-    if (!isNaN(d.getTime())) {
-      const day = String(d.getDate()).padStart(2, '0');
-      const month = String(d.getMonth() + 1).padStart(2, '0');
-      const year = d.getFullYear();
-      const hours = String(d.getHours()).padStart(2, '0');
-      const minutes = String(d.getMinutes()).padStart(2, '0');
-      datePart = `${day}.${month}.${year}.`;
-      timePart = `${hours}:${minutes}`;
-    }
-  }
-
-  const dateTimeString = datePart && timePart
-    ? ` • ${datePart} • ${timePart}`
-    : (datePart ? ` • ${datePart}` : (timePart ? ` • ${timePart}` : ''));
-  modalSourceTime.innerHTML = `<span class="modal-source-bold-green">${sourceName}</span>${dateTimeString}`;
-
-  // Pokažemo modal
+  // Postavljanje modala da se prikaže
   modal.style.display = 'flex';
 
-  // Dugme X -> odmah zatvara
+  // Dugme za zatvaranje modala
   closeModalButton.onclick = () => {
     modal.style.display = 'none';
   };
