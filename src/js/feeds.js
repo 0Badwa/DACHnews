@@ -79,7 +79,10 @@ function isHiddenFeed(feed) {
   const cat = (feed.category === "Ohne Kategorie") ? "Sonstiges" : feed.category;
 
   if (hiddenCats.includes(cat)) return true;
-  if (feed.source && hiddenSources.includes(feed.source.toLowerCase())) return true;
+if (feed.source) {
+  const normalizedSource = feed.source.trim().toLowerCase();
+  if (hiddenSources.map(s => s.trim().toLowerCase()).includes(normalizedSource)) return true;
+}
 
   return false;
 }
@@ -207,9 +210,18 @@ export async function fetchCategoryFeeds(category, forceRefresh = false) {
 function createNewsCard(feed) {
   const card = document.createElement('div');
   card.className = "news-card";
-  card.addEventListener('click', () => {
+  
+  // Corrected the variable reference from 'newsCard' to 'card'
+  card.onclick = () => {
+    // Remove 'active' class from all news cards
+    document.querySelectorAll('.news-card').forEach(existingCard => existingCard.classList.remove('active'));
+    
+    // Add 'active' class to the clicked card
+    card.classList.add('active');
+    
+    // Open the modal with the feed details
     openNewsModal(feed);
-  });
+  };
 
   const img = document.createElement('img');
   img.className = "news-card-image lazy";
@@ -246,6 +258,7 @@ function createNewsCard(feed) {
 
   return card;
 }
+
 
 /**
  * Prikazuje listu feedova (vesti) u #news-container.
