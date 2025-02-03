@@ -488,11 +488,42 @@ document.getElementById('news-container').addEventListener('scroll', function() 
     };
   }
 
-  // Schriftgröße
-  const incBtn = document.getElementById('font-increase');
-  if (incBtn) incBtn.onclick = increaseFontSize;
-  const decBtn = document.getElementById('font-decrease');
-  if (decBtn) decBtn.onclick = decreaseFontSize;
+ // Kontakt
+const kontaktButton = document.getElementById('kontakt-button');        // Dugme za otvaranje Kontakt modala
+const kontaktModal = document.getElementById('kontakt-modal');          // Modal za Kontakt
+const closeKontaktBtn = document.getElementById('close-kontakt-modal'); // Dugme za zatvaranje Kontakt modala
+
+if (kontaktButton && kontaktModal) {
+  kontaktButton.onclick = () => {
+    settingsModal.style.display = 'none';   // Zatvara modal sa podešavanjima
+    kontaktModal.style.display = 'flex';    // Prikazuje Kontakt modal
+  };
+}
+
+if (closeKontaktBtn) {
+  closeKontaktBtn.onclick = () => {
+    kontaktModal.style.display = 'none';    // Zatvara Kontakt modal
+  };
+}
+
+// Datenschutz
+const datenschutzButton = document.getElementById('datenschutz-button');        // Dugme za otvaranje Datenschutz modala
+const datenschutzModal = document.getElementById('datenschutz-modal');          // Modal za Datenschutz
+const closeDatenschutzBtn = document.getElementById('close-datenschutz-modal'); // Dugme za zatvaranje Datenschutz modala
+
+if (datenschutzButton && datenschutzModal) {
+  datenschutzButton.onclick = () => {
+    settingsModal.style.display = 'none';    // Zatvara modal sa podešavanjima
+    datenschutzModal.style.display = 'flex'; // Prikazuje Datenschutz modal
+  };
+}
+
+if (closeDatenschutzBtn) {
+  closeDatenschutzBtn.onclick = () => {
+    datenschutzModal.style.display = 'none'; // Zatvara Datenschutz modal
+  };
+}
+
 
   // Über
   const uberButton = document.getElementById('uber-button');
