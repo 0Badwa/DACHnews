@@ -67,7 +67,7 @@ function blockSource(src) {
       console.error("Greška pri slanju blokiranog izvora u Redis:", err);
     }
   }
-}
+
 
 function isSourceBlocked(src) {
   return blockedSources.includes(src);
