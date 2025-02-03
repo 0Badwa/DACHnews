@@ -234,7 +234,8 @@ img.src = feed.image.startsWith("/") ? `${BASE_IMAGE_URL}${feed.image}` : feed.i
 
   const sourceSpan = document.createElement('span');
   sourceSpan.className = "source";
-  sourceSpan.textContent = feed.source ? feed.source : 'Unbekannte Quelle';
+const normalizedSource = feed.source ? feed.source.toUpperCase().replace(/\s+/g, '') : 'UNBEKANNTEQUELLE';
+sourceSpan.textContent = normalizedSource;
 
   const timeSpan = document.createElement('span');
   timeSpan.className = "time";
