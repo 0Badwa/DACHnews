@@ -567,3 +567,13 @@ background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z
   font-weight: bold;
   font-size: 1rem;
 }
+
+
+/* Stilovi za tekst unutar modalnih prozora Kontakt, Datenschutz i Über */
+.modal .rearrange-modal-content p {
+  font-family: 'Roboto Condensed', sans-serif;  /* Koristi željeni font */
+  font-size: 0.8rem;      /* Podesite veličinu fonta – možete prilagoditi (npr. 16px) */
+  padding: 1rem;        /* Podesite padding – prilagodite po potrebi */
+  line-height: 1;     /* Povećajte razmak između redova ako je potrebno */
+  margin: 0;            /* Uklonite postojeće margine ako želite da sve bude konzistentno */
+}
