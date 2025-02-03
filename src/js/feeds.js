@@ -1,5 +1,12 @@
 /************************************************
  * feeds.js
+ *
+ * - Uklonjene eventualne reference na "Neueste" kategoriju.
+ * - Dodati loader i error message (već implementirano u main.js).
+ * - Dodatna funkcija za prikaz svih kategorija ("displayAllCategories"),
+ *   uklonjena greška "container is not defined".
+ * - Ispravljeno ažuriranje kategorije i resetovanje skrola.
+ * - Dodano osvežavanje aplikacije kada postane aktivna.
  ************************************************/
 
 import {
@@ -73,10 +80,9 @@ function isHiddenFeed(feed) {
 
   if (hiddenCats.includes(cat)) return true;
 if (feed.source) {
-  const normalizedSource = feed.source.toUpperCase().replace(/\s+/g, '');
-  if (hiddenSources.includes(normalizedSource)) return true;
+  const normalizedSource = feed.source.trim().toLowerCase();
+  if (hiddenSources.map(s => s.trim().toLowerCase()).includes(normalizedSource)) return true;
 }
-
 
   return false;
 }
@@ -235,8 +241,7 @@ img.src = feed.image.startsWith("/") ? `${BASE_IMAGE_URL}${feed.image}` : feed.i
 
   const sourceSpan = document.createElement('span');
   sourceSpan.className = "source";
-const normalizedSource = feed.source ? feed.source.toUpperCase().replace(/\s+/g, '') : 'UNBEKANNTEQUELLE';
-sourceSpan.textContent = normalizedSource;
+  sourceSpan.textContent = feed.source ? feed.source : 'Unbekannte Quelle';
 
   const timeSpan = document.createElement('span');
   timeSpan.className = "time";
@@ -471,36 +476,3 @@ function removeActiveClass() {
 document.addEventListener('DOMContentLoaded', () => {
   initFeeds();
 });
-
-
-const sourceNameMap = {
-  'derstandard.at': 'Der Standard',
-  'zeit.de': 'ZEIT ONLINE',
-  'spiegel.de': 'DER SPIEGEL',
-  'sueddeutsche.de': 'Süddeutsche Zeitung',
-  'aargauerzeitung.ch': 'Aargauer Zeitung',
-  'analyse-und-kritik.org': 'AK - Analyse & Kritik',
-  'der-augustin.at': 'Augustin',
-  'blick.ch': 'Blick',
-  'cruisermagazin.de': 'Cruiser Magazin',
-  'freitag.de': 'Der Freitag',
-  'taz.de': 'Die Tageszeitung',
-  'woz.ch': 'Die Wochenzeitung - WOZ',
-  'display-magazin.de': 'DISPLAY-Magazin',
-  'du-und-ich.net': 'Du und Ich',
-  'falter.at': 'Falter',
-  'jungle.world': 'Jungle World',
-  'kurier.at': 'Kurier.at',
-  'neues-deutschland.de': 'Neues Deutschland',
-  'pszeitung.ch': 'P.S. Zeitung',
-  'profil.at': 'Profil',
-  'queer.de': 'Queer.de',
-  'salzburg.com': 'Salzburger Nachrichten',
-  'siegessaeule.de': 'SIEGESSÄULE',
-  'tagblatt.ch': 'St. Galler Tagblatt',
-  'sueddeutsche.de': 'Süddeutsche',
-  'tagesanzeiger.ch': 'Tages Anzeiger',
-  'volksstimme.de': 'Volksstimme',
-  'vorwaerts.ch': 'Vorwärts',
-  'wienerzeitung.at': 'Wiener Zeitung Online'
-};
