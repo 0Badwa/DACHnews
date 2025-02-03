@@ -576,4 +576,10 @@ background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z
   padding: 1rem;        /* Podesite padding – prilagodite po potrebi */
   line-height: 1;     /* Povećajte razmak između redova ako je potrebno */
   margin: 0;            /* Uklonite postojeće margine ako želite da sve bude konzistentno */
+
+/* Stil za naslov u Über modalu */
+#uber-modal .modal-title {
+  padding: 1rem; /* Podesite vrednost po potrebi */
+  font-family: 'Roboto Condensed', sans-serif;
 }
+
