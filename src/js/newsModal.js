@@ -28,21 +28,25 @@ export function openNewsModal(feed) {
     ? activeNewsCard.querySelector('.source').textContent 
     : (feed.source || 'Unbekannte Quelle');
 
-  // Postavljamo izvor u modal
-// Pretpostavljam da feed ima polja feed.published_date i feed.published_time
-const publishedDate = feed.published_date || ''; // Na primer: '2024-01-20'
-const publishedTime = feed.published_time || ''; // Na primer: '14:35'
+  
+// Pretpostavka da feed.date_published sadrži datum i vreme u ISO formatu
+const publishedDateTime = feed.date_published || ''; 
 
-// Pretpostavljam da feed ima polja feed.published_date i feed.published_time
-const publishedDate = (feed.published_date || '').trim(); // Na primer: '2024-01-20'
-const publishedTime = (feed.published_time || '').trim(); // Na primer: '14:35'
+let formattedDate = '';
+let formattedTime = '';
+
+if (publishedDateTime) {
+  const dateObj = new Date(publishedDateTime);
+  formattedDate = dateObj.toLocaleDateString('de-DE');  // Formatiran datum
+  formattedTime = dateObj.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });  // Formatirano vreme
+}
 
 // Prikaz izvora sa datumom i vremenom
 modalSourceTime.innerHTML = `
   <span class="modal-source-bold-green">${sourceName.toUpperCase()}</span>
-  ${publishedDate ? ` • ${publishedDate}` : ''}
-  ${publishedTime ? ` • ${publishedTime}` : ''}
+  ${formattedDate && formattedTime ? ` • ${formattedDate} • ${formattedTime}` : ''}
 `;
+
 
 
   // Ostali elementi modala

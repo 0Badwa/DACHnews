@@ -8,9 +8,9 @@ import {
 } from './feeds.js';
 
 let categoriesOrder = [
- "Welt", "Politik", "Technologie", "Gesundheit", "Sport", "Wirtschaft", "Kultur",
+  "Technologie", "Gesundheit", "Sport", "Wirtschaft", "Kultur",
   "Unterhaltung", "Reisen", "Lifestyle", "Auto",
-   "Panorama", "Sonstiges"
+  "Welt", "Politik", "Panorama", "Sonstiges"
 ];
 let blockedSources = JSON.parse(localStorage.getItem('blockedSources') || '[]');
 let blockedCategories = JSON.parse(localStorage.getItem('blockedCategories') || '[]');
@@ -43,44 +43,19 @@ function applyCardFontSize() {
   }
 }
 
-async function blockSource(src) {
+function blockSource(src) {
   if (!blockedSources.includes(src)) {
     blockedSources.push(src);
     localStorage.setItem('blockedSources', JSON.stringify(blockedSources));
-
-    // Sačuvaj u Redis-u
-    try {
-      await fetch('/api/block-source', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ source: src })
-      });
-    } catch (err) {
-      console.error("Greška pri slanju blokiranog izvora u Redis:", err);
-    }
   }
 }
-
+function unblockSource(src) {
+  blockedSources = blockedSources.filter(s => s !== src);
+  localStorage.setItem('blockedSources', JSON.stringify(blockedSources));
+}
 function isSourceBlocked(src) {
   return blockedSources.includes(src);
 }
-
-async function unblockSource(src) {
-  blockedSources = blockedSources.filter(s => s !== src);
-  localStorage.setItem('blockedSources', JSON.stringify(blockedSources));
-
-  // Ukloni iz Redis-a
-  try {
-    await fetch('/api/unblock-source', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ source: src })
-    });
-  } catch (err) {
-    console.error("Greška pri uklanjanju blokiranog izvora iz Redis-a:", err);
-  }
-}
-
 
 function blockCategory(cat) {
   if (!blockedCategories.includes(cat)) {
@@ -218,22 +193,13 @@ function handleDrop(e) {
 function openQuellenModal() {
   const quellenModal = document.getElementById('quellen-modal');
   if (!quellenModal) return;
-  quellenModal.style.display = 'flex'; 
+  quellenModal.style.display = 'flex';
 
   const sourcesListEl = document.getElementById('sources-list');
-  if (!sourcesListEl) return; // ✅ Ovo je sada unutar funkcije
+  if (!sourcesListEl) return;
   sourcesListEl.innerHTML = '';
 
-  const newsSources = [
-    'Aargauer Zeitung', 'AK - Analyse & Kritik', 'Augustin', 'Blick', 
-    'Cruiser Magazin', 'DERSPIEGEL', 'Der Freitag', 'Der Standard', 
-    'Die Tageszeitung', 'Die Wochenzeitung - WOZ', 'DISPLAY-Magazin', 
-    'Du und Ich', 'Falter', 'Jungle World', 'Kurier.at', 'Neues Deutschland', 
-    'P.S. Zeitung', 'Profil', 'Queer.de', 'Salzburger Nachrichten', 
-    'SIEGESSÄULE', 'St. Galler Tagblatt', 'Süddeutsche', 'Tage Anzeiger', 
-    'Volksstimme', 'Vorwärts', 'Wiener Zeitung Online', 'ZEIT ONLINE'
-  ];
-
+  const newsSources = ['Bild', 'Zeit', 'Blick', 'Heise', 'Spiegel', 'Falter'];
   newsSources.forEach(src => {
     const sourceItem = document.createElement('div');
     sourceItem.className = 'source-item';
@@ -265,9 +231,6 @@ function openQuellenModal() {
   });
 }
 
-/**
- * Zatvaranje modala Quellen
- */
 function closeQuellenModal() {
   const quellenModal = document.getElementById('quellen-modal');
   if (quellenModal) {
@@ -275,7 +238,6 @@ function closeQuellenModal() {
   }
   loadFeeds();
 }
-
 
 /** initSwipe */
 function initSwipe() {
@@ -488,42 +450,11 @@ document.getElementById('news-container').addEventListener('scroll', function() 
     };
   }
 
- // Kontakt
-const kontaktButton = document.getElementById('kontakt-button');        // Dugme za otvaranje Kontakt modala
-const kontaktModal = document.getElementById('kontakt-modal');          // Modal za Kontakt
-const closeKontaktBtn = document.getElementById('close-kontakt-modal'); // Dugme za zatvaranje Kontakt modala
-
-if (kontaktButton && kontaktModal) {
-  kontaktButton.onclick = () => {
-    settingsModal.style.display = 'none';   // Zatvara modal sa podešavanjima
-    kontaktModal.style.display = 'flex';    // Prikazuje Kontakt modal
-  };
-}
-
-if (closeKontaktBtn) {
-  closeKontaktBtn.onclick = () => {
-    kontaktModal.style.display = 'none';    // Zatvara Kontakt modal
-  };
-}
-
-// Datenschutz
-const datenschutzButton = document.getElementById('datenschutz-button');        // Dugme za otvaranje Datenschutz modala
-const datenschutzModal = document.getElementById('datenschutz-modal');          // Modal za Datenschutz
-const closeDatenschutzBtn = document.getElementById('close-datenschutz-modal'); // Dugme za zatvaranje Datenschutz modala
-
-if (datenschutzButton && datenschutzModal) {
-  datenschutzButton.onclick = () => {
-    settingsModal.style.display = 'none';    // Zatvara modal sa podešavanjima
-    datenschutzModal.style.display = 'flex'; // Prikazuje Datenschutz modal
-  };
-}
-
-if (closeDatenschutzBtn) {
-  closeDatenschutzBtn.onclick = () => {
-    datenschutzModal.style.display = 'none'; // Zatvara Datenschutz modal
-  };
-}
-
+  // Schriftgröße
+  const incBtn = document.getElementById('font-increase');
+  if (incBtn) incBtn.onclick = increaseFontSize;
+  const decBtn = document.getElementById('font-decrease');
+  if (decBtn) decBtn.onclick = decreaseFontSize;
 
   // Über
   const uberButton = document.getElementById('uber-button');
@@ -556,24 +487,3 @@ if (closeDatenschutzBtn) {
     if (tutOverlay) tutOverlay.style.display = 'flex';
   }
 });
-/** iphone ide na blank page 
-document.addEventListener("DOMContentLoaded", function () {
-  const closeTutorialBtn = document.getElementById("close-tutorial");
-
-  if (closeTutorialBtn) {
-    closeTutorialBtn.onclick = function () {
-      document.getElementById("tutorial-overlay").style.display = "none";
-
-      // Provera da li je uređaj iPhone
-      if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-        window.close(); // Pokušaj zatvaranja taba
-
-        // Ako zatvaranje taba ne uspe, preusmeri korisnika na praznu stranicu
-        setTimeout(() => {
-          window.location.href = "about:blank";
-        }, 500);
-      }
-    };
-  }
-});
-               */
