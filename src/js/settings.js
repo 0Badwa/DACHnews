@@ -37,6 +37,30 @@ export function initSettings() {
   const kategorienButton = document.getElementById('kategorien-button');
   const uberButton = document.getElementById('uber-button');
 
+// Event listener za otvaranje Kontakt modala
+const kontaktButton = document.getElementById('kontakt-button');
+if (kontaktButton) {
+  kontaktButton.addEventListener('click', () => {
+    const kontaktModal = document.getElementById('kontakt-modal');
+    if (kontaktModal) {
+      kontaktModal.style.display = 'flex';
+    }
+  });
+}
+
+// Event listener za otvaranje Datenschutz modala
+const datenschutzButton = document.getElementById('datenschutz-button');
+if (datenschutzButton) {
+  datenschutzButton.addEventListener('click', () => {
+    const datenschutzModal = document.getElementById('datenschutz-modal');
+    if (datenschutzModal) {
+      datenschutzModal.style.display = 'flex';
+    }
+  });
+}
+
+
+  
   const fontIncreaseButton = document.getElementById('font-increase');
   const fontDecreaseButton = document.getElementById('font-decrease');
 
