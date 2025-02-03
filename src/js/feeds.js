@@ -44,7 +44,7 @@ function timeAgo(dateString) {
  */
 function getHiddenSources() {
   try {
-    return JSON.parse(localStorage.getItem('hiddenSources') || '[]');
+    return JSON.parse(localStorage.getItem('blockedSources') || '[]');
   } catch {
     return [];
   }
