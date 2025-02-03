@@ -8,9 +8,9 @@ import {
 } from './feeds.js';
 
 let categoriesOrder = [
-  "Welt", "Politik", "Technologie", "Gesundheit", "Sport", "Wirtschaft", "Kultur",
+  "Technologie", "Gesundheit", "Sport", "Wirtschaft", "Kultur",
   "Unterhaltung", "Reisen", "Lifestyle", "Auto",
-  "Panorama", "Sonstiges"
+  "Welt", "Politik", "Panorama", "Sonstiges"
 ];
 let blockedSources = JSON.parse(localStorage.getItem('blockedSources') || '[]');
 let blockedCategories = JSON.parse(localStorage.getItem('blockedCategories') || '[]');
@@ -43,56 +43,18 @@ function applyCardFontSize() {
   }
 }
 
-function isSourceBlocked(src) {
-  return blockedSources.includes(src);
-}
-
-async function blockSource(src) {
-  const normalizedSrc = src.toUpperCase().replace(/\s+/g, '');
-  let hiddenSources = JSON.parse(localStorage.getItem('hiddenSources')) || [];
-
-  if (!hiddenSources.includes(normalizedSrc)) {
-    hiddenSources.push(normalizedSrc);
-    localStorage.setItem('hiddenSources', JSON.stringify(hiddenSources));
-  }
-
+function blockSource(src) {
   if (!blockedSources.includes(src)) {
     blockedSources.push(src);
     localStorage.setItem('blockedSources', JSON.stringify(blockedSources));
-
-    // Sačuvaj u Redis-u
-    try {
-      await fetch('/api/block-source', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ source: src })
-      });
-    } catch (err) {
-      console.error("Greška pri slanju blokiranog izvora u Redis:", err);
-    }
   }
 }
-
-async function unblockSource(src) {
-  const normalizedSrc = src.toUpperCase().replace(/\s+/g, '');
-  let hiddenSources = JSON.parse(localStorage.getItem('hiddenSources')) || [];
-
-  hiddenSources = hiddenSources.filter(s => s !== normalizedSrc);
-  localStorage.setItem('hiddenSources', JSON.stringify(hiddenSources));
-
+function unblockSource(src) {
   blockedSources = blockedSources.filter(s => s !== src);
   localStorage.setItem('blockedSources', JSON.stringify(blockedSources));
-
-  // Ukloni iz Redis-a
-  try {
-    await fetch('/api/unblock-source', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ source: src })
-    });
-  } catch (err) {
-    console.error("Greška pri uklanjanju blokiranog izvora iz Redis-a:", err);
-  }
+}
+function isSourceBlocked(src) {
+  return blockedSources.includes(src);
 }
 
 function blockCategory(cat) {
@@ -101,18 +63,16 @@ function blockCategory(cat) {
     localStorage.setItem('blockedCategories', JSON.stringify(blockedCategories));
   }
 }
-
 function unblockCategory(cat) {
   blockedCategories = blockedCategories.filter(c => c !== cat);
   localStorage.setItem('blockedCategories', JSON.stringify(blockedCategories));
 }
-
 function isCategoryBlocked(cat) {
   return blockedCategories.includes(cat);
 }
 
 /**
- * Dinamičko kreiranje tabova (osim "Aktuell"),
+ * Dinamičko kreiranje tabova (sem Aktuell),
  * preskačemo blokirane kategorije.
  */
 function buildTabs() {
@@ -203,11 +163,9 @@ function handleDragStart(e) {
   e.dataTransfer.setData('text/plain', e.target.textContent.trim());
   e.target.style.opacity = '0.4';
 }
-
 function handleDragOver(e) {
   e.preventDefault();
 }
-
 function handleDrop(e) {
   e.preventDefault();
   const draggedCat = e.dataTransfer.getData('text/plain');
@@ -235,22 +193,13 @@ function handleDrop(e) {
 function openQuellenModal() {
   const quellenModal = document.getElementById('quellen-modal');
   if (!quellenModal) return;
-  quellenModal.style.display = 'flex'; 
+  quellenModal.style.display = 'flex';
 
   const sourcesListEl = document.getElementById('sources-list');
   if (!sourcesListEl) return;
   sourcesListEl.innerHTML = '';
 
-  const newsSources = [
-    'Aargauer Zeitung', 'AK - Analyse & Kritik', 'Augustin', 'Blick', 
-    'Cruiser Magazin', 'DERSPIEGEL', 'Der Freitag', 'Der Standard', 
-    'Die Tageszeitung', 'Die Wochenzeitung - WOZ', 'DISPLAY-Magazin', 
-    'Du und Ich', 'Falter', 'Jungle World', 'Kurier.at', 'Neues Deutschland', 
-    'P.S. Zeitung', 'Profil', 'Queer.de', 'Salzburger Nachrichten', 
-    'SIEGESSÄULE', 'St. Galler Tagblatt', 'Süddeutsche', 'Tage Anzeiger', 
-    'Volksstimme', 'Vorwärts', 'Wiener Zeitung Online', 'ZEIT ONLINE'
-  ];
-
+  const newsSources = ['Bild', 'Zeit', 'Blick', 'Heise', 'Spiegel', 'Falter'];
   newsSources.forEach(src => {
     const sourceItem = document.createElement('div');
     sourceItem.className = 'source-item';
@@ -282,9 +231,6 @@ function openQuellenModal() {
   });
 }
 
-/**
- * Zatvaranje modala Quellen
- */
 function closeQuellenModal() {
   const quellenModal = document.getElementById('quellen-modal');
   if (quellenModal) {
@@ -314,10 +260,11 @@ function initSwipe() {
     return arr;
   }
   
+
   function handleGesture() {
     const distX = touchendX - touchstartX;
     const distY = touchendY - touchstartY;
-    // Uvek resetuj vertikalni scroll pre prelaska
+    // Uvek resetuj vertical scroll pre prelaska
     swipeContainer.scrollTop = 0;
 
     if (Math.abs(distX) > Math.abs(distY) && Math.abs(distX) > swipeThreshold) {
@@ -341,7 +288,7 @@ function initSwipe() {
 
     clickTab(cats[idx]);
 
-    // Skroluj na vrh nakon malog delay-a
+    // Dodatno, za svaki slučaj, skroluj na vrh nakon malog delay-a
     setTimeout(() => {
       swipeContainer.scrollTop = 0;
     }, 300);
@@ -359,6 +306,7 @@ function initSwipe() {
       return;
     }
   
+
     // Ručno centriranje taba unutar tabsContainer
     if (tabsContainer && tab) {
       const leftPos = tab.offsetLeft - (tabsContainer.offsetWidth / 2) + (tab.offsetWidth / 2);
@@ -370,7 +318,7 @@ function initSwipe() {
 
     tab.click();
 
-    // Posle klika, osiguraj da news-container ide na vrh
+    // Posle klika, osiguramo da news-container ide na vrh
     requestAnimationFrame(() => {
       if (swipeContainer) swipeContainer.scrollTop = 0;
     });
@@ -389,7 +337,7 @@ function initSwipe() {
   });
 }
 
-/** loadFeeds -> simuliramo klik na "Aktuell" */
+/** loadFeeds -> simuliramo klik na Aktuell */
 function loadFeeds(defaultTab = 'Aktuell') {
   const tabBtn = document.querySelector(`.tab[data-tab="${defaultTab}"]`);
   if (tabBtn) {
@@ -403,7 +351,6 @@ function increaseFontSize() {
   if (currentCardFontSize > 40) currentCardFontSize = 40;
   applyCardFontSize();
 }
-
 function decreaseFontSize() {
   currentCardFontSize--;
   if (currentCardFontSize < 10) currentCardFontSize = 10;
@@ -425,10 +372,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const allTabs = document.querySelectorAll('.tab');
       allTabs.forEach(t => {
         t.classList.remove('active');
-        t.setAttribute('aria-selected', 'false');
+        t.setAttribute('aria-selected','false');
       });
       tab.classList.add('active');
-      tab.setAttribute('aria-selected', 'true');
+      tab.setAttribute('aria-selected','true');
 
       const cat = tab.getAttribute('data-tab');
       const container = document.getElementById('news-container');
@@ -440,17 +387,18 @@ document.addEventListener('DOMContentLoaded', () => {
         await displayAktuellFeeds();
       } else {
         await displayNewsByCategory(cat);
-        // Čuvanje scroll pozicije za aktivnu kategoriju
-        document.getElementById('news-container').addEventListener('scroll', function() {
-          const activeTab = document.querySelector('.tab.active');
-          if (activeTab) {
-            const currentCat = activeTab.getAttribute('data-tab');
-            localStorage.setItem(`${currentCat}_scroll`, this.scrollTop);
-          }
-        });
+      // Dodati ovo u DOMContentLoaded event listener:
+document.getElementById('news-container').addEventListener('scroll', function() {
+  const activeTab = document.querySelector('.tab.active');
+  if (activeTab) {
+    const currentCat = activeTab.getAttribute('data-tab');
+    localStorage.setItem(`${currentCat}_scroll`, this.scrollTop);
+  }
+});
       }
       
-      // Resetuj scroll nakon učitavanja
+
+      // Posle učitavanja, resetuj scroll
       requestAnimationFrame(() => {
         container.scrollTop = 0;
       });
@@ -502,37 +450,11 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
-  // Kontakt
-  const kontaktButton = document.getElementById('kontakt-button');
-  const kontaktModal = document.getElementById('kontakt-modal');
-  const closeKontaktBtn = document.getElementById('close-kontakt-modal');
-  if (kontaktButton && kontaktModal) {
-    kontaktButton.onclick = () => {
-      settingsModal.style.display = 'none';
-      kontaktModal.style.display = 'flex';
-    };
-  }
-  if (closeKontaktBtn) {
-    closeKontaktBtn.onclick = () => {
-      kontaktModal.style.display = 'none';
-    };
-  }
-
-  // Datenschutz
-  const datenschutzButton = document.getElementById('datenschutz-button');
-  const datenschutzModal = document.getElementById('datenschutz-modal');
-  const closeDatenschutzBtn = document.getElementById('close-datenschutz-modal');
-  if (datenschutzButton && datenschutzModal) {
-    datenschutzButton.onclick = () => {
-      settingsModal.style.display = 'none';
-      datenschutzModal.style.display = 'flex';
-    };
-  }
-  if (closeDatenschutzBtn) {
-    closeDatenschutzBtn.onclick = () => {
-      datenschutzModal.style.display = 'none';
-    };
-  }
+  // Schriftgröße
+  const incBtn = document.getElementById('font-increase');
+  if (incBtn) incBtn.onclick = increaseFontSize;
+  const decBtn = document.getElementById('font-decrease');
+  if (decBtn) decBtn.onclick = decreaseFontSize;
 
   // Über
   const uberButton = document.getElementById('uber-button');
