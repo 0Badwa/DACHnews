@@ -8,9 +8,9 @@ import {
 } from './feeds.js';
 
 let categoriesOrder = [
- "Welt", "Politik", "Technologie", "Gesundheit", "Sport", "Wirtschaft", "Kultur",
+  "Welt", "Politik", "Technologie", "Gesundheit", "Sport", "Wirtschaft", "Kultur",
   "Unterhaltung", "Reisen", "Lifestyle", "Auto",
-   "Panorama", "Sonstiges"
+  "Panorama", "Sonstiges"
 ];
 let blockedSources = JSON.parse(localStorage.getItem('blockedSources') || '[]');
 let blockedCategories = JSON.parse(localStorage.getItem('blockedCategories') || '[]');
@@ -42,32 +42,6 @@ function applyCardFontSize() {
     });
   }
 }
-
-function blockSource(src) {
-  const normalizedSrc = src.toUpperCase().replace(/\s+/g, '');
-  let hiddenSources = JSON.parse(localStorage.getItem('hiddenSources')) || [];
-
-  if (!hiddenSources.includes(normalizedSrc)) {
-    hiddenSources.push(normalizedSrc);
-    localStorage.setItem('hiddenSources', JSON.stringify(hiddenSources));
-  }
-}
-  if (!blockedSources.includes(src)) {
-    blockedSources.push(src);
-    localStorage.setItem('blockedSources', JSON.stringify(blockedSources));
-
-    // Sačuvaj u Redis-u
-    try {
-      await fetch('/api/block-source', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ source: src })
-      });
-    } catch (err) {
-      console.error("Greška pri slanju blokiranog izvora u Redis:", err);
-    }
-  }
-
 
 function isSourceBlocked(src) {
   return blockedSources.includes(src);
@@ -121,24 +95,24 @@ async function unblockSource(src) {
   }
 }
 
-
-
 function blockCategory(cat) {
   if (!blockedCategories.includes(cat)) {
     blockedCategories.push(cat);
     localStorage.setItem('blockedCategories', JSON.stringify(blockedCategories));
   }
 }
+
 function unblockCategory(cat) {
   blockedCategories = blockedCategories.filter(c => c !== cat);
   localStorage.setItem('blockedCategories', JSON.stringify(blockedCategories));
 }
+
 function isCategoryBlocked(cat) {
   return blockedCategories.includes(cat);
 }
 
 /**
- * Dinamičko kreiranje tabova (sem Aktuell),
+ * Dinamičko kreiranje tabova (osim "Aktuell"),
  * preskačemo blokirane kategorije.
  */
 function buildTabs() {
@@ -229,9 +203,11 @@ function handleDragStart(e) {
   e.dataTransfer.setData('text/plain', e.target.textContent.trim());
   e.target.style.opacity = '0.4';
 }
+
 function handleDragOver(e) {
   e.preventDefault();
 }
+
 function handleDrop(e) {
   e.preventDefault();
   const draggedCat = e.dataTransfer.getData('text/plain');
@@ -258,52 +234,11 @@ function handleDrop(e) {
  */
 function openQuellenModal() {
   const quellenModal = document.getElementById('quellen-modal');
-  const hiddenSources = JSON.parse(localStorage.getItem('hiddenSources')) || [];
-
-  if (quellenModal) {
-    quellenModal.style.display = 'flex';
-
-    const sourcesListEl = document.getElementById('sources-list');
-    sourcesListEl.innerHTML = '';
-
-    const newsSources = ['Der Standard', 'ZEIT ONLINE', 'FAZ', 'DER SPIEGEL', 'Süddeutsche Zeitung'];
-
-    newsSources.forEach(src => {
-      const normalizedSrc = src.toUpperCase().replace(/\s+/g, '');
-      const isBlocked = hiddenSources.includes(normalizedSrc);
-
-      const sourceItem = document.createElement('div');
-      sourceItem.className = 'source-item';
-
-      const spanName = document.createElement('span');
-      spanName.textContent = src;
-
-      const blockBtn = document.createElement('button');
-      blockBtn.textContent = isBlocked ? 'Entsperren' : 'Verbergen';
-
-      blockBtn.onclick = () => {
-        if (isBlocked) {
-          unblockSource(src);
-          blockBtn.textContent = 'Verbergen';
-        } else {
-          blockSource(src);
-          blockBtn.textContent = 'Entsperren';
-        }
-        loadFeeds();
-      };
-
-      sourceItem.appendChild(spanName);
-      sourceItem.appendChild(blockBtn);
-      sourcesListEl.appendChild(sourceItem);
-    });
-  }
-}
-  const quellenModal = document.getElementById('quellen-modal');
   if (!quellenModal) return;
   quellenModal.style.display = 'flex'; 
 
   const sourcesListEl = document.getElementById('sources-list');
-  if (!sourcesListEl) return; // ✅ Ovo je sada unutar funkcije
+  if (!sourcesListEl) return;
   sourcesListEl.innerHTML = '';
 
   const newsSources = [
@@ -358,7 +293,6 @@ function closeQuellenModal() {
   loadFeeds();
 }
 
-
 /** initSwipe */
 function initSwipe() {
   const swipeContainer = document.getElementById('news-container');
@@ -380,11 +314,10 @@ function initSwipe() {
     return arr;
   }
   
-
   function handleGesture() {
     const distX = touchendX - touchstartX;
     const distY = touchendY - touchstartY;
-    // Uvek resetuj vertical scroll pre prelaska
+    // Uvek resetuj vertikalni scroll pre prelaska
     swipeContainer.scrollTop = 0;
 
     if (Math.abs(distX) > Math.abs(distY) && Math.abs(distX) > swipeThreshold) {
@@ -408,7 +341,7 @@ function initSwipe() {
 
     clickTab(cats[idx]);
 
-    // Dodatno, za svaki slučaj, skroluj na vrh nakon malog delay-a
+    // Skroluj na vrh nakon malog delay-a
     setTimeout(() => {
       swipeContainer.scrollTop = 0;
     }, 300);
@@ -426,7 +359,6 @@ function initSwipe() {
       return;
     }
   
-
     // Ručno centriranje taba unutar tabsContainer
     if (tabsContainer && tab) {
       const leftPos = tab.offsetLeft - (tabsContainer.offsetWidth / 2) + (tab.offsetWidth / 2);
@@ -438,7 +370,7 @@ function initSwipe() {
 
     tab.click();
 
-    // Posle klika, osiguramo da news-container ide na vrh
+    // Posle klika, osiguraj da news-container ide na vrh
     requestAnimationFrame(() => {
       if (swipeContainer) swipeContainer.scrollTop = 0;
     });
@@ -457,7 +389,7 @@ function initSwipe() {
   });
 }
 
-/** loadFeeds -> simuliramo klik na Aktuell */
+/** loadFeeds -> simuliramo klik na "Aktuell" */
 function loadFeeds(defaultTab = 'Aktuell') {
   const tabBtn = document.querySelector(`.tab[data-tab="${defaultTab}"]`);
   if (tabBtn) {
@@ -471,6 +403,7 @@ function increaseFontSize() {
   if (currentCardFontSize > 40) currentCardFontSize = 40;
   applyCardFontSize();
 }
+
 function decreaseFontSize() {
   currentCardFontSize--;
   if (currentCardFontSize < 10) currentCardFontSize = 10;
@@ -492,10 +425,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const allTabs = document.querySelectorAll('.tab');
       allTabs.forEach(t => {
         t.classList.remove('active');
-        t.setAttribute('aria-selected','false');
+        t.setAttribute('aria-selected', 'false');
       });
       tab.classList.add('active');
-      tab.setAttribute('aria-selected','true');
+      tab.setAttribute('aria-selected', 'true');
 
       const cat = tab.getAttribute('data-tab');
       const container = document.getElementById('news-container');
@@ -507,18 +440,17 @@ document.addEventListener('DOMContentLoaded', () => {
         await displayAktuellFeeds();
       } else {
         await displayNewsByCategory(cat);
-      // Dodati ovo u DOMContentLoaded event listener:
-document.getElementById('news-container').addEventListener('scroll', function() {
-  const activeTab = document.querySelector('.tab.active');
-  if (activeTab) {
-    const currentCat = activeTab.getAttribute('data-tab');
-    localStorage.setItem(`${currentCat}_scroll`, this.scrollTop);
-  }
-});
+        // Čuvanje scroll pozicije za aktivnu kategoriju
+        document.getElementById('news-container').addEventListener('scroll', function() {
+          const activeTab = document.querySelector('.tab.active');
+          if (activeTab) {
+            const currentCat = activeTab.getAttribute('data-tab');
+            localStorage.setItem(`${currentCat}_scroll`, this.scrollTop);
+          }
+        });
       }
       
-
-      // Posle učitavanja, resetuj scroll
+      // Resetuj scroll nakon učitavanja
       requestAnimationFrame(() => {
         container.scrollTop = 0;
       });
@@ -570,42 +502,37 @@ document.getElementById('news-container').addEventListener('scroll', function() 
     };
   }
 
- // Kontakt
-const kontaktButton = document.getElementById('kontakt-button');        // Dugme za otvaranje Kontakt modala
-const kontaktModal = document.getElementById('kontakt-modal');          // Modal za Kontakt
-const closeKontaktBtn = document.getElementById('close-kontakt-modal'); // Dugme za zatvaranje Kontakt modala
+  // Kontakt
+  const kontaktButton = document.getElementById('kontakt-button');
+  const kontaktModal = document.getElementById('kontakt-modal');
+  const closeKontaktBtn = document.getElementById('close-kontakt-modal');
+  if (kontaktButton && kontaktModal) {
+    kontaktButton.onclick = () => {
+      settingsModal.style.display = 'none';
+      kontaktModal.style.display = 'flex';
+    };
+  }
+  if (closeKontaktBtn) {
+    closeKontaktBtn.onclick = () => {
+      kontaktModal.style.display = 'none';
+    };
+  }
 
-if (kontaktButton && kontaktModal) {
-  kontaktButton.onclick = () => {
-    settingsModal.style.display = 'none';   // Zatvara modal sa podešavanjima
-    kontaktModal.style.display = 'flex';    // Prikazuje Kontakt modal
-  };
-}
-
-if (closeKontaktBtn) {
-  closeKontaktBtn.onclick = () => {
-    kontaktModal.style.display = 'none';    // Zatvara Kontakt modal
-  };
-}
-
-// Datenschutz
-const datenschutzButton = document.getElementById('datenschutz-button');        // Dugme za otvaranje Datenschutz modala
-const datenschutzModal = document.getElementById('datenschutz-modal');          // Modal za Datenschutz
-const closeDatenschutzBtn = document.getElementById('close-datenschutz-modal'); // Dugme za zatvaranje Datenschutz modala
-
-if (datenschutzButton && datenschutzModal) {
-  datenschutzButton.onclick = () => {
-    settingsModal.style.display = 'none';    // Zatvara modal sa podešavanjima
-    datenschutzModal.style.display = 'flex'; // Prikazuje Datenschutz modal
-  };
-}
-
-if (closeDatenschutzBtn) {
-  closeDatenschutzBtn.onclick = () => {
-    datenschutzModal.style.display = 'none'; // Zatvara Datenschutz modal
-  };
-}
-
+  // Datenschutz
+  const datenschutzButton = document.getElementById('datenschutz-button');
+  const datenschutzModal = document.getElementById('datenschutz-modal');
+  const closeDatenschutzBtn = document.getElementById('close-datenschutz-modal');
+  if (datenschutzButton && datenschutzModal) {
+    datenschutzButton.onclick = () => {
+      settingsModal.style.display = 'none';
+      datenschutzModal.style.display = 'flex';
+    };
+  }
+  if (closeDatenschutzBtn) {
+    closeDatenschutzBtn.onclick = () => {
+      datenschutzModal.style.display = 'none';
+    };
+  }
 
   // Über
   const uberButton = document.getElementById('uber-button');
@@ -638,24 +565,3 @@ if (closeDatenschutzBtn) {
     if (tutOverlay) tutOverlay.style.display = 'flex';
   }
 });
-/** iphone ide na blank page 
-document.addEventListener("DOMContentLoaded", function () {
-  const closeTutorialBtn = document.getElementById("close-tutorial");
-
-  if (closeTutorialBtn) {
-    closeTutorialBtn.onclick = function () {
-      document.getElementById("tutorial-overlay").style.display = "none";
-
-      // Provera da li je uređaj iPhone
-      if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-        window.close(); // Pokušaj zatvaranja taba
-
-        // Ako zatvaranje taba ne uspe, preusmeri korisnika na praznu stranicu
-        setTimeout(() => {
-          window.location.href = "about:blank";
-        }, 500);
-      }
-    };
-  }
-});
-               */
