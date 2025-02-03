@@ -54,10 +54,8 @@ style="scroll-behavior: smooth;">
     <div class="tutorial-content">
       <h2>Willkommen!</h2>
 <br>
-      <p>Wischen Sie nach <strong>LINKS</strong>,</p>
-      <p>um Kategorien zu <strong>wechseln</strong>.</p>
-<br>
-      <p>Safari wird nicht unterstützt.</p>
+      <p>Wischen Sie nach LINKS,</p>
+      <p>um Kategorien zu wechseln.</p>
 <br>
       <button id="close-tutorial" class="tutorial-close-btn">Verstanden</button>
     </div>
@@ -78,13 +76,16 @@ style="scroll-behavior: smooth;">
           <span>Kategorien</span>
           <button id="kategorien-button" class="settings-action-button">Öffnen</button>
         </div>
-        <div class="settings-item">
-          <span>Schriftgröße</span>
-          <div class="font-size-buttons">
-            <button type="button" id="font-decrease" class="font-button">-</button>
-            <button type="button" id="font-increase" class="font-button">+</button>
-          </div>
-        </div>
+       <div class="settings-item">
+  <span>Kontakt</span>
+  <button id="kontakt-button" class="settings-action-button">Öffnen</button>
+</div>
+
+<div class="settings-item">
+  <span>Datenschutz</span>
+  <button id="datenschutz-button" class="settings-action-button">Öffnen</button>
+</div>
+
         <div class="settings-item">
           <span>Über</span>
           <button id="uber-button" class="settings-action-button">Öffnen</button>
@@ -125,7 +126,36 @@ style="scroll-behavior: smooth;">
       </div>
     </div>
   </div>
-
+  
+  <!-- Modal za Kontakt -->
+  <div id="kontakt-modal" class="modal" style="display: none;">
+    <div class="rearrange-modal-content uber-modal-content" style="margin: 0 3rem;">
+      <div class="modal-title" style="color: var(--primary-color); font-weight: bold; font-size: 120%;">
+        kontakt...
+      </div>
+      <p style="margin: 1rem 0;">
+        kontakt...
+      </p>
+      <div class="modal-buttons">
+        <button class="save-button" id="close-kontakt-modal">Schließen</button>
+      </div>
+    </div>
+    
+  </div>  <!-- Modal za Datenschutz -->
+  <div id="datenschutz-modal" class="modal" style="display: none;">
+    <div class="rearrange-modal-content uber-modal-content" style="margin: 0 3rem;">
+      <div class="modal-title" style="color: var(--primary-color); font-weight: bold; font-size: 120%;">
+       Datenschutz
+      </div>
+      <p style="margin: 1rem 0;">
+        Datenschutz...
+      </p>
+      <div class="modal-buttons">
+        <button class="save-button" id="close-uber-modal">Schließen</button>
+      </div>
+    </div>
+  </div>
+  
   <!-- Modal za Über -->
   <div id="uber-modal" class="modal" style="display: none;">
     <div class="rearrange-modal-content uber-modal-content" style="margin: 0 3rem;">
