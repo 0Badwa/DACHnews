@@ -29,7 +29,21 @@ export function openNewsModal(feed) {
     : (feed.source || 'Unbekannte Quelle');
 
   // Postavljamo izvor u modal
-  modalSourceTime.innerHTML = `<span class="modal-source-bold-green">${sourceName.toUpperCase()}</span>`;
+// Pretpostavljam da feed ima polja feed.published_date i feed.published_time
+const publishedDate = feed.published_date || ''; // Na primer: '2024-01-20'
+const publishedTime = feed.published_time || ''; // Na primer: '14:35'
+
+// Pretpostavljam da feed ima polja feed.published_date i feed.published_time
+const publishedDate = (feed.published_date || '').trim(); // Na primer: '2024-01-20'
+const publishedTime = (feed.published_time || '').trim(); // Na primer: '14:35'
+
+// Prikaz izvora sa datumom i vremenom
+modalSourceTime.innerHTML = `
+  <span class="modal-source-bold-green">${sourceName.toUpperCase()}</span>
+  ${publishedDate ? ` • ${publishedDate}` : ''}
+  ${publishedTime ? ` • ${publishedTime}` : ''}
+`;
+
 
   // Ostali elementi modala
   modalImage.src = feed.image || 'https://via.placeholder.com/240';
