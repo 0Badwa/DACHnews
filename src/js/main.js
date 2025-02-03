@@ -43,17 +43,25 @@ function applyCardFontSize() {
   }
 }
 
-async function blockSource(src) {
+function blockSource(src) {
   const normalizedSrc = src.toUpperCase().replace(/\s+/g, '');
-  if (!blockedSources.includes(normalizedSrc)) {
-    blockedSources.push(normalizedSrc);
+  let hiddenSources = JSON.parse(localStorage.getItem('hiddenSources')) || [];
+
+  if (!hiddenSources.includes(normalizedSrc)) {
+    hiddenSources.push(normalizedSrc);
+    localStorage.setItem('hiddenSources', JSON.stringify(hiddenSources));
+  }
+}
+  if (!blockedSources.includes(src)) {
+    blockedSources.push(src);
     localStorage.setItem('blockedSources', JSON.stringify(blockedSources));
 
+    // Sačuvaj u Redis-u
     try {
       await fetch('/api/block-source', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ source: normalizedSrc })
+        body: JSON.stringify({ source: src })
       });
     } catch (err) {
       console.error("Greška pri slanju blokiranog izvora u Redis:", err);
@@ -61,12 +69,17 @@ async function blockSource(src) {
   }
 }
 
-
 function isSourceBlocked(src) {
   return blockedSources.includes(src);
 }
 
-async function unblockSource(src) {
+function unblockSource(src) {
+  const normalizedSrc = src.toUpperCase().replace(/\s+/g, '');
+  let hiddenSources = JSON.parse(localStorage.getItem('hiddenSources')) || [];
+
+  hiddenSources = hiddenSources.filter(s => s !== normalizedSrc);
+  localStorage.setItem('hiddenSources', JSON.stringify(hiddenSources));
+}
   blockedSources = blockedSources.filter(s => s !== src);
   localStorage.setItem('blockedSources', JSON.stringify(blockedSources));
 
@@ -217,6 +230,47 @@ function handleDrop(e) {
  * Modal za Quellen
  */
 function openQuellenModal() {
+  const quellenModal = document.getElementById('quellen-modal');
+  const hiddenSources = JSON.parse(localStorage.getItem('hiddenSources')) || [];
+
+  if (quellenModal) {
+    quellenModal.style.display = 'flex';
+
+    const sourcesListEl = document.getElementById('sources-list');
+    sourcesListEl.innerHTML = '';
+
+    const newsSources = ['Der Standard', 'ZEIT ONLINE', 'FAZ', 'DER SPIEGEL', 'Süddeutsche Zeitung'];
+
+    newsSources.forEach(src => {
+      const normalizedSrc = src.toUpperCase().replace(/\s+/g, '');
+      const isBlocked = hiddenSources.includes(normalizedSrc);
+
+      const sourceItem = document.createElement('div');
+      sourceItem.className = 'source-item';
+
+      const spanName = document.createElement('span');
+      spanName.textContent = src;
+
+      const blockBtn = document.createElement('button');
+      blockBtn.textContent = isBlocked ? 'Entsperren' : 'Verbergen';
+
+      blockBtn.onclick = () => {
+        if (isBlocked) {
+          unblockSource(src);
+          blockBtn.textContent = 'Verbergen';
+        } else {
+          blockSource(src);
+          blockBtn.textContent = 'Entsperren';
+        }
+        loadFeeds();
+      };
+
+      sourceItem.appendChild(spanName);
+      sourceItem.appendChild(blockBtn);
+      sourcesListEl.appendChild(sourceItem);
+    });
+  }
+}
   const quellenModal = document.getElementById('quellen-modal');
   if (!quellenModal) return;
   quellenModal.style.display = 'flex'; 
