@@ -1,12 +1,5 @@
 /************************************************
  * feeds.js
- *
- * - Uklonjene eventualne reference na "Neueste" kategoriju.
- * - Dodati loader i error message (već implementirano u main.js).
- * - Dodatna funkcija za prikaz svih kategorija ("displayAllCategories"),
- *   uklonjena greška "container is not defined".
- * - Ispravljeno ažuriranje kategorije i resetovanje skrola.
- * - Dodano osvežavanje aplikacije kada postane aktivna.
  ************************************************/
 
 import {
@@ -476,3 +469,13 @@ function removeActiveClass() {
 document.addEventListener('DOMContentLoaded', () => {
   initFeeds();
 });
+
+
+const sourceNameMap = {
+  'derstandard.at': 'Der Standard',
+  'zeit.de': 'ZEIT ONLINE',
+  'spiegel.de': 'DER SPIEGEL',
+  'faz.net': 'FAZ',
+  'sueddeutsche.de': 'Süddeutsche Zeitung'
+  // Dodaj ostale izvore po potrebi
+};
