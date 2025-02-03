@@ -526,3 +526,40 @@ document.addEventListener('DOMContentLoaded', () => {
     if (tutOverlay) tutOverlay.style.display = 'flex';
   }
 });
+
+
+// Kontakt modal
+const kontaktButton = document.getElementById('kontakt-button');
+const kontaktModal = document.getElementById('kontakt-modal');
+const closeKontaktBtn = document.getElementById('close-kontakt-modal');
+
+if (kontaktButton && kontaktModal) {
+  kontaktButton.onclick = () => {
+    const settingsModal = document.getElementById('settings-modal');
+    if (settingsModal) settingsModal.style.display = 'none';
+    kontaktModal.style.display = 'flex';
+  };
+}
+if (closeKontaktBtn) {
+  closeKontaktBtn.onclick = () => {
+    kontaktModal.style.display = 'none';
+  };
+}
+
+// Datenschutz modal
+const datenschutzButton = document.getElementById('datenschutz-button');
+const datenschutzModal = document.getElementById('datenschutz-modal');
+const closeDatenschutzBtn = document.getElementById('close-datenschutz-modal');
+
+if (datenschutzButton && datenschutzModal) {
+  datenschutzButton.onclick = () => {
+    const settingsModal = document.getElementById('settings-modal');
+    if (settingsModal) settingsModal.style.display = 'none';
+    datenschutzModal.style.display = 'flex';
+  };
+}
+if (closeDatenschutzBtn) {
+  closeDatenschutzBtn.onclick = () => {
+    datenschutzModal.style.display = 'none';
+  };
+}
