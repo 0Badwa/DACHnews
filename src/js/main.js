@@ -44,22 +44,23 @@ function applyCardFontSize() {
 }
 
 async function blockSource(src) {
-  if (!blockedSources.includes(src)) {
-    blockedSources.push(src);
+  const normalizedSrc = src.toUpperCase().replace(/\s+/g, '');
+  if (!blockedSources.includes(normalizedSrc)) {
+    blockedSources.push(normalizedSrc);
     localStorage.setItem('blockedSources', JSON.stringify(blockedSources));
 
-    // Sačuvaj u Redis-u
     try {
       await fetch('/api/block-source', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ source: src })
+        body: JSON.stringify({ source: normalizedSrc })
       });
     } catch (err) {
       console.error("Greška pri slanju blokiranog izvora u Redis:", err);
     }
   }
 }
+
 
 function isSourceBlocked(src) {
   return blockedSources.includes(src);
