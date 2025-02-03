@@ -43,18 +43,39 @@ function applyCardFontSize() {
   }
 }
 
+/**
+ * Normalizuje ime izvora (sva velika slova i bez razmaka)
+ */
+function normalizeSource(src) {
+  return src.toUpperCase().replace(/\s+/g, '');
+}
+
+/**
+ * Blokira dati izvor koristeći normalizovano ime
+ */
 function blockSource(src) {
-  if (!blockedSources.includes(src)) {
-    blockedSources.push(src);
+  const normalized = normalizeSource(src);
+  if (!blockedSources.includes(normalized)) {
+    blockedSources.push(normalized);
     localStorage.setItem('blockedSources', JSON.stringify(blockedSources));
   }
 }
+
+/**
+ * Otključava dati izvor koristeći normalizovano ime
+ */
 function unblockSource(src) {
-  blockedSources = blockedSources.filter(s => s !== src);
+  const normalized = normalizeSource(src);
+  blockedSources = blockedSources.filter(s => s !== normalized);
   localStorage.setItem('blockedSources', JSON.stringify(blockedSources));
 }
+
+/**
+ * Proverava da li je dati izvor blokiran koristeći normalizovano ime
+ */
 function isSourceBlocked(src) {
-  return blockedSources.includes(src);
+  const normalized = normalizeSource(src);
+  return blockedSources.includes(normalized);
 }
 
 function blockCategory(cat) {
@@ -188,7 +209,7 @@ function handleDrop(e) {
 }
 
 /**
- * Modal za Quellen
+ * Modal za Quellen: dinamičko generisanje liste izvora.
  */
 function openQuellenModal() {
   const quellenModal = document.getElementById('quellen-modal');
@@ -199,7 +220,27 @@ function openQuellenModal() {
   if (!sourcesListEl) return;
   sourcesListEl.innerHTML = '';
 
-  const newsSources = ['Bild', 'Zeit', 'Blick', 'Heise', 'Spiegel', 'Falter'];
+  let feeds = [];
+  const cachedFeeds = localStorage.getItem('feeds-Aktuell');
+  if (cachedFeeds) {
+    try {
+      feeds = JSON.parse(cachedFeeds);
+    } catch (e) {
+      console.error("Greška pri parsiranju keširanih feedova:", e);
+    }
+  }
+  
+  // Izvlačimo jedinstvene izvore i normalizujemo ih
+  const distinctSources = [...new Set(
+    feeds
+      .map(feed => (feed.source || '').trim())
+      .filter(s => s !== '')
+      .map(normalizeSource)
+  )];
+  
+  // Ako nema keširanih izvora, koristimo rezervni niz
+  const newsSources = distinctSources.length > 0 ? distinctSources : ['BILD', 'ZEIT', 'BLICH', 'HEISE', 'SPIEGEL', 'FALTER'];
+  
   newsSources.forEach(src => {
     const sourceItem = document.createElement('div');
     sourceItem.className = 'source-item';
@@ -306,7 +347,6 @@ function initSwipe() {
       return;
     }
   
-
     // Ručno centriranje taba unutar tabsContainer
     if (tabsContainer && tab) {
       const leftPos = tab.offsetLeft - (tabsContainer.offsetWidth / 2) + (tab.offsetWidth / 2);
@@ -387,17 +427,16 @@ document.addEventListener('DOMContentLoaded', () => {
         await displayAktuellFeeds();
       } else {
         await displayNewsByCategory(cat);
-      // Dodati ovo u DOMContentLoaded event listener:
-document.getElementById('news-container').addEventListener('scroll', function() {
-  const activeTab = document.querySelector('.tab.active');
-  if (activeTab) {
-    const currentCat = activeTab.getAttribute('data-tab');
-    localStorage.setItem(`${currentCat}_scroll`, this.scrollTop);
-  }
-});
+        // Dodati ovo u DOMContentLoaded event listener:
+        document.getElementById('news-container').addEventListener('scroll', function() {
+          const activeTab = document.querySelector('.tab.active');
+          if (activeTab) {
+            const currentCat = activeTab.getAttribute('data-tab');
+            localStorage.setItem(`${currentCat}_scroll`, this.scrollTop);
+          }
+        });
       }
       
-
       // Posle učitavanja, resetuj scroll
       requestAnimationFrame(() => {
         container.scrollTop = 0;
