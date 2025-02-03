@@ -163,3 +163,6 @@ function openUberModal() {
     };
   }
 }
+document.addEventListener('DOMContentLoaded', () => {
+  initSettings();
+});
