@@ -226,7 +226,7 @@ function createNewsCard(feed) {
   const img = document.createElement('img');
   img.className = "news-card-image lazy";
 const BASE_IMAGE_URL = "https://dachnews.onrender.com"; // Dodaj ako već ne postoji
-img.dataset.src = feed.image.startsWith("/") ? `${BASE_IMAGE_URL}${feed.image}` : feed.image;
+img.src = feed.image.startsWith("/") ? `${BASE_IMAGE_URL}${feed.image}` : feed.image;
   img.alt = feed.title || 'No title';
 
   const contentDiv = document.createElement('div');
