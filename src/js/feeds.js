@@ -112,7 +112,7 @@ export async function fetchAllFeedsFromServer(forceRefresh = false) {
         let data = JSON.parse(cachedFeeds);
         data.sort((a, b) => new Date(b.date_published).getTime() - new Date(a.date_published).getTime());
         data = data.filter(feed => !isHiddenFeed(feed));
-        return data.slice(0, 50);
+        return data.slice(0, 100);
       }
     }
 
