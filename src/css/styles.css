@@ -569,8 +569,13 @@ background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z
 }
 
 
+/* Dodavanje stilova za kontakt modal */
 #kontakt-modal .modal-title {
-  padding: 2rem; /* Podesi po želji */
- text-align: left; /* Poravnanje poslednje linije levo */
+  padding: 2rem 2rem 0 2rem; /* Padding sa svih strana osim dole */
+  text-align: left; /* Poravnanje poslednje linije levo */
   text-align: justify; /* Justifikovanje teksta */
-}}
+}
+
+#kontakt-modal p {
+  padding: 2rem; /* Dodavanje paddinga za tekst ispod naslova */
+}
