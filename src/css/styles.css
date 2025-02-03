@@ -567,3 +567,10 @@ background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z
   font-weight: bold;
   font-size: 1rem;
 }
+
+
+#kontakt-modal .modal-title {
+  padding: 2rem; /* Podesi po želji */
+ text-align: left; /* Poravnanje poslednje linije levo */
+  text-align: justify; /* Justifikovanje teksta */
+}}
