@@ -73,13 +73,39 @@ function isSourceBlocked(src) {
   return blockedSources.includes(src);
 }
 
-function unblockSource(src) {
+async function blockSource(src) {
+  const normalizedSrc = src.toUpperCase().replace(/\s+/g, '');
+  let hiddenSources = JSON.parse(localStorage.getItem('hiddenSources')) || [];
+
+  if (!hiddenSources.includes(normalizedSrc)) {
+    hiddenSources.push(normalizedSrc);
+    localStorage.setItem('hiddenSources', JSON.stringify(hiddenSources));
+  }
+
+  if (!blockedSources.includes(src)) {
+    blockedSources.push(src);
+    localStorage.setItem('blockedSources', JSON.stringify(blockedSources));
+
+    // Sačuvaj u Redis-u
+    try {
+      await fetch('/api/block-source', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ source: src })
+      });
+    } catch (err) {
+      console.error("Greška pri slanju blokiranog izvora u Redis:", err);
+    }
+  }
+}
+
+async function unblockSource(src) {
   const normalizedSrc = src.toUpperCase().replace(/\s+/g, '');
   let hiddenSources = JSON.parse(localStorage.getItem('hiddenSources')) || [];
 
   hiddenSources = hiddenSources.filter(s => s !== normalizedSrc);
   localStorage.setItem('hiddenSources', JSON.stringify(hiddenSources));
-}
+
   blockedSources = blockedSources.filter(s => s !== src);
   localStorage.setItem('blockedSources', JSON.stringify(blockedSources));
 
@@ -94,6 +120,7 @@ function unblockSource(src) {
     console.error("Greška pri uklanjanju blokiranog izvora iz Redis-a:", err);
   }
 }
+
 
 
 function blockCategory(cat) {
