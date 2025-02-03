@@ -73,9 +73,10 @@ function isHiddenFeed(feed) {
 
   if (hiddenCats.includes(cat)) return true;
 if (feed.source) {
-  const normalizedSource = feed.source.trim().toLowerCase();
-  if (hiddenSources.map(s => s.trim().toLowerCase()).includes(normalizedSource)) return true;
+  const normalizedSource = feed.source.toUpperCase().replace(/\s+/g, '');
+  if (hiddenSources.includes(normalizedSource)) return true;
 }
+
 
   return false;
 }
