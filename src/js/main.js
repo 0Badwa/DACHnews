@@ -348,6 +348,7 @@ function initSwipe() {
   function handleGesture() {
     const distX = touchendX - touchstartX;
     const distY = touchendY - touchstartY;
+    container.style.scrollBehavior = 'auto !important'; // Forsiraj ponašanje
     swipeContainer.scrollTop = 0;
 
     if (Math.abs(distX) > Math.abs(distY) && Math.abs(distX) > swipeThreshold) {
