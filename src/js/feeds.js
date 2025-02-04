@@ -357,7 +357,7 @@ export function displayFeedsList(feedsList, categoryName) {
   if (!container) return;
 
   // Pre punjenja sadržaja, skrol na vrh
-container.scrollTo({ top: 0, behavior: 'auto' });
+  container.scrollTop = 0;
   container.innerHTML = '';
 
   if (!feedsList || feedsList.length === 0) {
