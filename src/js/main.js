@@ -11,7 +11,7 @@ let categoriesOrder = [
   "Technologie", "Gesundheit", "Sport", "Wirtschaft", "Kultur",
   "Unterhaltung", "Reisen", "Lifestyle", "Auto",
   "Welt", "Politik", "Panorama", "Sonstiges"
-];
+];ccccccccccc
 
 let blockedSources = JSON.parse(localStorage.getItem('blockedSources') || '[]');
 let blockedCategories = JSON.parse(localStorage.getItem('blockedCategories') || '[]');
@@ -454,42 +454,42 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const tabsContainer = document.getElementById('tabs-container');
   if (tabsContainer) {
-    tabsContainer.addEventListener('click', async (e) => {
-      const tab = e.target.closest('.tab');
-      if (!tab) return;
+  tabsContainer.addEventListener('click', async (e) => {
+  const tab = e.target.closest('.tab');
+  if (!tab || tab.classList.contains('active')) return; // Sprečava ponovni klik na aktivan tab
 
-      const allTabs = document.querySelectorAll('.tab');
-      allTabs.forEach(t => {
-        t.classList.remove('active');
-        t.setAttribute('aria-selected','false');
-      });
-      tab.classList.add('active');
-      tab.setAttribute('aria-selected','true');
+  // Uklanja "active" klasu sa svih tabova
+  document.querySelectorAll('.tab').forEach(t => {
+    t.classList.remove('active');
+    t.setAttribute('aria-selected', 'false');
+  });
 
-      const cat = tab.getAttribute('data-tab');
+  // Postavlja "active" na kliknuti tab
+  tab.classList.add('active');
+  tab.setAttribute('aria-selected', 'true');
 
-      gtag('event', 'category_change', {
-      'category_name': cat
-      });
-      
-      const container = document.getElementById('news-container');
-      if (!container) return;
+  const category = tab.getAttribute('data-tab');
+  const container = document.getElementById('news-container');
+  if (!container) return;
 
-      container.scrollTop = 0;
+  container.scrollTop = 0; // Resetuje scroll na vrh
 
-      if (cat === 'Aktuell') {
-        await displayAktuellFeeds();
-      } else {
-        await displayNewsByCategory(cat);
-        // Čuvanje scroll pozicije za slučaj potrebe
-        document.getElementById('news-container').addEventListener('scroll', function() {
-          const activeTab = document.querySelector('.tab.active');
-          if (activeTab) {
-            const currentCat = activeTab.getAttribute('data-tab');
-            localStorage.setItem(`${currentCat}_scroll`, this.scrollTop);
-          }
-        });
-      }
+  try {
+    if (category === 'Aktuell') {
+      await displayAktuellFeeds(true); // Force refresh
+    } else {
+      await displayNewsByCategory(category, true); // Force refresh
+    }
+  } catch (error) {
+    console.error(`Greška prilikom učitavanja kategorije "${category}":`, error);
+  }
+
+  // Dodatno osiguranje da se prikaz osveži
+  requestAnimationFrame(() => {
+    container.scrollTop = 0;
+  });
+});
+
 
       // Posle učitavanja, resetujemo scroll
       requestAnimationFrame(() => {
