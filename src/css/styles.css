@@ -603,3 +603,13 @@ background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z
 #uber-modal p {
   padding: 2rem; /* Dodavanje paddinga za tekst ispod naslova */
 }
+
+.flag-icon {
+  width: 16px;
+  height: 12px;
+  margin-right: 5px; /* Razmak između zastave i naziva medija */
+  vertical-align: middle;
+  border: 1px solid #ccc;
+  border-radius: 2px;
+  object-fit: cover;
+}
