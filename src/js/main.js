@@ -88,6 +88,26 @@ function unblockCategory(cat) {
   blockedCategories = blockedCategories.filter(c => c !== cat);
   localStorage.setItem('blockedCategories', JSON.stringify(blockedCategories));
 }
+
+// Dodavanje nove funkcije ovde
+function moveCategory(index, direction) {
+  const newIndex = index + direction;
+
+  // Proveri da li je indeks validan
+  if (newIndex < 0 || newIndex >= categoriesOrder.length) {
+    return;
+  }
+
+  // Zameni kategorije
+  [categoriesOrder[index], categoriesOrder[newIndex]] = [categoriesOrder[newIndex], categoriesOrder[index]];
+
+  // Sačuvaj novi raspored u localStorage
+  localStorage.setItem('categoriesOrder', JSON.stringify(categoriesOrder));
+
+  // Osveži prikaz
+  openRearrangeModal();
+}
+
 function isCategoryBlocked(cat) {
   return blockedCategories.includes(cat);
 }
@@ -135,11 +155,21 @@ function openRearrangeModal() {
     categoriesOrder = JSON.parse(savedOrder);
   }
 
-  categoriesOrder.forEach(cat => {
+  categoriesOrder.forEach((cat, index) => {
     const li = document.createElement('li');
     li.draggable = true;
     li.textContent = cat;
 
+    // Kreiranje strelica za pomeranje gore i dole
+    const upArrow = document.createElement('div');
+    upArrow.className = 'arrow-up';
+    upArrow.onclick = () => moveCategory(index, -1);
+
+    const downArrow = document.createElement('div');
+    downArrow.className = 'arrow-down';
+    downArrow.onclick = () => moveCategory(index, 1);
+
+    // Dugme za skrivanje/otključavanje kategorije
     const btn = document.createElement('button');
     btn.textContent = isCategoryBlocked(cat) ? 'Entsperren' : 'Verbergen';
     btn.onclick = () => {
@@ -152,8 +182,11 @@ function openRearrangeModal() {
       }
     };
 
+    // Dodavanje strelica i dugmeta u listu
+    li.prepend(upArrow, downArrow);
     li.appendChild(btn);
 
+    // Event listener za drag & drop
     li.addEventListener('dragstart', handleDragStart);
     li.addEventListener('dragover', handleDragOver);
     li.addEventListener('drop', handleDrop);
@@ -161,6 +194,7 @@ function openRearrangeModal() {
     ul.appendChild(li);
   });
 }
+
 
 function closeKategorienModal() {
   const kategorienModal = document.getElementById('kategorien-modal');
