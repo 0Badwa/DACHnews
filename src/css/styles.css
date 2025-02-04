@@ -614,7 +614,7 @@ background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z
    margin-top: 6px;
   vertical-align: bottom;
   border: 1px solid #ccc;
-  border-radius: 2px;
+  border-radius: 1px;
   object-fit: cover;
 }
 .source {
