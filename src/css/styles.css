@@ -420,7 +420,8 @@ background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z
 
 #sortable-list li {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start; /* Levo poravnanje */
+  gap: 10px; /* Razmak između strelica i imena kategorija */
   align-items: center;
   padding: 0.2rem 0.8rem;
   margin-bottom: 0.2rem; /* Veći razmak između stavki */
