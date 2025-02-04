@@ -282,12 +282,21 @@ function createNewsCard(feed) {
   const card = document.createElement('div');
   card.className = "news-card";
   
-  // Klik na karticu -> otvori modal
+  // Klik na karticu -> otvori modal i pošalji podatke u Google Analytics
   card.onclick = () => {
     document.querySelectorAll('.news-card').forEach(existingCard => existingCard.classList.remove('active'));
     card.classList.add('active');
     openNewsModal(feed);
+
+    // Praćenje klikova na vesti
+    gtag('event', 'news_click', {
+      'news_title': feed.title,
+      'source': feed.source
+    });
   };
+
+  return card; // Ne zaboravi da vratiš karticu ako se koristi dalje
+}
 
  // Slika
 const img = document.createElement('img');
