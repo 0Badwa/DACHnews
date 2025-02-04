@@ -605,6 +605,9 @@ background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z
 }
 
 .flag-icon {
+  box-shadow: none !important;   /* Uklanja sve senke */
+  filter: none !important;       /* Uklanja filtere kao što su glow efekti */
+  outline: none !important;      /* Uklanja eventualni outline */
   width: 0.6rem;
   height: 0.4rem;
   margin-right: 0.5rem; /* Razmak između zastave i naziva medija */
