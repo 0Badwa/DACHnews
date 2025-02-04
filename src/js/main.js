@@ -489,13 +489,6 @@ document.addEventListener('DOMContentLoaded', () => {
     container.scrollTop = 0;
   });
 });
-
-
-      // Posle učitavanja, resetujemo scroll
-      requestAnimationFrame(() => {
-        container.scrollTop = 0;
-      });
-    });
   }
 
   loadFeeds();
