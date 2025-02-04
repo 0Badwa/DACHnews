@@ -289,20 +289,24 @@ function createNewsCard(feed) {
     openNewsModal(feed);
   };
 
-  // Slika
-  const img = document.createElement('img');
-  img.className = "news-card-image lazy";
+ // Slika
+const img = document.createElement('img');
+img.className = "news-card-image lazy";
+
 const BASE_IMAGE_URL = window.location.hostname.includes("dach.news")
   ? "https://www.dach.news"
   : "https://dachnews.onrender.com";
 
-img.src = feed.image.startsWith("/") ? `${BASE_IMAGE_URL}${feed.image}` : feed.image;
+// Provera da li feed ima sliku
+if (feed.image && feed.image.startsWith("/")) {
+  img.src = `${BASE_IMAGE_URL}${feed.image}`;
+} else if (feed.image) {
+  img.src = feed.image; // Ako je apsolutni URL
+} else {
+  img.src = `${BASE_IMAGE_URL}/img/noimg.png`; // Fallback slika
+}
 
-
-  } else {
-    img.src = `${BASE_IMAGE_URL}/img/noimg.png`;
-  }
-  img.alt = feed.title || 'No title';
+img.alt = feed.title || 'No title';
 
   // Sadržaj
   const contentDiv = document.createElement('div');
