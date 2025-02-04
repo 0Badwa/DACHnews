@@ -282,21 +282,32 @@ function createNewsCard(feed) {
   const card = document.createElement('div');
   card.className = "news-card";
   
-  // Klik na karticu -> otvori modal i pošalji podatke u Google Analytics
+  // Klik na karticu -> otvori modal
   card.onclick = () => {
     document.querySelectorAll('.news-card').forEach(existingCard => existingCard.classList.remove('active'));
     card.classList.add('active');
     openNewsModal(feed);
-
-    // Praćenje klikova na vesti
-    gtag('event', 'news_click', {
-      'news_title': feed.title,
-      'source': feed.source
-    });
   };
 
-  return card; // Ne zaboravi da vratiš karticu ako se koristi dalje
+  const img = document.createElement('img');
+  img.className = "news-card-image lazy";
+  img.src = feed.image || '/default-image.png';
+  img.alt = feed.title || 'No title';
+
+  const contentDiv = document.createElement('div');
+  contentDiv.className = "news-card-content";
+
+  const title = document.createElement('h3');
+  title.className = "news-title truncated-title";
+  title.textContent = feed.title || 'No title';
+
+  contentDiv.appendChild(title);
+  card.appendChild(img);
+  card.appendChild(contentDiv);
+
+  return card; // Ovo sada ispravno stoji unutar funkcije
 }
+
 
  // Slika
 const img = document.createElement('img');
