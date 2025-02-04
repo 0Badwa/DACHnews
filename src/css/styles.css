@@ -430,7 +430,24 @@ background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z
   cursor: pointer;
   transition: background-color 0.2s, transform 0.2s; /* Dodata animacija za hover */
 }
+/* Stilovi za strelice za pomeranje kategorija */
+.arrow-up, .arrow-down {
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  cursor: pointer;
+  margin: 0 5px;
+  display: inline-block;
+}
 
+.arrow-up {
+  border-bottom: 10px solid #32CD32; /* Zelena strelica gore */
+}
+
+.arrow-down {
+  border-top: 10px solid #32CD32; /* Zelena strelica dole */
+}
 /* Kategorija je verbergen (zelena pozadina) */
 #sortable-list li.verbergen {
   background-color: rgba(50, 205, 50, 0.2); /* Zelena pozadina sa providnošću */
