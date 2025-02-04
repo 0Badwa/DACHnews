@@ -20,7 +20,7 @@ function parseDomain(source) {
   if (!source) return '';
   let s = source.trim().toLowerCase();
 
-  // Ukloni protokol
+  // Ukloni protokol (http:// ili https://)
   s = s.replace(/^https?:\/\//, '');
   // Ukloni "www."
   s = s.replace(/^www\./, '');
@@ -33,15 +33,14 @@ function parseDomain(source) {
 }
 
 /**
- * Vraća URL zastave zasnovan na brendovima ili TLD-u.
+ * Vraća URL zastave zasnovan na brendovima ili TLD-u (".de", ".at", ".ch").
  */
 function getCountryFlag(source) {
   const domain = parseDomain(source);
 
-  // Mapa brendova -> ISO kôd države
-  // Ako domain uključuje recimo "bild" -> 'de'
+  // Mapa brendova -> ISO kôd države (npr. 'bild' -> 'de' -> 'https://flagcdn.com/de.svg')
   const brandMap = {
-    // Nemačka
+    // DE (Nemačka)
     'bild': 'de',
     'spiegel': 'de',
     'zeit': 'de',
@@ -56,22 +55,24 @@ function getCountryFlag(source) {
     'queer': 'de',
     'siegessaeule': 'de',
     'volksstimme': 'de',
-    // Austrija
+    'general-anzeigerbonn': 'de', // Dodato
+    // AT (Austrija)
     'falter': 'at',
     'kurier': 'at',
     'profil': 'at',
     'wienerzeitung': 'at',
     'derstandard': 'at',
-    'salzburg': 'at', // "salzburg.com"
-    'augustin': 'at', // "der-augustin.at"
-    // Švajcarska
+    'salzburg': 'at',
+    'augustin': 'at',
+    // CH (Švajcarska)
     'blick': 'ch',
     'aargauerzeitung': 'ch',
     'woz': 'ch',
     'tagblatt': 'ch',
     'pszeitung': 'ch',
     'tagesanzeiger': 'ch',
-    'vorwaerts': 'ch'
+    'vorwaerts': 'ch',
+    'tages-anzeiger': 'ch' // Dodato ("tages-anzeiger")
   };
 
   // 1) Proveri brend
@@ -320,15 +321,12 @@ function createNewsCard(feed) {
     : 'UNBEKANNTEQUELLE';
   sourceSpan.textContent = normalizedSource;
 
-  // Zastava
+  // Zastava (visina 1rem, razmak 5px)
   const flagImg = document.createElement('img');
   flagImg.className = "flag-icon";
-  // Visina 1.2rem, širina proporcionalno
-  flagImg.style.height = "1.2rem";
+  flagImg.style.height = "1rem";
   flagImg.style.width = "auto";
-  // Razmak od 4px do teksta
-  flagImg.style.marginRight = "4px";
-  // Dohvatamo URL zastave
+  flagImg.style.marginRight = "5px";
   flagImg.src = getCountryFlag(feed.source);
   flagImg.alt = "flag";
   sourceSpan.prepend(flagImg);
