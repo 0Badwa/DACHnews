@@ -238,6 +238,15 @@ img.src = feed.image.startsWith("/") ? `${BASE_IMAGE_URL}${feed.image}` : feed.i
 const normalizedSource = feed.source ? feed.source.toUpperCase().replace(/\s+/g, '') : 'UNBEKANNTEQUELLE';
 sourceSpan.textContent = normalizedSource;
 
+// Dodavanje zastave zemlje
+  const flagImg = document.createElement('img');
+  flagImg.className = "flag-icon";
+  flagImg.src = getCountryFlag(feed.source); // Funkcija koja vraća URL zastave
+  flagImg.alt = "flag";
+
+  // Dodavanje zastave ispred izvora
+  sourceSpan.prepend(flagImg);
+  
   const timeSpan = document.createElement('span');
   timeSpan.className = "time";
   const timeString = feed.date_published ? timeAgo(feed.date_published) : '';
