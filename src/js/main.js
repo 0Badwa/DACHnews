@@ -348,7 +348,7 @@ function initSwipe() {
   function handleGesture() {
     const distX = touchendX - touchstartX;
     const distY = touchendY - touchstartY;
-    swipeContainer.scrollTop = 0 !important;
+    swipeContainer.scrollTop = 0;
 
     if (Math.abs(distX) > Math.abs(distY) && Math.abs(distX) > swipeThreshold) {
       if (distX < 0) {
