@@ -605,11 +605,11 @@ background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z
 }
 
 .flag-icon {
-  width: 12px;
-  height: 9px;
+  width: 0.6rem;
+  height: 0.4rem;
   margin-right: 0.5rem; /* Razmak između zastave i naziva medija */
    margin-top: 6px;
-  vertical-align: middle;
+  vertical-align: bottom;
   border: 1px solid #ccc;
   border-radius: 2px;
   object-fit: cover;
