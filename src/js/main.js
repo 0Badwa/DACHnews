@@ -467,6 +467,11 @@ document.addEventListener('DOMContentLoaded', () => {
       tab.setAttribute('aria-selected','true');
 
       const cat = tab.getAttribute('data-tab');
+
+      gtag('event', 'category_change', {
+      'category_name': cat
+      });
+      
       const container = document.getElementById('news-container');
       if (!container) return;
 
