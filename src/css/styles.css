@@ -224,6 +224,10 @@ nav .menu button {
   color: var(--text-color);
 }
 
+.news-title:hover {
+  cursor: pointer;
+}
+
 
 /* ========== 6) HEADINGS U SVAKOJ KATEGORIJI ========== */
 /* Kad kreiramo <h2> iz feeda, da bude bele boje i blagi zeleni glow */
