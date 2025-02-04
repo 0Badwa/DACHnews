@@ -292,11 +292,13 @@ function createNewsCard(feed) {
   // Slika
   const img = document.createElement('img');
   img.className = "news-card-image lazy";
-  const BASE_IMAGE_URL = "https://dachnews.onrender.com";
-  if (feed.image) {
-    img.src = feed.image.startsWith("/")
-      ? `${BASE_IMAGE_URL}${feed.image}`
-      : feed.image;
+const BASE_IMAGE_URL = window.location.hostname.includes("dach.news")
+  ? "https://www.dach.news"
+  : "https://dachnews.onrender.com";
+
+img.src = feed.image.startsWith("/") ? `${BASE_IMAGE_URL}${feed.image}` : feed.image;
+
+
   } else {
     img.src = `${BASE_IMAGE_URL}/img/noimg.png`;
   }
