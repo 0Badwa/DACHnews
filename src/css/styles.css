@@ -614,3 +614,7 @@ background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z
   border-radius: 2px;
   object-fit: cover;
 }
+.source {
+  display: inline-block;     /* Obezbedi da margin-right funkcioniše */
+  vertical-align: bottom;
+}
