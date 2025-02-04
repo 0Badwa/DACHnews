@@ -84,8 +84,9 @@ nav .menu button {
   z-index: 1001;
   background-color: var(--secondary-color); /* #000 */
   border-bottom: 2px solid var(--border-color);
-  overflow-x: auto;
-  white-space: nowrap;
+ overflow-y: hidden; /* Onemogućava vertikalno skrolovanje */
+  overflow-x: auto;   /* Omogućava horizontalno skrolovanje */
+  white-space: nowrap; /* Održava tabove u jednom redu */
   display: flex; 
   align-items: center;
   padding: 0.4rem 0;
