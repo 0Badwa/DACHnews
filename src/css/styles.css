@@ -299,6 +299,7 @@ background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z
   font-size: 1.1rem;
   font-weight: bold;
   margin-bottom: 0.5rem;
+  margin-top: 1rem;
   text-align: center;
   color: #fff; /* Beli tekst */
 }
