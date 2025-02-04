@@ -14,7 +14,7 @@ import { openNewsModal } from './newsModal.js';
 
 /**
  * Parsira domain ili ime izvora da bismo lakše pronašli zastavu.
- * Uklanja http(s)://, www., završne "/" itd.
+ * Uklanja "http(s)://", "www.", završne "/" i sve razmake.
  */
 function parseDomain(source) {
   if (!source) return '';
@@ -24,7 +24,7 @@ function parseDomain(source) {
   s = s.replace(/^https?:\/\//, '');
   // Ukloni "www."
   s = s.replace(/^www\./, '');
-  // Ukloni sve posle prvog '/' (ukoliko postoji path, npr: domain.com/vesti/...)
+  // Ukloni sve posle prvog '/', ako postoji
   s = s.split('/')[0];
   // Ukloni razmake
   s = s.replace(/\s+/g, '');
@@ -33,70 +33,65 @@ function parseDomain(source) {
 }
 
 /**
- * Vraća URL zastave, zavisno od domena ili ključne reči.
+ * Vraća URL zastave zasnovan na brendovima ili TLD-u.
  */
 function getCountryFlag(source) {
-  if (!source) return 'https://flagcdn.com/un.svg'; // ako je undefined/prazno
-
-  // Parsiramo domain ili naziv
   const domain = parseDomain(source);
 
-  // Primer mape koja obuhvata i delimične ključeve i tačne domene
-  // Ključ je string koji očekujemo u "domain", a vrednost je URL do svg zastave
-  const sourceCountryMap = {
-    // Austrija (AT)
-    'derstandard.at': 'https://flagcdn.com/at.svg',
-    'falter.at': 'https://flagcdn.com/at.svg',
-    'kurier.at': 'https://flagcdn.com/at.svg',
-    'profil.at': 'https://flagcdn.com/at.svg',
-    'wienerzeitung.at': 'https://flagcdn.com/at.svg',
-    'salzburg.com': 'https://flagcdn.com/at.svg',
-    'augustin': 'https://flagcdn.com/at.svg',          // npr. "der-augustin.at"
-
-    // Nemačka (DE)
-    'zeit.de': 'https://flagcdn.com/de.svg',
-    'spiegel.de': 'https://flagcdn.com/de.svg',
-    'sueddeutsche.de': 'https://flagcdn.com/de.svg',
-    'faz.net': 'https://flagcdn.com/de.svg',
-    'tagesspiegel.de': 'https://flagcdn.com/de.svg',
-    'jungel.world': 'https://flagcdn.com/de.svg',
-    'neues-deutschland.de': 'https://flagcdn.com/de.svg',
-    'volksstimme.de': 'https://flagcdn.com/de.svg',
-    'queer.de': 'https://flagcdn.com/de.svg',
-    'display-magazin.de': 'https://flagcdn.com/de.svg',
-    'cruisermagazin.de': 'https://flagcdn.com/de.svg',
-    'du-und-ich.net': 'https://flagcdn.com/de.svg',
-    'siegessaeule.de': 'https://flagcdn.com/de.svg',
-    'analyse-und-kritik.org': 'https://flagcdn.com/de.svg',
-    'bild': 'https://flagcdn.com/de.svg',              // "bild.de" ili samo "BILD"
-    'heise': 'https://flagcdn.com/de.svg',             // "heise.de"
-    'taz.de': 'https://flagcdn.com/de.svg',            // "taz.de"
-    'freitag.de': 'https://flagcdn.com/de.svg',        // "freitag.de"
-
-    // Švajcarska (CH)
-    'aargauerzeitung.ch': 'https://flagcdn.com/ch.svg',
-    'blick.ch': 'https://flagcdn.com/ch.svg',
-    'woz.ch': 'https://flagcdn.com/ch.svg',
-    'tagblatt.ch': 'https://flagcdn.com/ch.svg',
-    'pszeitung.ch': 'https://flagcdn.com/ch.svg',
-    'tagesanzeiger.ch': 'https://flagcdn.com/ch.svg',
-    'vorwaerts.ch': 'https://flagcdn.com/ch.svg',
-
-    // Podrazumevano
-    '_default': 'https://flagcdn.com/un.svg'
+  // Mapa brendova -> ISO kôd države
+  // Ako domain uključuje recimo "bild" -> 'de'
+  const brandMap = {
+    // Nemačka
+    'bild': 'de',
+    'spiegel': 'de',
+    'zeit': 'de',
+    'heise': 'de',
+    'taz': 'de',
+    'freitag': 'de',
+    'analyse-und-kritik': 'de',
+    'cruisermagazin': 'de',
+    'display-magazin': 'de',
+    'du-und-ich': 'de',
+    'neues-deutschland': 'de',
+    'queer': 'de',
+    'siegessaeule': 'de',
+    'volksstimme': 'de',
+    // Austrija
+    'falter': 'at',
+    'kurier': 'at',
+    'profil': 'at',
+    'wienerzeitung': 'at',
+    'derstandard': 'at',
+    'salzburg': 'at', // "salzburg.com"
+    'augustin': 'at', // "der-augustin.at"
+    // Švajcarska
+    'blick': 'ch',
+    'aargauerzeitung': 'ch',
+    'woz': 'ch',
+    'tagblatt': 'ch',
+    'pszeitung': 'ch',
+    'tagesanzeiger': 'ch',
+    'vorwaerts': 'ch'
   };
 
-  // Prolazimo kroz mapu i tražimo da li domain sadrži ključ
-  // npr. "sueddeutsche.de" includes "sueddeutsche.de" -> true
-  // ili "bild" includes "bild" -> true
-  for (const key in sourceCountryMap) {
-    if (key !== '_default' && domain.includes(key)) {
-      return sourceCountryMap[key];
+  // 1) Proveri brend
+  for (const brand in brandMap) {
+    if (domain.includes(brand)) {
+      return `https://flagcdn.com/${brandMap[brand]}.svg`;
     }
   }
 
-  // ako ne pronađe, vrati default
-  return sourceCountryMap['_default'];
+  // 2) Ako nije prepoznat brend, proveri TLD
+  if (domain.endsWith('.de')) {
+    return 'https://flagcdn.com/de.svg';
+  } else if (domain.endsWith('.at')) {
+    return 'https://flagcdn.com/at.svg';
+  } else if (domain.endsWith('.ch')) {
+    return 'https://flagcdn.com/ch.svg';
+  }
+
+  // 3) Podrazumevano
+  return 'https://flagcdn.com/un.svg';
 }
 
 /**
@@ -325,10 +320,15 @@ function createNewsCard(feed) {
     : 'UNBEKANNTEQUELLE';
   sourceSpan.textContent = normalizedSource;
 
-  // Zastava (visina 1.5rem)
+  // Zastava
   const flagImg = document.createElement('img');
   flagImg.className = "flag-icon";
-  flagImg.style.height = "1.5rem";
+  // Visina 1.2rem, širina proporcionalno
+  flagImg.style.height = "1.2rem";
+  flagImg.style.width = "auto";
+  // Razmak od 4px do teksta
+  flagImg.style.marginRight = "4px";
+  // Dohvatamo URL zastave
   flagImg.src = getCountryFlag(feed.source);
   flagImg.alt = "flag";
   sourceSpan.prepend(flagImg);
