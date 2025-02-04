@@ -4,7 +4,7 @@
 
 /* ========== 1) GLOBAL OVERRIDES ========== */
 :root {
-  --background-color: #1c1c1c; /* Tamnosiva */
+  --background-color: #000; /* Tamnosiva bila #1c1c1c */
   --secondary-color: #000;     /* Crna za kartice */
   --primary-color: #32CD32;    /* Nova zelena */
   --text-color: #ffffff;
