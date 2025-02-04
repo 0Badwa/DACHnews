@@ -289,44 +289,24 @@ function createNewsCard(feed) {
     openNewsModal(feed);
   };
 
+  // Slika
   const img = document.createElement('img');
   img.className = "news-card-image lazy";
-  img.src = feed.image || '/default-image.png';
+
+  const BASE_IMAGE_URL = window.location.hostname.includes("dach.news")
+    ? "https://www.dach.news"
+    : "https://dachnews.onrender.com";
+
+  // Provera da li feed ima sliku
+  if (feed.image && feed.image.startsWith("/")) {
+    img.src = `${BASE_IMAGE_URL}${feed.image}`;
+  } else if (feed.image) {
+    img.src = feed.image; // Ako je apsolutni URL
+  } else {
+    img.src = `${BASE_IMAGE_URL}/img/noimg.png`; // Fallback slika
+  }
+
   img.alt = feed.title || 'No title';
-
-  const contentDiv = document.createElement('div');
-  contentDiv.className = "news-card-content";
-
-  const title = document.createElement('h3');
-  title.className = "news-title truncated-title";
-  title.textContent = feed.title || 'No title';
-
-  contentDiv.appendChild(title);
-  card.appendChild(img);
-  card.appendChild(contentDiv);
-
-  return card; // Ovo sada ispravno stoji unutar funkcije
-}
-
-
- // Slika
-const img = document.createElement('img');
-img.className = "news-card-image lazy";
-
-const BASE_IMAGE_URL = window.location.hostname.includes("dach.news")
-  ? "https://www.dach.news"
-  : "https://dachnews.onrender.com";
-
-// Provera da li feed ima sliku
-if (feed.image && feed.image.startsWith("/")) {
-  img.src = `${BASE_IMAGE_URL}${feed.image}`;
-} else if (feed.image) {
-  img.src = feed.image; // Ako je apsolutni URL
-} else {
-  img.src = `${BASE_IMAGE_URL}/img/noimg.png`; // Fallback slika
-}
-
-img.alt = feed.title || 'No title';
 
   // Sadržaj
   const contentDiv = document.createElement('div');
