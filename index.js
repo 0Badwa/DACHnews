@@ -143,3 +143,9 @@ app.post('/api/unblock-source', async (req, res) => {
   }
 });
 
+app.use((req, res, next) => {
+  if (req.headers.host === 'dachnews.onrender.com') {
+    return res.redirect(301, 'https://www.dach.news' + req.url);
+  }
+  next();
+});
