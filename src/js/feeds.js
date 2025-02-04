@@ -513,3 +513,49 @@ const sourceNameMap = {
   'vorwaerts.ch': 'Vorwärts',
   'wienerzeitung.at': 'Wiener Zeitung Online'
 };
+
+
+function getCountryFlag(source) {
+  const sourceCountryMap = {
+    // Austrija
+    'DERSTANDARD.AT': 'https://flagcdn.com/at.svg',
+    'DER-AUGUSTIN.AT': 'https://flagcdn.com/at.svg',
+    'FALTER.AT': 'https://flagcdn.com/at.svg',
+    'KURIER.AT': 'https://flagcdn.com/at.svg',
+    'PROFIL.AT': 'https://flagcdn.com/at.svg',
+    'SALZBURG.COM': 'https://flagcdn.com/at.svg',
+    'WIENERZEITUNG.AT': 'https://flagcdn.com/at.svg',
+
+    // Nemačka
+    'ZEIT.DE': 'https://flagcdn.com/de.svg',
+    'SPIEGEL.DE': 'https://flagcdn.com/de.svg',
+    'SUEDDEUTSCHE.DE': 'https://flagcdn.com/de.svg',
+    'FAZ.NET': 'https://flagcdn.com/de.svg',
+    'TAGESSPIEGEL.DE': 'https://flagcdn.com/de.svg',
+    'JUNGLE.WORLD': 'https://flagcdn.com/de.svg',
+    'NEUES-DEUTSCHLAND.DE': 'https://flagcdn.com/de.svg',
+    'TAGESANZEIGER.CH': 'https://flagcdn.com/de.svg',
+    'VOLKSSTIMME.DE': 'https://flagcdn.com/de.svg',
+    'VORWAERTS.CH': 'https://flagcdn.com/de.svg',
+    'QUEER.DE': 'https://flagcdn.com/de.svg',
+    'DISPLAY-MAGAZIN.DE': 'https://flagcdn.com/de.svg',
+    'CRUISERMAGAZIN.DE': 'https://flagcdn.com/de.svg',
+    'DU-UND-ICH.NET': 'https://flagcdn.com/de.svg',
+    'SIEGESSAEULE.DE': 'https://flagcdn.com/de.svg',
+    'SOCIALISTISCHE-ZEITUNG.DE': 'https://flagcdn.com/de.svg',
+    'ANALYSE-UND-KRITIK.ORG': 'https://flagcdn.com/de.svg',
+
+    // Švajcarska
+    'AARGAUERZEITUNG.CH': 'https://flagcdn.com/ch.svg',
+    'BLICK.CH': 'https://flagcdn.com/ch.svg',
+    'WOZ.CH': 'https://flagcdn.com/ch.svg',
+    'TAGBLATT.CH': 'https://flagcdn.com/ch.svg',
+    'PSZEITUNG.CH': 'https://flagcdn.com/ch.svg',
+
+    // Podrazumevana zastava (ako izvor nije pronađen)
+    'DEFAULT': 'https://flagcdn.com/un.svg'
+  };
+
+  const normalizedSource = source.toUpperCase().replace(/\s+/g, '');
+  return sourceCountryMap[normalizedSource] || sourceCountryMap['DEFAULT'];
+}
