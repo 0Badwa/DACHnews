@@ -13,52 +13,90 @@ import {
 import { openNewsModal } from './newsModal.js';
 
 /**
- * Vraća odgovarajući URL za zastavu, na osnovu izvora.
+ * Parsira domain ili ime izvora da bismo lakše pronašli zastavu.
+ * Uklanja http(s)://, www., završne "/" itd.
+ */
+function parseDomain(source) {
+  if (!source) return '';
+  let s = source.trim().toLowerCase();
+
+  // Ukloni protokol
+  s = s.replace(/^https?:\/\//, '');
+  // Ukloni "www."
+  s = s.replace(/^www\./, '');
+  // Ukloni sve posle prvog '/' (ukoliko postoji path, npr: domain.com/vesti/...)
+  s = s.split('/')[0];
+  // Ukloni razmake
+  s = s.replace(/\s+/g, '');
+
+  return s;
+}
+
+/**
+ * Vraća URL zastave, zavisno od domena ili ključne reči.
  */
 function getCountryFlag(source) {
+  if (!source) return 'https://flagcdn.com/un.svg'; // ako je undefined/prazno
+
+  // Parsiramo domain ili naziv
+  const domain = parseDomain(source);
+
+  // Primer mape koja obuhvata i delimične ključeve i tačne domene
+  // Ključ je string koji očekujemo u "domain", a vrednost je URL do svg zastave
   const sourceCountryMap = {
-    // Austrija
-    'DERSTANDARD.AT': 'https://flagcdn.com/at.svg',
-    'DER-AUGUSTIN.AT': 'https://flagcdn.com/at.svg',
-    'FALTER.AT': 'https://flagcdn.com/at.svg',
-    'KURIER.AT': 'https://flagcdn.com/at.svg',
-    'PROFIL.AT': 'https://flagcdn.com/at.svg',
-    'SALZBURG.COM': 'https://flagcdn.com/at.svg',
-    'WIENERZEITUNG.AT': 'https://flagcdn.com/at.svg',
+    // Austrija (AT)
+    'derstandard.at': 'https://flagcdn.com/at.svg',
+    'falter.at': 'https://flagcdn.com/at.svg',
+    'kurier.at': 'https://flagcdn.com/at.svg',
+    'profil.at': 'https://flagcdn.com/at.svg',
+    'wienerzeitung.at': 'https://flagcdn.com/at.svg',
+    'salzburg.com': 'https://flagcdn.com/at.svg',
+    'augustin': 'https://flagcdn.com/at.svg',          // npr. "der-augustin.at"
 
-    // Nemačka
-    'ZEIT.DE': 'https://flagcdn.com/de.svg',
-    'SPIEGEL.DE': 'https://flagcdn.com/de.svg',
-    'SUEDDEUTSCHE.DE': 'https://flagcdn.com/de.svg',
-    'FAZ.NET': 'https://flagcdn.com/de.svg',
-    'TAGESSPIEGEL.DE': 'https://flagcdn.com/de.svg',
-    'JUNGLE.WORLD': 'https://flagcdn.com/de.svg',
-    'NEUES-DEUTSCHLAND.DE': 'https://flagcdn.com/de.svg',
-    'VOLKSSTIMME.DE': 'https://flagcdn.com/de.svg',
-    'QUEER.DE': 'https://flagcdn.com/de.svg',
-    'DISPLAY-MAGAZIN.DE': 'https://flagcdn.com/de.svg',
-    'CRUISERMAGAZIN.DE': 'https://flagcdn.com/de.svg',
-    'DU-UND-ICH.NET': 'https://flagcdn.com/de.svg',
-    'SIEGESSAEULE.DE': 'https://flagcdn.com/de.svg',
-    'SOCIALISTISCHE-ZEITUNG.DE': 'https://flagcdn.com/de.svg',
-    'ANALYSE-UND-KRITIK.ORG': 'https://flagcdn.com/de.svg',
+    // Nemačka (DE)
+    'zeit.de': 'https://flagcdn.com/de.svg',
+    'spiegel.de': 'https://flagcdn.com/de.svg',
+    'sueddeutsche.de': 'https://flagcdn.com/de.svg',
+    'faz.net': 'https://flagcdn.com/de.svg',
+    'tagesspiegel.de': 'https://flagcdn.com/de.svg',
+    'jungel.world': 'https://flagcdn.com/de.svg',
+    'neues-deutschland.de': 'https://flagcdn.com/de.svg',
+    'volksstimme.de': 'https://flagcdn.com/de.svg',
+    'queer.de': 'https://flagcdn.com/de.svg',
+    'display-magazin.de': 'https://flagcdn.com/de.svg',
+    'cruisermagazin.de': 'https://flagcdn.com/de.svg',
+    'du-und-ich.net': 'https://flagcdn.com/de.svg',
+    'siegessaeule.de': 'https://flagcdn.com/de.svg',
+    'analyse-und-kritik.org': 'https://flagcdn.com/de.svg',
+    'bild': 'https://flagcdn.com/de.svg',              // "bild.de" ili samo "BILD"
+    'heise': 'https://flagcdn.com/de.svg',             // "heise.de"
+    'taz.de': 'https://flagcdn.com/de.svg',            // "taz.de"
+    'freitag.de': 'https://flagcdn.com/de.svg',        // "freitag.de"
 
-    // Švajcarska
-    'AARGAUERZEITUNG.CH': 'https://flagcdn.com/ch.svg',
-    'BLICK.CH': 'https://flagcdn.com/ch.svg',
-    'WOZ.CH': 'https://flagcdn.com/ch.svg',
-    'TAGBLATT.CH': 'https://flagcdn.com/ch.svg',
-    'PSZEITUNG.CH': 'https://flagcdn.com/ch.svg',
-    'TAGESANZEIGER.CH': 'https://flagcdn.com/ch.svg',
-    'VORWAERTS.CH': 'https://flagcdn.com/ch.svg',
+    // Švajcarska (CH)
+    'aargauerzeitung.ch': 'https://flagcdn.com/ch.svg',
+    'blick.ch': 'https://flagcdn.com/ch.svg',
+    'woz.ch': 'https://flagcdn.com/ch.svg',
+    'tagblatt.ch': 'https://flagcdn.com/ch.svg',
+    'pszeitung.ch': 'https://flagcdn.com/ch.svg',
+    'tagesanzeiger.ch': 'https://flagcdn.com/ch.svg',
+    'vorwaerts.ch': 'https://flagcdn.com/ch.svg',
 
     // Podrazumevano
-    'DEFAULT': 'https://flagcdn.com/un.svg'
+    '_default': 'https://flagcdn.com/un.svg'
   };
 
-  if (!source) return sourceCountryMap['DEFAULT'];
-  const normalizedSource = source.toUpperCase().replace(/\s+/g, '');
-  return sourceCountryMap[normalizedSource] || sourceCountryMap['DEFAULT'];
+  // Prolazimo kroz mapu i tražimo da li domain sadrži ključ
+  // npr. "sueddeutsche.de" includes "sueddeutsche.de" -> true
+  // ili "bild" includes "bild" -> true
+  for (const key in sourceCountryMap) {
+    if (key !== '_default' && domain.includes(key)) {
+      return sourceCountryMap[key];
+    }
+  }
+
+  // ako ne pronađe, vrati default
+  return sourceCountryMap['_default'];
 }
 
 /**
@@ -89,7 +127,7 @@ function timeAgo(dateString) {
 }
 
 /**
- * Čita niz blokiranih izvora iz localStorage (ranije "hiddenSources").
+ * Čita niz blokiranih izvora iz localStorage.
  */
 function getBlockedSources() {
   try {
@@ -100,7 +138,7 @@ function getBlockedSources() {
 }
 
 /**
- * Čita niz blokiranih kategorija iz localStorage (ranije "hiddenCategories").
+ * Čita niz blokiranih kategorija iz localStorage.
  */
 function getBlockedCategories() {
   try {
@@ -111,27 +149,28 @@ function getBlockedCategories() {
 }
 
 /**
- * Proverava da li je feed sakriven na osnovu blokiranog izvora ili blokirane kategorije.
+ * Proverava da li je feed sakriven (blokiran) na osnovu izvora ili kategorije.
  */
 function isHiddenFeed(feed) {
   const blockedSources = getBlockedSources();
   const blockedCats = getBlockedCategories();
   
   // "Ohne Kategorie" tretiramo kao "Sonstiges"
-  const cat = feed.category === "Ohne Kategorie" ? "Sonstiges" : feed.category;
-  
+  const cat = (feed.category === "Ohne Kategorie") ? "Sonstiges" : feed.category;
   if (blockedCats.includes(cat)) return true;
 
   if (feed.source) {
     const normalizedSource = feed.source.toUpperCase().replace(/\s+/g, '');
-    if (blockedSources.includes(normalizedSource)) return true;
+    if (blockedSources.includes(normalizedSource)) {
+      return true;
+    }
   }
 
   return false;
 }
 
 /**
- * Preuzimanje do 50 najnovijih feed-ova iz "Aktuell" (ruta /api/feeds), keširano ~10 min.
+ * Fetch do 50 najnovijih feed-ova iz "Aktuell" (ruta /api/feeds), keš ~10 min.
  */
 export async function fetchAllFeedsFromServer(forceRefresh = false) {
   showLoader();
@@ -139,7 +178,6 @@ export async function fetchAllFeedsFromServer(forceRefresh = false) {
     const lastFetchKey = 'feeds-Aktuell-lastFetch';
     const cachedFeedsKey = 'feeds-Aktuell';
 
-    // Ako je forceRefresh, brišemo keš.
     if (forceRefresh) {
       localStorage.removeItem(lastFetchKey);
       localStorage.removeItem(cachedFeedsKey);
@@ -147,7 +185,7 @@ export async function fetchAllFeedsFromServer(forceRefresh = false) {
 
     const lastFetchTime = localStorage.getItem(lastFetchKey);
 
-    // Ako nije forceRefresh i cache je mlađi od 10 min, vraćamo keš
+    // Ako cache nije stariji od 10 min, vraćamo keš
     if (
       !forceRefresh &&
       lastFetchTime &&
@@ -162,7 +200,7 @@ export async function fetchAllFeedsFromServer(forceRefresh = false) {
       }
     }
 
-    // Inače, fetchujemo sa servera
+    // Inače, fetchujemo
     const response = await fetch("/api/feeds");
     if (!response.ok) {
       console.error("[fetchAllFeedsFromServer] Server returned status:", response.status);
@@ -174,7 +212,7 @@ export async function fetchAllFeedsFromServer(forceRefresh = false) {
     data.sort((a, b) => new Date(b.date_published).getTime() - new Date(a.date_published).getTime());
     data = data.filter(feed => !isHiddenFeed(feed));
 
-    // Skladištimo u localStorage
+    // U localStorage
     localStorage.setItem(cachedFeedsKey, JSON.stringify(data));
     localStorage.setItem(lastFetchKey, new Date().toISOString());
 
@@ -190,7 +228,7 @@ export async function fetchAllFeedsFromServer(forceRefresh = false) {
 }
 
 /**
- * Preuzima do 50 feedova iz date kategorije (ruta /api/feeds-by-category), keširano ~10 min.
+ * Fetch do 50 feedova iz određene kategorije, keširano ~10 min (/api/feeds-by-category).
  */
 export async function fetchCategoryFeeds(category, forceRefresh = false) {
   showLoader();
@@ -201,7 +239,6 @@ export async function fetchCategoryFeeds(category, forceRefresh = false) {
     const cachedFeedsKey = `feeds-${catForUrl}`;
     const lastFetchTime = localStorage.getItem(lastFetchKey);
 
-    // Ako cache nije stariji od 10 min, vraćamo keš
     if (
       !forceRefresh &&
       lastFetchTime &&
@@ -216,7 +253,6 @@ export async function fetchCategoryFeeds(category, forceRefresh = false) {
       }
     }
 
-    // Ako nema keša ili je star, fetchujemo...
     const url = `/api/feeds-by-category/${encodeURIComponent(catForUrl)}`;
     const response = await fetch(url);
     if (!response.ok) {
@@ -229,7 +265,6 @@ export async function fetchCategoryFeeds(category, forceRefresh = false) {
     data.sort((a, b) => new Date(b.date_published).getTime() - new Date(a.date_published).getTime());
     data = data.filter(feed => !isHiddenFeed(feed));
 
-    // Čuvamo u keš
     localStorage.setItem(cachedFeedsKey, JSON.stringify(data));
     localStorage.setItem(lastFetchKey, new Date().toISOString());
 
@@ -253,15 +288,12 @@ function createNewsCard(feed) {
   
   // Klik na karticu -> otvori modal
   card.onclick = () => {
-    // Ukloni 'active' klasu sa svih
     document.querySelectorAll('.news-card').forEach(existingCard => existingCard.classList.remove('active'));
-    // Dodaj 'active' ovoj kartici
     card.classList.add('active');
-    // Otvori modal
     openNewsModal(feed);
   };
 
-  // Slika (lazy loading)
+  // Slika
   const img = document.createElement('img');
   img.className = "news-card-image lazy";
   const BASE_IMAGE_URL = "https://dachnews.onrender.com";
@@ -270,7 +302,7 @@ function createNewsCard(feed) {
       ? `${BASE_IMAGE_URL}${feed.image}`
       : feed.image;
   } else {
-    img.src = `${BASE_IMAGE_URL}/img/noimg.png`; // Rezervna slika
+    img.src = `${BASE_IMAGE_URL}/img/noimg.png`;
   }
   img.alt = feed.title || 'No title';
 
@@ -293,14 +325,14 @@ function createNewsCard(feed) {
     : 'UNBEKANNTEQUELLE';
   sourceSpan.textContent = normalizedSource;
 
-  // Zastava
+  // Zastava (visina 1.5rem)
   const flagImg = document.createElement('img');
   flagImg.className = "flag-icon";
+  flagImg.style.height = "1.5rem";
   flagImg.src = getCountryFlag(feed.source);
   flagImg.alt = "flag";
-  // Dodajemo zastavu ispred izvora
   sourceSpan.prepend(flagImg);
-  
+
   // Vreme
   const timeSpan = document.createElement('span');
   timeSpan.className = "time";
@@ -328,7 +360,6 @@ export function displayFeedsList(feedsList, categoryName) {
 
   // Pre punjenja sadržaja, skrol na vrh
   container.scrollTop = 0;
-
   container.innerHTML = '';
 
   if (!feedsList || feedsList.length === 0) {
@@ -350,7 +381,7 @@ export function displayFeedsList(feedsList, categoryName) {
 }
 
 /**
- * Prikazuje "Aktuell" feedove (sve najnovije) pozivom fetchAllFeedsFromServer().
+ * Prikazuje "Aktuell" feedove (poziva fetchAllFeedsFromServer).
  */
 export async function displayAktuellFeeds(forceRefresh = false) {
   const container = document.getElementById('news-container');
@@ -394,7 +425,7 @@ export async function displayNewsByCategory(category, forceRefresh = false) {
 }
 
 /**
- * Prikazuje po 4 feeda za sve kategorije (ako se to uopšte koristi).
+ * (Opcionalno) prikazuje sve kategorije, po 4 feed-a.
  */
 export async function displayAllCategories() {
   const container = document.getElementById('news-container');
@@ -475,7 +506,7 @@ export function initAppRefreshOnVisibilityChange() {
  * Inicijalizuje rad sa feedovima.
  */
 export function initFeeds() {
-  // Dodaj listener za sve tabove:
+  // Listener za sve tabove
   const tabs = document.querySelectorAll('.tab');
   tabs.forEach(tab => {
     tab.addEventListener('click', async () => {
@@ -487,10 +518,10 @@ export function initFeeds() {
     });
   });
 
-  // Osvežavanje kad tab iz pozadine dođe u fokus
+  // Osvežavanje kad se vrati iz pozadine
   initAppRefreshOnVisibilityChange();
 
-  // Inicijalno prikazujemo 'Aktuell'
+  // Inicijalni prikaz => "Aktuell"
   displayAktuellFeeds();
 }
 
@@ -506,7 +537,7 @@ function removeActiveClass() {
   });
 }
 
-// Pokrećemo initFeeds kada je DOM spreman
+// Pokreće se kad je DOM spreman
 document.addEventListener('DOMContentLoaded', () => {
   initFeeds();
 });
