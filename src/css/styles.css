@@ -144,10 +144,9 @@ nav .menu button {
 /* ========== 5) NEWS CONTAINER & CARDS ========== */
 #news-container {
   margin-top: 0px;
-   padding-top: 140px;
+  padding: 140px 0.3rem 0.3rem 0.3rem; /* top right bottom left */
   min-height: calc(100vh - 130px); /* Ovo osigurava da container zauzima celokupan preostali prostor */
   overflow-y: auto; /* Prikazuje scrollbar samo kad je potreban */
-  padding: 0.3rem;
   /* Skriva scrollbar */
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* Internet Explorer 10+ */
