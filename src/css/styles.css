@@ -425,8 +425,7 @@ background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z
 
 #sortable-list li {
   display: flex;
-  justify-content: flex-start; /* Levo poravnanje */
-  gap: 5px; /* Razmak između strelica i imena kategorija */
+  justify-content: space-between; /* Razmak između elemenata */
   align-items: center;
   padding: 0.2rem 0.8rem;
   margin-bottom: 0.2rem; /* Veći razmak između stavki */
@@ -436,6 +435,13 @@ background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z
   cursor: pointer;
   transition: background-color 0.2s, transform 0.2s; /* Dodata animacija za hover */
 }
+
+/* Kontejner za strelice i naziv kategorije */
+.category-left {
+  display: flex;
+  align-items: center;
+}
+
 /* Stilovi za strelice za pomeranje kategorija */
 .arrow-up, .arrow-down {
   width: 0;
@@ -443,7 +449,7 @@ background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z
   border-left: 6px solid transparent;
   border-right: 6px solid transparent;
   cursor: pointer;
-  margin: 0 5px;
+  margin: 0 2px; /* Smanjen razmak između strelica */
   display: inline-block;
 }
 
@@ -454,6 +460,18 @@ background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z
 .arrow-down {
   border-top: 10px solid #32CD32; /* Zelena strelica dole */
 }
+
+/* Stil za naziv kategorije */
+.category-name {
+  margin-left: 10px; /* Razmak između strelica i naziva kategorije */
+}
+
+/* Stil za opciju "Entsperren" */
+.unlock {
+  cursor: pointer;
+  margin-left: auto; /* Poravnava dugme udesno */
+}
+
 /* Kategorija je verbergen (zelena pozadina) */
 #sortable-list li.verbergen {
   background-color: rgba(50, 205, 50, 0.2); /* Zelena pozadina sa providnošću */
@@ -486,6 +504,7 @@ background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z
 #sortable-list li button:hover {
   background-color: rgba(50, 205, 50, 0.8); /* Svetlija zelena na hover */
 }
+
 
 /* QUELLEN LIST */
 .sources-list {
