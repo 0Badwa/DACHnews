@@ -16,6 +16,12 @@ let categoriesOrder = [
 let blockedSources = JSON.parse(localStorage.getItem('blockedSources') || '[]');
 let blockedCategories = JSON.parse(localStorage.getItem('blockedCategories') || '[]');
 
+// Dodajte "Sonstiges" u blockedCategories ako već nije prisutna
+if (!blockedCategories.includes('Sonstiges')) {
+  blockedCategories.push('Sonstiges');
+  localStorage.setItem('blockedCategories', JSON.stringify(blockedCategories));
+}
+
 let currentCardFontSize = localStorage.getItem('cardFontSize')
   ? parseInt(localStorage.getItem('cardFontSize'), 10)
   : 16;
