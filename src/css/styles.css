@@ -449,7 +449,7 @@ background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z
   border-left: 6px solid transparent;
   border-right: 6px solid transparent;
   cursor: pointer;
-  margin: 0 2px; /* Smanjen razmak između strelica */
+  margin: 0 0.3rem; /* Smanjen razmak između strelica */
   display: inline-block;
 }
 
@@ -459,7 +459,7 @@ background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z
 
 .arrow-down {
   border-top: 10px solid #32CD32; /* Zelena strelica dole */
-    margin-right: 15px; /* Povećan razmak između desne strelice i naziva kategorije */
+    margin-right: 1.5rem; /* Povećan razmak između desne strelice i naziva kategorije */
 }
 
 /* Stil za naziv kategorije */
