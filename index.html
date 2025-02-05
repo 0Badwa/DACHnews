@@ -47,10 +47,10 @@
     <img src="src/icons/dachnewslogo.png" alt="DACH.news" />
   </nav>
 
-  <!-- Dodati loader i error-container -->
-  <div id="loader" style="display:none; text-align:center; margin-top:100px;">
-    <p style="color: #32CD32; font-weight: bold;">Loading...</p>
-  </div>
+  <!-- Loader element sa fiksnim pozicioniranjem kako ne bi pomerao sadržaj -->
+<div id="loader" style="display:none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align:center;">
+  <p style="color: #32CD32; font-weight: bold;">Laden...</p>
+</div>
   <div id="error-container" style="display:none; text-align:center; margin-top:100px; color:red;"></div>
 
   <!-- Tabs container koji prati feedove -->
