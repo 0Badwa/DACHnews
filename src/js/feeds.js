@@ -12,6 +12,16 @@ import {
 
 import { openNewsModal } from './newsModal.js';
 
+// Uvoz brandMap iz sourcesConfig.js
+import { brandMap } from './sourcesConfig.js';
+
+/**
+ * Helper funkcija koja uklanja TLD-ove .CH, .DE, .AT iz prosleđenog stringa.
+ */
+function removeTLD(source) {
+  return source.replace(/\.(ch|de|at)$/i, '');
+}
+
 /**
  * Parsira domain ili ime izvora da bismo lakše pronašli zastavu.
  * Uklanja "http(s)://", "www.", završne "/" i sve razmake.
@@ -38,44 +48,7 @@ function parseDomain(source) {
 function getCountryFlag(source) {
   const domain = parseDomain(source);
 
-  // Mapa brendova -> ISO kôd države (npr. 'bild' -> 'de' -> 'https://flagcdn.com/de.svg')
-  const brandMap = {
-    // DE (Nemačka)
-    'bild': 'de',
-    'spiegel': 'de',
-    'zeit': 'de',
-    'heise': 'de',
-    'taz': 'de',
-    'freitag': 'de',
-    'analyse-und-kritik': 'de',
-    'cruisermagazin': 'de',
-    'display-magazin': 'de',
-    'du-und-ich': 'de',
-    'neues-deutschland': 'de',
-    'queer': 'de',
-    'siegessaeule': 'de',
-    'volksstimme': 'de',
-    'general-anzeigerbonn': 'de', // Dodato
-    // AT (Austrija)
-    'falter': 'at',
-    'kurier': 'at',
-    'profil': 'at',
-    'wienerzeitung': 'at',
-    'derstandard': 'at',
-    'salzburg': 'at',
-    'augustin': 'at',
-    // CH (Švajcarska)
-    'blick': 'ch',
-    'aargauerzeitung': 'ch',
-    'woz': 'ch',
-    'tagblatt': 'ch',
-    'pszeitung': 'ch',
-    'tagesanzeiger': 'ch',
-    'vorwaerts': 'ch',
-    'tages-anzeiger': 'ch' // Dodato ("tages-anzeiger")
-  };
-
-  // 1) Proveri brend
+  // 1) Proveri brend iz brandMap
   for (const brand in brandMap) {
     if (domain.includes(brand)) {
       return `https://flagcdn.com/${brandMap[brand]}.svg`;
@@ -156,7 +129,7 @@ function isHiddenFeed(feed) {
   if (blockedCats.includes(cat)) return true;
 
   if (feed.source) {
-    const normalizedSource = feed.source.toUpperCase().replace(/\s+/g, '');
+    const normalizedSource = removeTLD(feed.source.toUpperCase().replace(/\s+/g, ''));
     if (blockedSources.includes(normalizedSource)) {
       return true;
     }
@@ -288,10 +261,10 @@ function createNewsCard(feed) {
     card.classList.add('active');
     openNewsModal(feed);
   };
-
+  
   // Slika
   const img = document.createElement('img');
-  img.className = "news-card-image lazy";
+  img.className = "news-card-image lazy news-image"; // Dodata klasa "news-image"
 
   const BASE_IMAGE_URL = window.location.hostname.includes("dach.news")
     ? "https://www.dach.news"
@@ -319,11 +292,11 @@ function createNewsCard(feed) {
   const meta = document.createElement('p');
   meta.className = "news-meta";
 
-  // Izvor
+  // Izvor – kreiramo span i koristimo removeTLD da uklonimo .CH, .DE, .AT
   const sourceSpan = document.createElement('span');
   sourceSpan.className = "source";
   const normalizedSource = feed.source
-    ? feed.source.toUpperCase().replace(/\s+/g, '')
+    ? removeTLD(feed.source.toUpperCase().replace(/\s+/g, ''))
     : 'UNBEKANNTEQUELLE';
   sourceSpan.textContent = normalizedSource;
 
@@ -539,6 +512,29 @@ function removeActiveClass() {
     tab.setAttribute('aria-selected', 'false');
     tab.classList.remove('active-green');
   });
+}
+
+/**
+ * Funkcija za blokiranje izvora.
+ * Uklanja TLD pre nego što doda "čisti" naziv u listu blokiranih izvora.
+ */
+export function blockSource(src) {
+  const blockedSources = getBlockedSources();
+  const cleanedSource = removeTLD(src.toUpperCase().replace(/\s+/g, ''));
+  if (!blockedSources.includes(cleanedSource)) {
+    blockedSources.push(cleanedSource);
+    localStorage.setItem('blockedSources', JSON.stringify(blockedSources));
+  }
+}
+
+/**
+ * Funkcija za odblokiranje izvora.
+ */
+export function unblockSource(src) {
+  const cleanedSource = removeTLD(src.toUpperCase().replace(/\s+/g, ''));
+  let blockedSources = getBlockedSources();
+  blockedSources = blockedSources.filter(s => s !== cleanedSource);
+  localStorage.setItem('blockedSources', JSON.stringify(blockedSources));
 }
 
 // Pokreće se kad je DOM spreman

@@ -179,6 +179,7 @@ nav .menu button {
   border-radius: 5px;
   width: 80px; 
   height: 80px;
+  min-width: 80px; /* Sprečava sužavanje slike */
   object-fit: cover;
   margin-right: 0.8rem;
 /* Neon glow efekat */
@@ -427,6 +428,7 @@ background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z
   display: flex;
   justify-content: space-between; /* Razmak između elemenata */
   align-items: center;
+  font-size: 0.9rem;
   padding: 0.2rem 0.8rem;
   margin-bottom: 0.2rem; /* Veći razmak između stavki */
   background-color: #000; /* Podrazumevana pozadina */
@@ -459,7 +461,7 @@ background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z
 
 .arrow-down {
   border-top: 10px solid #32CD32; /* Zelena strelica dole */
-    margin-right: 1.5rem; /* Povećan razmak između desne strelice i naziva kategorije */
+    margin-right: 1rem; /* Povećan razmak između desne strelice i naziva kategorije */
 }
 
 /* Stil za naziv kategorije */
@@ -516,12 +518,12 @@ background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.4rem 1rem; /* Usklađen padding */
-  margin: 0.4rem 0;
+  padding: 0.2rem 0.8rem; /* Smanjen padding da odgovara kategorijama */
+  margin-bottom: 0.2rem;  /* Smanjen razmak između izvora */
   background-color: #000; /* Podrazumevana pozadina */
   border: 1px solid var(--border-color); /* Granica */
   border-radius: 5px; /* Zaobljeni uglovi */
-  font-size: 1rem;
+  font-size: 0.9rem; /* Manja veličina fonta */
   transition: background-color 0.2s, transform 0.2s; /* Animacija za hover */
 }
 
@@ -546,10 +548,10 @@ background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z
 .unblock-button {
   color: #fff; /* Beli tekst */
   border: none;
-  padding: 0.4rem 0.8rem; /* Usklađen padding */
+  padding: 0.3rem 0.8rem; /* Usklađen padding */
   border-radius: 4px; /* Zaobljeni uglovi */
   cursor: pointer;
-  font-size: 0.9rem; /* Veličina fonta */
+  font-size: 0.8rem; /* Veličina fonta */
   transition: background-color 0.2s; /* Animacija za hover */
 }
 
@@ -641,7 +643,10 @@ background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z
   border: 1px solid #ccc;
   border-radius: 2px !important;  
   object-fit: cover;
+  min-width: auto !important; /* Sprečava da preuzme min-width od slika */
+  min-height: auto !important;
 }
+
 .source {
   display: inline-block;     /* Obezbedi da margin-right funkcioniše */
   vertical-align: bottom;

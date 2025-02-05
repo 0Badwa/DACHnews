@@ -2,10 +2,29 @@
  * main.js
  ************************************************/
 
+// Definišemo funkcije za otvaranje i zatvaranje Settings modala
+function openSettingsModal() {
+  const settingsModal = document.getElementById('settings-modal');
+  if (settingsModal) {
+    settingsModal.style.display = 'flex';
+  }
+}
+
+function closeSettingsModal() {
+  const settingsModal = document.getElementById('settings-modal');
+  if (settingsModal) {
+    settingsModal.style.display = 'none';
+  }
+}
+
+// Uvoz iz feed.js
 import {
   displayAktuellFeeds,
   displayNewsByCategory
 } from './feeds.js';
+
+// Uvoz iz sourcesConfig.js
+import { brandMap, ALLOWED_SOURCES } from './sourcesConfig.js';
 
 let categoriesOrder = [
   "Technologie", "Gesundheit", "Sport", "Wirtschaft", "Kultur",
@@ -48,6 +67,13 @@ function applyCardFontSize() {
       container.scrollTop = 0;
     });
   }
+}
+
+/**
+ * Pomoćna funkcija koja uklanja TLD-ove .CH, .DE, .AT (nezavisno od velikih/malih slova)
+ */
+function removeTLD(source) {
+  return source.replace(/\.(ch|de|at)$/i, '');
 }
 
 /**
@@ -224,6 +250,9 @@ function closeKategorienModal() {
   loadFeeds();
 }
 
+/**
+ * Funkcije za drag & drop
+ */
 function handleDragStart(e) {
   e.dataTransfer.setData('text/plain', e.target.textContent.trim());
   e.target.style.opacity = '0.4';
@@ -255,7 +284,7 @@ function handleDrop(e) {
 }
 
 /**
- * Modal za izvore ("Quellen"): dinamičko generisanje liste izvora
+ * Modal za izvore ("Quellen"): UVEK prikazuje sve izvore iz ALLOWED_SOURCES
  */
 function openQuellenModal() {
   const quellenModal = document.getElementById('quellen-modal');
@@ -266,30 +295,13 @@ function openQuellenModal() {
   if (!sourcesListEl) return;
   sourcesListEl.innerHTML = '';
 
-  let feeds = [];
-  const cachedFeeds = localStorage.getItem('feeds-Aktuell');
-  if (cachedFeeds) {
-    try {
-      feeds = JSON.parse(cachedFeeds);
-    } catch (e) {
-      console.error("Greška pri parsiranju keširanih feedova:", e);
-    }
-  }
+  // Umesto izdvajanja iz feedova, ovde direktno uzmi sve dozvoljene izvore
+  const allSources = ALLOWED_SOURCES.slice();
+  // Sortiraj izvore po abecedi (case-insensitive)
+  allSources.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
 
-  // Jedinstveni izvori + normalizovani
-  const distinctSources = [...new Set(
-    feeds
-      .map(feed => (feed.source || '').trim())
-      .filter(s => s !== '')
-      .map(normalizeSource)
-  )];
-
-  // Ako nema, neka neka lista
-  const newsSources = distinctSources.length > 0
-    ? distinctSources
-    : ['BILD', 'ZEIT', 'BLICH', 'HEISE', 'SPIEGEL', 'FALTER'];
-
-  newsSources.forEach(src => {
+  // Kreiraj UI elemente za svaki izvor, uz postojeći mehanizam block/unblock
+  allSources.forEach(src => {
     const sourceItem = document.createElement('div');
     sourceItem.className = 'source-item';
 
@@ -311,7 +323,16 @@ function openQuellenModal() {
         blockBtn.className = 'unblock-button';
         blockBtn.textContent = 'Entsperren';
       }
-      loadFeeds();
+      // Nakon izmene bloka, prisilno osveži feedove
+      const activeTab = document.querySelector('.tab.active');
+      if (activeTab) {
+        const category = activeTab.getAttribute('data-tab');
+        if (category === 'Aktuell') {
+          displayAktuellFeeds(true);
+        } else {
+          displayNewsByCategory(category, true);
+        }
+      }
     };
 
     sourceItem.appendChild(spanName);
@@ -325,7 +346,78 @@ function closeQuellenModal() {
   if (quellenModal) {
     quellenModal.style.display = 'none';
   }
-  loadFeeds();
+  openSettingsModal();
+}
+
+/**
+ * Funkcija za otvaranje Kategorien modala – sličan princip kao kod ostalih modala.
+ */
+function openKategorienModal() {
+  const modal = document.getElementById('kategorien-modal');
+  if (modal) {
+    modal.style.display = 'flex';
+    // Ovde možete dodati logiku za popunjavanje liste kategorija
+  }
+  const closeBtn = document.getElementById('close-kategorien-modal');
+  if (closeBtn) {
+    closeBtn.onclick = () => {
+      modal.style.display = 'none';
+      // Vraćamo se u Settings modal nakon zatvaranja Kategorien modala
+      openSettingsModal();
+    };
+  }
+}
+
+/**
+ * Funkcija za otvaranje Über modala.
+ */
+function openUberModal() {
+  const modal = document.getElementById('uber-modal');
+  if (modal) {
+    modal.style.display = 'flex';
+  }
+  const closeBtn = document.getElementById('close-uber-modal');
+  if (closeBtn) {
+    closeBtn.onclick = () => {
+      modal.style.display = 'none';
+      // Vraćamo se u Settings modal nakon zatvaranja Über modala
+      openSettingsModal();
+    };
+  }
+}
+
+/**
+ * Funkcija za otvaranje Kontakt modala.
+ */
+function openKontaktModal() {
+  const modal = document.getElementById('kontakt-modal');
+  if (modal) {
+    modal.style.display = 'flex';
+  }
+  const closeBtn = document.getElementById('close-kontakt-modal');
+  if (closeBtn) {
+    closeBtn.onclick = () => {
+      modal.style.display = 'none';
+      openSettingsModal();
+    };
+  }
+}
+
+/**
+ * Funkcija za otvaranje Datenschutz modala.
+ */
+function openDatenschutzModal() {
+  const modal = document.getElementById('datenschutz-modal');
+  if (modal) {
+    modal.style.display = 'flex';
+  }
+  const closeBtn = document.getElementById('close-datenschutz-modal');
+  if (closeBtn) {
+    closeBtn.onclick = () => {
+      modal.style.display = 'none';
+      openSettingsModal();
+    };
+  }
 }
 
 /**
@@ -460,41 +552,41 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const tabsContainer = document.getElementById('tabs-container');
   if (tabsContainer) {
-  tabsContainer.addEventListener('click', async (e) => {
-  const tab = e.target.closest('.tab');
-  if (!tab || tab.classList.contains('active')) return; // Sprečava ponovni klik na aktivan tab
+    tabsContainer.addEventListener('click', async (e) => {
+      const tab = e.target.closest('.tab');
+      if (!tab || tab.classList.contains('active')) return; // Sprečava ponovni klik na aktivan tab
 
-  // Uklanja "active" klasu sa svih tabova
-  document.querySelectorAll('.tab').forEach(t => {
-    t.classList.remove('active');
-    t.setAttribute('aria-selected', 'false');
-  });
+      // Uklanja "active" klasu sa svih tabova
+      document.querySelectorAll('.tab').forEach(t => {
+        t.classList.remove('active');
+        t.setAttribute('aria-selected', 'false');
+      });
 
-  // Postavlja "active" na kliknuti tab
-  tab.classList.add('active');
-  tab.setAttribute('aria-selected', 'true');
+      // Postavlja "active" na kliknuti tab
+      tab.classList.add('active');
+      tab.setAttribute('aria-selected', 'true');
 
-  const category = tab.getAttribute('data-tab');
-  const container = document.getElementById('news-container');
-  if (!container) return;
+      const category = tab.getAttribute('data-tab');
+      const container = document.getElementById('news-container');
+      if (!container) return;
 
-  container.scrollTop = 0; // Resetuje scroll na vrh
+      container.scrollTop = 0; // Resetuje scroll na vrh
 
-  try {
-    if (category === 'Aktuell') {
-      await displayAktuellFeeds(true); // Force refresh
-    } else {
-      await displayNewsByCategory(category, true); // Force refresh
-    }
-  } catch (error) {
-    console.error(`Greška prilikom učitavanja kategorije "${category}":`, error);
-  }
+      try {
+        if (category === 'Aktuell') {
+          await displayAktuellFeeds(true); // Force refresh
+        } else {
+          await displayNewsByCategory(category, true); // Force refresh
+        }
+      } catch (error) {
+        console.error(`Greška prilikom učitavanja kategorije "${category}":`, error);
+      }
 
-  // Dodatno osiguranje da se prikaz osveži
-  requestAnimationFrame(() => {
-    container.scrollTop = 0;
-  });
-});
+      // Dodatno osiguranje da se prikaz osveži
+      requestAnimationFrame(() => {
+        container.scrollTop = 0;
+      });
+    });
   }
 
   loadFeeds();
@@ -550,17 +642,61 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Über
   const uberButton = document.getElementById('uber-button');
-  const uberModal = document.getElementById('uber-modal');
-  const closeUberBtn = document.getElementById('close-uber-modal');
-  if (uberButton && uberModal) {
+  if (uberButton) {
     uberButton.onclick = () => {
       settingsModal.style.display = 'none';
-      uberModal.style.display = 'flex';
+      openUberModal();
     };
   }
+  const closeUberBtn = document.getElementById('close-uber-modal');
   if (closeUberBtn) {
     closeUberBtn.onclick = () => {
-      uberModal.style.display = 'none';
+      // U openUberModal() već je postavljeno zatvaranje sa povratkom u settings
+      // Ako ovde ne dodajemo openSettingsModal(), poziv će biti obrađen u funkciji openUberModal()
+      // ali ukoliko se zatvara direktno ovde, možete dodati:
+      const uberModal = document.getElementById('uber-modal');
+      if (uberModal) {
+        uberModal.style.display = 'none';
+        openSettingsModal();
+      }
+    };
+  }
+
+  // Kontakt
+  const kontaktButton = document.getElementById('kontakt-button');
+  if (kontaktButton) {
+    kontaktButton.onclick = () => {
+      settingsModal.style.display = 'none';
+      openKontaktModal();
+    };
+  }
+  const closeKontaktBtn = document.getElementById('close-kontakt-modal');
+  if (closeKontaktBtn) {
+    closeKontaktBtn.onclick = () => {
+      const kontaktModal = document.getElementById('kontakt-modal');
+      if (kontaktModal) {
+        kontaktModal.style.display = 'none';
+        openSettingsModal();
+      }
+    };
+  }
+
+  // Datenschutz
+  const datenschutzButton = document.getElementById('datenschutz-button');
+  if (datenschutzButton) {
+    datenschutzButton.onclick = () => {
+      settingsModal.style.display = 'none';
+      openDatenschutzModal();
+    };
+  }
+  const closeDatenschutzBtn = document.getElementById('close-datenschutz-modal');
+  if (closeDatenschutzBtn) {
+    closeDatenschutzBtn.onclick = () => {
+      const datenschutzModal = document.getElementById('datenschutz-modal');
+      if (datenschutzModal) {
+        datenschutzModal.style.display = 'none';
+        openSettingsModal();
+      }
     };
   }
 
@@ -579,39 +715,3 @@ document.addEventListener('DOMContentLoaded', () => {
     if (tutOverlay) tutOverlay.style.display = 'flex';
   }
 });
-
-// Kontakt modal
-const kontaktButton = document.getElementById('kontakt-button');
-const kontaktModal = document.getElementById('kontakt-modal');
-const closeKontaktBtn = document.getElementById('close-kontakt-modal');
-
-if (kontaktButton && kontaktModal) {
-  kontaktButton.onclick = () => {
-    const settingsModal = document.getElementById('settings-modal');
-    if (settingsModal) settingsModal.style.display = 'none';
-    kontaktModal.style.display = 'flex';
-  };
-}
-if (closeKontaktBtn) {
-  closeKontaktBtn.onclick = () => {
-    kontaktModal.style.display = 'none';
-  };
-}
-
-// Datenschutz modal
-const datenschutzButton = document.getElementById('datenschutz-button');
-const datenschutzModal = document.getElementById('datenschutz-modal');
-const closeDatenschutzBtn = document.getElementById('close-datenschutz-modal');
-
-if (datenschutzButton && datenschutzModal) {
-  datenschutzButton.onclick = () => {
-    const settingsModal = document.getElementById('settings-modal');
-    if (settingsModal) settingsModal.style.display = 'none';
-    datenschutzModal.style.display = 'flex';
-  };
-}
-if (closeDatenschutzBtn) {
-  closeDatenschutzBtn.onclick = () => {
-    datenschutzModal.style.display = 'none';
-  };
-}
