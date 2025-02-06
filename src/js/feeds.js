@@ -279,7 +279,7 @@ function createNewsCard(feed) {
     img.src = `${BASE_IMAGE_URL}/img/noimg.png`; // Fallback slika
   }
 
-  img.alt = feed.title || 'No title';
+//  img.alt = feed.title || 'No title';  
 
   // Sadržaj
   const contentDiv = document.createElement('div');
