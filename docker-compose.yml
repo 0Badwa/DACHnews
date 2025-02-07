@@ -6,12 +6,19 @@ services:
     ports:
       - "3001:3001"
     environment:
-      - REDIS_URL=redis://redis:6379  # Corrected URL
+      - REDIS_URL=redis://redis:6379
     depends_on:
       - redis
-    # ... other app configurations
+    restart: always  # Osigurava da se aplikacija ponovo pokrene ako padne
+
   redis:
     image: redis:latest
     ports:
       - "6379:6379"
+    volumes:
+      - redis_data:/data  # Čuva podatke između restartova
     command: ["redis-server", "--appendonly", "yes"]
+    restart: always  # Osigurava da se Redis ponovo pokrene ako padne
+
+volumes:
+  redis_data:

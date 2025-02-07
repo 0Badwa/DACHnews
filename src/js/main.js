@@ -2,6 +2,10 @@
  * main.js
  ************************************************/
 
+if ('scrollRestoration' in history) {
+  history.scrollRestoration = 'manual';
+}
+
 // Definišemo funkcije za otvaranje i zatvaranje Settings modala
 function openSettingsModal() {
   const settingsModal = document.getElementById('settings-modal');
@@ -473,8 +477,10 @@ function initSwipe() {
     clickTab(cats[idx]);
 
     setTimeout(() => {
-      swipeContainer.scrollTop = 0;
+      window.scrollTo(0, 0);
+      console.log('Window scrollTo(0,0) pozvan za kategoriju:', category);
     }, 300);
+    
   }
 
   function clickTab(cat) {
@@ -552,42 +558,48 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const tabsContainer = document.getElementById('tabs-container');
   if (tabsContainer) {
-    tabsContainer.addEventListener('click', async (e) => {
-      const tab = e.target.closest('.tab');
-      if (!tab || tab.classList.contains('active')) return; // Sprečava ponovni klik na aktivan tab
+    // Event listener koji obrađuje klik na tab (promenu kategorije)
+tabsContainer.addEventListener('click', async (e) => {
+  const tab = e.target.closest('.tab');
+  if (!tab || tab.classList.contains('active')) return; // Sprečava ponovni klik na aktivan tab
 
-      // Uklanja "active" klasu sa svih tabova
-      document.querySelectorAll('.tab').forEach(t => {
-        t.classList.remove('active');
-        t.setAttribute('aria-selected', 'false');
-      });
+  // Uklanja "active" klasu sa svih tabova
+  document.querySelectorAll('.tab').forEach(t => {
+    t.classList.remove('active');
+    t.setAttribute('aria-selected', 'false');
+  });
 
-      // Postavlja "active" na kliknuti tab
-      tab.classList.add('active');
-      tab.setAttribute('aria-selected', 'true');
+  // Postavlja "active" klasu na kliknuti tab
+  tab.classList.add('active');
+  tab.setAttribute('aria-selected', 'true');
 
-      const category = tab.getAttribute('data-tab');
-      const container = document.getElementById('news-container');
-      if (!container) return;
+  // Dohvati naziv kategorije iz atributa
+  const category = tab.getAttribute('data-tab');
+  const container = document.getElementById('news-container');
+  if (!container) return;
 
-      container.scrollTop = 0; // Resetuje scroll na vrh
+  // Ažuriraj activeTab i resetuj keš scroll pozicije za novu kategoriju
+  localStorage.setItem('activeTab', category);
+  localStorage.setItem(`${category}_scroll`, 0);
 
-      try {
-        if (category === 'Aktuell') {
-          await displayAktuellFeeds(true); // Force refresh
-        } else {
-          await displayNewsByCategory(category, true); // Force refresh
-        }
-      } catch (error) {
-        console.error(`Greška prilikom učitavanja kategorije "${category}":`, error);
-      }
-
-      // Dodatno osiguranje da se prikaz osveži
-      requestAnimationFrame(() => {
-        container.scrollTop = 0;
-      });
-    });
+  // Učitaj feedove za novu kategoriju (forceRefresh=true)
+  try {
+    if (category === 'Aktuell') {
+      await displayAktuellFeeds(true); // Force refresh
+    } else {
+      await displayNewsByCategory(category, true); // Force refresh
+    }
+  } catch (error) {
+    console.error(`Greška prilikom učitavanja kategorije "${category}":`, error);
   }
+
+  // Nakon što se novi sadržaj učita, resetuj scroll poziciju sa zakašnjenjem od 300ms
+  setTimeout(() => {
+    container.scrollTop = 0;
+    console.log('Scroll resetovan na 0 nakon učitavanja kategorije:', category);
+  }, 300);
+});
+
 
   loadFeeds();
 
@@ -651,9 +663,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const closeUberBtn = document.getElementById('close-uber-modal');
   if (closeUberBtn) {
     closeUberBtn.onclick = () => {
-      // U openUberModal() već je postavljeno zatvaranje sa povratkom u settings
-      // Ako ovde ne dodajemo openSettingsModal(), poziv će biti obrađen u funkciji openUberModal()
-      // ali ukoliko se zatvara direktno ovde, možete dodati:
       const uberModal = document.getElementById('uber-modal');
       if (uberModal) {
         uberModal.style.display = 'none';
@@ -714,4 +723,4 @@ document.addEventListener('DOMContentLoaded', () => {
     const tutOverlay = document.getElementById('tutorial-overlay');
     if (tutOverlay) tutOverlay.style.display = 'flex';
   }
-});
+}});
