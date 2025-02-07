@@ -118,9 +118,17 @@ function getBlockedCategories() {
 }
 
 /**
- * Proverava da li je feed sakriven (blokiran) na osnovu izvora ili kategorije.
+ * Proverava da li je feed sakriven (blokiran) na osnovu izvora, kategorije
+ * i da li je datum objavljivanja u budućnosti (u tom slučaju se takođe sakriva).
  */
 function isHiddenFeed(feed) {
+  // NE PRIKAZUJ vesti sa datumom sutra ili u budućnosti
+  if (feed.date_published) {
+    const publishedDate = new Date(feed.date_published);
+    const now = new Date();
+    if (publishedDate > now) return true;
+  }
+
   const blockedSources = getBlockedSources();
   const blockedCats = getBlockedCategories();
   
@@ -188,7 +196,6 @@ export async function fetchAllFeedsFromServer(forceRefresh = false) {
     return data.slice(0, 50);
 
   } catch (error) {
-    // Ako je greška AbortError, ignoriši je
     if (error.name === 'AbortError') {
       console.warn("[fetchAllFeedsFromServer] Fetch aborted.");
       return [];
@@ -200,7 +207,6 @@ export async function fetchAllFeedsFromServer(forceRefresh = false) {
     hideLoader();
   }
 }
-
 
 /**
  * Fetch do 50 feedova iz određene kategorije, keširano ~10 min (/api/feeds-by-category).
@@ -270,7 +276,7 @@ function createNewsCard(feed) {
   
   // Slika
   const img = document.createElement('img');
-  img.className = "news-card-image lazy news-image"; // Dodata klasa "news-image"
+  img.className = "news-card-image lazy news-image";
 
   const BASE_IMAGE_URL = window.location.hostname.includes("dach.news")
   ? "https://www.dach.news"
@@ -278,17 +284,13 @@ function createNewsCard(feed) {
   ? "http://localhost:3001"
   : "https://dachnews.onrender.com";
 
-
-  // Provera da li feed ima sliku
   if (feed.image && feed.image.startsWith("/")) {
     img.src = `${BASE_IMAGE_URL}${feed.image}`;
   } else if (feed.image) {
-    img.src = feed.image; // Ako je apsolutni URL
+    img.src = feed.image;
   } else {
-    img.src = `${BASE_IMAGE_URL}/img/noimg.png`; // Fallback slika
+    img.src = `${BASE_IMAGE_URL}/img/noimg.png`;
   }
-
-//  img.alt = feed.title || 'No title';  
 
   // Sadržaj
   const contentDiv = document.createElement('div');
@@ -301,7 +303,6 @@ function createNewsCard(feed) {
   const meta = document.createElement('p');
   meta.className = "news-meta";
 
-  // Izvor – kreiramo span i koristimo removeTLD da uklonimo .CH, .DE, .AT
   const sourceSpan = document.createElement('span');
   sourceSpan.className = "source";
   const normalizedSource = feed.source
@@ -309,7 +310,6 @@ function createNewsCard(feed) {
     : 'UNBEKANNTEQUELLE';
   sourceSpan.textContent = normalizedSource;
 
-  // Zastava (visina 1rem, razmak 5px)
   const flagImg = document.createElement('img');
   flagImg.className = "flag-icon";
   flagImg.style.height = "1rem";
@@ -319,7 +319,6 @@ function createNewsCard(feed) {
   flagImg.alt = "flag";
   sourceSpan.prepend(flagImg);
 
-  // Vreme
   const timeSpan = document.createElement('span');
   timeSpan.className = "time";
   const timeString = feed.date_published ? timeAgo(feed.date_published) : '';
@@ -344,7 +343,6 @@ export function displayFeedsList(feedsList, categoryName) {
   const container = document.getElementById('news-container');
   if (!container) return;
 
-  // Pre punjenja sadržaja, skrol na vrh
   container.scrollTop = 0;
   container.innerHTML = '';
 
@@ -400,7 +398,6 @@ export async function displayNewsByCategory(category, forceRefresh = false) {
     "Sonstiges"
   ];
 
-  // Ako je nepoznata, prebacujemo se na "Aktuell"
   if (!validCategories.includes(category)) {
     displayAktuellFeeds();
     return;
@@ -477,7 +474,6 @@ export function initAppRefreshOnVisibilityChange() {
       const activeTab = document.querySelector('.tab.active');
       const category = activeTab ? activeTab.getAttribute('data-tab') : 'Aktuell';
 
-      // Force refresh
       if (category === 'Aktuell') {
         displayAktuellFeeds(true);
       } else {
@@ -492,7 +488,6 @@ export function initAppRefreshOnVisibilityChange() {
  * Inicijalizuje rad sa feedovima.
  */
 export function initFeeds() {
-  // Listener za sve tabove
   const tabs = document.querySelectorAll('.tab');
   tabs.forEach(tab => {
     tab.addEventListener('click', async () => {
@@ -504,10 +499,7 @@ export function initFeeds() {
     });
   });
 
-  // Osvežavanje kad se vrati iz pozadine
   initAppRefreshOnVisibilityChange();
-
-  // Inicijalni prikaz => "Aktuell"
   displayAktuellFeeds();
 }
 
@@ -525,7 +517,6 @@ function removeActiveClass() {
 
 /**
  * Funkcija za blokiranje izvora.
- * Uklanja TLD pre nego što doda "čisti" naziv u listu blokiranih izvora.
  */
 export function blockSource(src) {
   const blockedSources = getBlockedSources();
