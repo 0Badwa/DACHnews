@@ -188,6 +188,11 @@ export async function fetchAllFeedsFromServer(forceRefresh = false) {
     return data.slice(0, 50);
 
   } catch (error) {
+    // Ako je greška AbortError, ignoriši je
+    if (error.name === 'AbortError') {
+      console.warn("[fetchAllFeedsFromServer] Fetch aborted.");
+      return [];
+    }
     console.error("[fetchAllFeedsFromServer] Greška:", error);
     showErrorMessage("Fehler: /api/feeds konnte nicht geladen werden.");
     return [];
@@ -195,6 +200,7 @@ export async function fetchAllFeedsFromServer(forceRefresh = false) {
     hideLoader();
   }
 }
+
 
 /**
  * Fetch do 50 feedova iz određene kategorije, keširano ~10 min (/api/feeds-by-category).
