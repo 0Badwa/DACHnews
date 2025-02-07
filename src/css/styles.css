@@ -132,7 +132,7 @@ nav .menu button {
   margin: 1px;
   /* Bele boje i zeleni glow */
   color: #fff;
-  text-shadow: 0 0 7px #32CD32;
+  /* text-shadow: 0 0 7px #32CD32; */ /* Uklonjen neon glow efekat */
   background:  var(--secondary-color);
   font-family: var(--font-family);
   font-size: 1.1em;
@@ -234,13 +234,13 @@ nav .menu button {
 /* Kad kreiramo <h2> iz feeda, da bude bele boje i blagi zeleni glow */
 #news-container h2 {
   color: #fff;
-  text-shadow: 0 0 7px #32CD32; /* glow efekat za tekst */
+  /* text-shadow: 0 0 7px #32CD32; */ /* Uklonjen neon glow efekat */
   background-color: #000; /* crna pozadina */
   margin-bottom: 4px;
   font-size: 1.1rem;
   text-align: center;
   padding: 4px;
-  box-shadow: 0 0 0 2px #000; /* crni outline */
+  /* box-shadow: 0 0 0 2px #000; crni outline */
 }
 
 /* ========== 7) RESPONSIVE ========== */

@@ -113,12 +113,12 @@ Pri kategorizaciji, obavezno vodi računa o specifičnostima tih zemalja. Ako ve
 }
 
 /**
- * Funkcija za smanjivanje slike (rezanje na 320px, kvalitet 100%) pomoću Sharp.
+ * Funkcija za smanjivanje slike (rezanje na 240px, kvalitet 80%) pomoću Sharp.
  */
 async function smanjiSliku(buffer) {
   try {
     return await sharp(buffer)
-      .resize(320, null, { fit: 'inside' })
+      .resize(240, null, { fit: 'inside' })
       .webp({ quality: 80 })
       .toBuffer();
   } catch (error) {
@@ -138,7 +138,7 @@ async function storeImageInRedis(imageUrl, id) {
     const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
     const buffer = Buffer.from(response.data);
 
-    // Smanjimo na 320px
+    // Smanjimo na 240px
     const optimized = await smanjiSliku(buffer);
     if (!optimized) return false;
 
@@ -148,7 +148,7 @@ async function storeImageInRedis(imageUrl, id) {
     // Čuvamo u Redis
     await redisClient.set(`img:${id}`, base64);
 
-    console.log(`[storeImageInRedis] Slika za ID:${id} uspešno snimljena (320px).`);
+    console.log(`[storeImageInRedis] Slika za ID:${id} uspešno snimljena (240px).`);
     return true;
   } catch (error) {
     console.error(`[storeImageInRedis] Greška pri snimanju slike za ID:${id}:`, error);
