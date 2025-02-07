@@ -17,7 +17,7 @@ const GPT_API_URL = "https://api.openai.com/v1/chat/completions";
 
 // Redis konekcija
 export const redisClient = createClient({
-  url: process.env.REDIS_URL,
+  url: process.env.REDIS_URL || 'redis://redis:6379', // Dodali smo fallback vrijednost
 });
 
 /**

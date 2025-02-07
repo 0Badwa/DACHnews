@@ -1,17 +1,15 @@
-version: "3.8"
 services:
   app:
     build:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "8080:8080"
+      - "3001:3001"
     environment:
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
+      - REDIS_URL=redis://redis:6379  # Corrected URL
     depends_on:
       - redis
-
+    # ... other app configurations
   redis:
     image: redis:latest
     ports:
