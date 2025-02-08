@@ -1,6 +1,6 @@
 /**
  * index.js
- * Backend aplikacije
+ * Backend aplikacije – Generisanje HTML iz JSON podataka koristeći Express (bez Chromium‑a)
  */
 
 import dotenv from 'dotenv';
@@ -17,8 +17,6 @@ import {
   processFeeds,
   getAllFeedsFromRedis
 } from './feedsService.js';
-
-import puppeteer from 'puppeteer'; // Koristi bundlovani Chromium iz puppeteer
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -44,31 +42,13 @@ app.use('/src', express.static(path.join(__dirname, 'src'), {
 // Poveži se na Redis
 await initRedis();
 
-// Helper funkcija: Generiše prerenderovani HTML za dati newsId
-async function generatePrerenderedHtml(newsId) {
-  const baseUrl = process.env.BASE_URL || `http://localhost:${process.env.PORT || 3001}`;
-  const targetUrl = `${baseUrl}/?newsId=${newsId}`;
-  
-  // Pokrećemo Puppeteer koristeći bundlovani Chromium sa potrebnim argumentima za Render
-  const browser = await puppeteer.launch({
-    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium-browser', // Default path for Chromium on Render
-    headless: "new",
-    args: ["--no-sandbox", "--disable-setuid-sandbox"]
-  });
-  
-  const page = await browser.newPage();
-  await page.goto(targetUrl, { waitUntil: 'networkidle0' });
-  const html = await page.content();
-  await browser.close();
-  return html;
-}
-
-// Rute:
+// Ruta za glavnu stranicu (index.html)
 app.get('/', (req, res) => {
   console.log("[Route /] Služenje index.html...");
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
+// API ruta za dohvatanje svih feedova
 app.get('/api/feeds', async (req, res) => {
   console.log("[Route /api/feeds] Klijent traži sve feedove...");
   try {
@@ -81,6 +61,7 @@ app.get('/api/feeds', async (req, res) => {
   }
 });
 
+// API ruta za dohvatanje feedova po kategoriji
 app.get('/api/feeds-by-category/:category', async (req, res) => {
   const category = req.params.category;
   console.log(`[Route /api/feeds-by-category] Kategorija: ${category}`);
@@ -114,30 +95,59 @@ app.get('/image/:id', async (req, res) => {
   }
 });
 
-// Ruta za prerenderovanje pojedinačne vesti koristeći Puppeteer
+// Nova ruta za generisanje HTML stranice za pojedinačnu vest (bez Chromium‑a)
 app.get('/news/:id', async (req, res) => {
   const newsId = req.params.id;
-  const cacheKey = `prerender:news:${newsId}`;
+  const cacheKey = `html:news:${newsId}`;
   try {
-    // Pokušaj da dohvatiš prerenderovani HTML iz Redis-a
+    // Pokušaj da dohvatiš keširani HTML iz Redis-a
     let cachedHtml = await redisClient.get(cacheKey);
     if (cachedHtml) {
-      console.log(`[Prerender] Serving cached HTML for news ${newsId}`);
+      console.log(`[Express HTML] Serving cached HTML for news ${newsId}`);
+      res.setHeader("Content-Type", "text/html");
       return res.send(cachedHtml);
     }
-    // Ako nema u kešu, generiši HTML
-    const html = await generatePrerenderedHtml(newsId);
-    // Keširaj prerenderovani HTML na 12 sati (43200 sekundi)
+    // Dohvati sve vesti i pronađi vest po id-u
+    const allFeeds = await getAllFeedsFromRedis();
+    const news = allFeeds.find(item => item.id === newsId);
+    if (!news) return res.status(404).send("News not found");
+    
+    // Generiši HTML koristeći podatke iz JSON objekta
+    const html = `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <title>${news.title}</title>
+        <meta name="description" content="${news.content_text ? news.content_text.substring(0, 160) : ''}">
+        <style>
+          body { font-family: Arial, sans-serif; margin: 20px; }
+          img { max-width: 100%; height: auto; }
+        </style>
+      </head>
+      <body>
+        <h1>${news.title}</h1>
+        <p><em>${news.date_published ? new Date(news.date_published).toLocaleString() : ''}</em></p>
+        ${news.image ? `<img src="${news.image}" alt="${news.title}">` : ''}
+        <div>${news.content_text}</div>
+        <p>Source: ${news.source}</p>
+        <p>Category: ${news.category}</p>
+      </body>
+      </html>
+    `;
+    
+    // Keširaj generisani HTML na 12 sati (43200 sekundi)
     await redisClient.setEx(cacheKey, 43200, html);
-    console.log(`[Prerender] Cached HTML for news ${newsId}`);
+    console.log(`[Express HTML] Cached HTML for news ${newsId}`);
+    res.setHeader("Content-Type", "text/html");
     res.send(html);
   } catch (error) {
-    console.error(`[Prerender] Error prerendering news ${newsId}:`, error);
-    res.status(500).send("Error prerendering page");
+    console.error(`[Express HTML] Error generating HTML for news ${newsId}:`, error);
+    res.status(500).send("Server error");
   }
 });
 
-// API ruta za dohvatanje pojedinačne vesti po id
+// API ruta za dohvatanje pojedinačne vesti u JSON formatu
 app.get('/api/news/:id', async (req, res) => {
   const newsId = req.params.id;
   try {
@@ -151,57 +161,16 @@ app.get('/api/news/:id', async (req, res) => {
   }
 });
 
-/* DEBUG ruta – prikazuje sve Redis ključeve sa prefiksom "prerender:" */
-app.get('/api/debug/redis-keys', async (req, res) => {
+/* DEBUG ruta – prikazuje sve Redis ključeve sa prefiksom "html:news:" */
+app.get('/api/debug/html-keys', async (req, res) => {
   try {
-    const keys = await redisClient.keys('prerender:*');
+    const keys = await redisClient.keys('html:news:*');
     res.json(keys);
   } catch (error) {
     console.error("Greška pri dohvaćanju Redis ključeva:", error);
     res.status(500).json({ error: error.toString() });
   }
 });
-
-// NOVA funkcija: Automatsko prerenderovanje svih vesti iz category ključeva
-async function prerenderAllNews() {
-  console.log("[Prerender] Pokrećem automatsko prerenderovanje svih vesti iz category ključeva...");
-  let successCount = 0;
-  try {
-    const categoryKeys = await redisClient.keys("category:*");
-    for (const key of categoryKeys) {
-      const items = await redisClient.lRange(key, 0, -1);
-      for (const itemStr of items) {
-        try {
-          const item = JSON.parse(itemStr);
-          const newsId = item.id;
-          if (!newsId) continue;
-          console.log(`[Prerender] Prerenderujem vest ${newsId} iz ${key}`);
-          const html = await generatePrerenderedHtml(newsId);
-          const cacheKey = `prerender:news:${newsId}`;
-          await redisClient.setEx(cacheKey, 43200, html);
-          successCount++;
-        } catch (err) {
-          console.error("Error prerendering vest:", err);
-        }
-      }
-    }
-    console.log(`[Prerender] Završeno automatsko prerenderovanje. Uspešno keširano HTML za ${successCount} vesti.`);
-  } catch (error) {
-    console.error("[Prerender] Greška pri prerenderovanju svih vesti:", error);
-  }
-  // Loguj ukupni broj prerenderovanih HTML ključeva u Redis-u
-  try {
-    const keys = await redisClient.keys("prerender:*");
-    console.log(`[Prerender] Ukupno prerender HTML ključeva u Redis-u: ${keys.length}`);
-  } catch (err) {
-    console.error("Greška pri dohvaćanju prerender ključeva:", err);
-  }
-}
-
-// Pokreni automatsko prerenderovanje svakih 12 sati (43200000 ms)
-setInterval(prerenderAllNews, 43200000);
-// Opcionalno, pokreni odmah pri startu
-prerenderAllNews();
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, '0.0.0.0', () => {
