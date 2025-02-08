@@ -48,7 +48,17 @@ await initRedis();
 async function generatePrerenderedHtml(newsId) {
   const baseUrl = process.env.BASE_URL || `http://localhost:${process.env.PORT || 3001}`;
   const targetUrl = `${baseUrl}/?newsId=${newsId}`;
-  const browser = await puppeteer.launch();
+  
+  // Ako je postavljen PUPPETEER_EXECUTABLE_PATH, koristimo ga
+  const launchOptions = {};
+  if (process.env.PUPPETEER_EXECUTABLE_PATH) {
+    launchOptions.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
+    console.log(`[Puppeteer] Koristim executablePath: ${process.env.PUPPETEER_EXECUTABLE_PATH}`);
+  } else {
+    console.log("[Puppeteer] Koristim podrazumevanu instalaciju Chrome/Chromium");
+  }
+  
+  const browser = await puppeteer.launch(launchOptions);
   const page = await browser.newPage();
   await page.goto(targetUrl, { waitUntil: 'networkidle0' });
   const html = await page.content();
