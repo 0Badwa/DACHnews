@@ -6,6 +6,30 @@ if ('scrollRestoration' in history) {
   history.scrollRestoration = 'manual';
 }
 
+// Dodaj kod za automatsko otvaranje modala vesti ako postoji ?newsId= u URL-u
+document.addEventListener('DOMContentLoaded', async () => {
+  // Proveri da li URL ima ?newsId
+  const urlParams = new URLSearchParams(window.location.search);
+  const newsId = urlParams.get('newsId');
+  
+  if (newsId) {
+    try {
+      // Dohvati podatke o vesti
+      const response = await fetch(`/api/news/${newsId}`);
+      if (!response.ok) throw new Error("News not found");
+
+      const news = await response.json();
+
+      // Prikaži modal - ova funkcija treba da postoji u newsModal.js ili slično
+      openNewsModal(news);
+    } catch (error) {
+      console.error("Greška pri učitavanju vesti:", error);
+    }
+  }
+});
+
+/** Ostatak koda main.js (ne dirati ako ne treba) **/
+
 // Definišemo funkcije za otvaranje i zatvaranje Settings modala
 function openSettingsModal() {
   const settingsModal = document.getElementById('settings-modal');

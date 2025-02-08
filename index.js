@@ -59,7 +59,6 @@ function generateHtmlForNews(news) {
         body { font-family: Arial, sans-serif; margin: 20px; }
         img { max-width: 100%; height: auto; }
       </style>
-      <!-- Structured Data Primer (NewsArticle) -->
       <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -168,7 +167,7 @@ app.get('/news/:id', async (req, res) => {
     if (!news) return res.status(404).send("News not found");
     
     const html = generateHtmlForNews(news);
-    await redisClient.setEx(cacheKey, 43200, html); // Keširaj na 12 sati (43200 sekundi)
+    await redisClient.setEx(cacheKey, 43200, html); // Keširaj na 12 sati
     console.log(`[Express HTML] Cached HTML for news ${newsId}`);
     res.setHeader("Content-Type", "text/html");
     res.send(html);
@@ -194,8 +193,8 @@ app.get('/api/news/:id', async (req, res) => {
 
 /**
  * Ruta za generisanje XML sitemap-a.
- * Preuzima sve vesti iz Redis-a i kreira XML sitemap sa URL-ovima u formatu:
- * https://www.dach.news/news/<news_id>
+ * Preuzima sve vesti iz Redis-a i kreira XML sitemap sa URL-ovima:
+ * Sada koristimo ?newsId=<id> umesto /news/<id>, da bismo automatski otvarali modal
  */
 app.get('/sitemap.xml', async (req, res) => {
   try {
@@ -205,7 +204,8 @@ app.get('/sitemap.xml', async (req, res) => {
     for (const news of allFeeds) {
       const lastmod = news.date_published ? new Date(news.date_published).toISOString() : new Date().toISOString();
       xml += '  <url>\n';
-      xml += `    <loc>https://www.dach.news/news/${news.id}</loc>\n`;
+      // Dodato `?newsId=` umesto /news/<id>
+      xml += `    <loc>https://www.dach.news/?newsId=${news.id}</loc>\n`;
       xml += `    <lastmod>${lastmod}</lastmod>\n`;
       xml += '    <changefreq>daily</changefreq>\n';
       xml += '    <priority>0.8</priority>\n';
@@ -240,6 +240,7 @@ app.listen(PORT, '0.0.0.0', () => {
 setInterval(processFeeds, 12 * 60 * 1000);
 processFeeds();
 
+// Endpointi za blokiranje/otblokiranje izvora
 app.post('/api/block-source', async (req, res) => {
   const { source } = req.body;
   if (!source) return res.status(400).send("Source required");
@@ -272,6 +273,7 @@ app.post('/api/unblock-source', async (req, res) => {
   }
 });
 
+// Redirect sa onrender domena na www.dach.news
 app.use((req, res, next) => {
   if (req.headers.host === 'dachnews.onrender.com') {
     return res.redirect(301, 'https://www.dach.news' + req.url);
