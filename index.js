@@ -1,6 +1,6 @@
 /**
  * index.js
- * Backend aplikacije – Server-side generisanje HTML-a za svaku vest koristeći JSON podatke
+ * Backend aplikacije – Server-side generisanje HTML-a za svaku vest i automatsko generisanje XML sitemap-a
  */
 
 import dotenv from 'dotenv';
@@ -59,6 +59,29 @@ function generateHtmlForNews(news) {
         body { font-family: Arial, sans-serif; margin: 20px; }
         img { max-width: 100%; height: auto; }
       </style>
+      <!-- Structured Data Primer (NewsArticle) -->
+      <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "NewsArticle",
+        "headline": "${news.title}",
+        "datePublished": "${news.date_published ? new Date(news.date_published).toISOString() : new Date().toISOString()}",
+        "image": "${news.image || ''}",
+        "author": {
+          "@type": "Person",
+          "name": "${news.source}"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "DACH.news",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.dach.news/src/icons/favicon.ico"
+          }
+        },
+        "description": "${news.content_text ? news.content_text.substring(0, 160) : ''}"
+      }
+      </script>
     </head>
     <body>
       <h1>${news.title}</h1>
@@ -169,6 +192,34 @@ app.get('/api/news/:id', async (req, res) => {
   }
 });
 
+/**
+ * Ruta za generisanje XML sitemap-a.
+ * Preuzima sve vesti iz Redis-a i kreira XML sitemap sa URL-ovima u formatu:
+ * https://www.dach.news/news/<news_id>
+ */
+app.get('/sitemap.xml', async (req, res) => {
+  try {
+    const allFeeds = await getAllFeedsFromRedis();
+    let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+    xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
+    for (const news of allFeeds) {
+      const lastmod = news.date_published ? new Date(news.date_published).toISOString() : new Date().toISOString();
+      xml += '  <url>\n';
+      xml += `    <loc>https://www.dach.news/news/${news.id}</loc>\n`;
+      xml += `    <lastmod>${lastmod}</lastmod>\n`;
+      xml += '    <changefreq>daily</changefreq>\n';
+      xml += '    <priority>0.8</priority>\n';
+      xml += '  </url>\n';
+    }
+    xml += '</urlset>';
+    res.header('Content-Type', 'application/xml');
+    res.send(xml);
+  } catch (error) {
+    console.error("Error generating sitemap:", error);
+    res.status(500).send("Server error");
+  }
+});
+
 // Debug ruta – prikazuje sve Redis ključeve za HTML (prefiks "html:news:")
 app.get('/api/debug/html-keys', async (req, res) => {
   try {
@@ -179,34 +230,6 @@ app.get('/api/debug/html-keys', async (req, res) => {
     res.status(500).json({ error: error.toString() });
   }
 });
-
-/**
- * Funkcija koja pre-generiše HTML za sve vesti iz Redis-a i kešira ih.
- * Ovaj proces se pokreće periodično (npr. svakih 12 sati) i odmah pri startu.
- */
-async function preGenerateAllNewsHtml() {
-  console.log("[Pre-Generate] Pokrećem pre-generisanje HTML-a za sve vesti...");
-  let successCount = 0;
-  try {
-    const allFeeds = await getAllFeedsFromRedis();
-    for (const news of allFeeds) {
-      if (!news.id) continue;
-      const html = generateHtmlForNews(news);
-      const cacheKey = `html:news:${news.id}`;
-      await redisClient.setEx(cacheKey, 43200, html);
-      console.log(`[Pre-Generate] Keširan HTML za vest ${news.id}`);
-      successCount++;
-    }
-    console.log(`[Pre-Generate] Pre-generisano HTML za ${successCount} vesti.`);
-  } catch (error) {
-    console.error("[Pre-Generate] Greška pri pre-generisanju HTML-a:", error);
-  }
-}
-
-// Pokreni pre-generisanje HTML-a svakih 12 sati (43200000 ms)
-setInterval(preGenerateAllNewsHtml, 43200000);
-// Opcionalno, pokreni odmah pri startu
-preGenerateAllNewsHtml();
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, '0.0.0.0', () => {
@@ -220,7 +243,6 @@ processFeeds();
 app.post('/api/block-source', async (req, res) => {
   const { source } = req.body;
   if (!source) return res.status(400).send("Source required");
-
   try {
     let blockedSources = await redisClient.get("blockedSources");
     blockedSources = blockedSources ? JSON.parse(blockedSources) : [];
@@ -238,7 +260,6 @@ app.post('/api/block-source', async (req, res) => {
 app.post('/api/unblock-source', async (req, res) => {
   const { source } = req.body;
   if (!source) return res.status(400).send("Source required");
-
   try {
     let blockedSources = await redisClient.get("blockedSources");
     blockedSources = blockedSources ? JSON.parse(blockedSources) : [];
