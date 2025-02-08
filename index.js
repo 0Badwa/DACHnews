@@ -18,7 +18,7 @@ import {
   getAllFeedsFromRedis
 } from './feedsService.js';
 
-import puppeteer from 'puppeteer'; // Za prerendering
+import puppeteer from 'puppeteer'; // Koristi ugrađeni Chromium
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -48,17 +48,11 @@ await initRedis();
 async function generatePrerenderedHtml(newsId) {
   const baseUrl = process.env.BASE_URL || `http://localhost:${process.env.PORT || 3001}`;
   const targetUrl = `${baseUrl}/?newsId=${newsId}`;
-  
-  // Ako je postavljen PUPPETEER_EXECUTABLE_PATH, koristimo ga
-  const launchOptions = {};
-  if (process.env.PUPPETEER_EXECUTABLE_PATH) {
-    launchOptions.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
-    console.log(`[Puppeteer] Koristim executablePath: ${process.env.PUPPETEER_EXECUTABLE_PATH}`);
-  } else {
-    console.log("[Puppeteer] Koristim podrazumevanu instalaciju Chrome/Chromium");
-  }
-  
-  const browser = await puppeteer.launch(launchOptions);
+  // Koristimo ugrađeni Chromium sa potrebnim argumentima za Render okruženje
+  const browser = await puppeteer.launch({
+    headless: "new", // Rešava neke probleme u Render okruženju
+    args: ["--no-sandbox", "--disable-setuid-sandbox"]
+  });
   const page = await browser.newPage();
   await page.goto(targetUrl, { waitUntil: 'networkidle0' });
   const html = await page.content();
