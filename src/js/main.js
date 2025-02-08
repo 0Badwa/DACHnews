@@ -3,8 +3,8 @@
  ************************************************/
 
 // Import potrebnih modula i funkcija
-import { initFeeds, displayAktuellFeeds, displayNewsByCategory } from './feeds.js';
 import { openNewsModal } from './newsModal.js';
+import { initFeeds, displayAktuellFeeds, displayNewsByCategory } from './feeds.js';
 import { brandMap, ALLOWED_SOURCES } from './sourcesConfig.js';
 
 // Ako je podržana, onemogućavamo automatsko vraćanje scroll pozicije
