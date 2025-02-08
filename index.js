@@ -51,8 +51,8 @@ async function generatePrerenderedHtml(newsId) {
   
   // Pokrećemo Puppeteer koristeći bundlovani Chromium sa potrebnim argumentima za Render
   const browser = await puppeteer.launch({
-    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/opt/render/.cache/puppeteer/chrome/linux-133.0.6943.53/chrome',
-    headless: "new", // Koristi novi headless mod
+    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium-browser', // Default path for Chromium on Render
+    headless: "new",
     args: ["--no-sandbox", "--disable-setuid-sandbox"]
   });
   
