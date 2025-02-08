@@ -535,15 +535,5 @@ export function unblockSource(src) {
   let blockedSources = getBlockedSources();
   blockedSources = blockedSources.filter(s => s !== cleanedSource);
   localStorage.setItem('blockedSources', JSON.stringify(blockedSources));
-}
-
-// Pokreće se kad je DOM spreman
-document.addEventListener('DOMContentLoaded', () => {
-  const urlParams = new URLSearchParams(window.location.search);
-  const newsId = urlParams.get('newsId');
-  // Ako nema newsId, učitaj feedove
-  if (!newsId) {
-    initFeeds();
-  }
-});
+};
 
