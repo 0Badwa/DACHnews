@@ -1,6 +1,7 @@
-/************************************************
+/**
  * index.js
- ************************************************/
+ * Backend aplikacije
+ */
 
 import dotenv from 'dotenv';
 dotenv.config();
@@ -16,6 +17,8 @@ import {
   processFeeds,
   getAllFeedsFromRedis
 } from './feedsService.js';
+
+import puppeteer from 'puppeteer'; // Dodato za prerendering
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -74,23 +77,16 @@ app.get('/api/feeds-by-category/:category', async (req, res) => {
   }
 });
 
-/**
- * Ruta za dohvatanje slike iz Redis-a.
- * Pošto Redis v4 nema getBuffer(), koristimo get() i dekodiramo Base64 u buffer.
- */
+// Ruta za dohvatanje slike iz Redis-a
 app.get('/image/:id', async (req, res) => {
   const imgKey = `img:${req.params.id}`;
   try {
-    // Uzimamo Base64 string iz Redis-a
     const base64 = await redisClient.get(imgKey);
     if (!base64) {
       console.log(`[Route /image/:id] Nema slike za ključ: ${imgKey}`);
       return res.status(404).send("Image not found.");
     }
-
-    // Pretvaramo Base64 nazad u buffer
     const buffer = Buffer.from(base64, 'base64');
-
     res.setHeader('Content-Type', 'image/webp');
     res.send(buffer);
   } catch (error) {
@@ -99,11 +95,55 @@ app.get('/image/:id', async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`[Express] Server pokrenut na portu ${PORT}`); // Ispravno!
+// Nova ruta za prerendering pojedinačne vesti koristeći Puppeteer
+app.get('/news/:id', async (req, res) => {
+  const newsId = req.params.id;
+  const cacheKey = `prerender:news:${newsId}`;
+  try {
+    // Pokušaj da dohvatiš prerenderovani HTML iz Redis-a
+    let cachedHtml = await redisClient.get(cacheKey);
+    if (cachedHtml) {
+      console.log(`[Prerender] Serving cached HTML for news ${newsId}`);
+      return res.send(cachedHtml);
+    }
+
+    // Ako nema u kešu, pokreni Puppeteer i generiši HTML
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+    const baseUrl = process.env.BASE_URL || `http://localhost:${process.env.PORT || 3001}`;
+    const targetUrl = `${baseUrl}/?newsId=${newsId}`;
+    await page.goto(targetUrl, { waitUntil: 'networkidle0' });
+    const html = await page.content();
+    await browser.close();
+
+    // Keširaj prerenderovani HTML na 12 sati (43200 sekundi)
+    await redisClient.setEx(cacheKey, 43200, html);
+    console.log(`[Prerender] Cached HTML for news ${newsId}`);
+    res.send(html);
+  } catch (error) {
+    console.error(`[Prerender] Error prerendering news ${newsId}:`, error);
+    res.status(500).send("Error prerendering page");
+  }
 });
 
+// API ruta za dohvatanje pojedinačne vesti po id
+app.get('/api/news/:id', async (req, res) => {
+  const newsId = req.params.id;
+  try {
+    const allFeeds = await getAllFeedsFromRedis();
+    const news = allFeeds.find(item => item.id === newsId);
+    if (!news) return res.status(404).send("News not found");
+    res.json(news);
+  } catch (error) {
+    console.error(`[API] Error fetching news ${newsId}:`, error);
+    res.status(500).send("Server error");
+  }
+});
+
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`[Express] Server pokrenut na portu ${PORT}`);
+});
 
 // Periodična obrada feedova (12 minuta)
 setInterval(processFeeds, 12 * 60 * 1000);
