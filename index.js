@@ -1,6 +1,6 @@
 /**
  * index.js
- * Backend aplikacije – Server-side generisanje HTML-a za svaku vest
+ * Backend aplikacije – Server-side generisanje HTML-a za svaku vest koristeći JSON podatke
  */
 
 import dotenv from 'dotenv';
@@ -179,6 +179,34 @@ app.get('/api/debug/html-keys', async (req, res) => {
     res.status(500).json({ error: error.toString() });
   }
 });
+
+/**
+ * Funkcija koja pre-generiše HTML za sve vesti iz Redis-a i kešira ih.
+ * Ovaj proces se pokreće periodično (npr. svakih 12 sati) i odmah pri startu.
+ */
+async function preGenerateAllNewsHtml() {
+  console.log("[Pre-Generate] Pokrećem pre-generisanje HTML-a za sve vesti...");
+  let successCount = 0;
+  try {
+    const allFeeds = await getAllFeedsFromRedis();
+    for (const news of allFeeds) {
+      if (!news.id) continue;
+      const html = generateHtmlForNews(news);
+      const cacheKey = `html:news:${news.id}`;
+      await redisClient.setEx(cacheKey, 43200, html);
+      console.log(`[Pre-Generate] Keširan HTML za vest ${news.id}`);
+      successCount++;
+    }
+    console.log(`[Pre-Generate] Pre-generisano HTML za ${successCount} vesti.`);
+  } catch (error) {
+    console.error("[Pre-Generate] Greška pri pre-generisanju HTML-a:", error);
+  }
+}
+
+// Pokreni pre-generisanje HTML-a svakih 12 sati (43200000 ms)
+setInterval(preGenerateAllNewsHtml, 43200000);
+// Opcionalno, pokreni odmah pri startu
+preGenerateAllNewsHtml();
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, '0.0.0.0', () => {
