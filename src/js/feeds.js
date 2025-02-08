@@ -539,5 +539,11 @@ export function unblockSource(src) {
 
 // Pokreće se kad je DOM spreman
 document.addEventListener('DOMContentLoaded', () => {
-  initFeeds();
+  const urlParams = new URLSearchParams(window.location.search);
+  const newsId = urlParams.get('newsId');
+  // Ako nema newsId, učitaj feedove
+  if (!newsId) {
+    initFeeds();
+  }
 });
+
