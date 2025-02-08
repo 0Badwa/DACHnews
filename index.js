@@ -18,7 +18,7 @@ import {
   getAllFeedsFromRedis
 } from './feedsService.js';
 
-import puppeteer from 'puppeteer'; // Dodato za prerendering
+import puppeteer from 'puppeteer'; // Za prerendering
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -137,6 +137,17 @@ app.get('/api/news/:id', async (req, res) => {
   } catch (error) {
     console.error(`[API] Error fetching news ${newsId}:`, error);
     res.status(500).send("Server error");
+  }
+});
+
+/* NOVA DEBUG ruta – koristi se samo za proveru keširanih prerenderovanih HTML stranica u Redis-u */
+app.get('/api/debug/redis-keys', async (req, res) => {
+  try {
+    const keys = await redisClient.keys('prerender:*');
+    res.json(keys);
+  } catch (error) {
+    console.error("Greška pri dohvaćanju Redis ključeva:", error);
+    res.status(500).json({ error: error.toString() });
   }
 });
 
