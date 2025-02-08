@@ -44,6 +44,18 @@ app.use('/src', express.static(path.join(__dirname, 'src'), {
 // Poveži se na Redis
 await initRedis();
 
+// Helper funkcija: Generiše prerenderovani HTML za dati newsId
+async function generatePrerenderedHtml(newsId) {
+  const baseUrl = process.env.BASE_URL || `http://localhost:${process.env.PORT || 3001}`;
+  const targetUrl = `${baseUrl}/?newsId=${newsId}`;
+  const browser = await puppeteer.launch();
+  const page = await browser.newPage();
+  await page.goto(targetUrl, { waitUntil: 'networkidle0' });
+  const html = await page.content();
+  await browser.close();
+  return html;
+}
+
 // Rute:
 app.get('/', (req, res) => {
   console.log("[Route /] Služenje index.html...");
@@ -95,7 +107,7 @@ app.get('/image/:id', async (req, res) => {
   }
 });
 
-// Nova ruta za prerendering pojedinačne vesti koristeći Puppeteer
+// Ruta za prerenderovanje pojedinačne vesti koristeći Puppeteer
 app.get('/news/:id', async (req, res) => {
   const newsId = req.params.id;
   const cacheKey = `prerender:news:${newsId}`;
@@ -106,16 +118,8 @@ app.get('/news/:id', async (req, res) => {
       console.log(`[Prerender] Serving cached HTML for news ${newsId}`);
       return res.send(cachedHtml);
     }
-
-    // Ako nema u kešu, pokreni Puppeteer i generiši HTML
-    const browser = await puppeteer.launch();
-    const page = await browser.newPage();
-    const baseUrl = process.env.BASE_URL || `http://localhost:${process.env.PORT || 3001}`;
-    const targetUrl = `${baseUrl}/?newsId=${newsId}`;
-    await page.goto(targetUrl, { waitUntil: 'networkidle0' });
-    const html = await page.content();
-    await browser.close();
-
+    // Ako nema u kešu, generiši HTML
+    const html = await generatePrerenderedHtml(newsId);
     // Keširaj prerenderovani HTML na 12 sati (43200 sekundi)
     await redisClient.setEx(cacheKey, 43200, html);
     console.log(`[Prerender] Cached HTML for news ${newsId}`);
@@ -140,7 +144,7 @@ app.get('/api/news/:id', async (req, res) => {
   }
 });
 
-/* NOVA DEBUG ruta – koristi se samo za proveru keširanih prerenderovanih HTML stranica u Redis-u */
+/* DEBUG ruta – prikazuje sve Redis ključeve sa prefiksom "prerender:" */
 app.get('/api/debug/redis-keys', async (req, res) => {
   try {
     const keys = await redisClient.keys('prerender:*');
@@ -150,6 +154,38 @@ app.get('/api/debug/redis-keys', async (req, res) => {
     res.status(500).json({ error: error.toString() });
   }
 });
+
+// NOVA funkcija: Automatsko prerenderovanje svih vesti iz category ključeva
+async function prerenderAllNews() {
+  console.log("[Prerender] Pokrećem automatsko prerenderovanje svih vesti iz category ključeva...");
+  try {
+    const categoryKeys = await redisClient.keys("category:*");
+    for (const key of categoryKeys) {
+      const items = await redisClient.lRange(key, 0, -1);
+      for (const itemStr of items) {
+        try {
+          const item = JSON.parse(itemStr);
+          const newsId = item.id;
+          if (!newsId) continue;
+          console.log(`[Prerender] Prerenderujem vest ${newsId} iz ${key}`);
+          const html = await generatePrerenderedHtml(newsId);
+          const cacheKey = `prerender:news:${newsId}`;
+          await redisClient.setEx(cacheKey, 43200, html);
+        } catch (err) {
+          console.error("Error prerendering vest:", err);
+        }
+      }
+    }
+    console.log("[Prerender] Završeno automatsko prerenderovanje svih vesti.");
+  } catch (error) {
+    console.error("[Prerender] Greška pri prerenderovanju svih vesti:", error);
+  }
+}
+
+// Pokreni automatsko prerenderovanje svakih 12 sati (43200000 ms)
+setInterval(prerenderAllNews, 43200000);
+// Opcionalno, pokreni odmah pri startu
+prerenderAllNews();
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, '0.0.0.0', () => {
