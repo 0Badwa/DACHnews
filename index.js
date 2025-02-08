@@ -158,6 +158,7 @@ app.get('/api/debug/redis-keys', async (req, res) => {
 // NOVA funkcija: Automatsko prerenderovanje svih vesti iz category ključeva
 async function prerenderAllNews() {
   console.log("[Prerender] Pokrećem automatsko prerenderovanje svih vesti iz category ključeva...");
+  let successCount = 0;
   try {
     const categoryKeys = await redisClient.keys("category:*");
     for (const key of categoryKeys) {
@@ -171,14 +172,22 @@ async function prerenderAllNews() {
           const html = await generatePrerenderedHtml(newsId);
           const cacheKey = `prerender:news:${newsId}`;
           await redisClient.setEx(cacheKey, 43200, html);
+          successCount++;
         } catch (err) {
           console.error("Error prerendering vest:", err);
         }
       }
     }
-    console.log("[Prerender] Završeno automatsko prerenderovanje svih vesti.");
+    console.log(`[Prerender] Završeno automatsko prerenderovanje. Uspešno keširano HTML za ${successCount} vesti.`);
   } catch (error) {
     console.error("[Prerender] Greška pri prerenderovanju svih vesti:", error);
+  }
+  // Loguj ukupni broj prerenderovanih HTML ključeva u Redis-u
+  try {
+    const keys = await redisClient.keys("prerender:*");
+    console.log(`[Prerender] Ukupno prerender HTML ključeva u Redis-u: ${keys.length}`);
+  } catch (err) {
+    console.error("Greška pri dohvaćanju prerender ključeva:", err);
   }
 }
 
