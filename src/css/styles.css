@@ -652,3 +652,12 @@ background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z
   display: inline-block;     /* Obezbedi da margin-right funkcioniše */
   vertical-align: bottom;
 }
+
+#kontakt-modal p,
+#datenschutz-modal p,
+#uber-modal p {
+  font-size: 0.8rem;
+  line-height: 1.5;
+  margin: 1rem 0;
+  letter-spacing: 0.02em; /* Blago povećanje razmaka između slova */
+}
