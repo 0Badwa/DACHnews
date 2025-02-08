@@ -18,7 +18,7 @@ import {
   getAllFeedsFromRedis
 } from './feedsService.js';
 
-import puppeteer from 'puppeteer'; // Koristi ugrađeni Chromium
+import puppeteer from 'puppeteer'; // Koristi bundlovani Chromium iz puppeteer
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -48,11 +48,13 @@ await initRedis();
 async function generatePrerenderedHtml(newsId) {
   const baseUrl = process.env.BASE_URL || `http://localhost:${process.env.PORT || 3001}`;
   const targetUrl = `${baseUrl}/?newsId=${newsId}`;
-  // Koristimo ugrađeni Chromium sa potrebnim argumentima za Render okruženje
+  
+  // Pokrećemo Puppeteer koristeći bundlovani Chromium sa potrebnim argumentima za Render
   const browser = await puppeteer.launch({
-    headless: "new", // Rešava neke probleme u Render okruženju
+    headless: "new", // Koristi novi headless mod
     args: ["--no-sandbox", "--disable-setuid-sandbox"]
   });
+  
   const page = await browser.newPage();
   await page.goto(targetUrl, { waitUntil: 'networkidle0' });
   const html = await page.content();
