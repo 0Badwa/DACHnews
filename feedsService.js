@@ -11,7 +11,7 @@ import sharp from 'sharp';
 import pLimit from 'p-limit';
 
 // Konstante
-const SEVEN_DAYS = 60 * 60 * 24 * 3;
+const SEVEN_DAYS = 60 * 60 * 24 * 7
 const RSS_FEED_URL = "https://rss.app/feeds/v1.1/_sf1gbLo1ZadJmc5e.json"; // Glavni feed
 const GPT_API_URL = "https://api.openai.com/v1/chat/completions";
 
