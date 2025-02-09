@@ -291,18 +291,18 @@ function createNewsCard(feed) {
   ? "http://localhost:3001"
   : "https://dachnews.onrender.com";
 
-  // Postavlja URL slike za modal, vodeći računa da se sufiks ispravno postavi
-if (feed.image && feed.image.startsWith('/')) {
-  if (feed.image.includes(':news-card')) {
-    // Zamenjujemo ":news-card" sa ":news-modal"
-    modalImage.src = feed.image.replace(':news-card', ':news-modal');
+  if (feed.image && feed.image.startsWith("/")) {
+    // Ako feed.image ne sadrži već sufiks ":news-card", dodaj ga
+    if (!feed.image.includes(":news-card")) {
+      img.src = `${BASE_IMAGE_URL}${feed.image}:news-card`;
+    } else {
+      img.src = `${BASE_IMAGE_URL}${feed.image}`;
+    }
+  } else if (feed.image) {
+    img.src = feed.image;
   } else {
-    // Ako sufiks nije prisutan, dodajemo ga
-    modalImage.src = feed.image + ':news-modal';
+    img.src = `${BASE_IMAGE_URL}/img/noimg.png`;
   }
-} else {
-  modalImage.src = `/image/${feed.id}:news-modal`;
-}
   
 
   // Sadržaj
