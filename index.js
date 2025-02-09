@@ -23,6 +23,9 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
+// Služenje statičkih fajlova iz "fonts/" foldera
+app.use('/fonts', express.static(path.join(__dirname, 'src/fonts')));
+
 app.use(
   helmet({
     contentSecurityPolicy: false,
