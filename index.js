@@ -1,7 +1,7 @@
-/**
+/************************************************
  * index.js
  * Backend aplikacije – Server-side generisanje HTML-a za svaku vest i automatsko generisanje XML sitemap-a
- */
+ ************************************************/
 
 import dotenv from 'dotenv';
 dotenv.config();
@@ -150,36 +150,6 @@ app.get('/image/:id', async (req, res) => {
   }
 });
 
-/**
- * Ruta za generisanje statičkog HTML-a za pojedinačnu vest.
- * Ako HTML već postoji u Redis kešu (ključ: html:news:<id>), koristi se keširana verzija.
- * U suprotnom, dohvaća se vest iz JSON podataka, generiše se HTML i kešira se u Redis-u na 12 sati.
- */
-app.get('/news/:id', async (req, res) => {
-  const newsId = req.params.id;
-  const cacheKey = `html:news:${newsId}`;
-  try {
-    let cachedHtml = await redisClient.get(cacheKey);
-    if (cachedHtml) {
-      console.log(`[Express HTML] Serving cached HTML for news ${newsId}`);
-      res.setHeader("Content-Type", "text/html");
-      return res.send(cachedHtml);
-    }
-    const allFeeds = await getAllFeedsFromRedis();
-    const news = allFeeds.find(item => item.id === newsId);
-    if (!news) return res.status(404).send("News not found");
-    
-    const html = generateHtmlForNews(news);
-    await redisClient.setEx(cacheKey, 43200, html); // Keširaj na 12 sati
-    console.log(`[Express HTML] Cached HTML for news ${newsId}`);
-    res.setHeader("Content-Type", "text/html");
-    res.send(html);
-  } catch (error) {
-    console.error(`[Express HTML] Error generating HTML for news ${newsId}:`, error);
-    res.status(500).send("Server error");
-  }
-});
-
 // API ruta za pojedinačnu vest u JSON formatu
 app.get('/api/news/:id', async (req, res) => {
   const newsId = req.params.id;
@@ -194,66 +164,21 @@ app.get('/api/news/:id', async (req, res) => {
   }
 });
 
-// 🔹 Nova ruta za HTML prikaz pojedinačne vesti (Google-friendly)
-app.get('/news/:id', async (req, res) => {
+/**
+ * Nova ruta za redirekciju /news/:id
+ * Kada korisnik poseti /news/:id, preusmerava se na /?newsId=:id
+ * Ovo omogućava frontend-u da automatski otvori modal za vest.
+ */
+app.get('/news/:id', (req, res) => {
   const newsId = req.params.id;
-  try {
-    const allFeeds = await getAllFeedsFromRedis();
-    const news = allFeeds.find(item => item.id === newsId);
-    if (!news) return res.status(404).send("News not found");
-
-    res.send(`
-      <!DOCTYPE html>
-      <html lang="de">
-      <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>${news.title} | DACH.news</title>
-        <meta name="description" content="${news.description || news.title}">
-        <meta property="og:title" content="${news.title}">
-        <meta property="og:description" content="${news.description || news.title}">
-        <meta property="og:url" content="https://www.dach.news/news/${news.id}">
-        <meta property="og:type" content="article">
-        <meta property="og:image" content="${news.image || 'https://www.dach.news/default-thumbnail.jpg'}">
-        <meta name="robots" content="index, follow">
-        <script type="application/ld+json">
-        {
-          "@context": "https://schema.org",
-          "@type": "NewsArticle",
-          "headline": "${news.title}",
-          "description": "${news.description || news.title}",
-          "url": "https://www.dach.news/news/${news.id}",
-          "datePublished": "${news.date_published}",
-          "dateModified": "${news.date_modified || news.date_published}",
-          "author": {
-            "@type": "Organization",
-            "name": "DACH.news"
-          }
-        }
-        </script>
-      </head>
-      <body>
-        <h1>${news.title}</h1>
-        <img src="${news.image || 'https://www.dach.news/default-thumbnail.jpg'}" alt="${news.title}">
-        <p>${news.description || 'Keine Beschreibung verfügbar'}</p>
-        <p>Veröffentlicht am: ${new Date(news.date_published).toLocaleDateString('de-DE')}</p>
-        <script>
-          window.location.replace("/?newsId=${news.id}"); // Redirekt na glavni sajt, ali Google vidi sadržaj
-        </script>
-      </body>
-      </html>
-    `);
-  } catch (error) {
-    console.error(`[HTML] Error generating page for news ${newsId}:`, error);
-    res.status(500).send("Server error");
-  }
+  console.log(`[Redirect] Redirecting /news/${newsId} to /?newsId=${newsId}`);
+  res.redirect(301, `/?newsId=${newsId}`);
 });
-
 
 /**
  * Ruta za generisanje XML sitemap-a.
  * Preuzima sve vesti iz Redis-a i kreira XML sitemap sa URL-ovima:
- * Sada koristimo ?newsId=<id> umesto /news/<id>, da bismo automatski otvarali modal
+ * Koristi ?newsId=<id> umesto /news/<id> da bi modal automatski radio.
  */
 app.get('/sitemap.xml', async (req, res) => {
   try {
@@ -263,7 +188,6 @@ app.get('/sitemap.xml', async (req, res) => {
     for (const news of allFeeds) {
       const lastmod = news.date_published ? new Date(news.date_published).toISOString() : new Date().toISOString();
       xml += '  <url>\n';
-      // Dodato `?newsId=` umesto /news/<id>
       xml += `    <loc>https://www.dach.news/?newsId=${news.id}</loc>\n`;
       xml += `    <lastmod>${lastmod}</lastmod>\n`;
       xml += '    <changefreq>daily</changefreq>\n';
