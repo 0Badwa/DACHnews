@@ -214,7 +214,7 @@ export async function addItemToRedis(item, category) {
 }
 
 /**
- * Vraća sve vesti iz Redis-a (spaja iz svih "category:*" listi).
+ * Vraća sve vesti iz Redis-a (spaja iz svih "category:*" listi) i deduplira ih po feed.id.
  */
 export async function getAllFeedsFromRedis() {
   const keys = await redisClient.keys("category:*");
@@ -239,8 +239,14 @@ export async function getAllFeedsFromRedis() {
     all = all.concat(parsed);
   }
 
-  return all;
+  // Deduplikacija feedova (po feed.id)
+  const uniqueFeeds = {};
+  all.forEach(feed => {
+    uniqueFeeds[feed.id] = feed;
+  });
+  return Object.values(uniqueFeeds);
 }
+
 
 
 /**
