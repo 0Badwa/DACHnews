@@ -275,10 +275,16 @@ function createNewsCard(feed) {
     openNewsModal(feed);
   };
   
-  // Slika
   const img = document.createElement('img');
   img.className = "news-card-image lazy news-image";
-
+  img.src = `/image/${feed.id}:news-card`; // 80x80px verzija
+  
+  // Osiguraj da se slika prikazuje u centru boxa
+  img.width = 80;
+  img.height = 80;
+  img.style.objectFit = "cover"; // Crop da popuni box
+  img.style.display = "block"; // Sprečava neželjene margine
+  
   const BASE_IMAGE_URL = window.location.hostname.includes("dach.news")
   ? "https://www.dach.news"
   : window.location.hostname.includes("localhost")

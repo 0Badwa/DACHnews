@@ -50,9 +50,17 @@ modalSourceTime.innerHTML = `
 
 
   // Ostali elementi modala
-  modalImage.src = feed.image || 'https://via.placeholder.com/240';
-  modalImage.loading = 'lazy';
-  modalImage.decoding = 'async';
+ // Koristi 320x240px verziju slike iz Redis-a
+// Option A: Use the feed.image property if available (fallback to modal resize URL otherwise)
+modalImage.src = feed.image && feed.image.startsWith('/')
+  ? feed.image.replace(/\/image\/(.*)/, `/image/$1:news-modal`)
+  : `/image/${feed.id}:news-modal`;
+modalImage.width = 320;
+modalImage.height = 240;
+modalImage.loading = 'lazy';
+modalImage.decoding = 'async';
+modalImage.style.objectFit = "contain"; // Sprečava izobličenje slike
+
 
   modalTitle.textContent = feed.title || 'No title';
   modalDescription.textContent = feed.content_text || 'Keine Beschreibung';

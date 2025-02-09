@@ -138,20 +138,26 @@ async function storeImageInRedis(imageUrl, id) {
     const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
     const buffer = Buffer.from(response.data);
 
-    // Smanjimo na 240px
-    const optimized = await smanjiSliku(buffer);
-    if (!optimized) return false;
+    // Kreiraj dve verzije slike
+    const sizes = {
+      "news-card": { width: 80, height: 80, fit: "cover" }, // 80x80px, crop u centar
+      "news-modal": { width: 320, height: 240, fit: "inside" } // 320x240px, bez crop-a
+    };
 
-    // Konvertujemo u Base64
-    const base64 = optimized.toString('base64');
+        for (const [key, { width, height, fit }] of Object.entries(sizes)) {
+      const resizedImage = await sharp(buffer)
+        .resize(width, height, { fit }) // `cover` za crop, `inside` za modal
+        .webp({ quality: 80 }) // WebP format sa 80% kvaliteta
+        .toBuffer();
 
-    // Čuvamo u Redis
-    await redisClient.set(`img:${id}`, base64);
+      // Sačuvaj sliku u Redis sa odgovarajućim ključem
+      await redisClient.set(`img:${id}:${key}`, resizedImage.toString('base64'));
+    }
 
-    console.log(`[storeImageInRedis] Slika za ID:${id} uspešno snimljena (240px).`);
+    console.log(`[storeImageInRedis] Kreirane verzije za ID:${id} (80x80, 320x240)`);
     return true;
   } catch (error) {
-    console.error(`[storeImageInRedis] Greška pri snimanju slike za ID:${id}:`, error);
+    console.error(`[storeImageInRedis] Greška pri optimizaciji slike za ID:${id}:`, error);
     return false;
   }
 }
