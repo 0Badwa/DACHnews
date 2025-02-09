@@ -48,24 +48,25 @@ function parseDomain(source) {
 function getCountryFlag(source) {
   const domain = parseDomain(source);
 
-  // 1) Proveri brend iz brandMap
-  for (const brand in brandMap) {
-    if (domain.includes(brand)) {
-      return `https://flagcdn.com/${brandMap[brand]}.svg`;
-    }
+// 1) Proveri brend iz brandMap i učitaj lokalne zastave
+for (const brand in brandMap) {
+  if (domain.includes(brand)) {
+    return `src/icons/flags/${brandMap[brand]}.svg`;
   }
+}
+
 
   // 2) Ako nije prepoznat brend, proveri TLD
   if (domain.endsWith('.de')) {
-    return 'https://flagcdn.com/de.svg';
+    return 'src/icons/flags/de.svg';
   } else if (domain.endsWith('.at')) {
-    return 'https://flagcdn.com/at.svg';
+    return 'src/icons/flags/at.svg';
   } else if (domain.endsWith('.ch')) {
-    return 'https://flagcdn.com/ch.svg';
+    return 'src/icons/flags/ch.svg';
   }
 
   // 3) Podrazumevano
-  return 'https://flagcdn.com/un.svg';
+  return 'src/icons/flags/un.svg'; // Dodaj default zastavu ako ne postoji
 }
 
 /**
