@@ -445,7 +445,7 @@ function closeSettingsModal() {
 
 /** Centralizovana inicijalizacija na DOMContentLoaded **/
 document.addEventListener('DOMContentLoaded', async () => {
-  // Provera URL parametra "newsId"
+  // Provera URL parametra "newsId" u query stringu
   const urlParams = new URLSearchParams(window.location.search);
   const newsId = urlParams.get('newsId');
 
@@ -464,6 +464,27 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   } else {
     initFeeds();
+  }
+
+  // 📌 Dodatna provera za URL formata "/news/:id"
+  const path = window.location.pathname;
+  if (path.startsWith('/news/')) {
+    const newsIdFromPath = path.split('/news/')[1];
+
+    if (newsIdFromPath) {
+      try {
+        const response = await fetch(`/api/news/${newsIdFromPath}`);
+        if (!response.ok) {
+          console.error("API nije pronašao vest sa ID:", newsIdFromPath);
+          throw new Error("News not found");
+        }
+        const news = await response.json();
+        console.log("Preuzeta vest:", news);
+        openNewsModal(news);
+      } catch (error) {
+        console.error("Greška pri učitavanju vesti:", error);
+      }
+    }
   }
 
   // Nastavak inicijalizacije UI elemenata
@@ -507,8 +528,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }, 300);
     });
   }
-
-  loadFeeds();
+loadFeeds();
 
   // Postavljanje event listener-a za Settings modal i srodne modale
   const menuButton = document.getElementById('menu-button');
