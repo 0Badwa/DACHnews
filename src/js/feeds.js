@@ -292,12 +292,18 @@ function createNewsCard(feed) {
   : "https://dachnews.onrender.com";
 
   if (feed.image && feed.image.startsWith("/")) {
-    img.src = `${BASE_IMAGE_URL}${feed.image}`;
+    // Ako feed.image ne sadrži već sufiks ":news-card", dodaj ga
+    if (!feed.image.includes(":news-card")) {
+      img.src = `${BASE_IMAGE_URL}${feed.image}:news-card`;
+    } else {
+      img.src = `${BASE_IMAGE_URL}${feed.image}`;
+    }
   } else if (feed.image) {
     img.src = feed.image;
   } else {
     img.src = `${BASE_IMAGE_URL}/img/noimg.png`;
   }
+  
 
   // Sadržaj
   const contentDiv = document.createElement('div');
