@@ -30,22 +30,29 @@
   
   <title>DACH.news</title>
 
-<!-- Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-31LTMD7YMB"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  // Konfiguracija bez kolačića
-  gtag('config', 'G-31LTMD7YMB', {
-    'anonymize_ip': true,
-    'storage': 'none',               // Sprečava čuvanje podataka u kolačićima
-    'client_storage': 'none',        // Onemogućava postavljanje kolačića na klijentu
-  'cookie_flags': 'SameSite=None;Secure',
-  'allow_ad_personalization_signals': false
-  });
-</script>
+  <script>
+    window.addEventListener('load', function() {
+      let script = document.createElement('script');
+      script.async = true;
+      script.src = "https://www.googletagmanager.com/gtag/js?id=G-31LTMD7YMB";
+      document.head.appendChild(script);
+  
+      script.onload = function() {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+  
+        // Konfiguracija bez kolačića
+        gtag('config', 'G-31LTMD7YMB', {
+          'anonymize_ip': true,
+          'storage': 'none',               // Sprečava čuvanje podataka u kolačićima
+          'client_storage': 'none',        // Onemogućava postavljanje kolačića na klijentu
+          'cookie_flags': 'SameSite=None;Secure',
+          'allow_ad_personalization_signals': false
+        });
+      };
+    });
+  </script>
 
 
   
