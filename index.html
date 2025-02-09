@@ -50,14 +50,13 @@
 
   
   <!-- Prefetch kritičnih resursa -->
-  <link rel="preload" href="src/css/styles.css" as="style">
+<link rel="preload" href="src/css/styles.css" as="style">
 
-  <!-- Preconnect za Google Fonts -->
-  <link rel="preload" href="src/fonts/Roboto-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
-  <link rel="preload" href="src/fonts/Roboto-Bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
-  <link rel="preload" href="src/fonts/Roboto_Condensed-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
-  <link rel="preload" href="src/fonts/Roboto_Condensed-Bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
-  
+<!-- Preload samo potrebnih fontova za prvu stranicu -->
+<link rel="preload" href="src/fonts/Roboto-300.woff2" as="font" type="font/woff2" crossorigin="anonymous"> <!-- Light za vreme -->
+<link rel="preload" href="src/fonts/Roboto-400.woff2" as="font" type="font/woff2" crossorigin="anonymous"> <!-- Normal za izvore -->
+<link rel="preload" href="src/fonts/Roboto_Condensed-700.woff2" as="font" type="font/woff2" crossorigin="anonymous"> <!-- Bold za naslove -->
+
 
   <!-- Učitaj CSS -->
   <link rel="stylesheet" href="src/css/styles.css">
