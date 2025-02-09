@@ -312,8 +312,8 @@ function createNewsCard(feed) {
 
   const flagImg = document.createElement('img');
   flagImg.className = "flag-icon";
-  flagImg.style.height = "1rem";
-  flagImg.style.width = "auto";
+  flagImg.style.height = "19px";
+  flagImg.style.width = "13px";
   flagImg.style.marginRight = "5px";
   flagImg.src = getCountryFlag(feed.source);
   flagImg.alt = "flag";
