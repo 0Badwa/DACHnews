@@ -23,6 +23,39 @@
   --border-color: #333;
 }
 
+@font-face {
+  font-family: 'Roboto';
+  src: url('../fonts/Roboto-Regular.woff2') format('woff2'),
+       url('../fonts/Roboto-Regular.woff') format('woff');
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: 'Roboto';
+  src: url('../fonts/Roboto-Bold.woff2') format('woff2'),
+       url('../fonts/Roboto-Bold.woff') format('woff');
+  font-weight: 700;
+}
+
+@font-face {
+  font-family: 'Roboto Condensed';
+  src: url('../fonts/Roboto_Condensed-Regular.woff2') format('woff2'),
+       url('../fonts/Roboto_Condensed-Regular.woff') format('woff');
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: 'Roboto Condensed';
+  src: url('../fonts/Roboto_Condensed-Bold.woff2') format('woff2'),
+       url('../fonts/Roboto_Condensed-Bold.woff') format('woff');
+  font-weight: 700;
+}
+
+body {
+  font-family: 'Roboto', sans-serif;
+}
+
+
 /* ========== 2) GLOBAL RESET ========== */
 html, body {
   width: 100%;
