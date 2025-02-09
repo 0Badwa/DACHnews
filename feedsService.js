@@ -82,7 +82,7 @@ async function sendBatchToGPT(feedBatch) {
 - Unterhaltung
 - Welt
 
-Pri kategorizaciji, obavezno vodi računa o specifičnostima tih zemalja. Ako vest sadrži informacije koje se jasno odnose na neku od gore navedenih kategorija, postavi je u odgovarajuću. Ako je vest o Donaldu Trampu ili nekom svetskom političaru, stavi je u kategoriju Welt. Ako je vest o saobraćajnim nezgodama, stavi je u kategoriju Panorama, a ne u Auto. Molim te vrati isključivo JSON niz gde je svaki element: { "id": "...", "category": "..." }`
+Pri kategorizaciji, obavezno vodi računa o specifičnostima tih zemalja. Ako vest sadrži informacije koje se jasno odnose na neku od gore navedenih kategorija, postavi je u odgovarajuću. Ako je vest o saobraćajnim nezgodama, stavi je u kategoriju Panorama, a ne u Auto. **Strogo se drži ovih kategorija i nikada ne dodaj nove kategorije.** Ako vest ne pripada nijednoj kategoriji, svrstavamo je u "Panorama". Molim te vrati isključivo JSON niz gde je svaki element: { "id": "...", "category": "..." }`
       },
       {
         role: "user",
