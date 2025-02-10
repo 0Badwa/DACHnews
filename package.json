@@ -25,5 +25,8 @@
     "redis": "^4.7.0",
     "rss-parser": "^3.13.0",
     "sharp": "^0.32.6"
+  },
+  "devDependencies": {
+    "critical": "^7.2.1"
   }
 }
