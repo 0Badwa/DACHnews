@@ -9,16 +9,13 @@ export const brandMap = {
   'bild': 'de',
   'spiegel': 'de',
   'zeit': 'de',
-  'heise': 'de',
   'taz': 'de',
   'freitag': 'de',
   'analyse-und-kritik': 'de',
   'cruisermagazin': 'de',
-  'display-magazin': 'de',
-  'du-und-ich': 'de',
+  'jungle-world': 'de',
   'neues-deutschland': 'de',
   'queer': 'de',
-  'siegessaeule': 'de',
   'volksstimme': 'de',
   'anzeigerbonn': 'de', // primer dodatog
   // AT (Austrija)
