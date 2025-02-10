@@ -234,8 +234,8 @@ app.get('/sitemap.xml', async (req, res) => {
       xml += '  <url>\n';
       xml += `    <loc>https://www.dach.news/news/${news.id}</loc>\n`;
       xml += `    <lastmod>${lastmod}</lastmod>\n`;
-      xml += '    <changefreq>daily</changefreq>\n';
-      xml += '    <priority>0.8</priority>\n';
+      xml += '    <changefreq>hourly</changefreq>\n';
+      xml += '    <priority>1.0</priority>\n';
       xml += '  </url>\n';
     }
     xml += '</urlset>';
