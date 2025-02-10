@@ -19,8 +19,17 @@ export function openNewsModal(feed) {
 
   // Prvo sklonimo modal (da nema treptanja starog stanja)
   modal.style.display = 'none';
-  modalImage.src = ''; // Ispraznimo stari src
+// Resetujemo sliku i dodajemo alt atribut
+modalImage.src = ''; 
+modalImage.alt = 'News image';
 
+// Dodajemo CSS klasu koja sakriva alt tekst
+modalImage.classList.add('hide-alt');
+
+// Kada se slika učita, prikazujemo je ponovo
+modalImage.onload = () => {
+  modalImage.classList.remove('hide-alt');
+};
   // Dohvati izvor sa aktivne kartice, ili feed.source
   const activeNewsCard = document.querySelector('.news-card.active');
   const sourceName = activeNewsCard
