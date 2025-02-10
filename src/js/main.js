@@ -368,7 +368,7 @@ function initSwipe() {
     setTimeout(() => {
       window.scrollTo(0, 0);
       console.log('Window scrollTo(0,0) pozvan za kategoriju:', currentCat);
-    }, 300);
+    }, 500);
   }
 
   function clickTab(cat) {
@@ -536,11 +536,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   
         resetScroll();
   
-        const intervalId = setInterval(resetScroll, 200);
+        const intervalId = setInterval(resetScroll, 300);
         setTimeout(() => {
           clearInterval(intervalId);
           console.log('Scroll reset interval cleared for category:', category);
-        }, 2000);
+        }, 1000);
       })();
     });
   }
