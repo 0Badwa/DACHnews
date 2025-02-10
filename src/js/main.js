@@ -509,8 +509,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       const container = document.getElementById('news-container');
       if (!container) return;
 
-      localStorage.setItem('activeTab', category);
-      localStorage.setItem(`${category}_scroll`, 0);
+      // localStorage.setItem('activeTab', category);
+      // localStorage.setItem(`${category}_scroll`, 0);
 
       try {
         if (category === 'Aktuell') {
