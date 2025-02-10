@@ -276,8 +276,9 @@ function createNewsCard(feed) {
   };
   
   const img = document.createElement('img');
-  img.className = "news-card-image lazy news-image";
-  img.src = `/image/${feed.id}:news-card`; // 80x80px verzija
+img.className = "news-card-image lazy news-image";
+img.src = feed.image ? feed.image : `${BASE_IMAGE_URL}/img/noimg.png`;
+img.alt = feed.title ? feed.title : ''; // Postavljamo title kao alt, ako postoji
   
   // Osiguraj da se slika prikazuje u centru boxa
   img.width = 80;
