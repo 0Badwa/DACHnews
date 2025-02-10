@@ -369,11 +369,18 @@ function initSwipe() {
     if (idx < 0) idx = 0;
     if (idx >= cats.length) idx = cats.length - 1;
     clickTab(cats[idx]);
-    setTimeout(() => {
-      container.scrollTop = 0;
-      window.scrollTo(0, 0);
-      console.log('Window scrollTo(0,0) pozvan za kategoriju:', currentCat);
-    }, 500);
+    // Resetujemo scroll poziciju više puta tokom 2 sekunde
+const scrollResetInterval = setInterval(() => {
+  container.scrollTop = 0;
+  window.scrollTo(0, 0);
+  console.log('Reset scroll interval: container.scrollTop=', container.scrollTop, 'window.pageYOffset=', window.pageYOffset);
+}, 200);
+
+setTimeout(() => {
+  clearInterval(scrollResetInterval);
+  console.log('Cleared scroll reset interval for category:', category);
+}, 2000);
+
   }
 
   function clickTab(cat) {
