@@ -8,7 +8,6 @@ dotenv.config();
 
 import express from 'express';
 import helmet from 'helmet';
-import compression from 'compression';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -32,10 +31,6 @@ app.use(
     contentSecurityPolicy: false,
   })
 );
-
-// Aktivacija GZIP kompresije
-app.use(compression());
-
 app.use(express.json());
 
 // Služenje statičkog sadržaja
