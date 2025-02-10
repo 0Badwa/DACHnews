@@ -224,6 +224,15 @@ nav .menu button {
               0 0 3px 2px rgba(0, 255, 0, 0.4), /* Srednji glow */
               0 0 4px 3px rgba(0, 255, 0, 0.2); /* Vanjski glow */
 }
+
+/* Sakrij `alt` tekst vizuelno, ali ga zadrži za SEO */
+.news-card img::before {
+  content: attr(alt); /* Uzimamo tekst iz `alt` atributa */
+  font-size: 0; /* Smanjujemo font da ne bude vidljiv */
+  text-indent: -9999px; /* Pomera ga daleko van ekrana */
+  visibility: hidden; /* Sakriva ga, ali Googlebot ga vidi */
+}
+
   
 .truncated-title {
   display: -webkit-box;
