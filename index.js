@@ -15,7 +15,9 @@ import {
   initRedis,
   redisClient,
   processFeeds,
-  getAllFeedsFromRedis
+  // Ako želiš i dalje da koristiš staru metodu:
+  // getAllFeedsFromRedis,
+  getAktuellFeedsFromRedis
 } from './feedsService.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -105,20 +107,23 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// API ruta za sve feedove
+/**
+ * API ruta za sve feedove – sada isključivo uzimamo listu "aktuell",
+ * što je ograničeno na najnovijih 200 vesti radi bržeg učitavanja.
+ */
 app.get('/api/feeds', async (req, res) => {
-  console.log("[Route /api/feeds] Client requesting all feeds...");
+  console.log("[Route /api/feeds] Client requesting the 'aktuell' feed...");
   try {
-    const all = await getAllFeedsFromRedis();
-    console.log(`[Route /api/feeds] Returning ${all.length} feeds`);
-    res.json(all);
+    const aktuell = await getAktuellFeedsFromRedis();
+    console.log(`[Route /api/feeds] Returning ${aktuell.length} items from 'aktuell' feed`);
+    res.json(aktuell);
   } catch (error) {
     console.error("[Route /api/feeds] Error:", error);
     res.status(500).send("Server error");
   }
 });
 
-// API ruta za feedove po kategoriji
+// API ruta za feedove po kategoriji (ostaje nepromijenjeno ako neko želi specifičnu kategoriju)
 app.get('/api/feeds-by-category/:category', async (req, res) => {
   const category = req.params.category;
   console.log(`[Route /api/feeds-by-category] Category: ${category}`);
@@ -135,8 +140,10 @@ app.get('/api/feeds-by-category/:category', async (req, res) => {
 });
 
 // Ruta za dohvatanje slike iz Redis-a
+// Napomena: sada imamo ključeve tipa "img:<id>:news-card" i "img:<id>:news-modal"
 app.get('/image/:id', async (req, res) => {
-  const imgKey = `img:${req.params.id}`;
+  // Za backward compatibility, pokušaćemo "news-modal" verziju
+  const imgKey = `img:${req.params.id}:news-modal`;
   try {
     const base64 = await redisClient.get(imgKey);
     if (!base64) {
@@ -156,9 +163,21 @@ app.get('/image/:id', async (req, res) => {
 app.get('/api/news/:id', async (req, res) => {
   const newsId = req.params.id;
   try {
-    const allFeeds = await getAllFeedsFromRedis();
-    const news = allFeeds.find(item => item.id === newsId);
-    if (!news) return res.status(404).send("News not found");
+    // Možemo da prođemo samo kroz "aktuell" (ako smo sigurni da je tu sve novo)
+    // ali za sigurnost (ako vest možda nije više u prvih 200) iskoristimo staru getAllFeedsFromRedis
+    // ili – ako si siguran da je dovoljno samo "aktuell", prilagodi po želji.
+    const aktuell = await getAktuellFeedsFromRedis();
+    const news = aktuell.find(item => item.id === newsId);
+    if (!news) {
+      // Ako nije pronađeno u 'aktuell', fallback: getAllFeedsFromRedis() (opcionalno)
+      // importuj getAllFeedsFromRedis ako ti treba
+      // const allFeeds = await getAllFeedsFromRedis();
+      // const newsFallback = allFeeds.find(item => item.id === newsId);
+      // if (!newsFallback) return res.status(404).send("News not found");
+      // return res.json(newsFallback);
+
+      return res.status(404).send("News not found");
+    }
     res.json(news);
   } catch (error) {
     console.error(`[API] Error fetching news ${newsId}:`, error);
@@ -175,8 +194,9 @@ app.get('/api/news/:id', async (req, res) => {
 app.get('/news/:id', async (req, res) => {
   const newsId = req.params.id;
   try {
-    const allFeeds = await getAllFeedsFromRedis();
-    const news = allFeeds.find(item => item.id === newsId);
+    const aktuell = await getAktuellFeedsFromRedis();
+    const news = aktuell.find(item => item.id === newsId);
+
     if (!news) return res.status(404).send("News not found");
 
     // Provera user-agent-a za Googlebot i slične botove
@@ -205,7 +225,7 @@ app.get('/news/:id', async (req, res) => {
           <h1>${news.title}</h1>
           <p>${news.description || 'Keine Beschreibung verfügbar'}</p>
           <img src="${news.image || 'https://www.dach.news/default-thumbnail.jpg'}" alt="${news.title}">
-          <p>Veröffentlicht am: ${new Date(news.date_published).toLocaleDateString('de-DE')}</p>
+          <p>Veröffentlicht am: ${news.date_published ? new Date(news.date_published).toLocaleDateString('de-DE') : ''}</p>
         </body>
         </html>
       `);
@@ -223,10 +243,18 @@ app.get('/news/:id', async (req, res) => {
  * Ruta za generisanje XML sitemap-a.
  * Preuzima sve vesti iz Redis-a i kreira XML sitemap sa URL-ovima koji sada koriste /news/:id,
  * što omogućava bolju SEO indeksaciju.
+ *
+ * Ako želiš da sitemap prikazuje samo 200 najnovijih, možeš da iskoristiš getAktuellFeedsFromRedis()
+ * ali se obično sitemap pravi za sve. Dakle, ovde koristimo getAllFeedsFromRedis() (po potrebi).
  */
 app.get('/sitemap.xml', async (req, res) => {
   try {
-    const allFeeds = await getAllFeedsFromRedis();
+    // Importuj ako ti treba:
+    // import { getAllFeedsFromRedis } from './feedsService.js';
+    // const allFeeds = await getAllFeedsFromRedis();
+    // Ili samo 200 najnovijih:
+    const allFeeds = await getAktuellFeedsFromRedis();
+
     let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
     xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
     for (const news of allFeeds) {

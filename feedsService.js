@@ -1,4 +1,4 @@
-/************************************************
+/************************************************ 
  * feedsService.js
  ************************************************/
 
@@ -128,7 +128,7 @@ async function smanjiSliku(buffer) {
 }
 
 /**
- * Čuva smanjenu sliku u Redis u Base64 formatu (pod ključem "img:<id>").
+ * Čuva smanjenu sliku u Redis u Base64 formatu (pod ključem "img:<id>:<sizeKey>").
  * Vraća true ako uspe, false inače.
  */
 async function storeImageInRedis(imageUrl, id) {
@@ -144,7 +144,7 @@ async function storeImageInRedis(imageUrl, id) {
       "news-modal": { width: 320, height: 240, fit: "inside" } // 320x240px, bez crop-a
     };
 
-        for (const [key, { width, height, fit }] of Object.entries(sizes)) {
+    for (const [key, { width, height, fit }] of Object.entries(sizes)) {
       const resizedImage = await sharp(buffer)
         .resize(width, height, { fit }) // `cover` za crop, `inside` za modal
         .webp({ quality: 80 }) // WebP format sa 80% kvaliteta
@@ -179,6 +179,7 @@ const limit = pLimit(3);
 
 /**
  * Dodavanje jedne vesti u Redis, sa smanjenom slikom (ako postoji).
+ * Takođe se dodaje i u "aktuell" listu (samo poslednjih 200 vesti).
  */
 export async function addItemToRedis(item, category) {
   const newsObj = {
@@ -202,6 +203,7 @@ export async function addItemToRedis(item, category) {
     newsObj.image = null;
   }
 
+  // Upis u listu po kategoriji
   const redisKey = `category:${category}`;
   await redisClient.rPush(redisKey, JSON.stringify(newsObj));
   await redisClient.expire(redisKey, SEVEN_DAYS);
@@ -209,6 +211,13 @@ export async function addItemToRedis(item, category) {
   // Obeležimo ID kao obrađen
   await redisClient.sAdd("processed_ids", item.id);
   await redisClient.expire("processed_ids", SEVEN_DAYS);
+
+  // Upišemo i u "aktuell" listu (da bismo brže služili najnovije vesti)
+  await redisClient.rPush("aktuell", JSON.stringify(newsObj));
+  // Zadržavamo samo 200 najnovijih
+  await redisClient.lTrim("aktuell", -200, -1);
+  // Takođe postavljamo expire i za aktuell
+  await redisClient.expire("aktuell", SEVEN_DAYS);
 
   console.log(`[addItemToRedis] Upisano ID:${item.id}, category:${category}`);
 }
@@ -220,7 +229,7 @@ export async function getAllFeedsFromRedis() {
   const keys = await redisClient.keys("category:*");
   let all = [];
 
-  // Dohvati blokirane izvore iz localStorage (ili baze ako koristiš backend za to)
+  // Dohvati blokirane izvore iz Redis
   let blockedSources = [];
   try {
     const stored = await redisClient.get("blockedSources");
@@ -247,7 +256,29 @@ export async function getAllFeedsFromRedis() {
   return Object.values(uniqueFeeds);
 }
 
+/**
+ * Vraća najnovijih (do 200) vesti iz "aktuell" liste u Redis-u.
+ * Na taj način izbegavamo prolazak kroz sve kategorije, što ubrzava učitavanje.
+ */
+export async function getAktuellFeedsFromRedis() {
+  // Dohvatamo sve iz liste "aktuell"
+  let items = await redisClient.lRange("aktuell", 0, -1);
+  let parsed = items.map(x => JSON.parse(x));
 
+  // Dohvati blokirane izvore iz Redis
+  let blockedSources = [];
+  try {
+    const stored = await redisClient.get("blockedSources");
+    blockedSources = stored ? JSON.parse(stored) : [];
+  } catch (err) {
+    console.error("[Redis] Greška pri čitanju blokiranih izvora:", err);
+  }
+
+  // Filtriraj blokirane izvore
+  parsed = parsed.filter(item => !blockedSources.includes(item.source));
+
+  return parsed;
+}
 
 /**
  * Glavna funkcija za obradu feed-ova.
@@ -279,13 +310,10 @@ export async function processFeeds() {
   //    Ako su dve vesti sa istim naslovom, gledamo date_published.
   const titleMap = new Map();
   for (const it of newItems) {
-    // Pokušamo da nadjemo veću vest s istim naslovom
     const existing = titleMap.get(it.title);
     if (!existing) {
-      // Ako je nema, samo dodajemo
       titleMap.set(it.title, it);
     } else {
-      // Uporedimo datume; ako je it noviji, menjamo
       const itTime = (it.date_published) ? new Date(it.date_published).getTime() : 0;
       const existingTime = (existing.date_published) ? new Date(existing.date_published).getTime() : 0;
       if (itTime > existingTime) {
@@ -341,7 +369,7 @@ export async function processFeeds() {
   console.log("[processFeeds] Završeno dodavanje novih feedova u Redis.");
 }
 
-// Primer koda koji se dodaje
+// Debug
 console.log("[DEBUG] Debugging message for feedsService.js");
 
 /**
