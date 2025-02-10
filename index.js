@@ -47,6 +47,7 @@ await initRedis();
 
 /**
  * Funkcija koja generiše HTML za vest iz JSON objekta.
+ * Dodan je dinamički canonical tag koji upućuje na jedinstveni URL stranice.
  * @param {Object} news - Objekat sa podacima o vesti.
  * @returns {string} - Generisani HTML.
  */
@@ -58,6 +59,7 @@ function generateHtmlForNews(news) {
       <meta charset="UTF-8">
       <title>${news.title}</title>
       <meta name="description" content="${news.content_text ? news.content_text.substring(0, 160) : ''}">
+      <link rel="canonical" href="https://www.dach.news/news/${news.id}">
       <style>
         body { font-family: Arial, sans-serif; margin: 20px; }
         img { max-width: 100%; height: auto; }
@@ -166,8 +168,9 @@ app.get('/api/news/:id', async (req, res) => {
 
 /**
  * Ruta za prikaz pojedinačne vesti (/news/:id).
- * Ako je zahtev poslat od strane Googlebota (ili sličnog bota), vraća se kompletan HTML sadržaj,
- * što omogućava bolju SEO indeksaciju. U suprotnom, korisnik se preusmerava na glavni sajt gde se otvara modal.
+ * Ako je zahtev poslat od strane Googlebota (ili sličnog bota), vraća se kompletan HTML sadržaj
+ * sa dinamički postavljenim canonical tagom.
+ * U suprotnom, korisnik se preusmerava na glavni sajt gde se otvara modal.
  */
 app.get('/news/:id', async (req, res) => {
   const newsId = req.params.id;
@@ -190,6 +193,7 @@ app.get('/news/:id', async (req, res) => {
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <title>${news.title} | DACH.news</title>
           <meta name="description" content="${news.description || news.title}">
+          <link rel="canonical" href="https://www.dach.news/news/${news.id}">
           <meta property="og:title" content="${news.title}">
           <meta property="og:description" content="${news.description || news.title}">
           <meta property="og:url" content="https://www.dach.news/news/${news.id}">
