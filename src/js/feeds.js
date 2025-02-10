@@ -363,8 +363,10 @@ export function displayFeedsList(feedsList, categoryName) {
   if (!feedsList || feedsList.length === 0) {
     container.innerHTML = `<p>Es gibt keine Nachrichten für die Kategorie: ${categoryName}</p>`;
     updateCategoryIndicator(categoryName);
-    // Resetujemo scroll nakon što se sadržaj postavi
-    container.scrollTop = 0;
+    // Resetujemo scroll nakon što se sadržaj postavi, u sledećoj animacionoj frame
+    requestAnimationFrame(() => {
+      container.scrollTop = 0;
+    });
     return;
   }
 
@@ -379,9 +381,12 @@ export function displayFeedsList(feedsList, categoryName) {
 
   updateCategoryIndicator(categoryName);
   
-  // Resetujemo scroll poziciju nakon dodavanja svih elemenata
-  container.scrollTop = 0;
+  // Resetujemo scroll poziciju nakon dodavanja svih elemenata u sledećoj animacionoj frame
+  requestAnimationFrame(() => {
+    container.scrollTop = 0;
+  });
 }
+
 
 
 /**
