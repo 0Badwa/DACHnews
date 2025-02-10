@@ -1,8 +1,3 @@
-/************************************************
- * index.js
- * Backend aplikacije – Server-side generisanje HTML-a za svaku vest i automatsko generisanje XML sitemap-a
- ************************************************/
-
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -23,17 +18,24 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
-// Služenje statičkih fajlova iz "fonts/" foldera
 app.use('/fonts', express.static(path.join(__dirname, 'src/fonts')));
 
 app.use(
-  helmet({
-    contentSecurityPolicy: false,
+  helmet.contentSecurityPolicy({
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "https://www.googletagmanager.com"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:"],
+      connectSrc: ["'self'"],
+      fontSrc: ["'self'", "data:"],
+      objectSrc: ["'none'"],
+      upgradeInsecureRequests: [],
+    },
   })
 );
 app.use(express.json());
 
-// Služenje statičkog sadržaja
 app.use('/src', express.static(path.join(__dirname, 'src'), {
   setHeaders: (res, filePath) => {
     if (filePath.endsWith('.js')) {
@@ -42,14 +44,10 @@ app.use('/src', express.static(path.join(__dirname, 'src'), {
   }
 }));
 
-// Poveži se na Redis
 await initRedis();
 
 /**
  * Funkcija koja generiše HTML za vest iz JSON objekta.
- * Dodan je dinamički canonical tag koji upućuje na jedinstveni URL stranice.
- * @param {Object} news - Objekat sa podacima o vesti.
- * @returns {string} - Generisani HTML.
  */
 function generateHtmlForNews(news) {
   return `
@@ -105,20 +103,27 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// API ruta za sve feedove
+/**
+ * API ruta za sve feedove iz liste "Aktuell".
+ * Ova ruta čita listu "Aktuell" iz Redis-a (poslednjih 200 vesti)
+ * i vraća ih kao JSON.
+ */
 app.get('/api/feeds', async (req, res) => {
-  console.log("[Route /api/feeds] Client requesting all feeds...");
+  console.log("[Route /api/feeds] Client requesting 'Aktuell' feeds...");
   try {
-    const all = await getAllFeedsFromRedis();
-    console.log(`[Route /api/feeds] Returning ${all.length} feeds`);
-    res.json(all);
+    const items = await redisClient.lRange("Aktuell", 0, -1);
+    const feeds = items.map(item => JSON.parse(item));
+    console.log(`[Route /api/feeds] Returning ${feeds.length} feeds from 'Aktuell'`);
+    res.json(feeds);
   } catch (error) {
     console.error("[Route /api/feeds] Error:", error);
     res.status(500).send("Server error");
   }
 });
 
-// API ruta za feedove po kategoriji
+/**
+ * API ruta za feedove po kategoriji.
+ */
 app.get('/api/feeds-by-category/:category', async (req, res) => {
   const category = req.params.category;
   console.log(`[Route /api/feeds-by-category] Category: ${category}`);
@@ -134,7 +139,9 @@ app.get('/api/feeds-by-category/:category', async (req, res) => {
   }
 });
 
-// Ruta za dohvatanje slike iz Redis-a
+/**
+ * Ruta za dohvatanje slike iz Redis-a.
+ */
 app.get('/image/:id', async (req, res) => {
   const imgKey = `img:${req.params.id}`;
   try {
@@ -152,7 +159,9 @@ app.get('/image/:id', async (req, res) => {
   }
 });
 
-// API ruta za pojedinačnu vest u JSON formatu
+/**
+ * API ruta za pojedinačnu vest u JSON formatu.
+ */
 app.get('/api/news/:id', async (req, res) => {
   const newsId = req.params.id;
   try {
@@ -168,9 +177,6 @@ app.get('/api/news/:id', async (req, res) => {
 
 /**
  * Ruta za prikaz pojedinačne vesti (/news/:id).
- * Ako je zahtev poslat od strane Googlebota (ili sličnog bota), vraća se kompletan HTML sadržaj
- * sa dinamički postavljenim canonical tagom.
- * U suprotnom, korisnik se preusmerava na glavni sajt gde se otvara modal.
  */
 app.get('/news/:id', async (req, res) => {
   const newsId = req.params.id;
@@ -179,7 +185,6 @@ app.get('/news/:id', async (req, res) => {
     const news = allFeeds.find(item => item.id === newsId);
     if (!news) return res.status(404).send("News not found");
 
-    // Provera user-agent-a za Googlebot i slične botove
     const userAgent = req.headers['user-agent'] || '';
     const isGooglebot = /Googlebot|bingbot|DuckDuckBot|Baiduspider|YandexBot/i.test(userAgent);
 
@@ -221,8 +226,6 @@ app.get('/news/:id', async (req, res) => {
 
 /**
  * Ruta za generisanje XML sitemap-a.
- * Preuzima sve vesti iz Redis-a i kreira XML sitemap sa URL-ovima koji sada koriste /news/:id,
- * što omogućava bolju SEO indeksaciju.
  */
 app.get('/sitemap.xml', async (req, res) => {
   try {
@@ -247,7 +250,6 @@ app.get('/sitemap.xml', async (req, res) => {
   }
 });
 
-// Debug ruta – prikazuje sve Redis ključeve za HTML (prefiks "html:news:")
 app.get('/api/debug/html-keys', async (req, res) => {
   try {
     const keys = await redisClient.keys('html:news:*');
@@ -263,11 +265,9 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`[Express] Server running on port ${PORT}`);
 });
 
-// Periodična obrada feedova (svakih 12 minuta)
 setInterval(processFeeds, 12 * 60 * 1000);
 processFeeds();
 
-// Endpointi za blokiranje/otblokiranje izvora
 app.post('/api/block-source', async (req, res) => {
   const { source } = req.body;
   if (!source) return res.status(400).send("Source required");
@@ -300,7 +300,6 @@ app.post('/api/unblock-source', async (req, res) => {
   }
 });
 
-// Redirect sa onrender domena na www.dach.news
 app.use((req, res, next) => {
   if (req.headers.host === 'dachnews.onrender.com') {
     return res.redirect(301, 'https://www.dach.news' + req.url);
