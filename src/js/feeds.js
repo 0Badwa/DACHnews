@@ -119,10 +119,13 @@ function getBlockedCategories() {
 }
 
 /**
- * Proverava da li je feed sakriven (blokiran) na osnovu izvora, kategorije
- * i da li je datum objavljivanja u budućnosti (u tom slučaju se takođe sakriva).
+ * Proverava da li je feed sakriven (blokiran) na osnovu izvora, kategorije,
+ * da li je datum objavljivanja u budućnosti, i da li vest ima sliku.
  */
 function isHiddenFeed(feed) {
+  // Sakrij vest ako nema sliku
+  if (!feed.image) return true;
+
   // NE PRIKAZUJ vesti sa datumom sutra ili u budućnosti
   if (feed.date_published) {
     const publishedDate = new Date(feed.date_published);
@@ -132,7 +135,7 @@ function isHiddenFeed(feed) {
 
   const blockedSources = getBlockedSources();
   const blockedCats = getBlockedCategories();
-  
+
   // "Ohne Kategorie" tretiramo kao "Sonstiges"
   const cat = (feed.category === "Ohne Kategorie") ? "Sonstiges" : feed.category;
   if (blockedCats.includes(cat)) return true;
@@ -146,6 +149,7 @@ function isHiddenFeed(feed) {
 
   return false;
 }
+
 
 /**
  * Fetch do 50 najnovijih feed-ova iz "Aktuell" (ruta /api/feeds), keš ~10 min.
