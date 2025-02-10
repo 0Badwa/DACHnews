@@ -1,5 +1,5 @@
 # Koristi Node.js kao osnovni image
-FROM node:16
+FROM node:18
 
 # Postavi radni direktorijum unutar kontejnera
 WORKDIR /app

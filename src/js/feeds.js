@@ -366,6 +366,7 @@ export function displayFeedsList(feedsList, categoryName) {
     // Resetujemo scroll nakon što se sadržaj postavi, u sledećoj animacionoj frame
     requestAnimationFrame(() => {
       container.scrollTop = 0;
+      window.scrollTo(0, 0);
     });
     return;
   }
