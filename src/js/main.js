@@ -518,14 +518,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.error(`Greška prilikom učitavanja kategorije "${category}":`, error);
       }
 
-      // Novo resetovanje scroll pozicije: čekamo 300ms pa resetujemo scroll više puta tokom 2 sekunde,
-      // ali otkazujemo interval ukoliko korisnik počne da skroluje.
+      // Novo resetovanje scroll pozicije: čekamo 300ms pa resetujemo scroll više puta tokom 2 sekunde
       (async () => {
         await new Promise(resolve => setTimeout(resolve, 300));
   
-        const container = document.getElementById('news-container');
-  
         function resetScroll() {
+          const container = document.getElementById('news-container');
           if (container) {
             container.scrollTop = 0;
           }
@@ -536,26 +534,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                       'window.pageYOffset=', window.pageYOffset);
         }
   
-        // Prvo odmah resetujemo scroll
         resetScroll();
   
         const intervalId = setInterval(resetScroll, 200);
-  
-        function cancelResetOnUserScroll() {
-          if (container && container.scrollTop > 0) {
-            clearInterval(intervalId);
-            container.removeEventListener('scroll', cancelResetOnUserScroll);
-            console.log('User scroll detected, clearing scroll reset interval.');
-          }
-        }
-  
-        if (container) {
-          container.addEventListener('scroll', cancelResetOnUserScroll);
-        }
-  
         setTimeout(() => {
           clearInterval(intervalId);
-          if (container) container.removeEventListener('scroll', cancelResetOnUserScroll);
           console.log('Scroll reset interval cleared for category:', category);
         }, 2000);
       })();
