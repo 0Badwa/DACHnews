@@ -367,6 +367,7 @@ export function displayFeedsList(feedsList, categoryName) {
     requestAnimationFrame(() => {
       container.scrollTop = 0;
       window.scrollTo(0, 0);
+      console.log('Reset scroll:', container.scrollTop, window.pageYOffset);
     });
     return;
   }

@@ -645,3 +645,12 @@ loadFeeds();
     if (tutOverlay) tutOverlay.style.display = 'flex';
   }
 });
+
+window.addEventListener('load', () => {
+  const container = document.getElementById('news-container');
+  if (container) {
+    container.scrollTop = 0;
+  }
+  window.scrollTo(0, 0);
+  console.log('Scroll resetovan: container.scrollTop=', container ? container.scrollTop : 'nema container', 'window.pageYOffset=', window.pageYOffset);
+});
