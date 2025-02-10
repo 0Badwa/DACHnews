@@ -370,9 +370,10 @@ function initSwipe() {
     if (idx >= cats.length) idx = cats.length - 1;
     clickTab(cats[idx]);
     setTimeout(() => {
+      container.scrollTop = 0;
       window.scrollTo(0, 0);
       console.log('Window scrollTo(0,0) pozvan za kategoriju:', currentCat);
-    }, 300);
+    }, 500);
   }
 
   function clickTab(cat) {
