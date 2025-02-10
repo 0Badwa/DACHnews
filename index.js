@@ -1,6 +1,6 @@
 /************************************************
  * index.js
- * Backend aplikacije – Server-side generisanje HTML-a za vesti i automatsko generisanje XML sitemap-a
+ * Backend aplikacije – Server-side generisanje HTML-a za svaku vest i automatsko generisanje XML sitemap-a
  ************************************************/
 
 import dotenv from 'dotenv';
@@ -15,8 +15,7 @@ import {
   initRedis,
   redisClient,
   processFeeds,
-  getAllFeedsFromRedis,
-  getAktuellFeedsFromRedis
+  getAllFeedsFromRedis
 } from './feedsService.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -34,7 +33,7 @@ app.use(
 );
 app.use(express.json());
 
-// Služenje statičkog sadržaja (CSS, JS, slike u src folderu itd.)
+// Služenje statičkog sadržaja
 app.use('/src', express.static(path.join(__dirname, 'src'), {
   setHeaders: (res, filePath) => {
     if (filePath.endsWith('.js')) {
@@ -47,7 +46,10 @@ app.use('/src', express.static(path.join(__dirname, 'src'), {
 await initRedis();
 
 /**
- * Generisanje HTML-a za vest (koristi se ako dohvatate HTML server-side za SEO).
+ * Funkcija koja generiše HTML za vest iz JSON objekta.
+ * Dodan je dinamički canonical tag koji upućuje na jedinstveni URL stranice.
+ * @param {Object} news - Objekat sa podacima o vesti.
+ * @returns {string} - Generisani HTML.
  */
 function generateHtmlForNews(news) {
   return `
@@ -103,23 +105,20 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-/**
- * API ruta za sve feedove, ali zapravo služi "aktuell" (najnovijih 200),
- * kako bismo ubrzali učitavanje početne stranice.
- */
+// API ruta za sve feedove
 app.get('/api/feeds', async (req, res) => {
-  console.log("[Route /api/feeds] Client requesting the 'aktuell' feed...");
+  console.log("[Route /api/feeds] Client requesting all feeds...");
   try {
-    const aktuell = await getAktuellFeedsFromRedis();
-    console.log(`[Route /api/feeds] Returning ${aktuell.length} items from 'aktuell' feed`);
-    res.json(aktuell);
+    const all = await getAllFeedsFromRedis();
+    console.log(`[Route /api/feeds] Returning ${all.length} feeds`);
+    res.json(all);
   } catch (error) {
     console.error("[Route /api/feeds] Error:", error);
     res.status(500).send("Server error");
   }
 });
 
-// API ruta za feedove po kategoriji (ostaje isto)
+// API ruta za feedove po kategoriji
 app.get('/api/feeds-by-category/:category', async (req, res) => {
   const category = req.params.category;
   console.log(`[Route /api/feeds-by-category] Category: ${category}`);
@@ -135,36 +134,20 @@ app.get('/api/feeds-by-category/:category', async (req, res) => {
   }
 });
 
-/**
- * Nova ruta za dohvatanje slike iz Redis-a:
- *  /image/:id/:size
- *  Gde :size može biti "news-card" ili "news-modal".
- */
-app.get('/image/:id/:size', async (req, res) => {
+// Ruta za dohvatanje slike iz Redis-a
+app.get('/image/:id', async (req, res) => {
+  const imgKey = `img:${req.params.id}`;
   try {
-    const { id, size } = req.params;
-
-    // Proverimo da li je zatražena veličina validna
-    const allowedSizes = ['news-card', 'news-modal'];
-    if (!allowedSizes.includes(size)) {
-      return res.status(400).send("Invalid image size.");
-    }
-
-    // Ključ je "img:<id>:<size>"
-    const imgKey = `img:${id}:${size}`;
     const base64 = await redisClient.get(imgKey);
-
     if (!base64) {
-      console.log(`[Route /image/:id/:size] No image found for key: ${imgKey}`);
+      console.log(`[Route /image/:id] No image found for key: ${imgKey}`);
       return res.status(404).send("Image not found.");
     }
-
     const buffer = Buffer.from(base64, 'base64');
     res.setHeader('Content-Type', 'image/webp');
     res.send(buffer);
-
   } catch (error) {
-    console.error("[Route /image/:id/:size] Error:", error);
+    console.error("[Route /image/:id] Error:", error);
     res.status(500).send("Server error");
   }
 });
@@ -173,21 +156,9 @@ app.get('/image/:id/:size', async (req, res) => {
 app.get('/api/news/:id', async (req, res) => {
   const newsId = req.params.id;
   try {
-    // Možemo koristiti samo "aktuell" ako očekujemo da je vest uvek tamo.
-    // Ako hoćeš potpunu sigurnost, fallback je getAllFeedsFromRedis().
-    const aktuell = await getAktuellFeedsFromRedis();
-    const news = aktuell.find(item => item.id === newsId);
-
-    if (!news) {
-      // fallback (opciono):
-      // const allFeeds = await getAllFeedsFromRedis();
-      // const newsFallback = allFeeds.find(item => item.id === newsId);
-      // if (!newsFallback) return res.status(404).send("News not found");
-      // return res.json(newsFallback);
-
-      return res.status(404).send("News not found");
-    }
-
+    const allFeeds = await getAllFeedsFromRedis();
+    const news = allFeeds.find(item => item.id === newsId);
+    if (!news) return res.status(404).send("News not found");
     res.json(news);
   } catch (error) {
     console.error(`[API] Error fetching news ${newsId}:`, error);
@@ -196,17 +167,19 @@ app.get('/api/news/:id', async (req, res) => {
 });
 
 /**
- * Ruta za prikaz pojedinačne vesti (/news/:id) – SEO fallback.
+ * Ruta za prikaz pojedinačne vesti (/news/:id).
+ * Ako je zahtev poslat od strane Googlebota (ili sličnog bota), vraća se kompletan HTML sadržaj
+ * sa dinamički postavljenim canonical tagom.
+ * U suprotnom, korisnik se preusmerava na glavni sajt gde se otvara modal.
  */
 app.get('/news/:id', async (req, res) => {
   const newsId = req.params.id;
   try {
-    const aktuell = await getAktuellFeedsFromRedis();
-    const news = aktuell.find(item => item.id === newsId);
-
+    const allFeeds = await getAllFeedsFromRedis();
+    const news = allFeeds.find(item => item.id === newsId);
     if (!news) return res.status(404).send("News not found");
 
-    // Provera user-agent-a (Googlebot, bingbot, itd.)
+    // Provera user-agent-a za Googlebot i slične botove
     const userAgent = req.headers['user-agent'] || '';
     const isGooglebot = /Googlebot|bingbot|DuckDuckBot|Baiduspider|YandexBot/i.test(userAgent);
 
@@ -232,7 +205,7 @@ app.get('/news/:id', async (req, res) => {
           <h1>${news.title}</h1>
           <p>${news.description || 'Keine Beschreibung verfügbar'}</p>
           <img src="${news.image || 'https://www.dach.news/default-thumbnail.jpg'}" alt="${news.title}">
-          <p>Veröffentlicht am: ${news.date_published ? new Date(news.date_published).toLocaleDateString('de-DE') : ''}</p>
+          <p>Veröffentlicht am: ${new Date(news.date_published).toLocaleDateString('de-DE')}</p>
         </body>
         </html>
       `);
@@ -248,20 +221,16 @@ app.get('/news/:id', async (req, res) => {
 
 /**
  * Ruta za generisanje XML sitemap-a.
+ * Preuzima sve vesti iz Redis-a i kreira XML sitemap sa URL-ovima koji sada koriste /news/:id,
+ * što omogućava bolju SEO indeksaciju.
  */
 app.get('/sitemap.xml', async (req, res) => {
   try {
-    // Uzimamo samo 'aktuell' (200 najnovijih), ili po želji getAllFeedsFromRedis()
-    const allFeeds = await getAktuellFeedsFromRedis();
-
+    const allFeeds = await getAllFeedsFromRedis();
     let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
     xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
-
     for (const news of allFeeds) {
-      const lastmod = news.date_published
-        ? new Date(news.date_published).toISOString()
-        : new Date().toISOString();
-
+      const lastmod = news.date_published ? new Date(news.date_published).toISOString() : new Date().toISOString();
       xml += '  <url>\n';
       xml += `    <loc>https://www.dach.news/news/${news.id}</loc>\n`;
       xml += `    <lastmod>${lastmod}</lastmod>\n`;
@@ -269,7 +238,6 @@ app.get('/sitemap.xml', async (req, res) => {
       xml += '    <priority>1.0</priority>\n';
       xml += '  </url>\n';
     }
-
     xml += '</urlset>';
     res.header('Content-Type', 'application/xml');
     res.send(xml);
@@ -279,7 +247,7 @@ app.get('/sitemap.xml', async (req, res) => {
   }
 });
 
-// Debug ruta – prikazuje sve Redis ključeve za HTML (prefiks "html:news:*")
+// Debug ruta – prikazuje sve Redis ključeve za HTML (prefiks "html:news:")
 app.get('/api/debug/html-keys', async (req, res) => {
   try {
     const keys = await redisClient.keys('html:news:*');

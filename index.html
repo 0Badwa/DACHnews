@@ -3,30 +3,31 @@
 <head>
   <meta charset="UTF-8" />
   <link rel="icon" href="src/icons/favicon.ico" type="image/x-icon" />
-  <!-- SEO Meta-Tags -->
-  <meta name="description" content="Aktuelle Nachrichten: %%NEWS_TITLE%%">
-  <meta name="keywords" content="Nachrichten, DACH, Deutschland, Österreich, Schweiz, Politik, Sport, Wirtschaft, Technologie, Kultur, Unterhaltung">
-  <meta name="author" content="DACH.news">
-  <meta name="robots" content="index, follow">
-  <meta name="language" content="de">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- SEO Meta-Tags -->
+<meta name="description" content="Aktuelle Nachrichten: %%NEWS_TITLE%%">
+<meta name="keywords" content="Nachrichten, DACH, Deutschland, Österreich, Schweiz, Politik, Sport, Wirtschaft, Technologie, Kultur, Unterhaltung">
+<meta name="author" content="DACH.news">
+<meta name="robots" content="index, follow">
+<meta name="language" content="de">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Open Graph für Social Media -->
-  <meta property="og:title" content="DACH.news - Unabhängige Nachrichten aus DACH">
-  <meta property="og:description" content="Bleiben Sie informiert mit den neuesten Nachrichten aus Deutschland, Österreich und der Schweiz.">
-  <meta property="og:image" content="https://dach.news/preview.jpg">
-  <meta property="og:url" content="https://dach.news">
-  <meta property="og:type" content="website">
+<!-- Open Graph für Social Media -->
+<meta property="og:title" content="DACH.news - Unabhängige Nachrichten aus DACH">
+<meta property="og:description" content="Bleiben Sie informiert mit den neuesten Nachrichten aus Deutschland, Österreich und der Schweiz.">
+<meta property="og:image" content="https://dach.news/preview.jpg">
+<meta property="og:url" content="https://dach.news">
+<meta property="og:type" content="website">
 
-  <!-- Twitter Card -->
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="DACH.news - Unabhängige Nachrichten aus DACH">
-  <meta name="twitter:description" content="Bleiben Sie informiert mit den neuesten Nachrichten aus Deutschland, Österreich und der Schweiz.">
-  <meta name="twitter:image" content="https://dach.news/preview.jpg">
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="DACH.news - Unabhängige Nachrichten aus DACH">
+<meta name="twitter:description" content="Bleiben Sie informiert mit den neuesten Nachrichten aus Deutschland, Österreich und der Schweiz.">
+<meta name="twitter:image" content="https://dach.news/preview.jpg">
 
-  <!-- Canonical URL -->
-  <link rel="canonical" href="https://www.dach.news/news/${news.id}">
+<!-- Canonical URL -->
+<link rel="canonical" href="https://www.dach.news/news/${news.id}">
 
+  
   <title>DACH.news</title>
 
   <script>
@@ -56,13 +57,17 @@
     window.addEventListener('scroll', loadGTag, { once: true });
   </script>
   
-  <!-- Prefetch kritičnih resursa -->
-  <link rel="preload" href="src/css/styles.css" as="style">
 
-  <!-- Preload kritičnih fontova za prvu stranicu -->
-  <link rel="preload" href="src/fonts/Roboto-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
-  <link rel="preload" href="src/fonts/Roboto-Bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
-  <link rel="preload" href="src/fonts/Roboto_Condensed-Bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+
+  
+  <!-- Prefetch kritičnih resursa -->
+<link rel="preload" href="src/css/styles.css" as="style">
+
+<!-- Preload kritičnih fontova za prvu stranicu -->
+<link rel="preload" href="src/fonts/Roboto-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="src/fonts/Roboto-Bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="src/fonts/Roboto_Condensed-Bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+
 
   <!-- Učitaj CSS -->
   <link rel="stylesheet" href="src/css/styles.css">
@@ -78,29 +83,28 @@
     <img src="src/icons/dachnewslogo.png" alt="DACH.news" />
   </nav>
 
-  <!-- Loader element sa fiksnim pozicioniranjem -->
-  <div id="loader" style="display:none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align:center;">
-    <p style="color: #32CD32; font-weight: bold;">   </p>
-  </div>
+  <!-- Loader element sa fiksnim pozicioniranjem kako ne bi pomerao sadržaj -->
+<div id="loader" style="display:none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align:center;">
+  <p style="color: #32CD32; font-weight: bold;">   </p>   <!-- ovde ide tekst loading/laden -->
+</div>
   <div id="error-container" style="display:none; text-align:center; margin-top:100px; color:red;"></div>
 
-  <!-- Tabs container sa ARIA atributima -->
-  <div class="tabs-container" 
-       role="tablist" 
-       id="tabs-container" 
-       style="scroll-behavior: smooth;">
-    <!-- Staticki tab "Aktuell" sa dodanim aria-controls, role, aria-selected i jedinstvenim id-jem -->
-    <button class="tab active" data-tab="Aktuell" role="tab" aria-selected="true" aria-controls="news-container" id="tab-Aktuell">Aktuell</button>
-    <!-- Ostale kategorije dinamički iz main.js -->
-  </div>
+  <!-- Tabs container koji prati feedove -->
+<div class="tabs-container" 
+role="tablist" 
+id="tabs-container" 
+style="scroll-behavior: smooth;">
+<button class="tab active" data-tab="Aktuell" role="tab" aria-selected="true">Aktuell</button>
+<!-- Ostale kategorije dinamički iz main.js -->
+</div>
 
   <!-- Indikator kategorije -->
   <div class="category-indicator">Aktuell</div>
 
-  <!-- Kontejner za vesti – označen kao tabpanel -->
-  <div id="news-container" role="tabpanel" tabindex="0" aria-labelledby="tab-Aktuell"></div>
+  <!-- Kontejner za vesti -->
+  <div id="news-container"></div>
 
-  <!-- Settings modal (Einstellungen) -->
+    <!-- Settings modal (Einstellungen) -->
   <div id="settings-modal" class="modal" style="display: none;">
     <div class="rearrange-modal-content settings-modal-content" style="margin: 0 3rem;">
       <div class="modal-title" style="color: var(--primary-color); font-weight: bold; font-size: 120%;">
@@ -116,13 +120,15 @@
           <button id="kategorien-button" class="settings-action-button">Öffnen</button>
         </div>
        <div class="settings-item">
-          <span>Kontakt</span>
-          <button id="kontakt-button" class="settings-action-button">Öffnen</button>
-        </div>
-        <div class="settings-item">
-          <span>Datenschutz</span>
-          <button id="datenschutz-button" class="settings-action-button">Öffnen</button>
-        </div>
+  <span>Kontakt</span>
+  <button id="kontakt-button" class="settings-action-button">Öffnen</button>
+</div>
+
+<div class="settings-item">
+  <span>Datenschutz</span>
+  <button id="datenschutz-button" class="settings-action-button">Öffnen</button>
+</div>
+
         <div class="settings-item">
           <span>Über</span>
           <button id="uber-button" class="settings-action-button">Öffnen</button>
@@ -174,13 +180,11 @@
         Bei Fragen, Anregungen oder Feedback zu DACH.news kontaktieren Sie uns bitte per E-Mail an 
         <a href="mailto:info@dach.news">info.dach.news@gmail.com</a>      
         <div class="modal-buttons">
-          <button class="save-button" id="close-kontakt-modal">Schließen</button>
-        </div>
-      </p>
+        <button class="save-button" id="close-kontakt-modal">Schließen</button>
+      </div>
     </div>
-  </div>
-  
-  <!-- Modal za Datenschutz -->
+    
+  </div>  <!-- Modal za Datenschutz -->
   <div id="datenschutz-modal" class="modal" style="display: none;">
     <div class="rearrange-modal-content uber-modal-content" style="margin: 0 3rem;">
       <div class="modal-title" style="color: var(--primary-color); font-weight: bold; font-size: 120%;">
@@ -193,9 +197,8 @@
         wodurch Ihre Privatsphäre vollständig geschützt bleibt. Dieser Ansatz gewährleistet 
         ein hohes Maß an Sicherheit und Anonymität.
         <div class="modal-buttons">
-          <button class="save-button" id="close-datenschutz-modal">Schließen</button>
-        </div>
-      </p>
+<button class="save-button" id="close-datenschutz-modal">Schließen</button>
+      </div>
     </div>
   </div>
   
@@ -216,9 +219,8 @@
         Inhalte. Ihre Unterstützung und Ihr Feedback sind von unschätzbarem Wert, um die 
         Plattform kontinuierlich zu verbessern und weiterzuentwickeln.
         <div class="modal-buttons">
-          <button class="save-button" id="close-uber-modal">Schließen</button>
-        </div>
-      </p>
+        <button class="save-button" id="close-uber-modal">Schließen</button>
+      </div>
     </div>
   </div>
 

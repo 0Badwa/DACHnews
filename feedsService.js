@@ -1,4 +1,4 @@
-/************************************************ 
+/************************************************
  * feedsService.js
  ************************************************/
 
@@ -11,7 +11,7 @@ import sharp from 'sharp';
 import pLimit from 'p-limit';
 
 // Konstante
-const SEVEN_DAYS = 60 * 60 * 24 * 7;
+const SEVEN_DAYS = 60 * 60 * 24 * 7
 const RSS_FEED_URL = "https://rss.app/feeds/v1.1/_sf1gbLo1ZadJmc5e.json"; // Glavni feed
 const GPT_API_URL = "https://api.openai.com/v1/chat/completions";
 
@@ -113,7 +113,7 @@ Pri kategorizaciji, obavezno vodi računa o specifičnostima tih zemalja. Ako ve
 }
 
 /**
- * Funkcija za smanjivanje slike pomoću Sharp – 240px širina, WebP kvalitet 80%.
+ * Funkcija za smanjivanje slike (rezanje na 240px, kvalitet 80%) pomoću Sharp.
  */
 async function smanjiSliku(buffer) {
   try {
@@ -128,7 +128,7 @@ async function smanjiSliku(buffer) {
 }
 
 /**
- * Čuva smanjenu sliku u Redis u Base64 formatu (pod ključem "img:<id>:<size>").
+ * Čuva smanjenu sliku u Redis u Base64 formatu (pod ključem "img:<id>").
  * Vraća true ako uspe, false inače.
  */
 async function storeImageInRedis(imageUrl, id) {
@@ -140,20 +140,21 @@ async function storeImageInRedis(imageUrl, id) {
 
     // Kreiraj dve verzije slike
     const sizes = {
-      "news-card": { width: 80, height: 80, fit: "cover" },
-      "news-modal": { width: 320, height: 240, fit: "inside" }
+      "news-card": { width: 80, height: 80, fit: "cover" }, // 80x80px, crop u centar
+      "news-modal": { width: 320, height: 240, fit: "inside" } // 320x240px, bez crop-a
     };
 
-    for (const [sizeKey, { width, height, fit }] of Object.entries(sizes)) {
+        for (const [key, { width, height, fit }] of Object.entries(sizes)) {
       const resizedImage = await sharp(buffer)
-        .resize(width, height, { fit })
-        .webp({ quality: 80 })
+        .resize(width, height, { fit }) // `cover` za crop, `inside` za modal
+        .webp({ quality: 80 }) // WebP format sa 80% kvaliteta
         .toBuffer();
 
-      await redisClient.set(`img:${id}:${sizeKey}`, resizedImage.toString('base64'));
+      // Sačuvaj sliku u Redis sa odgovarajućim ključem
+      await redisClient.set(`img:${id}:${key}`, resizedImage.toString('base64'));
     }
 
-    console.log(`[storeImageInRedis] Kreirane verzije za ID:${id} (news-card, news-modal)`);
+    console.log(`[storeImageInRedis] Kreirane verzije za ID:${id} (80x80, 320x240)`);
     return true;
   } catch (error) {
     console.error(`[storeImageInRedis] Greška pri optimizaciji slike za ID:${id}:`, error);
@@ -178,7 +179,6 @@ const limit = pLimit(3);
 
 /**
  * Dodavanje jedne vesti u Redis, sa smanjenom slikom (ako postoji).
- * Takođe se dodaje i u "aktuell" listu, do 200 najnovijih.
  */
 export async function addItemToRedis(item, category) {
   const newsObj = {
@@ -196,15 +196,12 @@ export async function addItemToRedis(item, category) {
   // Ako ima sliku, pokušaj optimizacije
   if (item.image) {
     const success = await storeImageInRedis(item.image, item.id);
-    // PROMENA -> Umesto dvotačke, koristimo kosu crtu: /image/<id>/news-card
-    newsObj.image = success
-      ? `/image/${item.id}/news-card`
-      : item.image;
+    // Ako je optimizacija uspela, koristimo /image/:id, inače ostavljamo original
+    newsObj.image = success ? `/image/${item.id}` : item.image;
   } else {
     newsObj.image = null;
   }
 
-  // Upis u listu po kategoriji
   const redisKey = `category:${category}`;
   await redisClient.rPush(redisKey, JSON.stringify(newsObj));
   await redisClient.expire(redisKey, SEVEN_DAYS);
@@ -212,11 +209,6 @@ export async function addItemToRedis(item, category) {
   // Obeležimo ID kao obrađen
   await redisClient.sAdd("processed_ids", item.id);
   await redisClient.expire("processed_ids", SEVEN_DAYS);
-
-  // Upišemo i u "aktuell" listu (za 200 najnovijih)
-  await redisClient.rPush("aktuell", JSON.stringify(newsObj));
-  await redisClient.lTrim("aktuell", -200, -1);
-  await redisClient.expire("aktuell", SEVEN_DAYS);
 
   console.log(`[addItemToRedis] Upisano ID:${item.id}, category:${category}`);
 }
@@ -228,7 +220,7 @@ export async function getAllFeedsFromRedis() {
   const keys = await redisClient.keys("category:*");
   let all = [];
 
-  // Dohvati blokirane izvore iz Redis
+  // Dohvati blokirane izvore iz localStorage (ili baze ako koristiš backend za to)
   let blockedSources = [];
   try {
     const stored = await redisClient.get("blockedSources");
@@ -255,25 +247,7 @@ export async function getAllFeedsFromRedis() {
   return Object.values(uniqueFeeds);
 }
 
-/**
- * Vraća najnovijih (do 200) vesti iz "aktuell" liste.
- */
-export async function getAktuellFeedsFromRedis() {
-  let items = await redisClient.lRange("aktuell", 0, -1);
-  let parsed = items.map(x => JSON.parse(x));
 
-  let blockedSources = [];
-  try {
-    const stored = await redisClient.get("blockedSources");
-    blockedSources = stored ? JSON.parse(stored) : [];
-  } catch (err) {
-    console.error("[Redis] Greška pri čitanju blokiranih izvora:", err);
-  }
-
-  parsed = parsed.filter(item => !blockedSources.includes(item.source));
-
-  return parsed;
-}
 
 /**
  * Glavna funkcija za obradu feed-ova.
@@ -302,14 +276,18 @@ export async function processFeeds() {
   newItems = [...new Map(newItems.map(item => [item.id, item])).values()];
 
   // 3) Uklanjamo duplikate po title (ostavljamo samo noviju vest)
+  //    Ako su dve vesti sa istim naslovom, gledamo date_published.
   const titleMap = new Map();
   for (const it of newItems) {
+    // Pokušamo da nadjemo veću vest s istim naslovom
     const existing = titleMap.get(it.title);
     if (!existing) {
+      // Ako je nema, samo dodajemo
       titleMap.set(it.title, it);
     } else {
-      const itTime = it.date_published ? new Date(it.date_published).getTime() : 0;
-      const existingTime = existing.date_published ? new Date(existing.date_published).getTime() : 0;
+      // Uporedimo datume; ako je it noviji, menjamo
+      const itTime = (it.date_published) ? new Date(it.date_published).getTime() : 0;
+      const existingTime = (existing.date_published) ? new Date(existing.date_published).getTime() : 0;
       if (itTime > existingTime) {
         titleMap.set(it.title, it);
       }
@@ -323,13 +301,13 @@ export async function processFeeds() {
   }
   console.log(`[processFeeds] Posle dupl. provere ostalo ${newItems.length} vesti.`);
 
-  // Ako je < 2 nove, preskačemo GPT do sledećeg ciklusa (čisto optimizacija)
+  // Ako je < 2 nove, preskačemo GPT do sledećeg ciklusa
   if (newItems.length < 2) {
     console.log("[processFeeds] Manje od 2 nove vesti, preskačemo GPT za sada.");
     return;
   }
 
-  // Delimo u batch-ove (po 20)
+  // Delimo u batch-ove
   const BATCH_SIZE = 20;
   for (let i = 0; i < newItems.length; i += BATCH_SIZE) {
     const batch = newItems.slice(i, i + BATCH_SIZE);
@@ -363,7 +341,7 @@ export async function processFeeds() {
   console.log("[processFeeds] Završeno dodavanje novih feedova u Redis.");
 }
 
-// Debug
+// Primer koda koji se dodaje
 console.log("[DEBUG] Debugging message for feedsService.js");
 
 /**
