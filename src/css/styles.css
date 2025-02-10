@@ -246,6 +246,8 @@ nav .menu button {
   font-weight: bold;
   line-height: 1.2; /* Prilagodite ovu vrednost po potrebi */
    max-height: calc(1.2em * 2); /* Ograničava visinu na dva reda */
+   font-family: 'Roboto', sans-serif; /* Dodavanje fonta */
+
 }
 .news-title {
   font-size: 1rem;
@@ -260,15 +262,19 @@ nav .menu button {
   font-size: 0.7rem;
   margin-top: 0.1rem; /* Dodaje razmak iznad meta informacija */
   color: var(--text-color);
+  font-family: 'Roboto', sans-serif; /* Dodavanje fonta */
 }
+
 .news-meta .source {
   text-transform: uppercase;
   color: var(--text-color);
   font-weight: bold; /* Bold tekst */
+  font-family: 'Roboto', sans-serif; /* Dodavanje fonta */
 }
 .news-meta .time {
   text-transform: lowercase;
   color: var(--text-color);
+  font-family: 'Roboto', sans-serif; /* Dodavanje fonta */
 }
 
 .news-title:hover {
