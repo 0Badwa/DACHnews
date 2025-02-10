@@ -279,7 +279,6 @@ function openKategorienModal() {
   if (closeBtn) {
     closeBtn.onclick = () => {
       modal.style.display = 'none';
-      openSettingsModal();
     };
   }
 }
@@ -293,7 +292,6 @@ function openUberModal() {
   if (closeBtn) {
     closeBtn.onclick = () => {
       modal.style.display = 'none';
-      openSettingsModal();
     };
   }
 }
@@ -307,7 +305,6 @@ function openKontaktModal() {
   if (closeBtn) {
     closeBtn.onclick = () => {
       modal.style.display = 'none';
-      openSettingsModal();
     };
   }
 }
@@ -321,7 +318,6 @@ function openDatenschutzModal() {
   if (closeBtn) {
     closeBtn.onclick = () => {
       modal.style.display = 'none';
-      openSettingsModal();
     };
   }
 }
@@ -369,18 +365,10 @@ function initSwipe() {
     if (idx < 0) idx = 0;
     if (idx >= cats.length) idx = cats.length - 1;
     clickTab(cats[idx]);
-    // Resetujemo scroll poziciju više puta tokom 2 sekunde
-const scrollResetInterval = setInterval(() => {
-  container.scrollTop = 0;
-  window.scrollTo(0, 0);
-  console.log('Reset scroll interval: container.scrollTop=', container.scrollTop, 'window.pageYOffset=', window.pageYOffset);
-}, 200);
-
-setTimeout(() => {
-  clearInterval(scrollResetInterval);
-  console.log('Cleared scroll reset interval for category:', category);
-}, 2000);
-
+    setTimeout(() => {
+      window.scrollTo(0, 0);
+      console.log('Window scrollTo(0,0) pozvan za kategoriju:', currentCat);
+    }, 300);
   }
 
   function clickTab(cat) {
@@ -517,8 +505,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       const container = document.getElementById('news-container');
       if (!container) return;
 
-      // localStorage.setItem('activeTab', category);
-      // localStorage.setItem(`${category}_scroll`, 0);
+      localStorage.setItem('activeTab', category);
+      localStorage.setItem(`${category}_scroll`, 0);
 
       try {
         if (category === 'Aktuell') {
@@ -530,13 +518,33 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.error(`Greška prilikom učitavanja kategorije "${category}":`, error);
       }
 
-      setTimeout(() => {
-        container.scrollTop = 0;
-        console.log('Scroll resetovan na 0 nakon učitavanja kategorije:', category);
-      }, 300);
+      // Novo resetovanje scroll pozicije: čekamo 300ms pa resetujemo scroll više puta tokom 2 sekunde
+      (async () => {
+        await new Promise(resolve => setTimeout(resolve, 300));
+  
+        function resetScroll() {
+          const container = document.getElementById('news-container');
+          if (container) {
+            container.scrollTop = 0;
+          }
+          window.scrollTo(0, 0);
+          document.documentElement.scrollTop = 0;
+          document.body.scrollTop = 0;
+          console.log('Reset scroll: container.scrollTop=', container ? container.scrollTop : 'nema container',
+                      'window.pageYOffset=', window.pageYOffset);
+        }
+  
+        resetScroll();
+  
+        const intervalId = setInterval(resetScroll, 200);
+        setTimeout(() => {
+          clearInterval(intervalId);
+          console.log('Scroll reset interval cleared for category:', category);
+        }, 2000);
+      })();
     });
   }
-loadFeeds();
+  loadFeeds();
 
   // Postavljanje event listener-a za Settings modal i srodne modale
   const menuButton = document.getElementById('menu-button');
@@ -651,13 +659,4 @@ loadFeeds();
     const tutOverlay = document.getElementById('tutorial-overlay');
     if (tutOverlay) tutOverlay.style.display = 'flex';
   }
-});
-
-window.addEventListener('load', () => {
-  const container = document.getElementById('news-container');
-  if (container) {
-    container.scrollTop = 0;
-  }
-  window.scrollTo(0, 0);
-  console.log('Scroll resetovan: container.scrollTop=', container ? container.scrollTop : 'nema container', 'window.pageYOffset=', window.pageYOffset);
 });
