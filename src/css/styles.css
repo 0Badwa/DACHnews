@@ -686,7 +686,7 @@ background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z
 .news-modal-analysis {
   margin-top: 1rem;
   border-top: 1px solid var(--border-color); /* ako želiš razdvajanje */
-  text-align: left; /* Centriranje */
+  text-align: center; /* Centriranje */
 }
 
 .modal-analysis-title {
@@ -699,9 +699,9 @@ background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z
 
 .modal-analysis-text {
   font-size: 0.8rem !important;
-  padding: 0rem 1rem 1rem 1.5rem;
+  padding: 0rem 1rem 1rem 1.5rem !important;
   line-height: 1.4;
-  text-align: left; /* Centriranje */
+  text-align: left !important; /* Centriranje */
 
   /* Hifenacija 
   hyphens: auto;

@@ -59,13 +59,13 @@ export function openNewsModal(feed) {
   // Naslov sekcije – zelena boja, usklađeno s dizajnom
   const analysisHeading = document.createElement('h3');
   analysisHeading.className = 'modal-analysis-title';
-  analysisHeading.textContent = 'AI Analyse';
+  analysisHeading.textContent = 'AI-Perspektive: Meinung & Kommentar';
   analysisContainer.appendChild(analysisHeading);
 
   // Tekst analize – font veličine 0.7rem, beli tekst
   const analysisText = document.createElement('p');
   analysisText.className = 'modal-analysis-text';
-  analysisText.textContent = feed.analysis || 'Keine Analyse verfügbar.';
+  analysisText.textContent = feed.analysis || 'Keine Meinung verfügbar.';
   analysisContainer.appendChild(analysisText);
 
   // U modalContent, umetni AI Analyse sekciju iznad kontejnera sa dugmadima
