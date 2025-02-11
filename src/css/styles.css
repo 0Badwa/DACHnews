@@ -690,14 +690,16 @@ background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z
 }
 
 .modal-analysis-title {
-  font-size: 0.8rem;         /* Možeš prilagoditi */
+  font-size: 0.9rem;         /* Možeš prilagoditi */
   color: var(--primary-color); /* zelena boja, isto kao kod ostalih elemenata */
   margin-bottom: 0.3rem;
   font-weight: bold;
 }
 
 .modal-analysis-text {
-  font-size: 0.7rem;
+  font-size: 0.6rem;
   color: #ffffff;  /* beli tekst */
   line-height: 1.2;
+  text-align: justify;       /* Poravnanje teksta */
+  padding: 0 1rem;           /* Razmak 1rem levo i desno */
 }
