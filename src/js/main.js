@@ -520,7 +520,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       // Novo resetovanje scroll pozicije: čekamo 300ms pa resetujemo scroll više puta tokom 2 sekunde
       (async () => {
-        await new Promise(resolve => setTimeout(resolve, 300));
+        await new Promise(resolve => setTimeout(resolve, 200));
   
         function resetScroll() {
           const container = document.getElementById('news-container');
@@ -536,11 +536,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   
         resetScroll();
   
-        const intervalId = setInterval(resetScroll, 300);
+        const intervalId = setInterval(resetScroll, 200);
         setTimeout(() => {
           clearInterval(intervalId);
           console.log('Scroll reset interval cleared for category:', category);
-        }, 1000);
+        }, 500);
       })();
     });
   }
