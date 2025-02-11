@@ -131,7 +131,7 @@ async function sendBatchToGPTAnalysis(feedBatch) {
     messages: [
       {
         role: "system",
-        content: `Analysiere die folgende Nachricht analytisch im deutschen Stil. Die Analyse soll zwischen 500 und 600 Zeichen umfassen. Gib als Ergebnis ein JSON Array zurück, in dem jeder Eintrag das Format { "id": "...", "analysis": "..." } hat.`
+        content: `Analysiere die folgende Nachricht analytisch im deutschen Stil. Die Analyse muss zwingend eine Länge von 700 bis 800 Zeichen haben. Gib als Ergebnis ein JSON Array zurück, in dem jeder Eintrag das Format { "id": "...", "analysis": "..." } hat.`
       },
       {
         role: "user",
