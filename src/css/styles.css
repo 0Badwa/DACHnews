@@ -690,7 +690,7 @@ background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z
 }
 
 .modal-analysis-title {
-  font-size: 1rem !important;          /* Možeš prilagoditi */
+  font-size: 0.9rem !important;          /* Možeš prilagoditi */
   color: var(--primary-color); /* zelena boja, isto kao kod ostalih elemenata */
   margin-bottom: 0.0rem;
   font-weight: bold;
