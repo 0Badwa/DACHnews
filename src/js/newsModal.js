@@ -82,18 +82,21 @@ modalImage.onload = () => {
     modal.style.display = 'flex';
   };
 
-  // Generišemo pun URL za sliku
-  const BASE_URL = window.location.hostname.includes("localhost")
-    ? "http://localhost:3001"
-    : "https://www.dach.news";
+ // Generišemo pun URL za sliku
+const BASE_URL = window.location.hostname.includes("localhost")
+? "http://localhost:3001"
+: "https://www.dach.news";
 
-  if (feed.image && feed.image.startsWith('/')) {
-    // Ako u putanji nema ":news-modal", dodaj ga
-    tempImg.src = feed.image.includes(':news-modal')
-      ? BASE_URL + feed.image
-      : BASE_URL + feed.image + ':news-modal';
-  } else {
-    // Fallback
-    tempImg.src = feed.image || (BASE_URL + '/img/noimg.png');
-  }
+if (feed.image && feed.image.startsWith('/')) {
+// Ako u putanji već nema sufiks za modal, dodaj ":news-modal"
+let imageUrl = BASE_URL + feed.image;
+if (!feed.image.includes(':news-modal')) {
+  imageUrl += ':news-modal';
+}
+// Preporučljivo enkodirati URL (posebno ako ima dvotačke)
+tempImg.src = encodeURI(imageUrl);
+} else {
+// Fallback: koristi originalnu vrednost ili default sliku
+tempImg.src = feed.image || (BASE_URL + '/img/noimg.png');
+}
 }
