@@ -163,7 +163,7 @@ Falls die Nachricht von Unglücken oder Katastrophen handelt, muss der Ton der A
 - Gib als Ergebnis ein JSON Array zurück, in dem jeder Eintrag das Format { "id": "...", "analysis": "..." } hat.  
 - Wenn du den folgenden Input erhältst, antworte **exakt im beschriebenen JSON-Format**, ohne zusätzliche Erklärungen oder Markdown.
 
-"Schreibe deine Analyse so, dass zuerst der analytische Teil (Meinung) steht, gefolgt von einem doppelten Zeilenumbruch (also "<p><p>"), und dann der humorvolle Kommentar."`
+"Schreibe deine Analyse so, dass zuerst der analytische Teil (Meinung) steht, gefolgt von einem doppelten Zeilenumbruch (also "<br><br>"), und dann der humorvolle Kommentar."`
 },
       {
         role: "user",
