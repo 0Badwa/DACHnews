@@ -59,7 +59,7 @@ export function openNewsModal(feed) {
   // Naslov sekcije – zelena boja, usklađeno s dizajnom
   const analysisHeading = document.createElement('h3');
   analysisHeading.className = 'modal-analysis-title';
-  analysisHeading.textContent = 'AI Analyse'; // alternativno "KI-Analyse"
+  analysisHeading.textContent = 'AI Analyse';
   analysisContainer.appendChild(analysisHeading);
 
   // Tekst analize – font veličine 0.7rem, beli tekst
@@ -75,8 +75,14 @@ export function openNewsModal(feed) {
     if (existingAnalysis) {
       existingAnalysis.remove();
     }
-    // Proveri da li je dugme "Weiter" dete modalContent-a
-    if (modalContent.contains(weiterButton)) {
+    /**
+     * Provera:
+     * Umesto korišćenja modalContent.contains(weiterButton) (koje vraća true i ako je dugme
+     * negde unutar potomaka), ovde proveravamo da li je weiterButton direktno dete modalContent-a.
+     * Ako jeste, ubacujemo analysisContainer pre njega. U suprotnom, dodajemo analysisContainer
+     * na kraj modalContent.
+     */
+    if (weiterButton.parentNode === modalContent) {
       modalContent.insertBefore(analysisContainer, weiterButton);
     } else {
       modalContent.appendChild(analysisContainer);

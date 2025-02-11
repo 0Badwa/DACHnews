@@ -195,19 +195,21 @@ style="scroll-behavior: smooth;">
     </div>
   </div>
 
-  <!-- Modal za pojedinačnu vest -->
-  <div id="news-modal" class="modal" style="display: none;">
-    <div class="rearrange-modal-content news-modal-content">
-      <img id="news-modal-image" src="" alt="News Image" />
-      <h2 id="news-modal-title"></h2>
-      <p id="news-modal-description"></p>
-      <p id="news-modal-source-time"></p>
-      <div class="modal-buttons">
-        <button class="save-button" id="close-news-modal">Schließen</button>
-        <button class="save-button" id="news-modal-weiter">Weiter</button>
-      </div>
+ <!-- Modal za pojedinačnu vest -->
+<div id="news-modal" class="modal" style="display: none;">
+  <div class="rearrange-modal-content news-modal-content">
+    <img id="news-modal-image" src="" alt="News Image" />
+    <h2 id="news-modal-title"></h2>
+    <p id="news-modal-description"></p>
+    <p id="news-modal-source-time"></p>
+    <!-- Dugme "Weiter" je sada direktno dete news-modal-content -->
+    <button class="save-button" id="news-modal-weiter">Weiter</button>
+    <div class="modal-buttons">
+      <button class="save-button" id="close-news-modal">Schließen</button>
     </div>
   </div>
+</div>
+
 
   <!-- Glavni JS fajl -->
   <script type="module" src="src/js/main.js" defer></script>
