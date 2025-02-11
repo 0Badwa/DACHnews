@@ -459,9 +459,12 @@ background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z
 }
 .modal-buttons {
   display: flex;
-  justify-content: space-between;
-  margin-top: 2rem;
+  justify-content: center;  /* Centriranje grupe dugmadi */
+  align-items: center;
+  gap: 1rem;              /* Razmak od 2rem između dugmadi */
+  margin-top: 2rem;       /* Razmak iznad grupe dugmadi */
 }
+
 
 .save-button {
   background-color: var(--primary-color); 
