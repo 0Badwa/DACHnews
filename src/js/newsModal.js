@@ -17,17 +17,13 @@ export function openNewsModal(feed) {
     return;
   }
 
-  // Sakrij modal kako bi se izbeglo "treptanje" starog sadržaja
+  // Sakrij modal da bi se resetovao sadržaj
   modal.style.display = 'none';
-  
+
   // Resetuj sliku i postavi alt tekst
   modalImage.src = '';
   modalImage.alt = 'News image';
-  
-  // Dodaj CSS klasu koja sakriva alt tekst dok se slika ne učita
   modalImage.classList.add('hide-alt');
-  
-  // Kada se slika učita, ukloni klasu za sakrivanje alt teksta
   modalImage.onload = () => {
     modalImage.classList.remove('hide-alt');
   };
@@ -56,14 +52,14 @@ export function openNewsModal(feed) {
   modalTitle.textContent = feed.title || 'No title';
   modalDescription.textContent = feed.content_text || 'Keine Beschreibung';
 
-  // --- Dodavanje sekcije za AI analizu ---
+  // --- Kreiraj i umetni sekciju za AI analizu ---
   const analysisContainer = document.createElement('div');
   analysisContainer.className = 'news-modal-analysis';
 
-  // Naslov sekcije – zelena boja, tipografski usklađeno
+  // Naslov sekcije – zelena boja (tipografski usklađeno)
   const analysisHeading = document.createElement('h3');
   analysisHeading.className = 'modal-analysis-title';
-  analysisHeading.textContent = 'AI Analyse'; // alternativno "KI-Analyse"
+  analysisHeading.textContent = 'AI Analyse'; // alternativno: "KI-Analyse"
   analysisContainer.appendChild(analysisHeading);
 
   // Tekst analize – font veličine 0.7rem, beli tekst
@@ -72,10 +68,20 @@ export function openNewsModal(feed) {
   analysisText.textContent = feed.analysis || 'Keine Analyse verfügbar.';
   analysisContainer.appendChild(analysisText);
 
-  // Ubaci analysisContainer na kraj sadržaja modala
+  // U modalContent ukloni prethodnu analizu (ako postoji)
   const modalContent = modal.querySelector('.news-modal-content');
   if (modalContent) {
-    modalContent.appendChild(analysisContainer);
+    const existingAnalysis = modalContent.querySelector('.news-modal-analysis');
+    if (existingAnalysis) {
+      modalContent.removeChild(existingAnalysis);
+    }
+    // Ubaci novu analizu iznad dugmeta "Weiter"
+    const weiterButtonElement = modalContent.querySelector('#news-modal-weiter');
+    if (weiterButtonElement) {
+      modalContent.insertBefore(analysisContainer, weiterButtonElement);
+    } else {
+      modalContent.appendChild(analysisContainer);
+    }
   }
 
   // Dugme za zatvaranje modala
@@ -93,7 +99,7 @@ export function openNewsModal(feed) {
     }, 3000);
   };
 
-  // Napravi novi Image objekat i sačekaj da se učita pre prikaza modala
+  // Kreiraj privremeni Image objekat da sačekamo učitavanje slike
   const tempImg = new Image();
   tempImg.onload = () => {
     modalImage.src = tempImg.src;
