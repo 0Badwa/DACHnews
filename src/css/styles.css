@@ -708,10 +708,11 @@ background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z
   hyphens: auto;
   -webkit-hyphens: auto;
   -moz-hyphens: auto;
+  -ms-hyphens: auto;
 
-  /* Rešenje za "widow" i "orphan" */
+  /* Rešenje za "widow" i "orphan"
   word-break: break-word;
-  overflow-wrap: break-word;
+  overflow-wrap: break-word;  */
 
   /* Sprečava prekratke redove */
   min-height: 3em; /* Osigurava da pasus nije kraći od 3 reda */
