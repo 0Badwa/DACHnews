@@ -691,7 +691,7 @@ background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z
 }
 
 .modal-analysis-title {
-  font-size: 0.9rem !important;          /* Možeš prilagoditi */
+  font-size: 1rem !important;          /* Možeš prilagoditi */
   color: var(--primary-color); /* zelena boja, isto kao kod ostalih elemenata */
   margin-bottom: 0.3rem;
   font-weight: bold;
@@ -699,9 +699,22 @@ background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z
 }
 
 .modal-analysis-text {
-  font-size: 0.7rem !important; /* Smanji font veličinu */
-  text-align: justify !important; /* Ako želiš poravnanje umesto centra */
-  padding: 0.5rem 1rem; /* Prilagodi padding */
-  line-height: 1.2; /* Smanji razmak između linija */
+  font-size: 0.8rem !important;
+  text-align: justify !important;
+  padding: 0.5rem 1rem;
+  line-height: 1.4;
+
+  /* Hifenacija */
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  -moz-hyphens: auto;
+
+  /* Rešenje za "widow" i "orphan" */
+  word-break: break-word;
+  overflow-wrap: break-word;
+
+  /* Sprečava prekratke redove */
+  min-height: 3em; /* Osigurava da pasus nije kraći od 3 reda */
 }
+
 
