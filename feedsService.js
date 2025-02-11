@@ -92,7 +92,6 @@ Ako vest sadrži informacije koje se odnose na neku od sledećih kategorija: Tec
     max_tokens: 1500,
     temperature: 0.0
   };
-  console.log("[GPT Categorization] Received response:", catResponse);
 
   try {
     const response = await axios.post(GPT_API_URL, payload, {
