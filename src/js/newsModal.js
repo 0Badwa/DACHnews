@@ -52,14 +52,14 @@ export function openNewsModal(feed) {
   modalTitle.textContent = feed.title || 'No title';
   modalDescription.textContent = feed.content_text || 'Keine Beschreibung';
 
-  // --- Kreiraj i umetni sekciju za AI analizu ---
+  // --- Kreiraj sekciju za AI analizu ---
   const analysisContainer = document.createElement('div');
   analysisContainer.className = 'news-modal-analysis';
 
-  // Naslov sekcije – zelena boja (tipografski usklađeno)
+  // Naslov sekcije – zelena boja, usklađeno s dizajnom
   const analysisHeading = document.createElement('h3');
   analysisHeading.className = 'modal-analysis-title';
-  analysisHeading.textContent = 'AI Analyse'; // alternativno: "KI-Analyse"
+  analysisHeading.textContent = 'AI Analyse'; // alternativno "KI-Analyse"
   analysisContainer.appendChild(analysisHeading);
 
   // Tekst analize – font veličine 0.7rem, beli tekst
@@ -73,12 +73,11 @@ export function openNewsModal(feed) {
   if (modalContent) {
     const existingAnalysis = modalContent.querySelector('.news-modal-analysis');
     if (existingAnalysis) {
-      modalContent.removeChild(existingAnalysis);
+      existingAnalysis.remove();
     }
-    // Ubaci novu analizu iznad dugmeta "Weiter"
-    const weiterButtonElement = modalContent.querySelector('#news-modal-weiter');
-    if (weiterButtonElement) {
-      modalContent.insertBefore(analysisContainer, weiterButtonElement);
+    // Proveri da li je dugme "Weiter" dete modalContent-a
+    if (modalContent.contains(weiterButton)) {
+      modalContent.insertBefore(analysisContainer, weiterButton);
     } else {
       modalContent.appendChild(analysisContainer);
     }
