@@ -17,26 +17,28 @@ export function openNewsModal(feed) {
     return;
   }
 
-  // Prvo sklonimo modal (da nema treptanja starog stanja)
+  // Sakrij modal kako bi se izbeglo "treptanje" starog sadržaja
   modal.style.display = 'none';
-// Resetujemo sliku i dodajemo alt atribut
-modalImage.src = ''; 
-modalImage.alt = 'News image';
+  
+  // Resetuj sliku i postavi alt tekst
+  modalImage.src = '';
+  modalImage.alt = 'News image';
+  
+  // Dodaj CSS klasu koja sakriva alt tekst dok se slika ne učita
+  modalImage.classList.add('hide-alt');
+  
+  // Kada se slika učita, ukloni klasu za sakrivanje alt teksta
+  modalImage.onload = () => {
+    modalImage.classList.remove('hide-alt');
+  };
 
-// Dodajemo CSS klasu koja sakriva alt tekst
-modalImage.classList.add('hide-alt');
-
-// Kada se slika učita, prikazujemo je ponovo
-modalImage.onload = () => {
-  modalImage.classList.remove('hide-alt');
-};
-  // Dohvati izvor sa aktivne kartice, ili feed.source
+  // Dohvati izvor iz aktivne kartice ili koristi feed.source
   const activeNewsCard = document.querySelector('.news-card.active');
   const sourceName = activeNewsCard
     ? activeNewsCard.querySelector('.source').textContent
     : (feed.source || 'Unbekannte Quelle');
 
-  // Datumi
+  // Formatiraj datum i vreme
   const publishedDateTime = feed.date_published || '';
   let formattedDate = '';
   let formattedTime = '';
@@ -50,43 +52,38 @@ modalImage.onload = () => {
     ${formattedDate && formattedTime ? ` • ${formattedDate} • ${formattedTime}` : ''}
   `;
 
-  // Popuni ostale elemente
+  // Postavi naslov i opis vesti
   modalTitle.textContent = feed.title || 'No title';
   modalDescription.textContent = feed.content_text || 'Keine Beschreibung';
 
-// --- Dodavanje sekcije za AI analizu ---
-const analysisContainer = document.createElement('div');
-analysisContainer.className = 'news-modal-analysis';
+  // --- Dodavanje sekcije za AI analizu ---
+  const analysisContainer = document.createElement('div');
+  analysisContainer.className = 'news-modal-analysis';
 
-// Naslov sekcije – zelena boja
-const analysisHeading = document.createElement('h3');
-analysisHeading.className = 'modal-analysis-title';
-analysisHeading.textContent = 'AI Analyse'; // ili "KI-Analyse" ako preferiraš
-analysisContainer.appendChild(analysisHeading);
+  // Naslov sekcije – zelena boja, tipografski usklađeno
+  const analysisHeading = document.createElement('h3');
+  analysisHeading.className = 'modal-analysis-title';
+  analysisHeading.textContent = 'AI Analyse'; // alternativno "KI-Analyse"
+  analysisContainer.appendChild(analysisHeading);
 
-// Tekst analize – font 0.7rem, beli tekst
-const analysisText = document.createElement('p');
-analysisText.className = 'modal-analysis-text';
-analysisText.textContent = feed.analysis || 'Keine Analyse verfügbar.';
-analysisContainer.appendChild(analysisText);
+  // Tekst analize – font veličine 0.7rem, beli tekst
+  const analysisText = document.createElement('p');
+  analysisText.className = 'modal-analysis-text';
+  analysisText.textContent = feed.analysis || 'Keine Analyse verfügbar.';
+  analysisContainer.appendChild(analysisText);
 
-// Ubaci analysisContainer ispod izvora i vremena.
-const modalContent = modal.querySelector('.news-modal-content');
-if (modalContent) {
-  // Ako želiš da se umetne odmah ispod elementa sa izvorom i vremenom:
-  modalContent.insertBefore(analysisContainer, modalContent.querySelector('#close-news-modal'));
-  // Ili jednostavno appenduj na kraj:
-  // modalContent.appendChild(analysisContainer);
-}
+  // Ubaci analysisContainer na kraj sadržaja modala
+  const modalContent = modal.querySelector('.news-modal-content');
+  if (modalContent) {
+    modalContent.appendChild(analysisContainer);
+  }
 
-
-
-  // Dugme za zatvaranje
+  // Dugme za zatvaranje modala
   closeModalButton.onclick = () => {
     modal.style.display = 'none';
   };
 
-  // "Weiter" -> otvaramo link, zatvaramo modal posle 3s
+  // Dugme "Weiter" – otvori link i zatvori modal posle 3 sekunde
   weiterButton.onclick = () => {
     if (feed.url) {
       window.open(feed.url, '_blank');
@@ -96,34 +93,29 @@ if (modalContent) {
     }, 3000);
   };
 
-  // Napravi novi Image objekat pa sačekaj da se učita
+  // Napravi novi Image objekat i sačekaj da se učita pre prikaza modala
   const tempImg = new Image();
   tempImg.onload = () => {
-    // Kada se učita, tek onda postavi src i prikaži modal
     modalImage.src = tempImg.src;
     modal.style.display = 'flex';
   };
   tempImg.onerror = () => {
-    // Ako nema slike, možemo postaviti fallback ili samo prikazati modal
     console.warn("[newsModal] Could not load image:", feed.image);
     modal.style.display = 'flex';
   };
 
- // Generišemo pun URL za sliku
-const BASE_URL = window.location.hostname.includes("localhost")
-? "http://localhost:3001"
-: "https://www.dach.news";
+  // Generiši pun URL za sliku
+  const BASE_URL = window.location.hostname.includes("localhost")
+    ? "http://localhost:3001"
+    : "https://www.dach.news";
 
-if (feed.image && feed.image.startsWith('/')) {
-// Ako u putanji već nema sufiks za modal, dodaj ":news-modal"
-let imageUrl = BASE_URL + feed.image;
-if (!feed.image.includes(':news-modal')) {
-  imageUrl += ':news-modal';
-}
-// Preporučljivo enkodirati URL (posebno ako ima dvotačke)
-tempImg.src = encodeURI(imageUrl);
-} else {
-// Fallback: koristi originalnu vrednost ili default sliku
-tempImg.src = feed.image || (BASE_URL + '/img/noimg.png');
-}
+  if (feed.image && feed.image.startsWith('/')) {
+    let imageUrl = BASE_URL + feed.image;
+    if (!feed.image.includes(':news-modal')) {
+      imageUrl += ':news-modal';
+    }
+    tempImg.src = encodeURI(imageUrl);
+  } else {
+    tempImg.src = feed.image || (BASE_URL + '/img/noimg.png');
+  }
 }
