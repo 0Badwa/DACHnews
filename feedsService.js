@@ -82,8 +82,7 @@ async function sendBatchToGPTCategorization(feedBatch) {
 - Unterhaltung
 - Welt
 
-Ako vest sadrži informacije koje se jasno odnose na neku od ovih kategorija, postavi je u odgovarajuću. Ako vest ne pripada nijednoj kategoriji, svrstaćemo je u "Panorama". 
-Molim te vrati isključivo JSON niz gde je svaki element: { "id": "...", "category": "..." }`
+Ako vest sadrži informacije koje se odnose na neku od sledećih kategorija: Technologie, Gesundheit, Sport, Wirtschaft, Kultur, Auto, Reisen, Lifestyle, Panorama, Politik, Unterhaltung, Welt, onda je svrati u odgovarajuću kategoriju. Ako vest ne pripada nijednoj od ovih kategorija, svrstaćemo je u "Panorama". Molim te, vrati isključivo validan JSON niz bez ikakvog dodatnog teksta, objašnjenja ili markdown oznaka. Svaki element u nizu mora biti objekat sa tačno dva svojstva: "id" (string) i "category" (string). Primer odgovora: [ { "id": "primer1", "category": "Wirtschaft" }, { "id": "primer2", "category": "Panorama" } ]. Tvoj odgovor mora sadržati samo JSON niz, bez dodatnih znakova.`
       },
       {
         role: "user",
@@ -93,6 +92,7 @@ Molim te vrati isključivo JSON niz gde je svaki element: { "id": "...", "catego
     max_tokens: 1500,
     temperature: 0.0
   };
+  console.log("[GPT Categorization] Received response:", catResponse);
 
   try {
     const response = await axios.post(GPT_API_URL, payload, {
