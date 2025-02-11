@@ -392,7 +392,7 @@ export async function processFeeds() {
     return;
   }
 
-  const BATCH_SIZE = 20;
+  const BATCH_SIZE = 5;
   for (let i = 0; i < newItems.length; i += BATCH_SIZE) {
     const batch = newItems.slice(i, i + BATCH_SIZE);
     // Paralelno pozovi GPT API za kategorizaciju i analizu
