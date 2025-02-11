@@ -1,3 +1,7 @@
+/************************************************
+ * feedsService.js
+ ************************************************/
+
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -46,12 +50,13 @@ export async function fetchRSSFeed() {
 }
 
 /**
- * Funkcija za slanje batch-a feed stavki GPT API-ju, uz skraćen description.
+ * Funkcija za slanje batch-a feed stavki GPT API–ju radi kategorizacije.
+ * Vraća JSON niz gde je svaki element: { "id": "...", "category": "..." }.
+ * Temperatura je postavljena na 0.0.
  */
-async function sendBatchToGPT(feedBatch) {
-  console.log("[sendBatchToGPT] Slanje serije stavki GPT API-ju...");
+async function sendBatchToGPTCategorization(feedBatch) {
+  console.log("[sendBatchToGPTCategorization] Slanje serije stavki GPT API–ju za kategorizaciju...");
 
-  // Skraćujemo opis radi manje potrošnje tokena
   const combinedContent = feedBatch.map((item) => ({
     id: item.id,
     title: item.title,
@@ -77,7 +82,8 @@ async function sendBatchToGPT(feedBatch) {
 - Unterhaltung
 - Welt
 
-Pri kategorizaciji, obavezno vodi računa o specifičnostima tih zemalja. Ako vest sadrži informacije koje se jasno odnose na neku od gore navedenih kategorija, postavi je u odgovarajuću. Ako je vest o saobraćajnim nezgodama, stavi je u kategoriju Panorama, a ne u Auto. **Strogo se drži ovih kategorija i nikada ne dodaj nove kategorije.** Ako vest ne pripada nijednoj kategoriji, svrstavamo je u "Panorama". Molim te vrati isključivo JSON niz gde je svaki element: { "id": "...", "category": "..." }`
+Ako vest sadrži informacije koje se jasno odnose na neku od ovih kategorija, postavi je u odgovarajuću. Ako vest ne pripada nijednoj kategoriji, svrstaćemo je u "Panorama". 
+Molim te vrati isključivo JSON niz gde je svaki element: { "id": "...", "category": "..." }`
       },
       {
         role: "user",
@@ -101,7 +107,55 @@ Pri kategorizaciji, obavezno vodi računa o specifičnostima tih zemalja. Ako ve
     }
     return JSON.parse(gptText);
   } catch (error) {
-    console.error("[sendBatchToGPT] Greška pri pozivu GPT API:", error?.response?.data || error.message);
+    console.error("[sendBatchToGPTCategorization] Greška pri pozivu GPT API:", error?.response?.data || error.message);
+    return null;
+  }
+}
+
+/**
+ * Funkcija za slanje batch-a feed stavki GPT API–ju radi analize.
+ * Vraća JSON niz gde je svaki element: { "id": "...", "analysis": "..." }.
+ * Temperatura je postavljena na 0.7; analiza treba da bude analitična i dužine između 500 i 600 karaktera.
+ */
+async function sendBatchToGPTAnalysis(feedBatch) {
+  console.log("[sendBatchToGPTAnalysis] Slanje serije stavki GPT API–ju za analizu...");
+
+  const combinedContent = feedBatch.map((item) => ({
+    id: item.id,
+    title: item.title,
+    description: (item.description || item.content_text || "").slice(0, 500)
+  }));
+
+  const payload = {
+    model: "gpt-4o-mini",
+    messages: [
+      {
+        role: "system",
+        content: `Analysiere die folgende Nachricht analytisch im deutschen Stil. Die Analyse soll zwischen 500 und 600 Zeichen umfassen. Gib als Ergebnis ein JSON Array zurück, in dem jeder Eintrag das Format { "id": "...", "analysis": "..." } hat.`
+      },
+      {
+        role: "user",
+        content: JSON.stringify(combinedContent)
+      }
+    ],
+    max_tokens: 1500,
+    temperature: 0.7
+  };
+
+  try {
+    const response = await axios.post(GPT_API_URL, payload, {
+      headers: {
+        Authorization: `Bearer ${process.env.CHATGPT_API_KEY}`,
+        "Content-Type": "application/json"
+      }
+    });
+    let gptText = response.data.choices?.[0]?.message?.content?.trim() || '';
+    if (gptText.startsWith("```json")) {
+      gptText = gptText.replace(/^```json\n?/, '').replace(/```$/, '');
+    }
+    return JSON.parse(gptText);
+  } catch (error) {
+    console.error("[sendBatchToGPTAnalysis] Greška pri pozivu GPT API:", error?.response?.data || error.message);
     return null;
   }
 }
@@ -166,8 +220,9 @@ const limit = pLimit(3);
 
 /**
  * Dodavanje jedne vesti u Redis, sa smanjenom slikom (ako postoji).
+ * Sada funkcija prima i dodatni parametar 'analysis' koji sadrži AI analizu vesti.
  */
-export async function addItemToRedis(item, category) {
+export async function addItemToRedis(item, category, analysis = null) {
   // Kreiramo objekat za vest
   const newsObj = {
     id: item.id,
@@ -179,6 +234,7 @@ export async function addItemToRedis(item, category) {
     source: (item.authors && item.authors.length > 0)
       ? item.authors[0].name
       : extractSource(item.url),
+    analysis: analysis // čuvamo i analizu vesti
   };
 
   // Ako ima sliku, pokušaj optimizacije
@@ -202,12 +258,11 @@ export async function addItemToRedis(item, category) {
   await redisClient.lPush("Aktuell", JSON.stringify(newsObj));
   await redisClient.lTrim("Aktuell", 0, 199);
 
-  // NOVO: Dodavanje vesti u SEO hash (bez TTL) za statičke SEO stranice
+  // Dodavanje vesti u SEO hash (bez TTL) za statičke SEO stranice, uključujući analizu
   await redisClient.hSet("seo:news", item.id, JSON.stringify(newsObj));
 
   console.log(`[addItemToRedis] Upisano ID:${item.id}, category:${category}`);
 }
-
 
 /**
  * Vraća sve vesti iz Redis-a (spaja iz svih "category:*" listi) i deduplira ih po feed.id.
@@ -253,9 +308,11 @@ export async function getSeoFeedsFromRedis() {
   }
 }
 
-
 /**
  * Glavna funkcija za obradu feed-ova.
+ * Ova funkcija preuzima nove vesti, eliminiše duplikate i šalje ih GPT API–ju
+ * u dva poziva – jedan za kategorizaciju (temperatura 0.0) i jedan za analizu (temperatura 0.7).
+ * Rezultati se kombinuju i čuvaju u Redis, uključujući u SEO hash za statičke SEO stranice.
  */
 export async function processFeeds() {
   console.log("[processFeeds] Počinje procesiranje feed-ova...");
@@ -307,26 +364,27 @@ export async function processFeeds() {
   const BATCH_SIZE = 20;
   for (let i = 0; i < newItems.length; i += BATCH_SIZE) {
     const batch = newItems.slice(i, i + BATCH_SIZE);
-    const gptResponse = await sendBatchToGPT(batch);
-    if (!gptResponse || !Array.isArray(gptResponse)) {
-      console.error("[processFeeds] GPT odgovor nevalidan. Sve ide u Uncategorized.");
+    // Paralelno pozovi GPT API za kategorizaciju i analizu
+    const [catResponse, analysisResponse] = await Promise.all([
+      sendBatchToGPTCategorization(batch),
+      sendBatchToGPTAnalysis(batch)
+    ]);
+
+    if (!catResponse || !Array.isArray(catResponse) || !analysisResponse || !Array.isArray(analysisResponse)) {
+      console.error("[processFeeds] GPT odgovor nevalidan. Sve ide u Uncategorized bez analize.");
       for (const item of batch) {
         await limit(() => addItemToRedis(item, "Uncategorized"));
       }
       continue;
     }
 
-    const idToCat = {};
-    gptResponse.forEach(c => {
-      if (c.id && c.category) {
-        idToCat[c.id] = c.category;
-      }
-    });
-
     await Promise.all(
       batch.map(item => {
-        const cat = idToCat[item.id] || "Uncategorized";
-        return limit(() => addItemToRedis(item, cat));
+        const catObj = catResponse.find(c => c.id === item.id);
+        const analysisObj = analysisResponse.find(a => a.id === item.id);
+        const cat = (catObj && catObj.category) ? catObj.category : "Uncategorized";
+        const analysis = (analysisObj && analysisObj.analysis) ? analysisObj.analysis : null;
+        return limit(() => addItemToRedis(item, cat, analysis));
       })
     );
   }
