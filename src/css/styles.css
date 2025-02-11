@@ -458,9 +458,11 @@ background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z
   cursor: pointer;
 }
 .modal-buttons {
-  text-align: center;
-  margin-top: 1rem;
+  display: flex;
+  justify-content: space-between;
+  margin-top: 2rem;
 }
+
 .save-button {
   background-color: var(--primary-color); 
   color: #fff;
