@@ -149,10 +149,14 @@ async function sendBatchToGPTAnalysis(feedBatch) {
         "Content-Type": "application/json"
       }
     });
+    console.log("[sendBatchToGPTAnalysis] GPT API response data:", response.data);
+  
     let gptText = response.data.choices?.[0]?.message?.content?.trim() || '';
     if (gptText.startsWith("```json")) {
       gptText = gptText.replace(/^```json\n?/, '').replace(/```$/, '');
     }
+    console.log("[sendBatchToGPTAnalysis] GPT text after cleanup:", gptText);
+    
     return JSON.parse(gptText);
   } catch (error) {
     console.error("[sendBatchToGPTAnalysis] Greška pri pozivu GPT API:", error?.response?.data || error.message);
