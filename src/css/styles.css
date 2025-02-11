@@ -414,7 +414,7 @@ background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z
   margin: 1.5rem 0.5rem 1rem 0.5rem; /* gore: 1.5rem, desno: 0.5rem, dole: 1rem, levo: 0.5rem */
   padding: 0rem 0.5rem;
   font-family: 'Roboto Condensed', sans-serif; /* cond */
-  font-size: 1rem; /* Beli tekst za opis */
+  font-size: 0.9rem; /* Beli tekst za opis */
   color: #fff; /* default white, override za .source ispod */
 }
 
@@ -693,7 +693,7 @@ background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z
 .modal-analysis-title {
   font-size: 1rem !important;          /* Možeš prilagoditi */
   color: var(--primary-color); /* zelena boja, isto kao kod ostalih elemenata */
-  margin-bottom: 0.3rem;
+  margin-bottom: 0.0rem;
   font-weight: bold;
   text-align: center; /* Centriranje teksta */
 }
@@ -704,17 +704,17 @@ background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z
   padding: 0.5rem 1rem;
   line-height: 1.4;
 
-  /* Hifenacija */
+  /* Hifenacija 
   hyphens: auto;
   -webkit-hyphens: auto;
   -moz-hyphens: auto;
-  -ms-hyphens: auto;
+  -ms-hyphens: auto; */
 
   /* Rešenje za "widow" i "orphan"
   word-break: break-word;
   overflow-wrap: break-word;  */
 
-  /* Sprečava prekratke redove */
+  /* Sprečava prekratke redove 
   min-height: 3em; /* Osigurava da pasus nije kraći od 3 reda */
 }
 
