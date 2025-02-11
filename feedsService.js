@@ -198,13 +198,16 @@ export async function addItemToRedis(item, category) {
   await redisClient.sAdd("processed_ids", item.id);
   await redisClient.expire("processed_ids", SEVEN_DAYS);
 
-  // ***** NOVO: Dodavanje vesti u listu "Aktuell" (poslednjih 200 vesti) *****
+  // Dodavanje vesti u listu "Aktuell" (poslednjih 200 vesti)
   await redisClient.lPush("Aktuell", JSON.stringify(newsObj));
   await redisClient.lTrim("Aktuell", 0, 199);
-  // **********************************************************************
+
+  // NOVO: Dodavanje vesti u SEO hash (bez TTL) za statičke SEO stranice
+  await redisClient.hSet("seo:news", item.id, JSON.stringify(newsObj));
 
   console.log(`[addItemToRedis] Upisano ID:${item.id}, category:${category}`);
 }
+
 
 /**
  * Vraća sve vesti iz Redis-a (spaja iz svih "category:*" listi) i deduplira ih po feed.id.
@@ -234,6 +237,22 @@ export async function getAllFeedsFromRedis() {
   });
   return Object.values(uniqueFeeds);
 }
+
+/**
+ * Vraća sve SEO vesti iz Redis hash "seo:news"
+ */
+export async function getSeoFeedsFromRedis() {
+  try {
+    const data = await redisClient.hGetAll("seo:news");
+    // Redis vraća objekat gde su ključevi ID-jevi, a vrednosti JSON stringovi.
+    const feeds = Object.values(data).map(item => JSON.parse(item));
+    return feeds;
+  } catch (error) {
+    console.error("[getSeoFeedsFromRedis] Greška pri dohvaćanju SEO vesti:", error);
+    return [];
+  }
+}
+
 
 /**
  * Glavna funkcija za obradu feed-ova.

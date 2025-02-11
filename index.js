@@ -229,7 +229,7 @@ app.get('/news/:id', async (req, res) => {
  */
 app.get('/sitemap.xml', async (req, res) => {
   try {
-    const allFeeds = await getAllFeedsFromRedis();
+    const allFeeds = await getSeoFeedsFromRedis(); // Koristimo SEO keš
     let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
     xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
     for (const news of allFeeds) {
@@ -249,6 +249,7 @@ app.get('/sitemap.xml', async (req, res) => {
     res.status(500).send("Server error");
   }
 });
+
 
 app.get('/api/debug/html-keys', async (req, res) => {
   try {
