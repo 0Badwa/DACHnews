@@ -674,3 +674,25 @@ background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z
   font-size: 0;
   text-indent: -9999px;
 }
+
+
+
+/* Stilovi za AI analizu u modal-u */
+.news-modal-analysis {
+  margin-top: 1rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border-color); /* ako želiš razdvajanje */
+}
+
+.modal-analysis-title {
+  font-size: 0.8rem;         /* Možeš prilagoditi */
+  color: var(--primary-color); /* zelena boja, isto kao kod ostalih elemenata */
+  margin-bottom: 0.3rem;
+  font-weight: bold;
+}
+
+.modal-analysis-text {
+  font-size: 0.7rem;
+  color: #ffffff;  /* beli tekst */
+  line-height: 1.2;
+}

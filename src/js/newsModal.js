@@ -54,6 +54,33 @@ modalImage.onload = () => {
   modalTitle.textContent = feed.title || 'No title';
   modalDescription.textContent = feed.content_text || 'Keine Beschreibung';
 
+// --- Dodavanje sekcije za AI analizu ---
+const analysisContainer = document.createElement('div');
+analysisContainer.className = 'news-modal-analysis';
+
+// Naslov sekcije – zelena boja
+const analysisHeading = document.createElement('h3');
+analysisHeading.className = 'modal-analysis-title';
+analysisHeading.textContent = 'AI Analyse'; // ili "KI-Analyse" ako preferiraš
+analysisContainer.appendChild(analysisHeading);
+
+// Tekst analize – font 0.7rem, beli tekst
+const analysisText = document.createElement('p');
+analysisText.className = 'modal-analysis-text';
+analysisText.textContent = feed.analysis || 'Keine Analyse verfügbar.';
+analysisContainer.appendChild(analysisText);
+
+// Ubaci analysisContainer ispod izvora i vremena.
+const modalContent = modal.querySelector('.news-modal-content');
+if (modalContent) {
+  // Ako želiš da se umetne odmah ispod elementa sa izvorom i vremenom:
+  modalContent.insertBefore(analysisContainer, modalContent.querySelector('#close-news-modal'));
+  // Ili jednostavno appenduj na kraj:
+  // modalContent.appendChild(analysisContainer);
+}
+
+
+
   // Dugme za zatvaranje
   closeModalButton.onclick = () => {
     modal.style.display = 'none';
