@@ -68,22 +68,16 @@ export function openNewsModal(feed) {
   analysisText.textContent = feed.analysis || 'Keine Analyse verfügbar.';
   analysisContainer.appendChild(analysisText);
 
-  // U modalContent ukloni prethodnu analizu (ako postoji)
+  // U modalContent, umetni AI Analyse sekciju iznad kontejnera sa dugmadima
   const modalContent = modal.querySelector('.news-modal-content');
   if (modalContent) {
     const existingAnalysis = modalContent.querySelector('.news-modal-analysis');
     if (existingAnalysis) {
       existingAnalysis.remove();
     }
-    /**
-     * Provera:
-     * Umesto korišćenja modalContent.contains(weiterButton) (koje vraća true i ako je dugme
-     * negde unutar potomaka), ovde proveravamo da li je weiterButton direktno dete modalContent-a.
-     * Ako jeste, ubacujemo analysisContainer pre njega. U suprotnom, dodajemo analysisContainer
-     * na kraj modalContent.
-     */
-    if (weiterButton.parentNode === modalContent) {
-      modalContent.insertBefore(analysisContainer, weiterButton);
+    const modalButtons = modalContent.querySelector('.modal-buttons');
+    if (modalButtons) {
+      modalContent.insertBefore(analysisContainer, modalButtons);
     } else {
       modalContent.appendChild(analysisContainer);
     }
