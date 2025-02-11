@@ -89,7 +89,7 @@ Ako vest sadrži informacije koje se odnose na neku od sledećih kategorija: Tec
         content: JSON.stringify(combinedContent)
       }
     ],
-    max_tokens: 1500,
+    max_tokens: 5000,
     temperature: 0.0
   };
 
@@ -161,7 +161,7 @@ Falls die Nachricht von Unglücken oder Katastrophen handelt, muss der Ton der A
         content: JSON.stringify(combinedContent)
       }
     ],
-    max_tokens: 1500,
+    max_tokens: 15000,
     temperature: 0.7
   };
 
