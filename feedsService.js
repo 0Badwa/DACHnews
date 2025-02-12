@@ -179,7 +179,7 @@ Wenn du den Input erhältst, antworte genau im beschriebenen JSON-Format, ohne z
         content: JSON.stringify(combinedContent)
       }
     ],
-    max_tokens: 25000,
+    max_tokens: 15000,
     temperature: 0.7
   };
 
