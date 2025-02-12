@@ -185,13 +185,29 @@ app.get('/api/news/:id', async (req, res) => {
 });
 
 /**
- * Ruta za prikaz pojedinačne vesti (/news/:id).
- * Ova izmena uvek šalje index.html, tako da se na klijentskoj strani (u main.js)
- * preuzme newsId iz URL-a i otvori modal sa odgovarajućom vestom.
+ * API ruta za pojedinačnu vest u JSON formatu.
  */
-app.get('/news/:id', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
+app.get('/api/news/:id', async (req, res) => {
+  const newsId = req.params.id;
+  try {
+    // Pokušaj da se vest pronađe u kategorijama
+    let allFeeds = await getAllFeedsFromRedis();
+    let news = allFeeds.find(item => item.id === newsId);
+    
+    // Ako nije pronađena, pokušaj sa SEO vesti
+    if (!news) {
+      const seoFeeds = await getSeoFeedsFromRedis();
+      news = seoFeeds.find(item => item.id === newsId);
+    }
+    
+    if (!news) return res.status(404).send("News not found");
+    res.json(news);
+  } catch (error) {
+    console.error(`[API] Error fetching news ${newsId}:`, error);
+    res.status(500).send("Server error");
+  }
 });
+
 
 
 /**

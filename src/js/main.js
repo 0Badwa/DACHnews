@@ -116,14 +116,19 @@ function moveCategory(index, direction) {
 function buildTabs() {
   const tabsContainer = document.getElementById('tabs-container');
   if (!tabsContainer) return;
+
+  // Uklanjamo sve tabove osim "Aktuell"
   const existingTabs = tabsContainer.querySelectorAll('.tab:not([data-tab="Aktuell"])');
   existingTabs.forEach(t => t.remove());
+
+  // Učitavamo eventualno sačuvani redosled
   const savedOrder = localStorage.getItem('categoriesOrder');
   if (savedOrder) {
     categoriesOrder = JSON.parse(savedOrder);
   }
+
   categoriesOrder.forEach(cat => {
-    if (isCategoryBlocked(cat)) return;
+    if (isCategoryBlocked(cat)) return; // preskoči ako je kategorija blokirana
     const btn = document.createElement('button');
     btn.className = 'tab';
     btn.setAttribute('data-tab', cat);
@@ -136,23 +141,29 @@ function openRearrangeModal() {
   const kategorienModal = document.getElementById('kategorien-modal');
   if (!kategorienModal) return;
   kategorienModal.style.display = 'flex';
+
   const ul = document.getElementById('sortable-list');
   if (!ul) return;
   ul.innerHTML = '';
+
   const savedOrder = localStorage.getItem('categoriesOrder');
   if (savedOrder) {
     categoriesOrder = JSON.parse(savedOrder);
   }
+
   categoriesOrder.forEach((cat, index) => {
     const li = document.createElement('li');
     li.draggable = true;
     li.textContent = cat;
+
     const upArrow = document.createElement('div');
     upArrow.className = 'arrow-up';
     upArrow.onclick = () => moveCategory(index, -1);
+
     const downArrow = document.createElement('div');
     downArrow.className = 'arrow-down';
     downArrow.onclick = () => moveCategory(index, 1);
+
     const btn = document.createElement('button');
     btn.textContent = isCategoryBlocked(cat) ? 'Entsperren' : 'Verbergen';
     btn.onclick = () => {
@@ -165,11 +176,14 @@ function openRearrangeModal() {
       }
       buildTabs();
     };
+
     li.prepend(upArrow, downArrow);
     li.appendChild(btn);
+
     li.addEventListener('dragstart', handleDragStart);
     li.addEventListener('dragover', handleDragOver);
     li.addEventListener('drop', handleDrop);
+
     ul.appendChild(li);
   });
 }
@@ -179,11 +193,14 @@ function closeKategorienModal() {
   if (kategorienModal) {
     kategorienModal.style.display = 'none';
   }
+
   const ul = document.getElementById('sortable-list');
   if (!ul) return;
+
   const items = [...ul.children].map(li =>
     li.textContent.split('Verbergen')[0].split('Entsperren')[0].trim()
   );
+
   categoriesOrder = items;
   localStorage.setItem('categoriesOrder', JSON.stringify(categoriesOrder));
   buildTabs();
@@ -204,12 +221,15 @@ function handleDrop(e) {
   const draggedCat = e.dataTransfer.getData('text/plain');
   const dropTarget = e.target.closest('li');
   if (!dropTarget) return;
+
   const ul = dropTarget.parentNode;
   const allItems = [...ul.children];
   const draggedItem = allItems.find(li => li.textContent.includes(draggedCat));
   if (!draggedItem) return;
+
   const draggedPos = allItems.indexOf(draggedItem);
   const dropPos = allItems.indexOf(dropTarget);
+
   if (draggedPos < dropPos) {
     ul.insertBefore(draggedItem, dropTarget.nextSibling);
   } else {
@@ -222,20 +242,26 @@ function openQuellenModal() {
   const quellenModal = document.getElementById('quellen-modal');
   if (!quellenModal) return;
   quellenModal.style.display = 'flex';
+
   const sourcesListEl = document.getElementById('sources-list');
   if (!sourcesListEl) return;
   sourcesListEl.innerHTML = '';
+
   const allSources = ALLOWED_SOURCES.slice();
   allSources.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+
   allSources.forEach(src => {
     const sourceItem = document.createElement('div');
     sourceItem.className = 'source-item';
+
     const spanName = document.createElement('span');
     spanName.textContent = src;
+
     const isBlocked = isSourceBlocked(src);
     const blockBtn = document.createElement('button');
     blockBtn.className = isBlocked ? 'unblock-button' : 'block-button';
     blockBtn.textContent = isBlocked ? 'Entsperren' : 'Verbergen';
+
     blockBtn.onclick = () => {
       if (isSourceBlocked(src)) {
         unblockSource(src);
@@ -246,6 +272,8 @@ function openQuellenModal() {
         blockBtn.className = 'unblock-button';
         blockBtn.textContent = 'Entsperren';
       }
+
+      // Osvežavamo trenutno aktivnu kategoriju nakon izmene
       const activeTab = document.querySelector('.tab.active');
       if (activeTab) {
         const category = activeTab.getAttribute('data-tab');
@@ -256,6 +284,7 @@ function openQuellenModal() {
         }
       }
     };
+
     sourceItem.appendChild(spanName);
     sourceItem.appendChild(blockBtn);
     sourcesListEl.appendChild(sourceItem);
@@ -325,6 +354,7 @@ function openDatenschutzModal() {
 function initSwipe() {
   const swipeContainer = document.getElementById('news-container');
   if (!swipeContainer) return;
+
   let touchstartX = 0;
   let touchendX = 0;
   let touchstartY = 0;
@@ -344,7 +374,10 @@ function initSwipe() {
   function handleGesture() {
     const distX = touchendX - touchstartX;
     const distY = touchendY - touchstartY;
+
+    // Resetujemo scroll
     swipeContainer.scrollTop = 0;
+
     if (Math.abs(distX) > Math.abs(distY) && Math.abs(distX) > swipeThreshold) {
       if (distX < 0) {
         moveCategorySwipe(1);
@@ -357,14 +390,19 @@ function initSwipe() {
   function moveCategorySwipe(dir) {
     const activeTab = document.querySelector('.tab.active');
     if (!activeTab) return;
+
     const currentCat = activeTab.getAttribute('data-tab');
     const cats = getAllSwipeCategories();
+
     let idx = cats.indexOf(currentCat);
     if (idx < 0) idx = 0;
     idx += dir;
+
     if (idx < 0) idx = 0;
     if (idx >= cats.length) idx = cats.length - 1;
+
     clickTab(cats[idx]);
+
     setTimeout(() => {
       window.scrollTo(0, 0);
       console.log('Window scrollTo(0,0) pozvan za kategoriju:', currentCat);
@@ -388,6 +426,7 @@ function initSwipe() {
       });
     }
     tab.click();
+
     requestAnimationFrame(() => {
       if (swipeContainer) swipeContainer.scrollTop = 0;
     });
@@ -398,6 +437,7 @@ function initSwipe() {
     touchstartX = t.screenX;
     touchstartY = t.screenY;
   });
+
   swipeContainer.addEventListener('touchend', e => {
     const t = e.changedTouches[0];
     touchendX = t.screenX;
@@ -441,52 +481,44 @@ function closeSettingsModal() {
 
 /** Centralizovana inicijalizacija na DOMContentLoaded **/
 document.addEventListener('DOMContentLoaded', async () => {
-  // Provera URL parametra "newsId" u query stringu
+  // 1) Prvo proveravamo URL parametar "newsId"
   const urlParams = new URLSearchParams(window.location.search);
-  const newsId = urlParams.get('newsId');
-
+  let newsId = urlParams.get('newsId');
+  
+  // 2) Ako ne postoji "newsId" u query parametru, proveravamo pathname (npr. "/news/123")
+  if (!newsId) {
+    const path = window.location.pathname;
+    if (path.startsWith('/news/')) {
+      newsId = path.split('/news/')[1];
+    }
+  }
+  
+  // 3) Ako imamo "newsId", pokušavamo da dobijemo vest od API-ja i prikažemo modal
   if (newsId) {
     try {
       const response = await fetch(`/api/news/${newsId}`);
       if (!response.ok) {
-        console.error("API nije pronašao vest sa ID:", newsId);
-        throw new Error("News not found");
+        console.error("Vest nije pronađena:", newsId);
+      } else {
+        const news = await response.json();
+        console.log("Preuzeta vest:", news);
+        openNewsModal(news);
       }
-      const news = await response.json();
-      console.log("Preuzeta vest:", news);
-      openNewsModal(news);
     } catch (error) {
       console.error("Greška pri učitavanju vesti:", error);
     }
   } else {
+    // Ako nema newsId, učitava se default "Aktuell" feed
     initFeeds();
   }
 
-  // 📌 Dodatna provera za URL formata "/news/:id"
-  const path = window.location.pathname;
-  if (path.startsWith('/news/')) {
-    const newsIdFromPath = path.split('/news/')[1];
-
-    if (newsIdFromPath) {
-      try {
-        const response = await fetch(`/api/news/${newsIdFromPath}`);
-        if (!response.ok) {
-          console.error("API nije pronašao vest sa ID:", newsIdFromPath);
-          throw new Error("News not found");
-        }
-        const news = await response.json();
-        console.log("Preuzeta vest:", news);
-        openNewsModal(news);
-      } catch (error) {
-        console.error("Greška pri učitavanju vesti:", error);
-      }
-    }
-  }
-
-  // Nastavak inicijalizacije UI elemenata
+  // --- Nastavak inicijalizacije interfejsa ---
   applyCardFontSize();
   buildTabs();
   initSwipe();
+  
+  // Učitavamo feed za aktivni tab ili default 'Aktuell'
+  loadFeeds();
 
   // Event listener za tabove
   const tabsContainer = document.getElementById('tabs-container');
@@ -494,6 +526,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     tabsContainer.addEventListener('click', async (e) => {
       const tab = e.target.closest('.tab');
       if (!tab || tab.classList.contains('active')) return;
+
       document.querySelectorAll('.tab').forEach(t => {
         t.classList.remove('active');
         t.setAttribute('aria-selected', 'false');
@@ -518,7 +551,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.error(`Greška prilikom učitavanja kategorije "${category}":`, error);
       }
 
-      // Novo resetovanje scroll pozicije: čekamo 300ms pa resetujemo scroll više puta tokom 2 sekunde
+      // Resetovanje scroll-a više puta da bismo bili sigurni da se vraća na vrh
       (async () => {
         await new Promise(resolve => setTimeout(resolve, 50));
   
@@ -530,8 +563,11 @@ document.addEventListener('DOMContentLoaded', async () => {
           window.scrollTo(0, 0);
           document.documentElement.scrollTop = 0;
           document.body.scrollTop = 0;
-          console.log('Reset scroll: container.scrollTop=', container ? container.scrollTop : 'nema container',
-                      'window.pageYOffset=', window.pageYOffset);
+          console.log(
+            'Reset scroll: container.scrollTop=',
+            container ? container.scrollTop : 'nema container',
+            'window.pageYOffset=', window.pageYOffset
+          );
         }
   
         resetScroll();
@@ -544,7 +580,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       })();
     });
   }
-  loadFeeds();
 
   // Postavljanje event listener-a za Settings modal i srodne modale
   const menuButton = document.getElementById('menu-button');
@@ -646,6 +681,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
   }
 
+  // Tutorial Overlay
   const closeTutorialBtn = document.getElementById('close-tutorial');
   if (closeTutorialBtn) {
     closeTutorialBtn.onclick = () => {
