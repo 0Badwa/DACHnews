@@ -184,52 +184,13 @@ app.get('/api/news/:id', async (req, res) => {
 
 /**
  * Ruta za prikaz pojedinačne vesti (/news/:id).
+ * Ova izmena uvek šalje index.html, tako da se na klijentskoj strani (u main.js)
+ * preuzme newsId iz URL-a i otvori modal sa odgovarajućom vestom.
  */
-app.get('/news/:id', async (req, res) => {
-  const newsId = req.params.id;
-  try {
-    const allFeeds = await getAllFeedsFromRedis();
-    const news = allFeeds.find(item => item.id === newsId);
-    if (!news) return res.status(404).send("News not found");
-
-    const userAgent = req.headers['user-agent'] || '';
-    const isGooglebot = /Googlebot|bingbot|DuckDuckBot|Baiduspider|YandexBot/i.test(userAgent);
-
-    if (isGooglebot) {
-      console.log(`[SEO] Serving static HTML for Googlebot: ${newsId}`);
-      return res.send(`
-        <!DOCTYPE html>
-        <html lang="de">
-        <head>
-          <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>${news.title} | DACH.news</title>
-          <meta name="description" content="${news.description || news.title}">
-          <link rel="canonical" href="https://www.dach.news/news/${news.id}">
-          <meta property="og:title" content="${news.title}">
-          <meta property="og:description" content="${news.description || news.title}">
-          <meta property="og:url" content="https://www.dach.news/news/${news.id}">
-          <meta property="og:type" content="article">
-          <meta property="og:image" content="${news.image || 'https://www.dach.news/default-thumbnail.jpg'}">
-          <meta name="robots" content="index, follow">
-        </head>
-        <body>
-          <h1>${news.title}</h1>
-          <p>${news.description || 'Keine Beschreibung verfügbar'}</p>
-          <img src="${news.image || 'https://www.dach.news/default-thumbnail.jpg'}" alt="${news.title}">
-          <p>Veröffentlicht am: ${new Date(news.date_published).toLocaleDateString('de-DE')}</p>
-        </body>
-        </html>
-      `);
-    } else {
-      console.log(`[Redirect] Redirecting /news/${newsId} to /?newsId=${newsId}`);
-      res.redirect(301, `/?newsId=${newsId}`);
-    }
-  } catch (error) {
-    console.error(`[HTML] Error generating page for news ${newsId}:`, error);
-    res.status(500).send("Server error");
-  }
+app.get('/news/:id', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
 });
+
 
 /**
  * Ruta za generisanje XML sitemap-a.
