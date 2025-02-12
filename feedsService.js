@@ -172,7 +172,8 @@ Copy code
 { "id": "...", "analysis": "..." }
 Wenn du den Input erhältst, antworte genau im beschriebenen JSON-Format, ohne zusätzliche Erklärungen oder Markdown.
 
-Schreibe den Output so, dass zuerst der analysis Teil kommt und dann der humorvolle Kommentar. Am Anfang des Kommentars sollte das Zeichen • (alt+0149) stehen.“`
+Schreibe den Output so, dass zuerst der analysis Teil kommt und dann der humorvolle Kommentar. Am Anfang des Kommentars sollte das Zeichen • (alt+0149) stehen.
+Gib mir die Analyse und den Kommentar unbedingt in einem einzigen Absatz zurück.`
 },
       {
         role: "user",
