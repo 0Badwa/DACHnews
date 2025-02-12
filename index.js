@@ -264,7 +264,7 @@ app.get('/sitemap.xml', async (req, res) => {
 
 app.get('/api/debug/html-keys', async (req, res) => {
   try {
-    const keys = await redisClient.keys('html:news:*');
+    const keys = await redisClient.keys('seo:news');
     res.json(keys);
   } catch (error) {
     console.error("Error fetching Redis keys:", error);
