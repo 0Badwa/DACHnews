@@ -5,6 +5,7 @@ import express from 'express';
 import helmet from 'helmet';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import fs from 'fs';
 
 import {
   initRedis,
@@ -97,10 +98,21 @@ function generateHtmlForNews(news) {
   `;
 }
 
-// Ruta za glavnu stranicu
+/**
+ * Ruta za glavnu stranicu sa dinamičkim popunjavanjem index.html
+ */
 app.get('/', (req, res) => {
-  console.log("[Route /] Serving index.html...");
-  res.sendFile(path.join(__dirname, 'index.html'));
+  const filePath = path.join(__dirname, 'index.html');
+  fs.readFile(filePath, 'utf8', (err, data) => {
+    if (err) {
+      console.error("Greška pri čitanju index.html", err);
+      return res.status(500).send("Server error");
+    }
+    // Dinamički postavi naslov (ovdje možeš preuzeti vrijednost iz baze ili drugdje)
+    const newsTitle = "Najnovije vijesti";
+    const modifiedHtml = data.replace('%%NEWS_TITLE%%', newsTitle);
+    res.send(modifiedHtml);
+  });
 });
 
 /**
@@ -249,7 +261,6 @@ app.get('/sitemap.xml', async (req, res) => {
     res.status(500).send("Server error");
   }
 });
-
 
 app.get('/api/debug/html-keys', async (req, res) => {
   try {
