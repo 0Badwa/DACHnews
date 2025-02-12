@@ -142,7 +142,7 @@ json
 Copy code
 {
   "id": "{Nachrichten-ID}",
-  "analysis": "{Text von 400–500 Zeichen, der das Thema subtil analysiert. Falls die Nachricht keine Katastrophe oder Tragödie ist, beende den Text mit einem kurzen, humorvollen Kommentar (max. 200 Zeichen), der die Situation ironisch oder provokativ kommentiert.}"
+  "analysis": "{Text von 400–500 Zeichen, der das Thema subtil analysiert. Falls die Nachricht keine Katastrophe oder Tragödie ist, beende den Text mit einem kurzen, humorvollen Kommentar (max. 200 Zeichen), der die Situation ironisch oder provokativ kommentiert. Der Kommentar beginnt mit dem Zeichen • und wird direkt an die Analyse angehängt.}"
 }
 Wenn die Nachricht über ein Unglück oder eine Katastrophe spricht, muss der Ton der Analyse professionell, respektvoll und humorlos sein.
 
