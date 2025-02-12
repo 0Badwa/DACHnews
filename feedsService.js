@@ -68,7 +68,7 @@ async function sendBatchToGPTCategorization(feedBatch) {
     messages: [
       {
         role: "system",
-        content: `Ti si veštački inteligentni asistent specijalizovan za kategorizaciju vesti za projekat DACH News (nemački jezik). Kategorije:
+        content: `Ti si svetski priznat stručnjak specijalizovan za kategorizaciju vesti. Radimo za projekat DACH News (nemački jezik). Imamo sledeće kategorije:
 - Technologie
 - Gesundheit
 - Sport
@@ -82,7 +82,7 @@ async function sendBatchToGPTCategorization(feedBatch) {
 - Unterhaltung
 - Welt
 
-Ako vest sadrži informacije koje se odnose na neku od sledećih kategorija: Technologie, Gesundheit, Sport, Wirtschaft, Kultur, Auto, Reisen, Lifestyle, Panorama, Politik, Unterhaltung, Welt, onda je svrati u odgovarajuću kategoriju. Ako vest ne pripada nijednoj od ovih kategorija, svrstaćemo je u "Panorama". Ako je vest o saobraćajnim neserećama ide u kategoriju Panorama. Molim te, vrati isključivo validan JSON niz bez ikakvog dodatnog teksta, objašnjenja ili markdown oznaka. Svaki element u nizu mora biti objekat sa tačno dva svojstva: "id" (string) i "category" (string). Primer odgovora: [ { "id": "primer1", "category": "Wirtschaft" }, { "id": "primer2", "category": "Panorama" } ]. Tvoj odgovor mora sadržati samo JSON niz, bez dodatnih znakova.`
+Obavezno dodeli jednu kategoriju svakoj vesti. Ako vest ne pripada nijednoj od ovih kategorija, svrstaćemo je u "Panorama". Ako je vest o saobraćajnim neserećama ide u kategoriju Panorama. Molim te, vrati isključivo validan JSON niz bez ikakvog dodatnog teksta, objašnjenja ili markdown oznaka. Svaki element u nizu mora biti objekat sa tačno dva svojstva: "id" (string) i "category" (string). Primer odgovora: [ { "id": "primer1", "category": "Wirtschaft" }, { "id": "primer2", "category": "Panorama" } ]. Tvoj odgovor mora sadržati samo JSON niz, bez dodatnih znakova.`
       },
       {
         role: "user",
@@ -90,7 +90,7 @@ Ako vest sadrži informacije koje se odnose na neku od sledećih kategorija: Tec
       }
     ],
     max_tokens: 5000,
-    temperature: 0.0
+    temperature: 0.2
   };
 
   try {
@@ -172,7 +172,7 @@ Copy code
 { "id": "...", "analysis": "..." }
 Wenn du den Input erhältst, antworte genau im beschriebenen JSON-Format, ohne zusätzliche Erklärungen oder Markdown.
 
-Schreibe den Text so, dass zuerst der analytische Teil (Meinung) kommt und dann der humorvolle Kommentar. Am Anfang des Kommentars sollte das Zeichen • (alt+0149) stehen. Gib mir beide Ergebnisse zusammen in einem Absatz zurück.“`
+Schreibe den Output so, dass zuerst der analysis Teil kommt und dann der humorvolle Kommentar. Am Anfang des Kommentars sollte das Zeichen • (alt+0149) stehen.“`
 },
       {
         role: "user",
