@@ -179,7 +179,7 @@ Wenn du den Input erhältst, antworte genau im beschriebenen JSON-Format, ohne z
         content: JSON.stringify(combinedContent)
       }
     ],
-    max_tokens: 15000,
+    max_tokens: 25000,
     temperature: 0.7
   };
 
@@ -408,7 +408,7 @@ export async function processFeeds() {
     return;
   }
 
-  const BATCH_SIZE = 5;
+  const BATCH_SIZE = 10;
   for (let i = 0; i < newItems.length; i += BATCH_SIZE) {
     const batch = newItems.slice(i, i + BATCH_SIZE);
     // Paralelno pozovi GPT API za kategorizaciju i analizu
