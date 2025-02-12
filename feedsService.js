@@ -160,9 +160,12 @@ Der Ton soll differenziert und direkt, jedoch ohne Moralismus sein.
 "kommentar" (Humorvoller Kommentar):
 Länge: max. 200 Zeichen
 Schreibe einen humorvollen Kommentar zur Nachricht, aber vermeide Wiederholungen (meide das Wort „vielleicht“). Sei kreativer.
-Der Kommentar sollte provokativ und humorvoll sein (kann Sarkasmus oder Ironie enthalten).
-Betone auf humorvolle Weise die Absurdität oder Unlogik der Situation.
-Keine extremen oder beleidigenden Inhalte.
+Analysiere die folgende Nachricht und erstelle einen kurzen, 
+humorvollen Kommentar, der ihre Absurdität, Ironie oder 
+unerwartete Seite hervorhebt. Der Kommentar kann Sarkasmus, 
+Wortspiele oder einen provokativen Ton enthalten, 
+sollte aber im Rahmen des guten Geschmacks bleiben – ohne extreme 
+oder beleidigende Inhalte.
 
 Zusätzliche Hinweise:
 Gib als Ergebnis ein JSON-Array zurück, in dem jeder Eintrag das Format hat:
