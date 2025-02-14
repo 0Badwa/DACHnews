@@ -82,7 +82,7 @@ async function sendBatchToGPTCategorization(feedBatch) {
 - Unterhaltung
 - Welt
 
-Obavezno dodeli jednu kategoriju svakoj vesti. Ako vest ne pripada nijednoj od ovih kategorija, svrstaćemo je u "Panorama". Ako je vest o saobraćajnim neserećama ide u kategoriju Panorama. Molim te, vrati isključivo validan JSON niz bez ikakvog dodatnog teksta, objašnjenja ili markdown oznaka. Svaki element u nizu mora biti objekat sa tačno dva svojstva: "id" (string) i "category" (string). Primer odgovora: [ { "id": "primer1", "category": "Wirtschaft" }, { "id": "primer2", "category": "Panorama" } ]. Tvoj odgovor mora sadržati samo JSON niz, bez dodatnih znakova.`
+Obavezno dodeli jednu kategoriju svakoj vesti. Ako vest ne pripada nijednoj od ovih kategorija, svrstaćemo je u "Panorama". Ako je vest o saobraćajnim neserećama ili ima pojam kriminal ide u kategoriju Panorama. Molim te, vrati isključivo validan JSON niz bez ikakvog dodatnog teksta, objašnjenja ili markdown oznaka. Svaki element u nizu mora biti objekat sa tačno dva svojstva: "id" (string) i "category" (string). Primer odgovora: [ { "id": "primer1", "category": "Wirtschaft" }, { "id": "primer2", "category": "Panorama" } ]. Tvoj odgovor mora sadržati samo JSON niz, bez dodatnih znakova.`
       },
       {
         role: "user",
@@ -305,9 +305,9 @@ export async function addItemToRedis(item, category, analysis = null) {
   await redisClient.sAdd("processed_ids", item.id);
   await redisClient.expire("processed_ids", SEVEN_DAYS);
 
-  // Dodavanje vesti u listu "Aktuell" (poslednjih 200 vesti)
+  // Dodavanje vesti u listu "Aktuell" (poslednjih 300 vesti)
   await redisClient.lPush("Aktuell", JSON.stringify(newsObj));
-  await redisClient.lTrim("Aktuell", 0, 199);
+  await redisClient.lTrim("Aktuell", 0, 299);
 
   // Dodavanje vesti u SEO hash (bez TTL) za statičke SEO stranice, uključujući analizu
   await redisClient.hSet("seo:news", item.id, JSON.stringify(newsObj));
@@ -407,8 +407,8 @@ export async function processFeeds() {
   }
   console.log(`[processFeeds] Posle dupl. provere ostalo ${newItems.length} vesti.`);
 
-  if (newItems.length < 2) {
-    console.log("[processFeeds] Manje od 2 nove vesti, preskačemo GPT za sada.");
+  if (newItems.length < 10) {
+    console.log("[processFeeds] Manje od 10 novih vesti, preskačemo GPT za sada.");
     return;
   }
 
