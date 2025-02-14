@@ -210,6 +210,15 @@ app.get('/sitemap.xml', async (req, res) => {
       xml += '    <priority>1.0</priority>\n';
       xml += '  </url>\n';
     }
+
+   // Dodajemo RSS feed u sitemap
+   xml += '  <url>\n';
+   xml += `    <loc>https://www.dach.news/rss</loc>\n`;
+   xml += `    <lastmod>${new Date().toISOString()}</lastmod>\n`;
+   xml += '    <changefreq>hourly</changefreq>\n';
+   xml += '    <priority>0.9</priority>\n';
+   xml += '  </url>\n';
+
     xml += '</urlset>';
     res.header('Content-Type', 'application/xml');
     res.send(xml);

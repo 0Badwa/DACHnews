@@ -21,20 +21,28 @@ Disallow: /cart
 Disallow: /checkout
 Disallow: /account
 Disallow: /search
-
-# Dozvoli svim botovima indeksiranje ključnih stranica
-Allow: /
 Allow: /news/
 Allow: /api/
-Allow: /rss
+Allow: /rss/
 
 # Googlebot specifična pravila
 User-agent: Googlebot
 Allow: /api/
 Allow: /rss/
 Crawl-delay: 1
-Request-rate: 1/1s
+
+# Googlebot-News (specijalizovan za vesti)
+User-agent: Googlebot-News
+Allow: /news/
+Allow: /rss/
+Crawl-delay: 1
+
+# Bingbot (za Bing News)
+User-agent: bingbot
+Allow: /news/
+Allow: /rss/
+Crawl-delay: 1
 
 # Omogućavanje sitemap-a za bolju indeksaciju
 Sitemap: https://www.dach.news/sitemap.xml
-Sitemap: https://www.dach.news/rss
+Sitemap: https://www.dach.news/rss.xml
