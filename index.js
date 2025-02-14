@@ -282,15 +282,57 @@ app.use((req, res, next) => {
  */
 app.get('/api/rss', async (req, res) => {
   try {
-    // Uzimamo do 200 najnovijih iz 'Aktuell'
+    // Uzimamo do 200 najnovijih vesti iz 'Aktuell'
     const rawItems = await redisClient.lRange("Aktuell", 0, 199);
     const feeds = rawItems.map(item => JSON.parse(item));
-    res.json(feeds);
+
+    // JSON-LD struktura za AI pretraživače (Schema.org format)
+    const jsonLd = {
+      "@context": "https://schema.org",
+      "@type": "DataFeed",
+      "name": "DACH.news API",
+      "description": "Aktuelle Nachrichten aus der DACH-Region, analysiert von AI.",
+      "url": "https://www.dach.news/api/rss",
+      "dataFeedElement": feeds.map(feed => ({
+        "@type": "NewsArticle",
+        "headline": feed.title,
+        "datePublished": feed.date_published ? new Date(feed.date_published).toISOString() : new Date().toISOString(),
+        "image": feed.image || "https://www.dach.news/src/icons/default-image.png",
+        "url": feed.url || "https://www.dach.news",
+        "author": {
+          "@type": "Organization",
+          "name": feed.source || "Unbekannte Quelle",
+          "url": feed.url ? new URL(feed.url).origin : "https://www.dach.news"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "DACH.news",
+          "url": "https://www.dach.news",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.dach.news/src/icons/logo.png"
+          }
+        },
+        "description": `Diese Nachricht stammt von ${feed.source || "einer unbekannten Quelle"} und wurde von KI analysiert.`,
+        "comment": feed.analysis ? {
+          "@type": "Comment",
+          "text": feed.analysis,
+          "author": {
+            "@type": "AIAlgorithm",
+            "name": "DACH.news AI"
+          }
+        } : undefined
+      }))
+    };
+
+    res.json(jsonLd);
   } catch (error) {
     console.error("[Route /api/rss] Error:", error);
     res.status(500).send("Server error");
   }
 });
+
+
 
 /**
  * 2) Ruta koja generiše RSS feed u XML formatu (klasičan RSS 2.0)
