@@ -57,13 +57,16 @@ function generateHtmlForNews(news) {
     <html lang="en">
     <head>
       <meta charset="UTF-8">
-      <title>${news.title}</title>
+     <title>${news.title} - DACH News: Nachrichten aus Deutschland, Österreich, Schweiz</title>
       <meta name="description" content="${news.content_text ? news.content_text.substring(0, 160) : ''}">
       <link rel="canonical" href="https://www.dach.news/news/${news.id}">
       <style>
         body { font-family: Arial, sans-serif; margin: 20px; }
         img { max-width: 100%; height: auto; }
       </style>
+
+             <h1>${news.title}</h1>
+
       <script type="application/ld+json">
       {
         "@context": "https://schema.org",
