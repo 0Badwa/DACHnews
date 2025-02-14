@@ -17,7 +17,16 @@ export const brandMap = {
   'neues-deutschland': 'de',
   'queer': 'de',
   'volksstimme': 'de',
-  'anzeigerbonn': 'de', // primer dodatog
+  'anzeigerbonn': 'de',
+  'die-welt': 'de',
+  'sueddeutsche': 'de',
+  'focus': 'de',
+  'handelsblatt': 'de',
+  'faz': 'de',
+  'stern': 'de',
+  'ndr': 'de',
+  'zdf': 'de',
+  'dw': 'de',
   // AT (Austrija)
   'falter': 'at',
   'kurier': 'at',
@@ -26,6 +35,10 @@ export const brandMap = {
   'derstandard': 'at',
   'salzburg': 'at',
   'augustin': 'at',
+  'diepresse': 'at',
+  'orf': 'at',
+  'kleinezeitung': 'at',
+  'nachrichten': 'at',
   // CH (Švajcarska)
   'blick': 'ch',
   'aargauerzeitung': 'ch',
@@ -34,6 +47,8 @@ export const brandMap = {
   'pszeitung': 'ch',
   'tagesanzeiger': 'ch',
   'vorwaerts': 'ch',
+  'nzz': 'ch',
+  'srf': 'ch'
 };
 
 /**
