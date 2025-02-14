@@ -282,7 +282,7 @@ app.use((req, res, next) => {
 
 /**
  * 1) API ruta koja vraća JSON feed (podaci iz Redis-a).
- *    Npr. do 50 najnovijih iz "Aktuell".
+ *    Npr. do 200 najnovijih iz "Aktuell".
  */
 app.get('/api/rss', async (req, res) => {
   try {
@@ -314,7 +314,7 @@ app.get('/rss', async (req, res) => {
     rss += `<channel>\n`;
     rss += `  <title>DACH.news RSS</title>\n`;
     rss += `  <link>https://www.dach.news</link>\n`;
-    rss += `  <description>RSS Feed by DACH.news</description>\n`;
+    rss += `  <description>Aktuelle Nachrichten aus der DACH-Region, analysiert mit Hilfe von AI</description>\n`;
     rss += `  <language>de</language>\n`;
 
     // Generišemo <item> za svaku vest
