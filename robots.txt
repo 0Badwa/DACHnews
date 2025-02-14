@@ -1,0 +1,40 @@
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
+
+User-agent: BLEXBot
+Disallow: /
+
+User-agent: *
+Disallow: /admin
+Disallow: /login
+Disallow: /register
+Disallow: /cart
+Disallow: /checkout
+Disallow: /account
+Disallow: /search
+
+# Dozvoli svim botovima indeksiranje ključnih stranica
+Allow: /
+Allow: /news/
+Allow: /api/
+Allow: /rss
+
+# Googlebot specifična pravila
+User-agent: Googlebot
+Allow: /api/
+Allow: /rss/
+Crawl-delay: 1
+Request-rate: 1/1s
+
+# Omogućavanje sitemap-a za bolju indeksaciju
+Sitemap: https://www.dach.news/sitemap.xml
+Sitemap: https://www.dach.news/rss

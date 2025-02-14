@@ -339,3 +339,18 @@ app.get('/rss', async (req, res) => {
     res.status(500).send("Server error");
   }
 });
+
+/**
+ * 3) API dokumentacija za lakši pristup
+ */
+app.get('/api/docs', (req, res) => {
+  res.send(`
+    <h1>DACH News API</h1>
+    <p>Willkommen zur DACH News API. Diese API ermöglicht den Zugriff auf die neuesten Nachrichten.</p>
+    <ul>
+      <li><a href="/api/rss">/api/rss</a> - JSON RSS-Feed</li>
+      <li><a href="/api/feeds-by-category/Sport">/api/feeds-by-category/Sport</a> - Nachrichten nach Kategorie</li>
+      <li><a href="/api/latest-news">/api/latest-news</a> - Neueste Nachrichten</li>
+    </ul>
+  `);
+});
