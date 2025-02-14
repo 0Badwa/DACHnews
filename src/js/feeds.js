@@ -198,7 +198,7 @@ export async function fetchAllFeedsFromServer(forceRefresh = false) {
     localStorage.setItem(cachedFeedsKey, JSON.stringify(data));
     localStorage.setItem(lastFetchKey, new Date().toISOString());
 
-    return data.slice(0, 50);
+    return data.slice(0, 100);
 
   } catch (error) {
     if (error.name === 'AbortError') {
@@ -214,7 +214,7 @@ export async function fetchAllFeedsFromServer(forceRefresh = false) {
 }
 
 /**
- * Fetch do 50 feedova iz određene kategorije, keširano ~10 min (/api/feeds-by-category).
+ * Fetch do 100 feedova iz određene kategorije, keširano ~10 min (/api/feeds-by-category).
  */
 export async function fetchCategoryFeeds(category, forceRefresh = false) {
   showLoader();
@@ -235,7 +235,7 @@ export async function fetchCategoryFeeds(category, forceRefresh = false) {
         let data = JSON.parse(cached);
         data.sort((a, b) => new Date(b.date_published).getTime() - new Date(a.date_published).getTime());
         data = data.filter(feed => !isHiddenFeed(feed));
-        return data.slice(0, 50);
+        return data.slice(0, 100);
       }
     }
 
@@ -254,7 +254,7 @@ export async function fetchCategoryFeeds(category, forceRefresh = false) {
     localStorage.setItem(cachedFeedsKey, JSON.stringify(data));
     localStorage.setItem(lastFetchKey, new Date().toISOString());
 
-    return data.slice(0, 50);
+    return data.slice(0, 100);
 
   } catch (error) {
     console.error("[fetchCategoryFeeds] Greška:", error);
