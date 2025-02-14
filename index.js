@@ -229,10 +229,6 @@ app.get('/api/debug/html-keys', async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`[Express] Server running on port ${PORT}`);
-});
 
 setInterval(processFeeds, 12 * 60 * 1000);
 processFeeds();
@@ -353,4 +349,32 @@ app.get('/api/docs', (req, res) => {
       <li><a href="/api/latest-news">/api/latest-news</a> - Neueste Nachrichten</li>
     </ul>
   `);
+});
+
+
+/**
+ * 4) API za pretragu vesti po ključnoj reči
+ */
+app.get('/api/search', async (req, res) => {
+  const { query } = req.query;
+  if (!query) return res.status(400).send("Query param is required.");
+
+  try {
+    const allFeeds = await getAllFeedsFromRedis();
+    const results = allFeeds.filter(feed =>
+      feed.title.toLowerCase().includes(query.toLowerCase()) ||
+      feed.content_text.toLowerCase().includes(query.toLowerCase())
+    );
+
+    res.json({ total: results.length, articles: results });
+  } catch (error) {
+    console.error("[API] Error searching news:", error);
+    res.status(500).send("Server error");
+  }
+});
+
+
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`[Express] Server running on port ${PORT}`);
 });
