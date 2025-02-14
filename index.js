@@ -170,22 +170,7 @@ app.get('/image/:id', async (req, res) => {
 
 /**
  * API ruta za pojedinačnu vest u JSON formatu.
- */
-app.get('/api/news/:id', async (req, res) => {
-  const newsId = req.params.id;
-  try {
-    const allFeeds = await getAllFeedsFromRedis();
-    const news = allFeeds.find(item => item.id === newsId);
-    if (!news) return res.status(404).send("News not found");
-    res.json(news);
-  } catch (error) {
-    console.error(`[API] Error fetching news ${newsId}:`, error);
-    res.status(500).send("Server error");
-  }
-});
-
-/**
- * API ruta za pojedinačnu vest u JSON formatu.
+ * (Zbog duple definicije, spojeno u jednu rutu.)
  */
 app.get('/api/news/:id', async (req, res) => {
   const newsId = req.params.id;
@@ -207,8 +192,6 @@ app.get('/api/news/:id', async (req, res) => {
     res.status(500).send("Server error");
   }
 });
-
-
 
 /**
  * Ruta za generisanje XML sitemap-a.
@@ -291,4 +274,68 @@ app.use((req, res, next) => {
     return res.redirect(301, 'https://www.dach.news' + req.url);
   }
   next();
+});
+
+/**********************************************
+ * DODATE NOVE FUNKCIJE ZA RSS
+ **********************************************/
+
+/**
+ * 1) API ruta koja vraća JSON feed (podaci iz Redis-a).
+ *    Npr. do 50 najnovijih iz "Aktuell".
+ */
+app.get('/api/rss', async (req, res) => {
+  try {
+    // Uzimamo do 200 najnovijih iz 'Aktuell'
+    const rawItems = await redisClient.lRange("Aktuell", 0, 199);
+    const feeds = rawItems.map(item => JSON.parse(item));
+    res.json(feeds);
+  } catch (error) {
+    console.error("[Route /api/rss] Error:", error);
+    res.status(500).send("Server error");
+  }
+});
+
+/**
+ * 2) Ruta koja generiše RSS feed u XML formatu (klasičan RSS 2.0)
+ */
+app.get('/rss', async (req, res) => {
+  try {
+    // Uzimamo do 200 najnovijih iz 'Aktuell'
+    const rawItems = await redisClient.lRange("Aktuell", 0, 199);
+    const feeds = rawItems.map(item => JSON.parse(item));
+
+    // Header za RSS
+    res.setHeader('Content-Type', 'application/rss+xml; charset=utf-8');
+    
+    // Generišemo osnovu RSS-a
+    let rss = `<?xml version="1.0" encoding="UTF-8"?>\n`;
+    rss += `<rss version="2.0">\n`;
+    rss += `<channel>\n`;
+    rss += `  <title>DACH.news RSS</title>\n`;
+    rss += `  <link>https://www.dach.news</link>\n`;
+    rss += `  <description>RSS Feed by DACH.news</description>\n`;
+    rss += `  <language>de</language>\n`;
+
+    // Generišemo <item> za svaku vest
+    feeds.forEach(feed => {
+      rss += `  <item>\n`;
+      rss += `    <title><![CDATA[${feed.title}]]></title>\n`;
+      rss += `    <link>${feed.url || ''}</link>\n`;
+      rss += `    <enclosure url="${feed.image}" type="image/webp" />\n`;
+      rss += `    <description><![CDATA[${feed.content_text || ''}]]></description>\n`;
+      rss += `    <category>${feed.category || ''}</category>\n`;
+      rss += `    <pubDate>${feed.date_published ? new Date(feed.date_published).toUTCString() : ''}</pubDate>\n`;
+      rss += `    <guid isPermaLink="false">${feed.id}</guid>\n`;
+      rss += `  </item>\n`;
+    });
+
+    rss += `</channel>\n`;
+    rss += `</rss>`;
+
+    res.send(rss);
+  } catch (error) {
+    console.error("[Route /rss] Error generating RSS:", error);
+    res.status(500).send("Server error");
+  }
 });
