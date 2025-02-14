@@ -413,8 +413,9 @@ export async function processFeeds() {
   }
 
   const BATCH_SIZE = 10;
-  for (let i = 0; i < newItems.length; i += BATCH_SIZE) {
+  for (let i = 0; i + BATCH_SIZE <= newItems.length; i += BATCH_SIZE) {
     const batch = newItems.slice(i, i + BATCH_SIZE);
+    console.log(`[processFeeds] Šaljem batch od ${batch.length} vesti na GPT API.`);
     // Paralelno pozovi GPT API za kategorizaciju i analizu
     const [catResponse, analysisResponse] = await Promise.all([
       sendBatchToGPTCategorization(batch),
