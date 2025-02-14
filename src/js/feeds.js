@@ -284,6 +284,13 @@ img.className = "news-card-image lazy news-image";
 img.src = feed.image ? feed.image : `${BASE_IMAGE_URL}/src/icons/no-image.png`;
 img.alt = feed.title ? feed.title : 'Nachrichtenbild'; // SEO-friendly alt na nemačkom
   
+// Ako se slika ne može učitati (CSP blokira ili ne postoji), koristi no-image.png
+img.onerror = function() {
+  this.onerror = null; // Sprečava beskonačnu petlju ako default slika ne postoji
+  this.src = "https://www.dach.news/src/icons/no-image.png";
+};
+
+
   // Osiguraj da se slika prikazuje u centru boxa
   img.width = 80;
   img.height = 80;
