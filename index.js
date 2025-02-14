@@ -14,8 +14,12 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
-app.use('/favicon.ico', express.static(path.join(__dirname, 'src/icons/favicon.ico')));
+// Služi Bing verifikacioni fajl
+app.get('/BingSiteAuth.xml', (req, res) => {
+  res.sendFile(path.join(__dirname, 'BingSiteAuth.xml'));
+});
 
+app.use('/favicon.ico', express.static(path.join(__dirname, 'src/icons/favicon.ico')));
 app.use('/fonts', express.static(path.join(__dirname, 'src/fonts')));
 
 app.use(
