@@ -1,9 +1,71 @@
+/***********************************************
+ * newsModal.js
+ ***********************************************/
+
+/**
+ * Ažurira <title>, <meta> description, kao i
+ * Open Graph i Twitter card meta tagove
+ * na osnovu prosledjene vesti (feed).
+ */
+function updateDynamicMeta(feed) {
+  // 1) Title
+  document.title = feed.title
+    ? `${feed.title} – DACH.news`
+    : 'DACH.news';
+
+  // 2) Meta description (uzmi prvih ~160 karaktera iz content_text, ako postoji)
+  const description = feed.content_text
+    ? feed.content_text.substring(0, 160)
+    : (feed.title || 'Aktuelle Nachrichten aus der DACH-Region');
+  const metaDesc = document.querySelector('meta[name="description"]');
+  if (metaDesc) {
+    metaDesc.setAttribute('content', description);
+  }
+
+  // 3) Open Graph
+  const ogTitle = document.querySelector('meta[property="og:title"]');
+  if (ogTitle) {
+    ogTitle.setAttribute('content', document.title);
+  }
+  const ogDesc = document.querySelector('meta[property="og:description"]');
+  if (ogDesc) {
+    ogDesc.setAttribute('content', description);
+  }
+  const ogImage = document.querySelector('meta[property="og:image"]');
+  if (ogImage) {
+    ogImage.setAttribute('content', feed.image || 'https://dach.news/preview.jpg');
+  }
+  const ogUrl = document.querySelector('meta[property="og:url"]');
+  if (ogUrl) {
+    // Ako hoćeš da menjaš url za svaku vest, možeš npr:
+    // ogUrl.setAttribute('content', `https://www.dach.news/news/${feed.id}`);
+    ogUrl.setAttribute('content', 'https://dach.news');
+  }
+
+  // 4) Twitter
+  const twTitle = document.querySelector('meta[name="twitter:title"]');
+  if (twTitle) {
+    twTitle.setAttribute('content', document.title);
+  }
+  const twDesc = document.querySelector('meta[name="twitter:description"]');
+  if (twDesc) {
+    twDesc.setAttribute('content', description);
+  }
+  const twImage = document.querySelector('meta[name="twitter:image"]');
+  if (twImage) {
+    twImage.setAttribute('content', feed.image || 'https://dach.news/preview.jpg');
+  }
+}
+
 /**
  * Otvara modal sa novom slikom bez kratkotrajnog prikaza stare slike.
  * Ceo modal ostaje sakriven dok se nova slika ne učita,
  * pa se sve prikaže odjednom, bez "treptanja".
  */
 export function openNewsModal(feed) {
+  // Prvo ažuriramo <title> i <meta> tagove za SEO
+  updateDynamicMeta(feed);
+
   const modal = document.getElementById('news-modal');
   const modalImage = document.getElementById('news-modal-image');
   const modalTitle = document.getElementById('news-modal-title');
@@ -28,47 +90,48 @@ export function openNewsModal(feed) {
     modalImage.classList.remove('hide-alt');
   };
 
-  // Dohvati izvor iz aktivne kartice ili koristi feed.source
+  // Ako postoji aktivna news-card, uzmi source odatle, inače iz feed.source
   const activeNewsCard = document.querySelector('.news-card.active');
   const sourceName = activeNewsCard
     ? activeNewsCard.querySelector('.source').textContent
     : (feed.source || 'Unbekannte Quelle');
 
-  // Formatiraj datum i vreme
+  // Formatiraj datum i vreme za prikaz
   const publishedDateTime = feed.date_published || '';
   let formattedDate = '';
   let formattedTime = '';
   if (publishedDateTime) {
     const dateObj = new Date(publishedDateTime);
     formattedDate = dateObj.toLocaleDateString('de-DE');
-    formattedTime = dateObj.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+    formattedTime = dateObj.toLocaleTimeString('de-DE', {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   }
   modalSourceTime.innerHTML = `
     <span class="modal-source-bold-green">${sourceName.toUpperCase()}</span>
     ${formattedDate && formattedTime ? ` • ${formattedDate} • ${formattedTime}` : ''}
   `;
 
-  // Postavi naslov i opis vesti
+  // Popuni naslov i opis vesti
   modalTitle.textContent = feed.title || 'No title';
   modalDescription.textContent = feed.content_text || 'Keine Beschreibung';
 
-  // --- Kreiraj sekciju za AI analizu ---
+  // Kreiraj sekciju za AI analizu (ako je ima)
   const analysisContainer = document.createElement('div');
   analysisContainer.className = 'news-modal-analysis';
 
-  // Naslov sekcije – zelena boja, usklađeno s dizajnom
   const analysisHeading = document.createElement('h3');
   analysisHeading.className = 'modal-analysis-title';
   analysisHeading.textContent = 'AI-Perspektive: Meinung & Kommentar';
   analysisContainer.appendChild(analysisHeading);
 
-  // Tekst analize – font veličine 0.7rem, beli tekst
   const analysisText = document.createElement('p');
   analysisText.className = 'modal-analysis-text';
   analysisText.textContent = feed.analysis || 'Keine Meinung verfügbar.';
   analysisContainer.appendChild(analysisText);
 
-  // U modalContent, umetni AI Analyse sekciju iznad kontejnera sa dugmadima
+  // Umetni analysisContainer iznad dugmadi
   const modalContent = modal.querySelector('.news-modal-content');
   if (modalContent) {
     const existingAnalysis = modalContent.querySelector('.news-modal-analysis');
@@ -83,22 +146,27 @@ export function openNewsModal(feed) {
     }
   }
 
-  // Dugme za zatvaranje modala
+  // Dugme za zatvaranje
   closeModalButton.onclick = () => {
     modal.style.display = 'none';
   };
 
-  // Dugme "Weiter" – otvori link i zatvori modal posle 3 sekunde
+  // Dugme "Weiter" -> otvaranje originalnog url-a
   weiterButton.onclick = () => {
     if (feed.url) {
       window.open(feed.url, '_blank');
     }
+    // Zatvori modal posle par sekundi ili odmah (po želji)
     setTimeout(() => {
       modal.style.display = 'none';
     }, 3000);
   };
 
-  // Kreiraj privremeni Image objekat da sačekamo učitavanje slike
+  // Sada kreiramo privremeni <img> da se učita slika
+  const BASE_URL = window.location.hostname.includes("localhost")
+    ? "http://localhost:3001"
+    : "https://www.dach.news";
+
   const tempImg = new Image();
   tempImg.onload = () => {
     modalImage.src = tempImg.src;
@@ -109,18 +177,16 @@ export function openNewsModal(feed) {
     modal.style.display = 'flex';
   };
 
-  // Generiši pun URL za sliku
-  const BASE_URL = window.location.hostname.includes("localhost")
-    ? "http://localhost:3001"
-    : "https://www.dach.news";
-
+  // Ako je putanja feed.image relativna (počinje sa "/"), dodaj base URL
   if (feed.image && feed.image.startsWith('/')) {
-    let imageUrl = BASE_URL + feed.image;
+    let finalUrl = BASE_URL + feed.image;
+    // Ako nije već suffix ":news-modal", dodaj ga
     if (!feed.image.includes(':news-modal')) {
-      imageUrl += ':news-modal';
+      finalUrl += ':news-modal';
     }
-    tempImg.src = encodeURI(imageUrl);
+    tempImg.src = encodeURI(finalUrl);
   } else {
-    tempImg.src = feed.image || (BASE_URL + '/img/noimg.png');
+    // Fallback ako nema slike
+    tempImg.src = feed.image || (BASE_URL + '/src/icons/no-image.png');
   }
 }
