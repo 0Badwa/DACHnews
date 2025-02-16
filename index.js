@@ -1,3 +1,5 @@
+/* index.js */
+
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -139,18 +141,19 @@ app.get('/api/feeds', async (req, res) => {
 
 /**
  * API ruta za feedove po kategoriji.
+ * Dodata da se mogu dohvatiti feedovi iz Redis-a (lista "category:Naziv").
  */
 app.get('/api/feeds-by-category/:category', async (req, res) => {
-  const category = req.params.category;
-  console.log(`[Route /api/feeds-by-category] Category: ${category}`);
   try {
+    const category = req.params.category;
     const redisKey = `category:${category}`;
-    const feedItems = await redisClient.lRange(redisKey, 0, -1);
-    console.log(`[Route /api/feeds-by-category] Found ${feedItems.length} items for ${category}`);
-    const parsed = feedItems.map(x => JSON.parse(x));
-    res.json(parsed);
+    const items = await redisClient.lRange(redisKey, 0, -1);
+    const feeds = items.map((item) => JSON.parse(item));
+
+    console.log(`[Route /api/feeds-by-category] Returning ${feeds.length} feeds for category ${category}`);
+    res.json(feeds);
   } catch (error) {
-    console.error(`[Route /api/feeds-by-category] Error:`, error);
+    console.error("[Route /api/feeds-by-category] Error:", error);
     res.status(500).send("Server error");
   }
 });
@@ -218,13 +221,13 @@ app.get('/sitemap.xml', async (req, res) => {
       xml += '  </url>\n';
     }
 
-   // Dodajemo RSS feed u sitemap
-   xml += '  <url>\n';
-   xml += `    <loc>https://www.dach.news/rss</loc>\n`;
-   xml += `    <lastmod>${new Date().toISOString()}</lastmod>\n`;
-   xml += '    <changefreq>hourly</changefreq>\n';
-   xml += '    <priority>0.9</priority>\n';
-   xml += '  </url>\n';
+    // Dodajemo RSS feed u sitemap
+    xml += '  <url>\n';
+    xml += `    <loc>https://www.dach.news/rss</loc>\n`;
+    xml += `    <lastmod>${new Date().toISOString()}</lastmod>\n`;
+    xml += '    <changefreq>hourly</changefreq>\n';
+    xml += '    <priority>0.9</priority>\n';
+    xml += '  </url>\n';
 
     xml += '</urlset>';
     res.header('Content-Type', 'application/xml');
@@ -244,7 +247,6 @@ app.get('/api/debug/html-keys', async (req, res) => {
     res.status(500).json({ error: error.toString() });
   }
 });
-
 
 setInterval(processFeeds, 12 * 60 * 1000);
 processFeeds();
@@ -348,8 +350,6 @@ app.get('/api/rss', async (req, res) => {
   }
 });
 
-
-
 /**
  * 2) Ruta koja generiše RSS feed u XML formatu (klasičan RSS 2.0)
  */
@@ -409,7 +409,6 @@ app.get('/api/docs', (req, res) => {
   `);
 });
 
-
 /**
  * 4) API za pretragu vesti po ključnoj reči
  */
@@ -430,7 +429,6 @@ app.get('/api/search', async (req, res) => {
     res.status(500).send("Server error");
   }
 });
-
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, '0.0.0.0', () => {

@@ -38,23 +38,8 @@ let currentCardFontSize = localStorage.getItem('cardFontSize')
 function applyCardFontSize() {
   document.documentElement.style.setProperty('--card-font-size', currentCardFontSize + 'px');
   localStorage.setItem('cardFontSize', currentCardFontSize);
-
-  const activeTab = document.querySelector('.tab.active');
-  if (!activeTab) return;
-  const cat = activeTab.getAttribute('data-tab');
-  const container = document.getElementById('news-container');
-  if (!cat || !container) return;
-
-  if (cat === 'Aktuell') {
-    displayAktuellFeeds().then(() => {
-      container.scrollTop = 0;
-    });
-  } else {
-    displayNewsByCategory(cat).then(() => {
-      container.scrollTop = 0;
-    });
-  }
 }
+
 
 /**
  * Pomoćne funkcije
@@ -421,7 +406,6 @@ function initSwipe() {
 
     setTimeout(() => {
       window.scrollTo(0, 0);
-      console.log('Window scrollTo(0,0) pozvan za kategoriju:', currentCat);
     }, 500);
   }
 
@@ -497,19 +481,17 @@ function closeSettingsModal() {
 
 /** Centralizovana inicijalizacija na DOMContentLoaded **/
 document.addEventListener('DOMContentLoaded', async () => {
-  // 1) Prvo proveravamo URL parametar "newsId"
+  // 1) Proveri parametar newsId u ?newsId=... ili /news/...
   const urlParams = new URLSearchParams(window.location.search);
   let newsId = urlParams.get('newsId');
-  
-  // 2) Ako ne postoji "newsId" u query parametru, proveravamo pathname (npr. "/news/123")
   if (!newsId) {
     const path = window.location.pathname;
     if (path.startsWith('/news/')) {
       newsId = path.split('/news/')[1];
     }
   }
-  
-  // 3) Ako imamo "newsId", pokušavamo da dobijemo vest od API-ja i prikažemo modal
+
+  // 2) Ako imamo newsId, samo otvorimo modal za tu vest
   if (newsId) {
     try {
       const response = await fetch(`/api/news/${newsId}`);
@@ -517,87 +499,26 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.error("Vest nije pronađena:", newsId);
       } else {
         const news = await response.json();
-        console.log("Preuzeta vest:", news);
         openNewsModal(news);
       }
     } catch (error) {
       console.error("Greška pri učitavanju vesti:", error);
     }
-  } else {
-    // Ako nema newsId, učitava se default "Aktuell" feed
-    initFeeds();
   }
 
-  // --- Nastavak inicijalizacije interfejsa ---
+  // 3) Primeni cardFontSize
   applyCardFontSize();
-  buildTabs();
+
+  // 4) **CHANGED**: Prvo buildTabs(), pa initSwipe(), pa initFeeds() (ako nema newsId)
+  buildTabs();                 // [CHANGED] Pomereno iznad initFeeds
   initSwipe();
-  
-  // Učitavamo feed za aktivni tab ili default 'Aktuell'
-  loadFeeds();
 
-  // Event listener za tabove
-  const tabsContainer = document.getElementById('tabs-container');
-  if (tabsContainer) {
-    tabsContainer.addEventListener('click', async (e) => {
-      const tab = e.target.closest('.tab');
-      if (!tab || tab.classList.contains('active')) return;
-
-      document.querySelectorAll('.tab').forEach(t => {
-        t.classList.remove('active');
-        t.setAttribute('aria-selected', 'false');
-      });
-      tab.classList.add('active');
-      tab.setAttribute('aria-selected', 'true');
-
-      const category = tab.getAttribute('data-tab');
-      const container = document.getElementById('news-container');
-      if (!container) return;
-
-      localStorage.setItem('activeTab', category);
-      localStorage.setItem(`${category}_scroll`, 0);
-
-      try {
-        if (category === 'Aktuell') {
-          await displayAktuellFeeds(true);
-        } else {
-          await displayNewsByCategory(category, true);
-        }
-      } catch (error) {
-        console.error(`Greška prilikom učitavanja kategorije "${category}":`, error);
-      }
-
-      // Resetovanje scroll-a više puta da bismo bili sigurni da se vraća na vrh
-      (async () => {
-        await new Promise(resolve => setTimeout(resolve, 50));
-  
-        function resetScroll() {
-          const container = document.getElementById('news-container');
-          if (container) {
-            container.scrollTop = 0;
-          }
-          window.scrollTo(0, 0);
-          document.documentElement.scrollTop = 0;
-          document.body.scrollTop = 0;
-          console.log(
-            'Reset scroll: container.scrollTop=',
-            container ? container.scrollTop : 'nema container',
-            'window.pageYOffset=', window.pageYOffset
-          );
-        }
-  
-        resetScroll();
-  
-        const intervalId = setInterval(resetScroll, 50);
-        setTimeout(() => {
-          clearInterval(intervalId);
-          console.log('Scroll reset interval cleared for category:', category);
-        }, 150);
-      })();
-    });
+  // Ako NEMA newsId, učitavamo sve feedove i pravimo event-listener-e
+  if (!newsId) {
+    initFeeds();               // Poziv u fajlu feeds.js -> postavi eventListeners
   }
 
-  // Postavljanje event listener-a za Settings modal i srodne modale
+  // Postavljanje event listener-a za Settings modal
   const menuButton = document.getElementById('menu-button');
   const settingsModal = document.getElementById('settings-modal');
   const closeSettingsBtn = document.getElementById('close-settings');

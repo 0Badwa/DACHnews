@@ -370,37 +370,38 @@ export function displayFeedsList(feedsList, categoryName) {
   const container = document.getElementById('news-container');
   if (!container) return;
 
+  // Dedupliciramo feedove – zadržavamo samo jedinstvene na osnovu id-ja
+  const uniqueFeeds = Array.from(new Map(feedsList.map(feed => [feed.id, feed])).values());
+
   // Očistimo kontejner pre dodavanja novih vesti
   container.innerHTML = '';
 
-  if (!feedsList || feedsList.length === 0) {
+  if (!uniqueFeeds || uniqueFeeds.length === 0) {
     container.innerHTML = `<p>Es gibt keine Nachrichten für die Kategorie: ${categoryName}</p>`;
     updateCategoryIndicator(categoryName);
-    // Resetujemo scroll nakon što se sadržaj postavi, u sledećoj animacionoj frame
     requestAnimationFrame(() => {
       container.scrollTop = 0;
       window.scrollTo(0, 0);
-      console.log('Reset scroll:', container.scrollTop, window.pageYOffset);
     });
     return;
   }
 
   // Sortiramo vesti (najnovije prve)
-  feedsList.sort((a, b) => new Date(b.date_published).getTime() - new Date(a.date_published).getTime());
+  uniqueFeeds.sort((a, b) => new Date(b.date_published).getTime() - new Date(a.date_published).getTime());
 
   // Kreiramo i dodajemo svaku news karticu u kontejner
-  feedsList.forEach(feed => {
+  uniqueFeeds.forEach(feed => {
     const card = createNewsCard(feed);
     container.appendChild(card);
   });
 
   updateCategoryIndicator(categoryName);
   
-  // Resetujemo scroll poziciju nakon dodavanja svih elemenata u sledećoj animacionoj frame
   requestAnimationFrame(() => {
     container.scrollTop = 0;
   });
 }
+
 
 
 

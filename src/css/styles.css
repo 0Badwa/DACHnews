@@ -431,6 +431,13 @@ background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z
   color: var(--primary-color); /* Zelena boja za vreme */
 }
 
+/* Primer: primenjuje pointer stil na element koji prikazuje izvor, datum i vreme */
+#news-modal-source-time,
+.news-meta .source,
+.news-meta .time {
+  cursor: pointer;
+}
+
 /* ========== 10) SETTINGS, DRAG & DROP, ETC. ========== */
 .settings-list .settings-item {
   display: flex; 
