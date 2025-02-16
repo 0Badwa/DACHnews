@@ -376,18 +376,25 @@ export function displayFeedsList(feedsList, categoryName) {
   // Očistimo kontejner pre dodavanja novih vesti
   container.innerHTML = '';
 
+  // Ako je prazan niz
   if (!uniqueFeeds || uniqueFeeds.length === 0) {
     container.innerHTML = `<p>Es gibt keine Nachrichten für die Kategorie: ${categoryName}</p>`;
     updateCategoryIndicator(categoryName);
+
+    // Resetuj scroll i za container i za ceo prozor
     requestAnimationFrame(() => {
       container.scrollTop = 0;
       window.scrollTo(0, 0);
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
     });
     return;
   }
 
   // Sortiramo vesti (najnovije prve)
-  uniqueFeeds.sort((a, b) => new Date(b.date_published).getTime() - new Date(a.date_published).getTime());
+  uniqueFeeds.sort((a, b) => 
+    new Date(b.date_published).getTime() - new Date(a.date_published).getTime()
+  );
 
   // Kreiramo i dodajemo svaku news karticu u kontejner
   uniqueFeeds.forEach(feed => {
@@ -395,13 +402,34 @@ export function displayFeedsList(feedsList, categoryName) {
     container.appendChild(card);
   });
 
+  // Ažuriramo naziv kategorije
   updateCategoryIndicator(categoryName);
-  
+
+  // Posle dodavanja, resetuj skrol višestruko
   requestAnimationFrame(() => {
+    // 1) Odmah
     container.scrollTop = 0;
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+
+    // 2) Nakon 60ms
+    setTimeout(() => {
+      container.scrollTop = 0;
+      window.scrollTo(0, 0);
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    }, 60);
+
+    // 3) Nakon 120ms
+    setTimeout(() => {
+      container.scrollTop = 0;
+      window.scrollTo(0, 0);
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    }, 120);
   });
 }
-
 
 
 
