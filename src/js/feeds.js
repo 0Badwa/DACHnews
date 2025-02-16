@@ -48,13 +48,12 @@ function parseDomain(source) {
 function getCountryFlag(source) {
   const domain = parseDomain(source);
 
-// 1) Proveri brend iz brandMap i učitaj lokalne zastave
-for (const brand in brandMap) {
-  if (domain.includes(brand)) {
-    return `src/icons/flags/${brandMap[brand]}.svg`;
+  // 1) Proveri brend iz brandMap i učitaj lokalne zastave
+  for (const brand in brandMap) {
+    if (domain.includes(brand)) {
+      return `src/icons/flags/${brandMap[brand]}.svg`;
+    }
   }
-}
-
 
   // 2) Ako nije prepoznat brend, proveri TLD
   if (domain.endsWith('.de')) {
@@ -149,7 +148,6 @@ function isHiddenFeed(feed) {
 
   return false;
 }
-
 
 /**
  * Fetch do 50 najnovijih feed-ova iz "Aktuell" (ruta /api/feeds), keš ~10 min.
@@ -272,39 +270,61 @@ function createNewsCard(feed) {
   const card = document.createElement('div');
   card.className = "news-card";
   
-  // Klik na karticu -> otvori modal
-  card.onclick = () => {
+  // Definiši BASE_IMAGE_URL pre upotrebe
+  const BASE_IMAGE_URL = window.location.hostname.includes("dach.news")
+    ? "https://www.dach.news"
+    : window.location.hostname.includes("localhost")
+    ? "http://localhost:3001"
+    : window.location.hostname.includes("exyunews.onrender.com")
+    ? "https://exyunews.onrender.com"
+    : "https://dachnews.onrender.com";
+  
+  // Dodaj click event sa ripple efektom
+  card.addEventListener('click', function(e) {
+    // Ukloni prethodni ripple, ako postoji
+    const existingRipple = card.querySelector('.ripple');
+    if (existingRipple) {
+      existingRipple.remove();
+    }
+    
+    // Dobij koordinatu klika unutar kartice
+    const rect = card.getBoundingClientRect();
+    const ripple = document.createElement('span');
+    ripple.className = 'ripple';
+    const size = Math.max(rect.width, rect.height);
+    ripple.style.width = ripple.style.height = size + 'px';
+    ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
+    ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
+    card.appendChild(ripple);
+    
+    // Nakon završetka animacije ukloni ripple
+    ripple.addEventListener('animationend', () => {
+      ripple.remove();
+    });
+    
+    // Klik na karticu -> otvori modal
     document.querySelectorAll('.news-card').forEach(existingCard => existingCard.classList.remove('active'));
     card.classList.add('active');
     openNewsModal(feed);
-  };
+  });
   
   const img = document.createElement('img');
-img.className = "news-card-image lazy news-image";
-img.src = feed.image ? feed.image : `${BASE_IMAGE_URL}/src/icons/no-image.png`;
-img.alt = feed.title ? feed.title : 'Nachrichtenbild'; // SEO-friendly alt na nemačkom
+  img.className = "news-card-image lazy news-image";
+  img.src = feed.image ? feed.image : `${BASE_IMAGE_URL}/src/icons/no-image.png`;
+  img.alt = feed.title ? feed.title : 'Nachrichtenbild'; // SEO-friendly alt na nemačkom
   
-// Ako se slika ne može učitati (CSP blokira ili ne postoji), koristi no-image.png
-img.onerror = function() {
-  this.onerror = null; // Sprečava beskonačnu petlju ako default slika ne postoji
-  this.src = "https://www.dach.news/src/icons/no-image.png";
-};
-
-
+  // Ako se slika ne može učitati (CSP blokira ili ne postoji), koristi no-image.png
+  img.onerror = function() {
+    this.onerror = null; // Sprečava beskonačnu petlju ako default slika ne postoji
+    this.src = "https://www.dach.news/src/icons/no-image.png";
+  };
+  
   // Osiguraj da se slika prikazuje u centru boxa
   img.width = 80;
   img.height = 80;
   img.style.objectFit = "cover"; // Crop da popuni box
   img.style.display = "block"; // Sprečava neželjene margine
   
-  const BASE_IMAGE_URL = window.location.hostname.includes("dach.news")
-  ? "https://www.dach.news"
-  : window.location.hostname.includes("localhost")
-  ? "http://localhost:3001"
-  : window.location.hostname.includes("exyunews.onrender.com")
-  ? "https://exyunews.onrender.com"
-  : "https://dachnews.onrender.com";
-
   if (feed.image && feed.image.startsWith("/")) {
     // Ako feed.image ne sadrži već sufiks ":news-card", dodaj ga
     if (!feed.image.includes(":news-card")) {
@@ -318,7 +338,6 @@ img.onerror = function() {
     img.src = `${BASE_IMAGE_URL}/img/noimg.png`;
   }
   
-
   // Sadržaj
   const contentDiv = document.createElement('div');
   contentDiv.className = "news-card-content";
@@ -430,8 +449,6 @@ export function displayFeedsList(feedsList, categoryName) {
     }, 120);
   });
 }
-
-
 
 /**
  * Prikazuje "Aktuell" feedove (poziva fetchAllFeedsFromServer).
@@ -605,4 +622,3 @@ export function unblockSource(src) {
   blockedSources = blockedSources.filter(s => s !== cleanedSource);
   localStorage.setItem('blockedSources', JSON.stringify(blockedSources));
 };
-
