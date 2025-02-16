@@ -28,7 +28,7 @@ app.use(
       defaultSrc: ["'self'"],
       scriptSrc: ["'self'", "https://www.googletagmanager.com"],
       styleSrc: ["'self'", "'unsafe-inline'"],
-      imgSrc: ["'self'", "data:", "https://www.dach.news"],
+      imgSrc: ["'self'", "data:", "https://www.dach.news", "https://exyunews.onrender.com"],
       connectSrc: ["'self'"],
       fontSrc: ["'self'", "data:"],
       objectSrc: ["'none'"],

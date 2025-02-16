@@ -3,36 +3,33 @@
 <head>
   <meta charset="UTF-8" />
   <link rel="icon" href="src/icons/favicon.ico" type="image/x-icon" />
-<!-- SEO Meta-Tags -->
-<meta name="description" content="„Ihre Nachrichtenquelle – präzise ausgewählt und analysiert mit AI.">
-<meta name="keywords" content="Nachrichten, DACH, Deutschland, Österreich, Schweiz, Politik, Sport, Wirtschaft, Technologie, Kultur, Unterhaltung, Künstliche Intelligenz, KI, AI-Analyse, AI-generierte Nachrichten">
-<meta name="author" content="DACH.news">
-<meta name="robots" content="index, follow">
-<meta name="language" content="de">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- SEO Meta-Tags -->
+  <meta name="description" content="„Ihre Nachrichtenquelle – präzise ausgewählt und analysiert mit AI.">
+  <meta name="keywords" content="Nachrichten, DACH, Deutschland, Österreich, Schweiz, Politik, Sport, Wirtschaft, Technologie, Kultur, Unterhaltung, Künstliche Intelligenz, KI, AI-Analyse, AI-generierte Nachrichten">
+  <meta name="author" content="DACH.news">
+  <meta name="robots" content="index, follow">
+  <meta name="language" content="de">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- Open Graph für Social Media -->
-<meta property="og:title" content="DACH.news – Nachrichten mit KI-Perspektive aus DACH">
-<meta property="og:description" content="Bleiben Sie informiert mit den neuesten Nachrichten aus Deutschland, Österreich und der Schweiz.">
-<meta property="og:image" content="https://dach.news/preview.jpg">
-<meta property="og:url" content="https://dach.news">
-<meta property="og:type" content="website">
+  <!-- Open Graph für Social Media -->
+  <meta property="og:title" content="DACH.news – Nachrichten mit KI-Perspektive aus DACH">
+  <meta property="og:description" content="Bleiben Sie informiert mit den neuesten Nachrichten aus Deutschland, Österreich und der Schweiz.">
+  <meta property="og:image" content="https://dach.news/preview.jpg">
+  <meta property="og:url" content="https://dach.news">
+  <meta property="og:type" content="website">
 
-<!-- Twitter Card -->
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="DACH.news – Nachrichten mit KI-Perspektive aus DACH">
-<meta name="twitter:description" content="Bleiben Sie informiert mit den neuesten Nachrichten aus Deutschland, Österreich und der Schweiz.">
-<meta name="twitter:image" content="https://dach.news/preview.jpg">
-
-
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="DACH.news – Nachrichten mit KI-Perspektive aus DACH">
+  <meta name="twitter:description" content="Bleiben Sie informiert mit den neuesten Nachrichten aus Deutschland, Österreich und der Schweiz.">
+  <meta name="twitter:image" content="https://dach.news/preview.jpg">
 
   <title>DACH.news</title>
 
-
   <!-- Prefetch kritičnih resursa -->
-<link rel="preload" href="src/css/styles.css" as="style">
+  <link rel="preload" href="src/css/styles.css" as="style">
 
-<script src="src/js/gtag.js"></script>
+  <script src="src/js/gtag.js"></script>
 
   <!-- Učitaj CSS -->
   <link rel="stylesheet" href="src/css/styles.css">
@@ -42,37 +39,117 @@
     <div class="menu">
       <button id="menu-button" class="menu-button">☰</button>
       <div class="dropdown" id="dropdown-menu">
-        <!-- Sve prebačeno u Settings modal -->
+        <!-- Menüeinträge dynamisch oder im Modal -->
       </div>
     </div>
     <img src="src/icons/dachnewslogo.png" alt="DACH.news" />
   </nav>
 
-  <!-- Loader element sa fiksnim pozicioniranjem kako ne bi pomerao sadržaj -->
-<div id="loader" style="display:none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align:center;">
-  <p style="color: #32CD32; font-weight: bold;">   </p>   <!-- ovde ide tekst loading/laden -->
-</div>
+  <!-- Loader element (fester Positionsrahmen, damit es den Inhalt nicht verschiebt) -->
+  <div id="loader" 
+       style="display:none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align:center;">
+    <p style="color: #32CD32; font-weight: bold;"></p>
+    <!-- Text “Loading...” oder “Laden...” kann hier dynamisch eingefügt werden -->
+  </div>
+
   <div id="error-container" style="display:none; text-align:center; margin-top:100px; color:red;"></div>
 
-  <!-- Tabs container koji prati feedove -->
-<div class="tabs-container" 
-role="tablist" 
-id="tabs-container" 
-style="scroll-behavior: smooth;">
-<button class="tab active" data-tab="Aktuell" role="tab" aria-selected="true">Aktuell</button>
-<!-- Ostale kategorije dinamički iz main.js -->
-</div>
+  <!-- Tabs container (rollenspezifische Elemente für ARIA) -->
+  <div class="tabs-container" 
+       id="tabs-container" 
+       role="tablist" 
+       aria-label="DACH-News-Kategorien"
+       style="scroll-behavior: smooth;">
+    <!-- Beispielkategorien: Die erste ist ‘active’ -->
+    <button class="tab active" 
+            data-tab="Aktuell" 
+            role="tab" 
+            aria-selected="true" 
+            aria-controls="news-container"
+            id="tab-aktuell">
+      Aktuell
+    </button>
+    <button class="tab" 
+            data-tab="Technologie" 
+            role="tab" 
+            aria-selected="false" 
+            aria-controls="news-container"
+            id="tab-technologie">
+      Technologie
+    </button>
+    <button class="tab" 
+            data-tab="Gesundheit" 
+            role="tab" 
+            aria-selected="false" 
+            aria-controls="news-container"
+            id="tab-gesundheit">
+      Gesundheit
+    </button>
+    <button class="tab" 
+            data-tab="Sport" 
+            role="tab" 
+            aria-selected="false" 
+            aria-controls="news-container"
+            id="tab-sport">
+      Sport
+    </button>
+    <button class="tab" 
+            data-tab="Wirtschaft" 
+            role="tab" 
+            aria-selected="false" 
+            aria-controls="news-container"
+            id="tab-wirtschaft">
+      Wirtschaft
+    </button>
+    <button class="tab" 
+            data-tab="Kultur" 
+            role="tab" 
+            aria-selected="false" 
+            aria-controls="news-container"
+            id="tab-kultur">
+      Kultur
+    </button>
+    <button class="tab" 
+            data-tab="Unterhaltung" 
+            role="tab" 
+            aria-selected="false" 
+            aria-controls="news-container"
+            id="tab-unterhaltung">
+      Unterhaltung
+    </button>
+    <button class="tab" 
+            data-tab="Reisen" 
+            role="tab" 
+            aria-selected="false" 
+            aria-controls="news-container"
+            id="tab-reisen">
+      Reisen
+    </button>
+    <button class="tab" 
+            data-tab="Life" 
+            role="tab" 
+            aria-selected="false" 
+            aria-controls="news-container"
+            id="tab-life">
+      Life
+    </button>
+  </div>
 
-  <!-- Indikator kategorije -->
+  <!-- Indikator für aktuell gewählte Kategorie -->
   <div class="category-indicator">Aktuell</div>
 
-  <!-- Kontejner za vesti -->
-  <div id="news-container"></div>
+  <!-- Container für News (mit ARIA Role "tabpanel") -->
+  <div id="news-container" 
+       role="tabpanel" 
+       aria-labelledby="tab-aktuell">
+    <!-- Dynamische Inhalte entsprechend ausgewählter Kategorie -->
+  </div>
 
-    <!-- Settings modal (Einstellungen) -->
+  <!-- Settings modal (Einstellungen) -->
   <div id="settings-modal" class="modal" style="display: none;">
     <div class="rearrange-modal-content settings-modal-content" style="margin: 0 3rem;">
-      <div class="modal-title" style="color: var(--primary-color); font-weight: bold; font-size: 120%;">
+      <div class="modal-title" 
+           style="color: var(--primary-color); font-weight: bold; font-size: 120%;">
         Einstellungen
       </div>
       <div class="settings-list" style="margin-top: 1rem;">
@@ -84,16 +161,14 @@ style="scroll-behavior: smooth;">
           <span>Kategorien</span>
           <button id="kategorien-button" class="settings-action-button">Öffnen</button>
         </div>
-       <div class="settings-item">
-  <span>Kontakt</span>
-  <button id="kontakt-button" class="settings-action-button">Öffnen</button>
-</div>
-
-<div class="settings-item">
-  <span>Datenschutz</span>
-  <button id="datenschutz-button" class="settings-action-button">Öffnen</button>
-</div>
-
+        <div class="settings-item">
+          <span>Kontakt</span>
+          <button id="kontakt-button" class="settings-action-button">Öffnen</button>
+        </div>
+        <div class="settings-item">
+          <span>Datenschutz</span>
+          <button id="datenschutz-button" class="settings-action-button">Öffnen</button>
+        </div>
         <div class="settings-item">
           <span>Über</span>
           <button id="uber-button" class="settings-action-button">Öffnen</button>
@@ -105,14 +180,15 @@ style="scroll-behavior: smooth;">
     </div>
   </div>
 
-  <!-- Modal za Quellen: "Quelle verbergen" -->
+  <!-- Modal: Quellen (Quelle verbergen) -->
   <div id="quellen-modal" class="modal" style="display: none;">
     <div class="rearrange-modal-content quellen-modal-content" style="margin: 0 3rem;">
-      <div class="modal-title" style="color: var(--primary-color); font-weight: bold; font-size: 120%;">
+      <div class="modal-title" 
+           style="color: var(--primary-color); font-weight: bold; font-size: 120%;">
         Quelle verbergen
       </div>
       <div class="sources-list" id="sources-list" style="margin-top: 1rem;">
-        <!-- Dinamički spisak izvora iz main.js -->
+        <!-- Dynamische Quellen-Liste über main.js -->
       </div>
       <div class="modal-buttons">
         <button class="save-button" id="close-quellen-modal">Schließen</button>
@@ -120,40 +196,47 @@ style="scroll-behavior: smooth;">
     </div>
   </div>
 
-  <!-- Modal za Kategorien: "Verbergen und anordnen" -->
+  <!-- Modal: Kategorien (Verbergen und anordnen) -->
   <div id="kategorien-modal" class="modal" style="display: none;">
     <div class="rearrange-modal-content kategorien-modal-content" style="margin: 0 3rem;">
-      <div class="modal-title" style="color: var(--primary-color); font-weight: bold; font-size: 120%;">
+      <div class="modal-title" 
+           style="color: var(--primary-color); font-weight: bold; font-size: 120%;">
         Verbergen und anordnen
       </div>
-      <ul id="sortable-list" class="rearrange-list" style="margin: 1rem 0;">
-        <!-- Popunjava se dinamički iz main.js (drag & drop) -->
+      <ul id="sortable-list" 
+          class="rearrange-list" 
+          style="margin: 1rem 0;">
+        <!-- Dynamische Kategorien-Liste mit Drag & Drop in main.js -->
       </ul>
       <div class="modal-buttons">
         <button class="save-button" id="close-kategorien-modal">Schließen</button>
       </div>
     </div>
   </div>
-  
-  <!-- Modal za Kontakt -->
+
+  <!-- Modal: Kontakt -->
   <div id="kontakt-modal" class="modal" style="display: none;">
     <div class="rearrange-modal-content uber-modal-content" style="margin: 0 3rem;">
-      <div class="modal-title" style="color: var(--primary-color); font-weight: bold; font-size: 120%;">
+      <div class="modal-title" 
+           style="color: var(--primary-color); font-weight: bold; font-size: 120%;">
         Kontakt
       </div>
       <p style="margin: 1rem 0;">
         Bei Fragen, Anregungen oder Feedback zu DACH.news kontaktieren Sie uns bitte per E-Mail an 
-        <a href="mailto:info@dach.news">info.dach.news@gmail.com</a>      
-        <div class="modal-buttons">
+        <a href="mailto:info@dach.news">info.dach.news@gmail.com</a>
+      </p>
+      <div class="modal-buttons">
         <button class="save-button" id="close-kontakt-modal">Schließen</button>
       </div>
     </div>
-    
-  </div>  <!-- Modal za Datenschutz -->
+  </div>
+
+  <!-- Modal: Datenschutz -->
   <div id="datenschutz-modal" class="modal" style="display: none;">
     <div class="rearrange-modal-content uber-modal-content" style="margin: 0 3rem;">
-      <div class="modal-title" style="color: var(--primary-color); font-weight: bold; font-size: 120%;">
-       Datenschutz
+      <div class="modal-title" 
+           style="color: var(--primary-color); font-weight: bold; font-size: 120%;">
+        Datenschutz
       </div>
       <p style="margin: 1rem 0;">
         Bei DACH.news hat der Schutz Ihrer persönlichen Daten oberste Priorität. 
@@ -161,16 +244,18 @@ style="scroll-behavior: smooth;">
         ohne personenbezogene Daten zu erheben. Alle Daten werden anonym verarbeitet, 
         wodurch Ihre Privatsphäre vollständig geschützt bleibt. Dieser Ansatz gewährleistet 
         ein hohes Maß an Sicherheit und Anonymität.
-        <div class="modal-buttons">
-<button class="save-button" id="close-datenschutz-modal">Schließen</button>
+      </p>
+      <div class="modal-buttons">
+        <button class="save-button" id="close-datenschutz-modal">Schließen</button>
       </div>
     </div>
   </div>
-  
-  <!-- Modal za Über -->
+
+  <!-- Modal: Über -->
   <div id="uber-modal" class="modal" style="display: none;">
     <div class="rearrange-modal-content uber-modal-content" style="margin: 0 3rem;">
-      <div class="modal-title" style="color: var(--primary-color); font-weight: bold; font-size: 120%;">
+      <div class="modal-title" 
+           style="color: var(--primary-color); font-weight: bold; font-size: 120%;">
         Über diese App
       </div>
       <p style="margin: 1rem 0;">
@@ -183,30 +268,29 @@ style="scroll-behavior: smooth;">
         sich durch Toleranz und Objektivität aus und vermeiden reißerische oder polarisierende 
         Inhalte. Ihre Unterstützung und Ihr Feedback sind von unschätzbarem Wert, um die 
         Plattform kontinuierlich zu verbessern und weiterzuentwickeln.
-        <div class="modal-buttons">
+      </p>
+      <div class="modal-buttons">
         <button class="save-button" id="close-uber-modal">Schließen</button>
       </div>
     </div>
   </div>
 
- <!-- Modal za pojedinačnu vest -->
-<div id="news-modal" class="modal" style="display: none;">
-  <div class="rearrange-modal-content news-modal-content">
-    <img id="news-modal-image" src="" alt="News Image" />
-    <h2 id="news-modal-title"></h2>
-    <p id="news-modal-description"></p>
-    <p id="news-modal-source-time"></p>
-    <!-- AI Analyse sekcija će biti dinamički ubačena ovde preko JS-a (pre kontejnera sa dugmadima) -->
-    <div class="modal-buttons">
-      <button class="save-button" id="close-news-modal">Schließen</button>
-      <button class="save-button" id="news-modal-weiter">Weiter</button>
+  <!-- Modal für einzelne News -->
+  <div id="news-modal" class="modal" style="display: none;">
+    <div class="rearrange-modal-content news-modal-content">
+      <img id="news-modal-image" src="" alt="News Image" />
+      <h2 id="news-modal-title"></h2>
+      <p id="news-modal-description"></p>
+      <p id="news-modal-source-time"></p>
+      <!-- KI-Analyse kann hier per JS dynamisch eingefügt werden -->
+      <div class="modal-buttons">
+        <button class="save-button" id="close-news-modal">Schließen</button>
+        <button class="save-button" id="news-modal-weiter">Weiter</button>
+      </div>
     </div>
   </div>
-</div>
 
-
-
-  <!-- Glavni JS fajl -->
+  <!-- Haupt-JavaScript -->
   <script type="module" src="src/js/main.js" defer></script>
 </body>
 </html>

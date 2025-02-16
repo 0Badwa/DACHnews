@@ -301,6 +301,8 @@ img.onerror = function() {
   ? "https://www.dach.news"
   : window.location.hostname.includes("localhost")
   ? "http://localhost:3001"
+  : window.location.hostname.includes("exyunews.onrender.com")
+  ? "https://exyunews.onrender.com"
   : "https://dachnews.onrender.com";
 
   if (feed.image && feed.image.startsWith("/")) {
