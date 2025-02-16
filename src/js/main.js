@@ -113,26 +113,42 @@ function moveCategory(index, direction) {
   openRearrangeModal();
 }
 
+/**
+ * Kreira tabove za navigaciju, postavljajući ARIA atribute za pristupačnost.
+ */
 function buildTabs() {
   const tabsContainer = document.getElementById('tabs-container');
   if (!tabsContainer) return;
 
-  // Uklanjamo sve tabove osim "Aktuell"
+  // Ukloni sve tekstualne čvorove koji nisu elementi
+  Array.from(tabsContainer.childNodes).forEach(node => {
+    if (node.nodeType === Node.TEXT_NODE) {
+      tabsContainer.removeChild(node);
+    }
+  });
+
+  // Ukloni sve dinamički dodate tabove osim statičnog "Aktuell"
   const existingTabs = tabsContainer.querySelectorAll('.tab:not([data-tab="Aktuell"])');
   existingTabs.forEach(t => t.remove());
 
-  // Učitavamo eventualno sačuvani redosled
+  // Učitavanje sačuvanog redosleda kategorija
   const savedOrder = localStorage.getItem('categoriesOrder');
   if (savedOrder) {
     categoriesOrder = JSON.parse(savedOrder);
   }
 
+  // Kreiraj tabove za svaku kategoriju
   categoriesOrder.forEach(cat => {
-    if (isCategoryBlocked(cat)) return; // preskoči ako je kategorija blokirana
+    if (isCategoryBlocked(cat)) return; // preskoči blokirane kategorije
     const btn = document.createElement('button');
     btn.className = 'tab';
     btn.setAttribute('data-tab', cat);
     btn.textContent = cat;
+    // Postavi potrebne ARIA atribute
+    btn.setAttribute('role', 'tab');
+    btn.setAttribute('aria-selected', 'false');
+    btn.id = 'tab-' + cat.toLowerCase().replace(/\s+/g, '-');
+    btn.setAttribute('aria-controls', 'news-container');
     tabsContainer.appendChild(btn);
   });
 }

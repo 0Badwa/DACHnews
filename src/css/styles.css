@@ -145,7 +145,7 @@ nav .menu button {
 }
 .tabs-container button:hover,
 .tabs-container button.active {
-  background: #32CD32; /* Default zelena */
+  background: #057605; /* Default zelena */
   color: #fff;
   border-radius: 5px;
   padding: 0.5rem 1rem;
