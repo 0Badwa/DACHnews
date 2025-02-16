@@ -724,25 +724,60 @@ background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z
   min-height: 3em; /* Osigurava da pasus nije kraći od 3 reda */
 }
 
-
-/* Ripple efekt za news-card elemente */
+/* Ripple efekt */
 .news-card {
   position: relative;
   overflow: hidden;
 }
 
+/* Futuristic Grid Ripple */
 .news-card .ripple {
   position: absolute;
-  border-radius: 50%;
+  width: 100px;
+  height: 100px;
+  /* Povećali smo na 12px umesto 6px */
+  background: repeating-linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0.15) 0 2px,
+      transparent 2px 10px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.15) 0 2px,
+      transparent 2px 10px
+    );
+  /* Veličina “kvadrata” u pozadini */
+  background-size: 12px 12px, 12px 12px;
   transform: scale(0);
-  animation: ripple-effect 600ms linear;
-  background-color: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  animation: ripple-grid 0.7s ease-out forwards, glitch-grid 1.2s infinite alternate;
   pointer-events: none;
+  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.4));
 }
 
-@keyframes ripple-effect {
-  to {
-    transform: scale(4);
+@keyframes ripple-grid {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.5);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(2.5);
     opacity: 0;
+  }
+}
+
+@keyframes glitch-grid {
+  0% {
+    background-position: 0 0, 0 0;
+  }
+  50% {
+    background-position: 2px -2px, -2px 2px;
+  }
+  100% {
+    background-position: 0 0, 0 0;
   }
 }
