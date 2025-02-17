@@ -436,14 +436,14 @@ function initSwipe() {
     const t = e.changedTouches[0];
     touchstartX = t.screenX;
     touchstartY = t.screenY;
-  });
+}, { passive: true });
 
-  swipeContainer.addEventListener('touchend', e => {
+swipeContainer.addEventListener('touchend', e => {
     const t = e.changedTouches[0];
     touchendX = t.screenX;
     touchendY = t.screenY;
     handleGesture();
-  });
+}, { passive: true });
 }
 
 function loadFeeds(defaultTab = 'Aktuell') {

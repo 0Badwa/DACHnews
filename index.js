@@ -9,7 +9,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
 
-import { initRedis, redisClient, processFeeds, getAllFeedsFromRedis, getSeoFeedsFromRedis } from './feedsService.js';
+import { initRedis, redisClient, processFeeds, getAllFeedsFromRedis, getSeoFeedsFromRedis, cleanupSeoCache } from './feedsService.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -250,6 +250,10 @@ app.get('/api/debug/html-keys', async (req, res) => {
 
 setInterval(processFeeds, 12 * 60 * 1000);
 processFeeds();
+
+// Pokreće čišćenje SEO keša svakih 6 sati
+setInterval(cleanupSeoCache, 6 * 60 * 60 * 1000);
+
 
 app.post('/api/block-source', async (req, res) => {
   const { source } = req.body;

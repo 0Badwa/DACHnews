@@ -142,7 +142,7 @@ json
 Copy code
 {
   "id": "{Nachrichten-ID}",
-  "analysis": "{Text von 400–500 Zeichen, der das Thema subtil analysiert. Falls die Nachricht keine Katastrophe oder Tragödie ist, beende den Text mit einem kurzen, humorvollen Kommentar (max. 200 Zeichen), der die Situation ironisch oder provokativ kommentiert. Der Kommentar beginnt mit dem Zeichen • und wird direkt an die Analyse angehängt.}"
+  "analysis": "{Text von300–350 Zeichen, der das Thema subtil analysiert. Falls die Nachricht keine Katastrophe oder Tragödie ist, beende den Text mit einem kurzen, humorvollen Kommentar (max. 200 Zeichen), der die Situation ironisch oder provokativ kommentiert. Der Kommentar beginnt mit dem Zeichen • und wird direkt an die Analyse angehängt.}"
 }
 Wenn die Nachricht über ein Unglück oder eine Katastrophe spricht, muss der Ton der Analyse professionell, respektvoll und humorlos sein.
 
@@ -152,7 +152,7 @@ Verwende den aktiven Sprachgebrauch.
 Vermeide Adverbien.
 
 "analysis" (Meinung zur Nachricht):
-Länge: 400–500 Zeichen (einschließlich Leerzeichen)
+Länge: 300–350 Zeichen (einschließlich Leerzeichen)
 Formuliere eine reflektierte Meinung zur Nachricht aus einer subtilen sozialdemokratischen Perspektive, ohne offenes Parteinahme. Erwähne nicht explizit, aus welcher Perspektive du schreibst.
 Nutze Fakten, Vergleiche oder rhetorische Fragen zur fundierten Analyse.
 Der Ton soll differenziert und direkt, jedoch ohne Moralismus sein.
@@ -184,8 +184,11 @@ Gib mir die Analyse und den Kommentar unbedingt in einem einzigen Absatz zurück
       }
     ],
     max_tokens: 15000,
-    temperature: 0.7
-  };
+    temperature: 0.7,  
+    top_p: 0.9,        
+    frequency_penalty: 0.3,  
+    presence_penalty: 0.2  
+    };
 
 
 
@@ -267,7 +270,13 @@ function extractSource(url) {
   }
 }
 
-const limit = pLimit(3);
+
+// Provera da li je uređaj mobilni
+const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+
+// Postavljanje limita u zavisnosti od uređaja
+const limit = pLimit(isMobile ? 2 : 4);
+
 
 /**
  * Dodavanje jedne vesti u Redis, sa smanjenom slikom (ako postoji).
@@ -445,6 +454,40 @@ export async function processFeeds() {
 }
 
 console.log("[DEBUG] Debugging message for feedsService.js");
+
+/**
+ * Čisti SEO keš (hash "seo:news") od vesti starijih od 7 dana.
+ */
+export async function cleanupSeoCache() {
+  const now = Date.now();
+  const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
+  try {
+    const keys = await redisClient.hKeys("seo:news");
+    for (const key of keys) {
+      const itemStr = await redisClient.hGet("seo:news", key);
+      if (itemStr) {
+        let item;
+        try {
+          item = JSON.parse(itemStr);
+        } catch (err) {
+          // Ako parsiranje ne uspe, obriši zapis
+          await redisClient.hDel("seo:news", key);
+          continue;
+        }
+        if (item.date_published) {
+          const publishedTime = new Date(item.date_published).getTime();
+          if (now - publishedTime > SEVEN_DAYS_MS) {
+            await redisClient.hDel("seo:news", key);
+          }
+        }
+      }
+    }
+    console.log("[cleanupSeoCache] SEO keš očišćen.");
+  } catch (error) {
+    console.error("[cleanupSeoCache] Greška pri čišćenju SEO keša:", error);
+  }
+}
+
 
 /**
  * Dohvata sve izvore iz Redis-a.

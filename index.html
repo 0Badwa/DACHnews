@@ -42,7 +42,7 @@
         <!-- Menüeinträge dynamisch oder im Modal -->
       </div>
     </div>
-    <img src="src/icons/dachnewslogo.webp" alt="DACH.news" />
+    <img src="src/icons/dachnewslogo.webp" alt="DACH.news" width="360" height="60" />
   </nav>
 
   <!-- Loader element (fester Positionsrahmen, damit es den Inhalt nicht verschiebt) -->
@@ -138,17 +138,24 @@
   <!-- Indikator für aktuell gewählte Kategorie -->
   <div class="category-indicator">Aktuell</div>
 
-  <!-- Container für News (mit ARIA Role "tabpanel") -->
-  <div id="news-container" 
-       role="tabpanel" 
-       aria-labelledby="tab-aktuell">
-    <!-- Dynamische Inhalte entsprechend ausgewählter Kategorie -->
+  <!-- NOVI WRAPPER ZA DVE “STRANICE” (carousel-page) -->
+  <div id="carousel-wrapper" class="carousel-wrapper" style="display: flex; width: 200%; transition: transform 0.3s ease-out;">
+    <div class="carousel-page" style="width: 100%;">
+      <div id="news-container" 
+           role="tabpanel" 
+           aria-labelledby="tab-aktuell">
+        <div id="swipe-overlay" class="swipe-overlay"></div>
+      </div>
+    </div>
+    <div class="carousel-page" style="width: 100%;">
+      <!-- Ova druga “stranica” može služiti za prikaz sledeće ili prethodne kategorije -->
+    </div>
   </div>
 
   <div class="news-card">
     <div class="ripple" style="top: 50%; left: 50%;"></div>
   </div>
-  
+
   <!-- Settings modal (Einstellungen) -->
   <div id="settings-modal" class="modal" style="display: none;">
     <div class="rearrange-modal-content settings-modal-content" style="margin: 0 3rem;">
