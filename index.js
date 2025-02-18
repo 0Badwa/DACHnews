@@ -30,7 +30,16 @@ app.use(
       defaultSrc: ["'self'"],
       scriptSrc: ["'self'", "https://www.googletagmanager.com"],
       styleSrc: ["'self'", "'unsafe-inline'"],
-      imgSrc: ["'self'", "data:", "https://www.dach.news", "https://exyunews.onrender.com", "https://static.boerse.de"],
+      imgSrc: [
+        "'self'",
+        "data:",
+        "https://www.dach.news",
+        "https://exyunews.onrender.com",
+        "https://static.boerse.de",
+        "https://p6.focus.de",  // Dodato
+        "https://cdn.swp.de",   // Dodato
+        "https://media.example.com" // Dodaj još izvora ako treba
+      ],
       connectSrc: ["'self'"],
       fontSrc: ["'self'", "data:"],
       objectSrc: ["'none'"],
@@ -38,6 +47,7 @@ app.use(
     },
   })
 );
+
 app.use(express.json());
 
 app.use('/src', express.static(path.join(__dirname, 'src'), {

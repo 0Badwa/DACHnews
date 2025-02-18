@@ -5,7 +5,7 @@
 // Import potrebnih modula i funkcija
 import { openNewsModal } from './newsModal.js';
 import { initFeeds, displayAktuellFeeds, displayNewsByCategory } from './feeds.js';
-import { brandMap, ALLOWED_SOURCES } from './sourcesConfig.js';
+import { brandMap, ALLOWED_SOURCES, sourceAliases } from './sourcesConfig.js';
 
 // Ako je podržana, onemogućavamo automatsko vraćanje scroll pozicije
 if ('scrollRestoration' in history) {
@@ -238,7 +238,6 @@ function handleDrop(e) {
   }
   draggedItem.style.opacity = '1';
 }
-
 function openQuellenModal() {
   const quellenModal = document.getElementById('quellen-modal');
   if (!quellenModal) return;
@@ -248,49 +247,96 @@ function openQuellenModal() {
   if (!sourcesListEl) return;
   sourcesListEl.innerHTML = '';
 
-  const allSources = ALLOWED_SOURCES.slice();
-  allSources.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+  // Kreiraj grupisanu listu izvora po zemljama
+  const groupedSources = {
+    de: [],
+    at: [],
+    ch: []
+  };
 
-  allSources.forEach(src => {
-    const sourceItem = document.createElement('div');
-    sourceItem.className = 'source-item';
+  ALLOWED_SOURCES.forEach(src => {
+    let normalized = src.toLowerCase();
 
-    const spanName = document.createElement('span');
-    spanName.textContent = src;
-
-    const isBlocked = isSourceBlocked(src);
-    const blockBtn = document.createElement('button');
-    blockBtn.className = isBlocked ? 'unblock-button' : 'block-button';
-    blockBtn.textContent = isBlocked ? 'Entsperren' : 'Verbergen';
-
-    blockBtn.onclick = () => {
-      if (isSourceBlocked(src)) {
-        unblockSource(src);
-        blockBtn.className = 'block-button';
-        blockBtn.textContent = 'Verbergen';
-      } else {
-        blockSource(src);
-        blockBtn.className = 'unblock-button';
-        blockBtn.textContent = 'Entsperren';
+    // Mapiranje na glavni izvor ako postoji u sourceAliases
+    for (let mainSource in sourceAliases) {
+      if (sourceAliases[mainSource].includes(normalized)) {
+        normalized = mainSource;
+        break;
       }
+    }
 
-      // Osvežavamo trenutno aktivnu kategoriju nakon izmene
-      const activeTab = document.querySelector('.tab.active');
-      if (activeTab) {
-        const category = activeTab.getAttribute('data-tab');
-        if (category === 'Aktuell') {
-          displayAktuellFeeds(true);
-        } else {
-          displayNewsByCategory(category, true);
-        }
-      }
-    };
+    const country = brandMap[normalized] || 'other';
+    if (groupedSources[country]) {
+      groupedSources[country].push(normalized.toUpperCase());
+    }
+  });
 
-    sourceItem.appendChild(spanName);
-    sourceItem.appendChild(blockBtn);
-    sourcesListEl.appendChild(sourceItem);
+  // Sortiraj izvore unutar svake grupe
+  for (let country in groupedSources) {
+    groupedSources[country].sort();
+  }
+
+  // Kreiraj sekcije za svaku državu u brandMap
+  const countryNames = {
+    de: '🇩🇪 Deutschland',
+    at: '🇦🇹 Österreich',
+    ch: '🇨🇭 Schweiz'
+  };
+
+  Object.keys(groupedSources).forEach(country => {
+    if (groupedSources[country].length > 0) {
+      // Dodaj naslov za državu
+      const countryHeader = document.createElement('h3');
+      countryHeader.textContent = countryNames[country];
+      countryHeader.style.margin = '0.5rem 0';
+      countryHeader.style.fontWeight = 'bold';
+      sourcesListEl.appendChild(countryHeader);
+
+      // Dodaj izvore ispod naslova države
+      groupedSources[country].forEach(src => {
+        const sourceItem = document.createElement('div');
+        sourceItem.className = 'source-item';
+
+        const spanName = document.createElement('span');
+        spanName.textContent = src;
+
+        const isBlocked = isSourceBlocked(src);
+        const blockBtn = document.createElement('button');
+        blockBtn.className = isBlocked ? 'unblock-button' : 'block-button';
+        blockBtn.textContent = isBlocked ? 'Entsperren' : 'Verbergen';
+
+        blockBtn.onclick = () => {
+          if (isSourceBlocked(src)) {
+            unblockSource(src);
+            blockBtn.className = 'block-button';
+            blockBtn.textContent = 'Verbergen';
+          } else {
+            blockSource(src);
+            blockBtn.className = 'unblock-button';
+            blockBtn.textContent = 'Entsperren';
+          }
+
+          // Osvežavanje prikaza nakon izmene
+          const activeTab = document.querySelector('.tab.active');
+          if (activeTab) {
+            const category = activeTab.getAttribute('data-tab');
+            if (category === 'Aktuell') {
+              displayAktuellFeeds(true);
+            } else {
+              displayNewsByCategory(category, true);
+            }
+          }
+        };
+
+        sourceItem.appendChild(spanName);
+        sourceItem.appendChild(blockBtn);
+        sourcesListEl.appendChild(sourceItem);
+      });
+    }
   });
 }
+
+
 
 function closeQuellenModal() {
   const quellenModal = document.getElementById('quellen-modal');
