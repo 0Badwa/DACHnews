@@ -12,9 +12,8 @@ import {
 
 import { openNewsModal } from './newsModal.js';
 
-// Uvoz brandMap i sourceAliases iz sourcesConfig.js
-import { brandMap, sourceAliases } from './sourcesConfig.js';
-
+// Uvoz brandMap iz sourcesConfig.js
+import { brandMap } from './sourcesConfig.js';
 
 /**
  * Helper funkcija koja uklanja TLD-ove .CH, .DE, .AT iz prosleđenog stringa.
@@ -47,34 +46,27 @@ function parseDomain(source) {
  * Vraća URL zastave zasnovan na brendovima ili TLD-u (".de", ".at", ".ch").
  */
 function getCountryFlag(source) {
-  let normalizedSource = parseDomain(source).toLowerCase();
+  const domain = parseDomain(source);
 
-  // Mapiranje alternativnih domena na glavni naziv iz sourceAliases
-  for (let mainSource in sourceAliases) {
-    if (sourceAliases[mainSource].includes(normalizedSource)) {
-      normalizedSource = mainSource;
-      break;
+  // 1) Proveri brend iz brandMap i učitaj lokalne zastave
+  for (const brand in brandMap) {
+    if (domain.includes(brand)) {
+      return `src/icons/flags/${brandMap[brand]}.svg`;
     }
   }
 
-  // Vraća zastavu iz brandMap ako postoji, inače proverava TLD
-  if (brandMap[normalizedSource]) {
-    return `src/icons/flags/${brandMap[normalizedSource]}.svg`;
-  }
-
-  // Ako nije prepoznat brend, proveri TLD
-  if (normalizedSource.endsWith('.de')) {
+  // 2) Ako nije prepoznat brend, proveri TLD
+  if (domain.endsWith('.de')) {
     return 'src/icons/flags/de.svg';
-  } else if (normalizedSource.endsWith('.at')) {
+  } else if (domain.endsWith('.at')) {
     return 'src/icons/flags/at.svg';
-  } else if (normalizedSource.endsWith('.ch')) {
+  } else if (domain.endsWith('.ch')) {
     return 'src/icons/flags/ch.svg';
   }
 
-  // Podrazumevana zastava ako ništa nije prepoznato
-  return 'src/icons/flags/un.svg';
+  // 3) Podrazumevano
+  return 'src/icons/flags/un.svg'; // Dodaj default zastavu ako ne postoji
 }
-
 
 /**
  * Vraća string tipa "vor X Minuten/Stunden/Tagen...", na nemačkom jeziku.
@@ -184,7 +176,7 @@ export async function fetchAllFeedsFromServer(forceRefresh = false) {
         let data = JSON.parse(cachedFeeds);
         data.sort((a, b) => new Date(b.date_published).getTime() - new Date(a.date_published).getTime());
         data = data.filter(feed => !isHiddenFeed(feed));
-        return data.slice(0, 200);
+        return data.slice(0, 100);
       }
     }
 
@@ -204,7 +196,7 @@ export async function fetchAllFeedsFromServer(forceRefresh = false) {
     localStorage.setItem(cachedFeedsKey, JSON.stringify(data));
     localStorage.setItem(lastFetchKey, new Date().toISOString());
 
-    return data.slice(0, 200);
+    return data.slice(0, 100);
 
   } catch (error) {
     if (error.name === 'AbortError') {
@@ -241,7 +233,7 @@ export async function fetchCategoryFeeds(category, forceRefresh = false) {
         let data = JSON.parse(cached);
         data.sort((a, b) => new Date(b.date_published).getTime() - new Date(a.date_published).getTime());
         data = data.filter(feed => !isHiddenFeed(feed));
-        return data.slice(0, 200);
+        return data.slice(0, 100);
       }
     }
 
@@ -260,7 +252,7 @@ export async function fetchCategoryFeeds(category, forceRefresh = false) {
     localStorage.setItem(cachedFeedsKey, JSON.stringify(data));
     localStorage.setItem(lastFetchKey, new Date().toISOString());
 
-    return data.slice(0, 200);
+    return data.slice(0, 100);
 
   } catch (error) {
     console.error("[fetchCategoryFeeds] Greška:", error);

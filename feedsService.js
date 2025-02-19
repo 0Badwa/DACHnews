@@ -277,21 +277,6 @@ const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
 // Postavljanje limita u zavisnosti od uređaja
 const limit = pLimit(isMobile ? 2 : 4);
 
-/**
- * Normalizuje izvor da bi se koristio glavni naziv umesto alternativnih domena.
- */
-function normalizeSource(source) {
-  let normalizedSource = source.toLowerCase();
-
-  // Mapiraj alternativne domene na glavni naziv izvora
-  for (let mainSource in sourceAliases) {
-    if (sourceAliases[mainSource].includes(normalizedSource)) {
-      return mainSource;
-    }
-  }
-  return normalizedSource;
-}
-
 
 /**
  * Dodavanje jedne vesti u Redis, sa smanjenom slikom (ako postoji).

@@ -577,10 +577,8 @@ background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z
 
 
 /* QUELLEN LIST */
-.sources-list h3 {
-  font-size: 1rem;  /* Podešavanje veličine naslova */
-  font-weight: bold;
-  margin: 1rem 0 0.5rem 0;
+.sources-list {
+  margin-bottom: 1.5rem;
 }
 
 .source-item {
