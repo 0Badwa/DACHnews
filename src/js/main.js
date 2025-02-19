@@ -239,12 +239,6 @@ function handleDrop(e) {
   draggedItem.style.opacity = '1';
 }
 function openQuellenModal() {
- // console.log("ALLOWED_SOURCES:", ALLOWED_SOURCES); // ✅ Log za debagovanje
-  if (!ALLOWED_SOURCES || ALLOWED_SOURCES.length === 0) {
-    console.error("Greška: ALLOWED_SOURCES je prazan!");
-    return;
-  }
-  
   const quellenModal = document.getElementById('quellen-modal');
   if (!quellenModal) return;
   quellenModal.style.display = 'flex';
@@ -307,23 +301,36 @@ function openQuellenModal() {
         spanName.textContent = src;
 
         const isBlocked = isSourceBlocked(src);
-        const switchContainer = document.createElement("div");
-switchContainer.classList.add("switch-container");
-switchContainer.onclick = () => toggleSource(src, switchContainer);
+        const blockBtn = document.createElement('button');
+        blockBtn.className = isBlocked ? 'unblock-button' : 'block-button';
+        blockBtn.textContent = isBlocked ? 'Entsperren' : 'Verbergen';
 
-const switchSlider = document.createElement("div");
-switchSlider.classList.add("switch-slider");
-switchContainer.appendChild(switchSlider);
+        blockBtn.onclick = () => {
+          if (isSourceBlocked(src)) {
+            unblockSource(src);
+            blockBtn.className = 'block-button';
+            blockBtn.textContent = 'Verbergen';
+          } else {
+            blockSource(src);
+            blockBtn.className = 'unblock-button';
+            blockBtn.textContent = 'Entsperren';
+          }
 
-// Ako je izvor skriven, postavi switch kao aktivan
-if (!isSourceBlocked(src)) {
-  switchContainer.classList.add("active");
-}
+          // Osvežavanje prikaza nakon izmene
+          const activeTab = document.querySelector('.tab.active');
+          if (activeTab) {
+            const category = activeTab.getAttribute('data-tab');
+            if (category === 'Aktuell') {
+              displayAktuellFeeds(true);
+            } else {
+              displayNewsByCategory(category, true);
+            }
+          }
+        };
 
-sourceItem.appendChild(spanName);  // Dodaj naziv izvora
-sourceItem.appendChild(switchContainer); // Dodaj switch dugme
-sourcesListEl.appendChild(sourceItem);
-
+        sourceItem.appendChild(spanName);
+        sourceItem.appendChild(blockBtn);
+        sourcesListEl.appendChild(sourceItem);
       });
     }
   });
@@ -672,40 +679,3 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (tutOverlay) tutOverlay.style.display = 'flex';
   }
 });
-
-
-/**
- * Funkcija koja prebacuje stanje izvora između uključenog i isključenog
- * Koristi blockSource i unblockSource za ažuriranje globalne liste blokiranih izvora.
- */
-function toggleSource(source, element) {
-  element.classList.toggle("active");
-
-  if (element.classList.contains("active")) {
-    unblockSource(source);
-  } else {
-    blockSource(source);
-  }
-  // Očisti keširani feed da bi se prikaz osvežio
-  localStorage.removeItem('feeds-Aktuell');
-  // Osveži prikaz vesti – ovde se osvežava kategorija "Aktuell"; ukoliko imate i druge kategorije,
-  // pozovite odgovarajuću funkciju za trenutno aktivnu kategoriju.
-  displayAktuellFeeds(true);
-}
-
-
-
-// Funkcija za proveru da li je izvor skriven
-function isSourceHidden(source) {
-  return localStorage.getItem(`hidden-source-${source}`) === "true";
-}
-
-// Funkcija za skrivanje izvora
-function hideSource(source) {
-  localStorage.setItem(`hidden-source-${source}`, "true");
-}
-
-// Funkcija za prikazivanje izvora
-function showSource(source) {
-  localStorage.removeItem(`hidden-source-${source}`);
-}

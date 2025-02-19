@@ -398,20 +398,10 @@ export function displayFeedsList(feedsList, categoryName) {
   if (!container) return;
 
   // Dedupliciramo feedove – zadržavamo samo jedinstvene na osnovu id-ja
-  let uniqueFeeds = Array.from(new Map(feedsList.map(feed => [feed.id, feed])).values());
-
-  // Filtriraj vesti prema blokiranim izvorima iz localStorage
-  const blockedSources = getBlockedSources();
-  uniqueFeeds = uniqueFeeds.filter(feed => {
-    if (!feed.source) return true;
-    const normalizedSource = removeTLD(feed.source.toUpperCase().replace(/\s+/g, ''));
-    return !blockedSources.includes(normalizedSource);
-  });
+  const uniqueFeeds = Array.from(new Map(feedsList.map(feed => [feed.id, feed])).values());
 
   // Očistimo kontejner pre dodavanja novih vesti
   container.innerHTML = '';
-  // ...
-
 
   // Ako je prazan niz
   if (!uniqueFeeds || uniqueFeeds.length === 0) {
