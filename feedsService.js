@@ -247,6 +247,8 @@ async function storeImageInRedis(imageUrl, id) {
         .resize(width, height, { fit })
         .webp({ quality: 80 })
         .toBuffer();
+        console.log(`[storeImageInRedis] Kreirana verzija ${key} za ID:${id} (dimenzije: ${width}x${height})`);
+
       await redisClient.set(`img:${id}:${key}`, resizedImage.toString('base64'));
     }
 
@@ -276,6 +278,21 @@ const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
 
 // Postavljanje limita u zavisnosti od uređaja
 const limit = pLimit(isMobile ? 2 : 4);
+
+/**
+ * Normalizuje izvor da bi se koristio glavni naziv umesto alternativnih domena.
+ */
+function normalizeSource(source) {
+  let normalizedSource = source.toLowerCase();
+
+  // Mapiraj alternativne domene na glavni naziv izvora
+  for (let mainSource in sourceAliases) {
+    if (sourceAliases[mainSource].includes(normalizedSource)) {
+      return mainSource;
+    }
+  }
+  return normalizedSource;
+}
 
 
 /**

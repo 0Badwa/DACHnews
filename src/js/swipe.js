@@ -1,7 +1,7 @@
 /**
  * swipe.js
- * 
- * Implementacija kontinuiranog (carousel-like) swipe efekta 
+ *
+ * Implementacija kontinuiranog (carousel-like) swipe efekta
  *
  * Ako želite da se stvarno vide dve “stranice” odjednom (kao kod mobilnih “home screen”
  * swipe efekata), bilo bi potrebno i u HTML-u postaviti wrapper i dve .carousel-page,
@@ -14,9 +14,15 @@
 import { displayAktuellFeeds, displayNewsByCategory } from './feeds.js';
 import { showGreenRectangle } from './ui.js';
 
+/**
+ * Inicijalizuje svajp funkcionalnost za promenu kategorija.
+ */
 export function initSwipe() {
   const swipeContainer = document.getElementById('news-container');
   if (!swipeContainer) return;
+
+  // Deklaracija i inicijalizacija currentIndex ovde, u opsegu funkcije initSwipe
+  let currentIndex = 0;
 
   // Da li smo već detektovali prvi swipe (pozvaćemo showGreenRectangle jednom).
   let firstSwipeOccurred = false;
@@ -27,9 +33,6 @@ export function initSwipe() {
   let previousTranslate = 0;
   let animationID = 0;
   let dragging = false;
-
-  // Indeks aktivne kategorije (0 => "Aktuell", 1 => "Technologie", itd.)
-  let currentIndex = 0;
 
   // Lista kategorija (redom). Možete je uskladiti sa redosledom u aplikaciji.
   const categories = [
@@ -86,6 +89,10 @@ export function initSwipe() {
 
     const movedBy = currentTranslate - previousTranslate;
 
+    // Dodato logovanje pre provere pomeraja
+    console.log("[swipe.js] touchEnd - Pre provere pomeraja, currentIndex:", currentIndex, "movedBy:", movedBy);
+
+
     // Ako je pomeraj ispod -threshold => prelazak napred (sledeća kategorija)
     if (movedBy < -threshold && currentIndex < categories.length - 1) {
       currentIndex++;
@@ -102,6 +109,10 @@ export function initSwipe() {
         showGreenRectangle();
       }
     }
+
+    // Dodato logovanje posle provere pomeraja
+    console.log("[swipe.js] touchEnd - Posle provere pomeraja, currentIndex:", currentIndex);
+
 
     // Pošto imamo samo jedan container (ne više “stranica”),
     // posle prelaska na novu kategoriju resetujemo poziciju na 0.

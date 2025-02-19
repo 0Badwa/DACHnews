@@ -491,9 +491,10 @@ background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z
   padding: 0;
 }
 
+/* Stil za red kategorije */
 #sortable-list li {
   display: flex;
-  justify-content: space-between; /* Razmak između elemenata */
+  justify-content: space-between; /* Omogućava razmak između elemenata */
   align-items: center;
   font-size: 0.9rem;
   padding: 0.2rem 0.8rem;
@@ -509,6 +510,8 @@ background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z
 .category-left {
   display: flex;
   align-items: center;
+  flex-grow: 1; /* Omogućava širenje kako bi svi redovi bili isti */
+  gap: 0.5rem; /* Mali razmak između strelica i teksta */
 }
 
 /* Stilovi za strelice za pomeranje kategorija */
@@ -518,7 +521,7 @@ background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z
   border-left: 6px solid transparent;
   border-right: 6px solid transparent;
   cursor: pointer;
-  margin: 0 0.3rem; /* Smanjen razmak između strelica */
+  margin: 0 0.2rem; /* Smanjen razmak između strelica */
   display: inline-block;
 }
 
@@ -528,27 +531,22 @@ background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z
 
 .arrow-down {
   border-top: 10px solid #32CD32; /* Zelena strelica dole */
-    margin-right: 1rem; /* Povećan razmak između desne strelice i naziva kategorije */
+  margin-right: 1rem; /* Povećan razmak između desne strelice i naziva kategorije */
 }
 
 /* Stil za naziv kategorije */
 .category-name {
   margin-left: 10px; /* Razmak između strelica i naziva kategorije */
+  flex-grow: 1; /* Omogućava da naziv kategorije zauzme prostor */
 }
 
-/* Stil za opciju "Entsperren" */
-.unlock {
-  cursor: pointer;
-  margin-left: auto; /* Poravnava dugme udesno */
-}
-
-/* Kategorija je verbergen (zelena pozadina) */
+/* Kategorija je verbergen (sakrivena) */
 #sortable-list li.verbergen {
   background-color: rgba(50, 205, 50, 0.2); /* Zelena pozadina sa providnošću */
   border: 1px solid var(--primary-color); /* Zelena granica */
 }
 
-/* Kategorija je entsperren (crvena pozadina) */
+/* Kategorija je entsperren (otključana) */
 #sortable-list li.entsperren {
   background-color: rgba(255, 68, 68, 0.2); /* Crvena pozadina sa providnošću */
   border: 1px solid #ff4444; /* Crvena granica */
@@ -559,26 +557,70 @@ background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z
   transform: scale(1.02); /* Blago uvećanje na hover */
 }
 
-#sortable-list li button {
-  background-color: var(--primary-color); /* Zelena pozadina dugmeta */
-  color: #fff; /* Beli tekst */
-  border: none;
-  padding: 0.3rem 0.8rem; /* Padding dugmeta */
-  border-radius: 4px; /* Zaobljeni uglovi dugmeta */
+/* SWITCH DUGME ZA UKLJUČIVANJE/ISKLJUČIVANJE KATEGORIJA */
+.switch-container {
+  position: relative;
+  display: inline-block;
+  width: 1.7rem; /* Širina switch dugmeta */
+  height: 0.8rem; /* Visina switch dugmeta */
+  background-color: #444; /* Tamna boja kada je isključeno */
+  border-radius: 0.8rem;
+  transition: background-color 0.4s ease, box-shadow 0.4s ease;
   cursor: pointer;
-  font-size: 0.9rem; /* Veličina fonta */
-  transition: background-color 0.2s; /* Animacija za hover */
-  margin-left: auto; /* Poravnava dugme udesno */
+  box-shadow: inset 0 0 0.1rem #0f0, 0 0 0.2rem #0f0;
 }
 
-#sortable-list li button:hover {
-  background-color: rgba(50, 205, 50, 0.8); /* Svetlija zelena na hover */
+/* Klizač unutar switch dugmeta (krug) */
+.switch-slider {
+  position: absolute;
+  top: 0.05rem;
+  left: auto;
+  right: 0.05rem; /* Početna pozicija - desno */
+  width: 0.7rem;
+  height: 0.7rem;
+  background-color: #fff; /* Bela ručica */
+  border-radius: 50%;
+  transition: transform 0.4s ease, background-color 0.4s ease;
+  box-shadow: 0 0 0.1rem #0f0, 0 0 0.15rem #0f0;
+}
+
+/* Kada je dugme AKTIVNO (ON), klizač ide DESNO */
+.switch-container.active .switch-slider {
+  transform: translateX(0.9rem);
+  background-color: #000;
+}
+
+/* Kada je dugme ISKLJUČENO (OFF), klizač ostaje LEVO */
+.switch-container:not(.active) .switch-slider {
+  transform: translateX(0);
+}
+
+/* Animacije prebacivanja */
+@keyframes toggleOn {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(0.9rem); }
+}
+
+@keyframes toggleOff {
+  0%   { transform: translateX(0.9rem); }
+  100% { transform: translateX(0); }
+}
+
+/* Primena animacija */
+.switch-container.active .switch-slider {
+  animation: toggleOn 0.4s ease-in-out forwards;
+}
+
+.switch-container:not(.active) .switch-slider {
+  animation: toggleOff 0.4s ease-in-out forwards;
 }
 
 
 /* QUELLEN LIST */
-.sources-list {
-  margin-bottom: 1.5rem;
+.sources-list h3 {
+  font-size: 1rem;  /* Podešavanje veličine naslova */
+  font-weight: bold;
+  margin: 1rem 0 0.5rem 0;
 }
 
 .source-item {
@@ -831,4 +873,84 @@ background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z
   pointer-events: none; /* Da ne blokira interakcije */
   z-index: 999; /* Na vrhu sadržaja */
   background: transparent;
+}
+
+/* ========== NOVI SWITCH DUGME STIL (CYBERPUNK) =====o1===== */
+.switch-container {
+  position: relative;
+  display: inline-block;
+  width: 1.7rem;       /* širina staze */
+  height: 0.8rem;      /* visina staze */
+  background-color: #000;  /* boja staze kada je isključeno */
+  border-radius: 0.8rem;
+  transition: background-color 0.4s ease, box-shadow 0.4s ease;
+  cursor: pointer;
+  
+  /* Neon glow kada je isključeno: malo suptilniji */
+  box-shadow:
+    inset 0 0 0.1rem #0f0,
+    0 0 0.2rem #0f0;
+  
+  /* Blagi 3D efekat lebdenja */
+  transform: perspective(300px) translateZ(3px);
+}
+.switch-container:hover {
+  transform: perspective(300px) translateZ(6px);
+  transition: transform 0.3s ease;
+}
+
+/* „Klizač“ (knob) */
+.switch-slider {
+  position: absolute;
+  top: 0.05rem;
+  left: 0.05rem;
+  width: 0.7rem;
+  height: 0.7rem;
+  background-color: #fff;    /* bela ručica */
+  border-radius: 50%;
+  transition: transform 0.4s ease, background-color 0.4s ease, box-shadow 0.4s ease;
+  
+  /* Početni neon odsjaj na ručici */
+  box-shadow:
+    0 0 0.1rem #0f0,
+    0 0 0.15rem #0f0;
+}
+
+/* Kada je switch Uključeno (aktivno) */
+.switch-container.active {
+  background-color: #32CD32; /* intenzivna zelena pozadina */
+  
+  /* Jači neon glow */
+  box-shadow:
+    inset 0 0 0.12rem #0f0,
+    0 0 0.1rem #0f0,
+    0 0 0.2rem #0f0;
+}
+
+/* Pomak ručice i izgled kada je uključeno */
+.switch-container.active .switch-slider {
+  transform: translateX(0.9rem);
+  background-color: #000; /* kontrastna crna ručica na zelenoj pozadini */
+  box-shadow:
+    0 0 0.1rem #0f0,
+    0 0 0.2rem #0f0,
+    0 0 0.3rem #0f0; /* dodatno pojačan neon */
+}
+
+/* Animacije prebacivanja (ostavljene po uzoru na tvoj kod) */
+@keyframes toggleOn {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(0.9rem); }
+}
+@keyframes toggleOff {
+  0%   { transform: translateX(0.9rem); }
+  100% { transform: translateX(0); }
+}
+
+/* Triger animacija kada .active klasa postoji ili ne postoji */
+.switch-container.active .switch-slider {
+  animation: toggleOn 0.4s ease-in-out forwards;
+}
+.switch-container:not(.active) .switch-slider {
+  animation: toggleOff 0.4s ease-in-out forwards;
 }

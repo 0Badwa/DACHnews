@@ -1,11 +1,12 @@
 /***********************************************
  * newsModal.js
+ * 
+ * Ovaj fajl prikazuje i ažurira modal za pojedinačnu vest.
  ***********************************************/
 
 /**
- * Ažurira <title>, <meta> description, kao i
- * Open Graph i Twitter card meta tagove
- * na osnovu prosledjene vesti (feed).
+ * Funkcija koja ažurira <title>, <meta> description, kao i Open Graph i Twitter card meta tagove
+ * na osnovu prosleđene vesti (feed).
  */
 function updateDynamicMeta(feed) {
   // 1) Title
@@ -13,7 +14,7 @@ function updateDynamicMeta(feed) {
     ? `${feed.title} – DACH.news`
     : 'DACH.news';
 
-  // 2) Meta description (uzmi prvih ~160 karaktera iz content_text, ako postoji)
+  // 2) Meta description (prvih ~160 karaktera)
   const description = feed.content_text
     ? feed.content_text.substring(0, 160)
     : (feed.title || 'Aktuelle Nachrichten aus der DACH-Region');
@@ -37,8 +38,7 @@ function updateDynamicMeta(feed) {
   }
   const ogUrl = document.querySelector('meta[property="og:url"]');
   if (ogUrl) {
-    // Ako hoćeš da menjaš url za svaku vest, možeš npr:
-    // ogUrl.setAttribute('content', `https://www.dach.news/news/${feed.id}`);
+    // Ako hoćete da menja URL, npr: ogUrl.setAttribute('content', `https://www.dach.news/news/${feed.id}`);
     ogUrl.setAttribute('content', 'https://dach.news');
   }
 
@@ -58,12 +58,12 @@ function updateDynamicMeta(feed) {
 }
 
 /**
- * Otvara modal sa novom slikom bez kratkotrajnog prikaza stare slike.
- * Ceo modal ostaje sakriven dok se nova slika ne učita,
- * pa se sve prikaže odjednom, bez "treptanja".
+ * Funkcija koja otvara modal za pojedinačnu vest (feed),
+ * prikazuje detalje, inicijalno sakriva modal dok se slika ne učita
+ * i nakon toga je prikazuje.
  */
 export function openNewsModal(feed) {
-  // Prvo ažuriramo <title> i <meta> tagove za SEO
+  // Ažurira <title> i <meta> tagove
   updateDynamicMeta(feed);
 
   const modal = document.getElementById('news-modal');
@@ -79,10 +79,10 @@ export function openNewsModal(feed) {
     return;
   }
 
-  // Sakrij modal da bi se resetovao sadržaj
+  // Sakrij modal dok se sve ne pripremi
   modal.style.display = 'none';
 
-  // Resetuj sliku i postavi alt tekst
+  // Reset
   modalImage.src = '';
   modalImage.alt = 'News image';
   modalImage.classList.add('hide-alt');
@@ -90,13 +90,13 @@ export function openNewsModal(feed) {
     modalImage.classList.remove('hide-alt');
   };
 
-  // Ako postoji aktivna news-card, uzmi source odatle, inače iz feed.source
+  // Izvor
   const activeNewsCard = document.querySelector('.news-card.active');
   const sourceName = activeNewsCard
     ? activeNewsCard.querySelector('.source').textContent
     : (feed.source || 'Unbekannte Quelle');
 
-  // Formatiraj datum i vreme za prikaz
+  // Format datuma
   const publishedDateTime = feed.date_published || '';
   let formattedDate = '';
   let formattedTime = '';
@@ -113,11 +113,11 @@ export function openNewsModal(feed) {
     ${formattedDate && formattedTime ? ` • ${formattedDate} • ${formattedTime}` : ''}
   `;
 
-  // Popuni naslov i opis vesti
+  // Naslov i opis
   modalTitle.textContent = feed.title || 'No title';
   modalDescription.textContent = feed.content_text || 'Keine Beschreibung';
 
-  // Kreiraj sekciju za AI analizu (ako je ima)
+  // Analiza (ako postoji)
   const analysisContainer = document.createElement('div');
   analysisContainer.className = 'news-modal-analysis';
 
@@ -131,7 +131,6 @@ export function openNewsModal(feed) {
   analysisText.textContent = feed.analysis || 'Keine Meinung verfügbar.';
   analysisContainer.appendChild(analysisText);
 
-  // Umetni analysisContainer iznad dugmadi
   const modalContent = modal.querySelector('.news-modal-content');
   if (modalContent) {
     const existingAnalysis = modalContent.querySelector('.news-modal-analysis');
@@ -146,47 +145,79 @@ export function openNewsModal(feed) {
     }
   }
 
-  // Dugme za zatvaranje
+  // Dugme X - zatvaranje
   closeModalButton.onclick = () => {
     modal.style.display = 'none';
   };
 
-  // Dugme "Weiter" -> otvaranje originalnog url-a
+  // Dugme "Weiter" -> otvaranje originalnog URL-a
   weiterButton.onclick = () => {
     if (feed.url) {
       window.open(feed.url, '_blank');
     }
-    // Zatvori modal posle par sekundi ili odmah (po želji)
     setTimeout(() => {
       modal.style.display = 'none';
     }, 3000);
   };
 
-  // Sada kreiramo privremeni <img> da se učita slika
-  const BASE_URL = window.location.hostname.includes("localhost")
+  // Definicija BASE_URL – podržava localhost, exyunews.onrender.com i www.exyunews.onrender.com,
+  // a podrazumevano se koristi https://www.dach.news
+  const hostname = window.location.hostname;
+  const BASE_URL = hostname.includes("localhost")
     ? "http://localhost:3001"
-    : "https://www.dach.news";
+    : hostname === "exyunews.onrender.com"
+      ? "https://exyunews.onrender.com"
+      : hostname === "www.exyunews.onrender.com"
+        ? "https://www.exyunews.onrender.com"
+        : "https://www.dach.news";
+
+  // Domena koje smo ranije blokirali
+  const invalidImageSources = [
+    "https://p6.focus.de",
+    "https://quadro.burda-forward.de"
+  ];
 
   const tempImg = new Image();
   tempImg.onload = () => {
+    // Kad se temp slika učita, postavimo je u modal i prikažemo modal
     modalImage.src = tempImg.src;
     modal.style.display = 'flex';
   };
   tempImg.onerror = () => {
     console.warn("[newsModal] Could not load image:", feed.image);
+    // Umesto zatvaranja, koristimo fallback "no-image.png"
+    modalImage.src = `${BASE_URL}/src/icons/no-image.png`;
     modal.style.display = 'flex';
   };
 
-  // Ako je putanja feed.image relativna (počinje sa "/"), dodaj base URL
-  if (feed.image && feed.image.startsWith('/')) {
-    let finalUrl = BASE_URL + feed.image;
-    // Ako nije već suffix ":news-modal", dodaj ga
-    if (!feed.image.includes(':news-modal')) {
-      finalUrl += ':news-modal';
-    }
-    tempImg.src = encodeURI(finalUrl);
+  // Ako je slika sa blokiranog domena -> fallback
+  if (feed.image && invalidImageSources.some(src => feed.image.startsWith(src))) {
+    console.warn("[newsModal] Blokirana slika:", feed.image);
+    tempImg.src = `${BASE_URL}/src/icons/no-image.png`;
   } else {
-    // Fallback ako nema slike
-    tempImg.src = feed.image || (BASE_URL + '/src/icons/no-image.png');
-  }
-}
+    // Normalan slučaj
+    let id;
+    if (feed && feed.id) {
+      // Umesto odsecanja dvotačke, koristimo ceo feed.id
+      id = feed.id;
+    } else if (feed.image && feed.image.startsWith('/')) {
+      // Pokušaj da se izvuče id iz feed.image pretpostavljajući format "/image/{id}" ili "/image/{id}:news-card"
+      const parts = feed.image.split('/');
+      if (parts.length >= 3) {
+        id = parts[2].split(':')[0];
+      }
+    }
+    if (id) {
+      // Učitava verziju za modal (320x240) koristeći dobijeni id
+      tempImg.src = encodeURI(`${BASE_URL}/image/${id}:news-modal`);
+    } else if (feed.image && feed.image.startsWith('/')) {
+      // Ako ne možemo da izvučemo id, formiramo URL iz feed.image
+      let finalUrl = BASE_URL + feed.image;
+      if (!feed.image.includes(':news-modal')) {
+        finalUrl += ':news-modal';
+      }
+      tempImg.src = encodeURI(finalUrl);
+    } else {
+      tempImg.src = feed.image || (`${BASE_URL}/src/icons/no-image.png`);
+    }
+  }}

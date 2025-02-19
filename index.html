@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <link rel="icon" href="src/icons/favicon.ico" type="image/x-icon" />
   <!-- SEO Meta-Tags -->
-  <meta name="description" content="„Ihre Nachrichtenquelle – präzise ausgewählt und analysiert mit AI.">
+  <meta name="description" content="Ihre Nachrichtenquelle – präzise ausgewählt und analysiert mit AI.">
   <meta name="keywords" content="Nachrichten, DACH, Deutschland, Österreich, Schweiz, Politik, Sport, Wirtschaft, Technologie, Kultur, Unterhaltung, Künstliche Intelligenz, KI, AI-Analyse, AI-generierte Nachrichten">
   <meta name="author" content="DACH.news">
   <meta name="robots" content="index, follow">
@@ -31,6 +31,9 @@
 
   <script src="src/js/gtag.js"></script>
 
+  <link rel="canonical" href="https://www.dach.news" />
+
+
   <!-- Učitaj CSS -->
   <link rel="stylesheet" href="src/css/styles.css">
 </head>
@@ -42,7 +45,7 @@
         <!-- Menüeinträge dynamisch oder im Modal -->
       </div>
     </div>
-    <img src="src/icons/dachnewslogo.webp" alt="DACH.news" width="360" height="60" />
+    <img src="src/icons/dachnewslogo.webp" alt="DACH.news – Nachrichtenaggregator" width="360" height="60">
   </nav>
 
   <!-- Loader element (fester Positionsrahmen, damit es den Inhalt nicht verschiebt) -->
@@ -191,12 +194,12 @@
     </div>
   </div>
 
-  <!-- Modal: Quellen (Quelle verbergen) -->
+  <!-- Modal: Quellen (Quellen verbergen) -->
   <div id="quellen-modal" class="modal" style="display: none;">
     <div class="rearrange-modal-content quellen-modal-content" style="margin: 0 3rem;">
       <div class="modal-title" 
            style="color: var(--primary-color); font-weight: bold; font-size: 120%;">
-        Quelle verbergen
+        Quellen verbergen
       </div>
       <div class="sources-list" id="sources-list" style="margin-top: 1rem;">
         <!-- Dynamische Quellen-Liste über main.js -->
@@ -208,22 +211,23 @@
   </div>
 
   <!-- Modal: Kategorien (Verbergen und anordnen) -->
-  <div id="kategorien-modal" class="modal" style="display: none;">
-    <div class="rearrange-modal-content kategorien-modal-content" style="margin: 0 3rem;">
-      <div class="modal-title" 
-           style="color: var(--primary-color); font-weight: bold; font-size: 120%;">
-        Verbergen und anordnen
-      </div>
-      <ul id="sortable-list" 
-          class="rearrange-list" 
-          style="margin: 1rem 0;">
-        <!-- Dynamische Kategorien-Liste mit Drag & Drop in main.js -->
-      </ul>
-      <div class="modal-buttons">
-        <button class="save-button" id="close-kategorien-modal">Schließen</button>
-      </div>
+<div id="kategorien-modal" class="modal" style="display: none;">
+  <div class="rearrange-modal-content kategorien-modal-content" style="margin: 0 3rem;">
+    <div class="modal-title" 
+         style="color: var(--primary-color); font-weight: bold; font-size: 120%;">
+      Verbergen und Anordnen
+    </div>
+    <ul id="sortable-list" 
+        class="rearrange-list" 
+        style="margin: 1rem 0;">
+      <!-- Dynamische Kategorien-Liste mit Drag & Drop und Switch Buttons in main.js -->
+    </ul>
+    <div class="modal-buttons">
+      <button class="save-button" id="close-kategorien-modal">Schließen</button>
     </div>
   </div>
+</div>
+
 
   <!-- Modal: Kontakt -->
   <div id="kontakt-modal" class="modal" style="display: none;">
@@ -271,14 +275,13 @@
       </div>
       <p style="margin: 1rem 0;">
         DACH.news ist ein unabhängiges Nachrichtenaggregator-Projekt, das einen sorgfältig 
-        kuratierten und stets aktuellen Überblick über Nachrichten aus der DACH-Region bietet. 
+        kuratierten und stets aktuellen Überblick über Nachrichten aus der DACH-Region bietet.  <br><br>
         Obwohl die Plattform auf rund dreißig Quellen basiert, wurden diese Medien sorgfältig 
         ausgewählt, um eine ausgewogene, konstruktive und objektive Berichterstattung zu 
         gewährleisten. Ein besonderer Schwerpunkt liegt auf Inklusivität, damit unterschiedliche 
-        Perspektiven und Stimmen gleichermaßen Gehör finden. Die ausgewählten Medien zeichnen 
+        Perspektiven und Stimmen gleichermaßen Gehör finden.  <br><br>Die ausgewählten Medien zeichnen 
         sich durch Toleranz und Objektivität aus und vermeiden reißerische oder polarisierende 
-        Inhalte. Ihre Unterstützung und Ihr Feedback sind von unschätzbarem Wert, um die 
-        Plattform kontinuierlich zu verbessern und weiterzuentwickeln.
+        Inhalte.
       </p>
       <div class="modal-buttons">
         <button class="save-button" id="close-uber-modal">Schließen</button>

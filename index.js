@@ -30,7 +30,22 @@ app.use(
       defaultSrc: ["'self'"],
       scriptSrc: ["'self'", "https://www.googletagmanager.com"],
       styleSrc: ["'self'", "'unsafe-inline'"],
-      imgSrc: ["'self'", "data:", "https://www.dach.news", "https://exyunews.onrender.com"],
+      imgSrc: [
+        "'self'",
+        "data:",
+        "https://www.dach.news",
+        "https://exyunews.onrender.com",
+        "https://www.exyunews.onrender.com", // Dodato
+        "https://static.boerse.de",
+        "https://p6.focus.de",
+        "https://cdn.swp.de",
+        "https://media.example.com",
+        "https://quadro.burda-forward.de", // Dodato za slike sa Burda Forward
+        "https://img.burda-forward.de", // Dodato kao rezervni domen
+        "https://p6.focus.de", // Ponovo dodato jer postoje greške sa ovim domenom
+        "https://cdn.burda-forward.de" // Alternativni CDN domen za slike Burda Forward
+      ],
+
       connectSrc: ["'self'"],
       fontSrc: ["'self'", "data:"],
       objectSrc: ["'none'"],
@@ -38,6 +53,7 @@ app.use(
     },
   })
 );
+
 app.use(express.json());
 
 app.use('/src', express.static(path.join(__dirname, 'src'), {
@@ -50,24 +66,29 @@ app.use('/src', express.static(path.join(__dirname, 'src'), {
 
 await initRedis();
 
-/**
- * Funkcija koja generiše HTML za vest iz JSON objekta.
- */
 function generateHtmlForNews(news) {
   return `
     <!DOCTYPE html>
-    <html lang="en">
+    <html lang="de">
     <head>
       <meta charset="UTF-8">
-     <title>${news.title} - DACH News: Nachrichten aus Deutschland, Österreich, Schweiz</title>
+      <title>${news.title} - DACH News: Nachrichten aus Deutschland, Österreich, Schweiz</title>
       <meta name="description" content="${news.content_text ? news.content_text.substring(0, 160) : ''}">
-      <link rel="canonical" href="https://www.dach.news/news/${news.id}">
-      <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        img { max-width: 100%; height: auto; }
-      </style>
+      <link rel="canonical" href="${new URL('/news/' + news.id, 'https://www.dach.news').href}">
 
-             <h1>${news.title}</h1>
+      <!-- Open Graph Meta Tags -->
+      <meta property="og:type" content="article">
+      <meta property="og:title" content="${news.title}">
+      <meta property="og:description" content="${news.content_text ? news.content_text.substring(0, 160) : ''}">
+      <meta property="og:url" content="https://www.dach.news/news/${news.id}">
+      <meta property="og:image" content="${news.image || 'https://www.dach.news/default-image.jpg'}">
+      <meta property="og:site_name" content="DACH News">
+
+      <!-- Twitter Card Meta Tags -->
+      <meta name="twitter:card" content="summary_large_image">
+      <meta name="twitter:title" content="${news.title}">
+      <meta name="twitter:description" content="${news.content_text ? news.content_text.substring(0, 160) : ''}">
+      <meta name="twitter:image" content="${news.image || 'https://www.dach.news/default-image.jpg'}">
 
       <script type="application/ld+json">
       {
@@ -75,7 +96,12 @@ function generateHtmlForNews(news) {
         "@type": "NewsArticle",
         "headline": "${news.title}",
         "datePublished": "${news.date_published ? new Date(news.date_published).toISOString() : new Date().toISOString()}",
-        "image": "${news.image || ''}",
+        "dateModified": "${news.date_published ? new Date(news.date_published).toISOString() : new Date().toISOString()}",
+        "mainEntityOfPage": {
+          "@type": "WebPage",
+          "@id": "https://www.dach.news/news/${news.id}"
+        },
+        "image": "${news.image || 'https://www.dach.news/default-image.jpg'}",
         "author": {
           "@type": "Person",
           "name": "${news.source}"
@@ -88,12 +114,14 @@ function generateHtmlForNews(news) {
             "url": "https://www.dach.news/src/icons/favicon.ico"
           }
         },
-        "description": "${news.content_text ? news.content_text.substring(0, 160) : ''}"
+        "description": "${news.content_text ? news.content_text.substring(0, 160) : ''}",
+        "articleBody": "${news.content_text.replace(/"/g, '\\"')}"
       }
       </script>
     </head>
     <body>
       <h1>${news.title}</h1>
+      <h2>${news.category} - ${news.source}</h2>
       <p><em>${news.date_published ? new Date(news.date_published).toLocaleString() : ''}</em></p>
       ${news.image ? `<img src="${news.image}" alt="${news.title}">` : ''}
       <div>${news.content_text}</div>
@@ -103,6 +131,7 @@ function generateHtmlForNews(news) {
     </html>
   `;
 }
+
 
 /**
  * Ruta za glavnu stranicu sa dinamičkim popunjavanjem index.html
@@ -162,7 +191,17 @@ app.get('/api/feeds-by-category/:category', async (req, res) => {
  * Ruta za dohvatanje slike iz Redis-a.
  */
 app.get('/image/:id', async (req, res) => {
-  const imgKey = `img:${req.params.id}`;
+  // Parametar može biti oblika "id:variant", npr. "994b607b2be02db94a561e10966e26fb:news-modal"
+  const param = req.params.id;
+  let id, variant;
+  if (param.includes(':')) {
+    [id, variant] = param.split(':');
+  } else {
+    id = param;
+    // Ako nije definisana varijanta, koristimo podrazumevanu verziju za newscards
+    variant = 'news-card';
+  }
+  const imgKey = `img:${id}:${variant}`;
   try {
     const base64 = await redisClient.get(imgKey);
     if (!base64) {
@@ -177,6 +216,7 @@ app.get('/image/:id', async (req, res) => {
     res.status(500).send("Server error");
   }
 });
+
 
 /**
  * API ruta za pojedinačnu vest u JSON formatu.
@@ -286,6 +326,32 @@ app.post('/api/unblock-source', async (req, res) => {
     res.status(500).send("Server error");
   }
 });
+
+// Redirekcija za nevažeće ili istekao URL-ove sa newsId parametrom
+app.get('/news/:id', async (req, res) => {
+  const newsId = req.params.id;
+  
+  try {
+    let allFeeds = await getAllFeedsFromRedis();
+    let news = allFeeds.find(item => item.id === newsId);
+    
+    if (!news) {
+      const seoFeeds = await getSeoFeedsFromRedis();
+      news = seoFeeds.find(item => item.id === newsId);
+    }
+
+    if (!news) {
+      console.log(`[Redirect] News ID ${newsId} not found. Redirecting to homepage.`);
+      return res.redirect(301, 'https://www.dach.news');
+    }
+
+    res.send(generateHtmlForNews(news));
+  } catch (error) {
+    console.error(`[Error] Fetching news ${newsId}:`, error);
+    res.redirect(301, 'https://www.dach.news');
+  }
+});
+
 
 app.use((req, res, next) => {
   if (req.headers.host === 'dachnews.onrender.com') {
