@@ -9,7 +9,14 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
 
-import { initRedis, redisClient, processFeeds, getAllFeedsFromRedis, getSeoFeedsFromRedis, cleanupSeoCache } from './feedsService.js';
+import {
+  initRedis,
+  redisClient,
+  processFeeds,
+  getAllFeedsFromRedis,
+  getSeoFeedsFromRedis,
+  cleanupSeoCache,
+} from './feedsService.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -24,6 +31,7 @@ app.get('/BingSiteAuth.xml', (req, res) => {
 app.use('/favicon.ico', express.static(path.join(__dirname, 'src/icons/favicon.ico')));
 app.use('/fonts', express.static(path.join(__dirname, 'src/fonts')));
 
+// Prošireni imgSrc domeni
 app.use(
   helmet.contentSecurityPolicy({
     directives: {
@@ -34,22 +42,24 @@ app.use(
         "'self'",
         "data:",
         "https://www.dach.news",
+        "https://dach.news",
         "https://exyunews.onrender.com",
-        "https://www.exyunews.onrender.com", // Dodato
+        "https://www.exyunews.onrender.com",
+        "https://newsdocker-1.onrender.com",
+        "https://www.newsdocker-1.onrender.com",
         "https://static.boerse.de",
         "https://p6.focus.de",
         "https://cdn.swp.de",
         "https://media.example.com",
-        "https://quadro.burda-forward.de", // Dodato za slike sa Burda Forward
-        "https://img.burda-forward.de", // Dodato kao rezervni domen
-        "https://p6.focus.de", // Ponovo dodato jer postoje greške sa ovim domenom
-        "https://cdn.burda-forward.de" // Alternativni CDN domen za slike Burda Forward
+        "https://quadro.burda-forward.de",
+        "https://img.burda-forward.de",
+        "https://p6.focus.de", // ponovljeno radi potencijalnih grešaka
+        "https://cdn.burda-forward.de"
       ],
-
       connectSrc: ["'self'"],
       fontSrc: ["'self'", "data:"],
       objectSrc: ["'none'"],
-      upgradeInsecureRequests: [],
+      upgradeInsecureRequests: []
     },
   })
 );
@@ -66,6 +76,10 @@ app.use('/src', express.static(path.join(__dirname, 'src'), {
 
 await initRedis();
 
+/**
+ * Generiše detaljniji HTML sa Open Graph, Twitter tagovima, povezanim eksternim CSS-om
+ * i AI sekcijom za analizu ako postoji (ili placeholder ako nema).
+ */
 function generateHtmlForNews(news) {
   return `
     <!DOCTYPE html>
@@ -90,6 +104,10 @@ function generateHtmlForNews(news) {
       <meta name="twitter:description" content="${news.content_text ? news.content_text.substring(0, 160) : ''}">
       <meta name="twitter:image" content="${news.image || 'https://www.dach.news/default-image.jpg'}">
 
+      <!-- Link to external CSS -->
+      <link rel="stylesheet" href="https://www.dach.news/src/css/styles.css">
+
+      <!-- Structured Data (JSON-LD) -->
       <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -127,6 +145,12 @@ function generateHtmlForNews(news) {
       <div>${news.content_text}</div>
       <p>Source: ${news.source}</p>
       <p>Category: ${news.category}</p>
+
+      <!-- AI-Perspektive: Meinung & Kommentar -->
+      <section>
+        <h2>AI-Perspektive: Meinung &amp; Kommentar</h2>
+        <p>${news.analysis ? news.analysis : 'Keine AI-Analyse verfügbar.'}</p>
+      </section>
     </body>
     </html>
   `;
@@ -189,19 +213,23 @@ app.get('/api/feeds-by-category/:category', async (req, res) => {
 
 /**
  * Ruta za dohvatanje slike iz Redis-a.
+ * Podržava varijante preko "id:variant" forme (ili default "news-card").
  */
 app.get('/image/:id', async (req, res) => {
-  // Parametar može biti oblika "id:variant", npr. "994b607b2be02db94a561e10966e26fb:news-modal"
   const param = req.params.id;
   let id, variant;
+
+  // Ako parametar sadrži dvotačku, razdvajamo id i varijantu
   if (param.includes(':')) {
     [id, variant] = param.split(':');
   } else {
+    // Ako nije definisana varijanta, koristi "news-card"
     id = param;
-    // Ako nije definisana varijanta, koristimo podrazumevanu verziju za newscards
     variant = 'news-card';
   }
+
   const imgKey = `img:${id}:${variant}`;
+
   try {
     const base64 = await redisClient.get(imgKey);
     if (!base64) {
@@ -220,7 +248,6 @@ app.get('/image/:id', async (req, res) => {
 
 /**
  * API ruta za pojedinačnu vest u JSON formatu.
- * (Zbog duple definicije, spojeno u jednu rutu.)
  */
 app.get('/api/news/:id', async (req, res) => {
   const newsId = req.params.id;
@@ -288,6 +315,7 @@ app.get('/api/debug/html-keys', async (req, res) => {
   }
 });
 
+// Pokrećemo proces vesti na svakih 12 minuta
 setInterval(processFeeds, 12 * 60 * 1000);
 processFeeds();
 
@@ -295,6 +323,9 @@ processFeeds();
 setInterval(cleanupSeoCache, 6 * 60 * 60 * 1000);
 
 
+/**
+ * Blokiranje izvora
+ */
 app.post('/api/block-source', async (req, res) => {
   const { source } = req.body;
   if (!source) return res.status(400).send("Source required");
@@ -312,6 +343,9 @@ app.post('/api/block-source', async (req, res) => {
   }
 });
 
+/**
+ * Deblokiranje izvora
+ */
 app.post('/api/unblock-source', async (req, res) => {
   const { source } = req.body;
   if (!source) return res.status(400).send("Source required");
@@ -503,4 +537,11 @@ app.get('/api/search', async (req, res) => {
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`[Express] Server running on port ${PORT}`);
+});
+
+/**
+ * Na kraju, osiguravamo uredno zatvaranje Redis konekcije
+ */
+process.on('exit', async () => {
+  await redisClient.disconnect();
 });

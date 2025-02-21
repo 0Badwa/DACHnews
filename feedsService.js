@@ -274,7 +274,11 @@ function extractSource(url) {
 
 
 // Provera da li je uređaj mobilni
-const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+//const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+
+// Provera da li je navigator definisan; ako nije, pretpostavljamo da uređaj nije mobilan
+const isMobile = (typeof navigator !== 'undefined' && /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)) || false;
+
 
 // Postavljanje limita u zavisnosti od uređaja
 const limit = pLimit(isMobile ? 2 : 4);
