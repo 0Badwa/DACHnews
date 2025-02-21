@@ -158,6 +158,28 @@ function isHiddenFeed(feed) {
 }
 
 /**
+ * Proverava da li postoji keširan feed u localStorage i vraća ga ako je validan.
+ */
+function getCachedFeeds(lastFetchKey, cachedFeedsKey, forceRefresh) {
+  const lastFetchTime = localStorage.getItem(lastFetchKey);
+  if (!forceRefresh && lastFetchTime) {
+    const elapsedTime = Date.now() - new Date(lastFetchTime).getTime();
+    if (elapsedTime < 10 * 60 * 1000) {  // Keš traje 10 minuta
+      console.log("[CACHE] Koristimo keširane feedove...");
+      const cachedFeeds = localStorage.getItem(cachedFeedsKey);
+      if (cachedFeeds) {
+        let data = JSON.parse(cachedFeeds);
+        data.sort((a, b) => new Date(b.date_published).getTime() - new Date(a.date_published).getTime());
+        return data.filter(feed => !isHiddenFeed(feed)).slice(0, 200);
+      }
+    }
+  }
+  return null;
+}
+
+
+
+/**
  * Fetch do 50 najnovijih feed-ova iz "Aktuell" (ruta /api/feeds), keš ~10 min.
  */
 export async function fetchAllFeedsFromServer(forceRefresh = false) {
@@ -171,22 +193,9 @@ export async function fetchAllFeedsFromServer(forceRefresh = false) {
       localStorage.removeItem(cachedFeedsKey);
     }
 
-    const lastFetchTime = localStorage.getItem(lastFetchKey);
+    let cachedData = getCachedFeeds(lastFetchKey, cachedFeedsKey, forceRefresh);
+if (cachedData) return cachedData;
 
-    // Ako cache nije stariji od 10 min, vraćamo keš
-    if (
-      !forceRefresh &&
-      lastFetchTime &&
-      (Date.now() - new Date(lastFetchTime).getTime()) < 10 * 60 * 1000
-    ) {
-      const cachedFeeds = localStorage.getItem(cachedFeedsKey);
-      if (cachedFeeds) {
-        let data = JSON.parse(cachedFeeds);
-        data.sort((a, b) => new Date(b.date_published).getTime() - new Date(a.date_published).getTime());
-        data = data.filter(feed => !isHiddenFeed(feed));
-        return data.slice(0, 200);
-      }
-    }
 
     // Inače, fetchujemo
     const response = await fetch("/api/feeds");
@@ -229,29 +238,13 @@ export async function fetchCategoryFeeds(category, forceRefresh = false) {
     const catForUrl = (category === "Sonstiges") ? "Uncategorized" : category;
     const lastFetchKey = `feeds-${catForUrl}-lastFetch`;
     const cachedFeedsKey = `feeds-${catForUrl}`;
-    const lastFetchTime = localStorage.getItem(lastFetchKey);
 
-    if (
-      !forceRefresh &&
-      lastFetchTime &&
-      (Date.now() - new Date(lastFetchTime).getTime()) < 10 * 60 * 1000
-    ) {
-      const cached = localStorage.getItem(cachedFeedsKey);
-      if (cached) {
-        let data = JSON.parse(cached);
-        data.sort((a, b) => new Date(b.date_published).getTime() - new Date(a.date_published).getTime());
-        data = data.filter(feed => !isHiddenFeed(feed));
-        return data.slice(0, 200);
-      }
-    }
+    // ✅ **Dodaj keširanje ovde**
+    let cachedData = getCachedFeeds(lastFetchKey, cachedFeedsKey, forceRefresh);
+    if (cachedData) return cachedData;
 
     const url = `/api/feeds-by-category/${encodeURIComponent(catForUrl)}`;
     const response = await fetch(url);
-    if (!response.ok) {
-      console.error(`[fetchCategoryFeeds] Server returned status ${response.status} za kategoriju: ${catForUrl}`);
-      showErrorMessage(`Fehler: /api/feeds-by-category/${category} konnte nicht geladen werden.`);
-      return [];
-    }
 
     let data = await response.json();
     data.sort((a, b) => new Date(b.date_published).getTime() - new Date(a.date_published).getTime());
@@ -285,7 +278,7 @@ function createNewsCard(feed) {
     ? "http://localhost:3001"
     : window.location.hostname.includes("exyunews.onrender.com")
     ? "https://exyunews.onrender.com"
-    : "https://dachnews.onrender.com";
+    : "https://newsdocker-1.onrender.com";
   
   // Dodaj click event sa ripple efektom
   card.addEventListener('click', function(e) {

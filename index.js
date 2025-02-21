@@ -43,10 +43,9 @@ app.use(
         "data:",
         "https://www.dach.news",
         "https://dach.news",
-        "https://exyunews.onrender.com",
+        "https://developnews.onrender.com",  // Dodaj novi domen ovde
         "https://www.exyunews.onrender.com",
         "https://newsdocker-1.onrender.com",
-        "https://www.newsdocker-1.onrender.com",
         "https://static.boerse.de",
         "https://p6.focus.de",
         "https://cdn.swp.de",
@@ -63,6 +62,7 @@ app.use(
     },
   })
 );
+
 
 app.use(express.json());
 
@@ -388,7 +388,7 @@ app.get('/news/:id', async (req, res) => {
 
 
 app.use((req, res, next) => {
-  if (req.headers.host === 'dachnews.onrender.com') {
+  if (req.headers.host === 'newsdocker-1.onrender.com') {
     return res.redirect(301, 'https://www.dach.news' + req.url);
   }
   next();
