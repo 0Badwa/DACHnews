@@ -104,7 +104,8 @@ app.use(
         "https://quadro.burda-forward.de",
         "https://img.burda-forward.de",
         "https://p6.focus.de", // ponovljeno radi potencijalnih grešaka
-        "https://cdn.burda-forward.de"
+        "https://cdn.burda-forward.de",
+        "https://img.zeit.de" // Dodato ovde
       ],
       connectSrc: ["'self'"],
       fontSrc: ["'self'", "data:"],
