@@ -145,10 +145,17 @@ export function openNewsModal(feed) {
     }
   }
 
-  // Dugme X - zatvaranje
-  closeModalButton.onclick = () => {
-    modal.style.display = 'none';
-  };
+
+  
+// Dugme X - zatvaranje
+closeModalButton.onclick = () => {
+  modal.style.display = 'none';
+  // Ako URL sadrži query parametar "newsId", ukloni ga i preusmeri na osnovnu stranicu
+  if (window.location.search.includes('newsId')) {
+    window.history.replaceState({}, '', '/');
+  }
+};
+
 
   // Dugme "Weiter" -> otvaranje originalnog URL-a
   weiterButton.onclick = () => {
