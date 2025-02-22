@@ -39,7 +39,6 @@ pool.query('SELECT 1')
 
 export default pool;
 
-
 /**
  * Čuva vest u PostgreSQL bazi ako ima analizu.
  */
@@ -65,12 +64,13 @@ async function saveNewsToPostgres(newsObj) {
   ];
 
   try {
-    await pgPool.query(query, values);
+    await pool.query(query, values);
     console.log(`[PostgreSQL] Vest ID:${newsObj.id} upisana u bazu.`);
   } catch (error) {
     console.error(`[PostgreSQL] Greška pri upisu vesti ID:${newsObj.id}:`, error);
   }
 }
+
 
 // Služi Bing verifikacioni fajl
 app.get('/BingSiteAuth.xml', (req, res) => {
@@ -441,9 +441,21 @@ app.post('/api/unblock-source', async (req, res) => {
   }
 });
 
+
 // Redirekcija za nevažeće ili istekao URL-ove sa newsId parametrom
 app.get('/news/:id', async (req, res) => {
   const newsId = req.params.id;
+  const userAgent = req.headers['user-agent'] || '';
+
+
+  // Ako zahtev NIJE od jednog od SEO botova (Googlebot, Bingbot, YandexBot, DuckDuckBot, Yahoo! Slurp),
+// preusmeravamo korisnika na glavnu stranicu gde se otvara modal
+const allowedBots = ['googlebot', 'bingbot', 'yandexbot', 'duckduckbot', 'slurp'];
+if (!allowedBots.some(bot => userAgent.toLowerCase().includes(bot))) {
+  return res.redirect(302, '/?newsId=' + newsId);
+}
+
+
   let news = null;
 
   try {
