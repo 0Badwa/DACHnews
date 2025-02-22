@@ -4,21 +4,21 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "3001:3001"
+      - "${APP_PORT:-3001}:3001"
     environment:
       - REDIS_URL=redis://redis:6379
     depends_on:
       - redis
-    restart: always  # Osigurava da se aplikacija ponovo pokrene ako padne
+    restart: always
 
   redis:
     image: redis:latest
     ports:
       - "6379:6379"
     volumes:
-      - redis_data:/data  # Čuva podatke između restartova
+      - redis_data:/data
     command: ["redis-server", "--appendonly", "yes"]
-    restart: always  # Osigurava da se Redis ponovo pokrene ako padne
+    restart: always
 
 volumes:
   redis_data:
