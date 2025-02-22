@@ -370,10 +370,11 @@ async function* getFeedsGenerator() {
   let cursor = 0;
   do {
     // Skeniramo Redis ključeve u batch-evima
-    const [newCursor, keys] = await redisClient.scan(cursor, {
+    const { cursor: newCursor, keys } = await redisClient.scan(cursor, {
       MATCH: 'category:*',
-      COUNT: 10 // Procesiramo po 10 ključeva po iteraciji
+      COUNT: 10
     });
+    
     cursor = newCursor;
 
     for (const key of keys) {
