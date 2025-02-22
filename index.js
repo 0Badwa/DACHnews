@@ -13,6 +13,7 @@ import {
   initRedis,
   redisClient,
   processFeeds,
+  getFeedsGenerator,
   getAllFeedsFromRedis,
   getSeoFeedsFromRedis,
   cleanupSeoCache,

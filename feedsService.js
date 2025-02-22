@@ -430,6 +430,8 @@ export async function getSeoFeedsFromRedis() {
   }
 }
 
+export { getFeedsGenerator };
+
 
 /**
  * Glavna funkcija za obradu feed-ova.
