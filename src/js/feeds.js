@@ -203,7 +203,6 @@ function getCachedFeeds(lastFetchKey, cachedFeedsKey, newFeeds = []) {
 
 
 
-
 /**
  * Fetch do 50 najnovijih feed-ova iz "Aktuell" (ruta /api/feeds), keš ~10 min.
  */
@@ -218,9 +217,9 @@ export async function fetchAllFeedsFromServer(forceRefresh = false) {
       localStorage.removeItem(cachedFeedsKey);
     }
 
-    let cachedData = getCachedFeeds(lastFetchKey, cachedFeedsKey, forceRefresh);
-if (cachedData) return cachedData;
-
+    // Prosleđujemo prazan niz umesto forceRefresh kako bi se izbegla greška newFeeds.filter is not a function.
+    let cachedData = getCachedFeeds(lastFetchKey, cachedFeedsKey, []);
+    if (cachedData) return cachedData;
 
     // Inače, fetchujemo
     const response = await fetch("/api/feeds");
@@ -252,6 +251,7 @@ if (cachedData) return cachedData;
     hideLoader();
   }
 }
+
 
 /**
  * Fetch do 100 feedova iz određene kategorije, keširano ~10 min (/api/feeds-by-category).
