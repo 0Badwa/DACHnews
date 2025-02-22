@@ -362,6 +362,8 @@ export async function addItemToRedis(item, category, analysis = null) {
 
   // Čuvanje u PostgreSQL samo ako vest ima analizu
   if (analysis) {
+    // Za SQL čuvamo samo newsmodal verziju (320x240)
+  newsObj.image = `/image/${item.id}:news-modal`;
     await saveNewsToPostgres(newsObj);
   }
 
