@@ -448,20 +448,17 @@ app.post('/api/unblock-source', async (req, res) => {
   }
 });
 
-
 // Redirekcija za nevažeće ili istekao URL-ove sa newsId parametrom
 app.get('/news/:id', async (req, res) => {
   const newsId = req.params.id;
   const userAgent = req.headers['user-agent'] || '';
 
-
   // Ako zahtev NIJE od jednog od SEO botova (Googlebot, Bingbot, YandexBot, DuckDuckBot, Yahoo! Slurp),
-// preusmeravamo korisnika na glavnu stranicu gde se otvara modal
-const allowedBots = ['googlebot', 'bingbot', 'yandexbot', 'duckduckbot', 'slurp'];
-if (!allowedBots.some(bot => userAgent.toLowerCase().includes(bot))) {
-  return res.redirect(302, '/?newsId=' + newsId);
-}
-
+  // preusmeravamo korisnika na glavnu stranicu gde se otvara modal
+  const allowedBots = ['googlebot', 'bingbot', 'yandexbot', 'duckduckbot', 'slurp'];
+  if (!allowedBots.some(bot => userAgent.toLowerCase().includes(bot))) {
+    return res.redirect(302, '/?newsId=' + newsId);
+  }
 
   let news = null;
 
@@ -471,7 +468,7 @@ if (!allowedBots.some(bot => userAgent.toLowerCase().includes(bot))) {
     // Strimujemo feedove i tražimo vest sa newsId
     for await (const batch of getFeedsGenerator()) {
       news = batch.find(item => item.id === newsId);
-      if (news) break; // Ako nađemo vest, prekidamo iteraciju
+      if (news) break;
     }
 
     // Ako vest nije pronađena, proveravamo SEO cache
@@ -479,6 +476,24 @@ if (!allowedBots.some(bot => userAgent.toLowerCase().includes(bot))) {
       console.log(`[Redirect] Vest ID: ${newsId} nije pronađena u kategorijama, pretraga u SEO cache-u...`);
       const seoFeeds = await getSeoFeedsFromRedis();
       news = seoFeeds.find(item => item.id === newsId);
+    }
+
+    // Ako vest i dalje nije pronađena, pokušavamo dohvat sa neon.tech API
+    if (!news) {
+      console.log(`[Redirect] Vest ID: ${newsId} nije pronađena u kešu, pokušavam dohvat sa neon.tech...`);
+      try {
+        const neonResponse = await axios.get(`https://neon.tech/api/news/${newsId}`);
+        if (neonResponse.status === 200 && neonResponse.data) {
+          news = neonResponse.data;
+          // Ako vest nema definisanu sliku, konstrušemo URL za Backblaze B2.
+          if (!news.image) {
+            const bucket = process.env.B2_BUCKET_NAME || 'dachnewsmodal';
+            news.image = `https://f000.backblazeb2.com/file/${process.env.B2_BUCKET_NAME}/${newsId}-news-modal.webp`;
+          }
+        }
+      } catch (err) {
+        console.error(`[Redirect] Greška pri dohvaćanju vesti sa neon.tech:`, err);
+      }
     }
 
     if (!news) {
@@ -493,6 +508,7 @@ if (!allowedBots.some(bot => userAgent.toLowerCase().includes(bot))) {
     res.redirect(301, 'https://www.dach.news');
   }
 });
+
 
 // Redirekcija ako se sajt otvori na starom hostu
 app.use((req, res, next) => {
