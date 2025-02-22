@@ -441,7 +441,6 @@ export async function getSeoFeedsFromRedis() {
 
 export { getFeedsGenerator };
 
-
 /**
  * Glavna funkcija za obradu feed-ova.
  * Ova funkcija preuzima nove vesti, eliminiše duplikate i šalje ih GPT API–ju
@@ -459,8 +458,22 @@ export async function processFeeds() {
     return;
   }
 
+
   let newItems = [];
   for (const item of allItems) {
+    // Lista blokiranih izvora
+    const blockedSources = [
+      "https://cdn.swp.de",
+      "https://p6.focus.de",
+      "https://cdn.burda-forward.de",
+      "https://quadro.burda-forward.de",
+      "https://static.boerse.de"
+    ];
+    // Preskačemo stavke čiji URL sadrži neki od blokiranih linkova
+    if (item.url && blockedSources.some(source => item.url.includes(source))) {
+      console.log("[processFeeds] Blokiran izvor:", item.url);
+      continue;
+    }
     const alreadyProcessed = await redisClient.sIsMember("processed_ids", item.id);
     if (!alreadyProcessed) {
       newItems.push(item);
@@ -528,6 +541,9 @@ export async function processFeeds() {
 }
 
 console.log("[DEBUG] Debugging message for feedsService.js");
+
+
+
 
 /**
  * Čisti SEO keš (hash "seo:news") od vesti starijih od 7 dana.
