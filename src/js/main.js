@@ -5,7 +5,7 @@
 import { openNewsModal } from './newsModal.js';
 import { initFeeds, displayAktuellFeeds, displayNewsByCategory } from './feeds.js';
 import { brandMap, ALLOWED_SOURCES, sourceAliases } from './sourcesConfig.js';
-import { initializeLazyLoading } from './ui.js';
+import { initializeLazyLoading, cleanupObservers } from './ui.js';
 
 if ('scrollRestoration' in history) {
   history.scrollRestoration = 'manual';
