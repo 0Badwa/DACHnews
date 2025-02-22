@@ -39,10 +39,11 @@ pool.query('SELECT 1')
 
 export default pool;
 
+
 /**
  * Čuva vest u PostgreSQL bazi ako ima analizu.
  */
-async function saveNewsToPostgres(newsObj) {
+export async function saveNewsToPostgres(newsObj) {
   if (!newsObj.analysis) return; // Preskačemo ako nema analize
 
   const query = `
@@ -70,6 +71,7 @@ async function saveNewsToPostgres(newsObj) {
     console.error(`[PostgreSQL] Greška pri upisu vesti ID:${newsObj.id}:`, error);
   }
 }
+
 
 
 // Služi Bing verifikacioni fajl
@@ -154,7 +156,7 @@ function generateHtmlForNews(news) {
     <html lang="de">
     <head>
       <meta charset="UTF-8">
-      <title>${news.title} - DACH News: Nachrichten aus Deutschland, Österreich, Schweiz</title>
+      <title>${news.title} - DACH.news: Nachrichten aus Deutschland, Österreich, Schweiz</title>
       <meta name="description" content="${news.content_text ? news.content_text.substring(0, 160) : ''}">
       <link rel="canonical" href="${new URL('/news/' + news.id, 'https://www.dach.news').href}">
 
@@ -164,7 +166,7 @@ function generateHtmlForNews(news) {
       <meta property="og:description" content="${news.content_text ? news.content_text.substring(0, 160) : ''}">
       <meta property="og:url" content="https://www.dach.news/news/${news.id}">
       <meta property="og:image" content="${news.image || 'https://www.dach.news/default-image.jpg'}">
-      <meta property="og:site_name" content="DACH News">
+      <meta property="og:site_name" content="DACH.news">
 
       <!-- Twitter Card Meta Tags -->
       <meta name="twitter:card" content="summary_large_image">

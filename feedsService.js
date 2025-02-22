@@ -9,6 +9,9 @@ import axios from 'axios';
 import { createClient } from 'redis';
 import sharp from 'sharp';
 import pLimit from 'p-limit';
+import { saveNewsToPostgres } from './index.js';
+
+
 
 // Konstante
 const SEVEN_DAYS = 60 * 60 * 24 * 4;
