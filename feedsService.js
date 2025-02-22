@@ -294,7 +294,7 @@ async function storeImageInRedis(imageUrl, id) {
 
     const sizes = {
       "news-card": { width: 80, height: 80, fit: "cover" },
-      "news-modal": { width: 320, height: 240, fit: "inside" }
+      "news-modal": { width: 240, height: 180, fit: "inside" }
     };
 
     for (const [key, { width, height, fit }] of Object.entries(sizes)) {
@@ -407,7 +407,7 @@ export async function addItemToRedis(item, category, analysis = null) {
 
   // Čuvanje u PostgreSQL samo ako vest ima analizu
   if (analysis) {
-    // Za SQL čuvamo samo newsmodal verziju (320x240)
+    // Za SQL čuvamo samo newsmodal verziju (240x180)
   newsObj.image = `/image/${item.id}:news-modal`;
     await saveNewsToPostgres(newsObj);
   }
