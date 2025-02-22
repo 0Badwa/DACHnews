@@ -109,34 +109,45 @@ export function updateCategoryIndicator(categoryName) {
   }
 }
 
+
+// Set za praćenje aktivnih IntersectionObserver instanci
+const observers = new Set();
+
 /**
- * Lazy loading
+ * Inicijalizuje lazy loading za slike koristeći IntersectionObserver.
+ * Vraća funkciju za čišćenje observera pri unmountu.
  */
 export function initializeLazyLoading() {
-  const lazyImages = document.querySelectorAll('img.lazy');
-  if ("IntersectionObserver" in window) {
-    const imageObserver = new IntersectionObserver((entries, observer) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          const img = entry.target;
-          img.src = img.dataset.src;
-          img.classList.remove("lazy");
-          img.classList.add("loaded");
-          observer.unobserve(img);
+  const imageObserver = new IntersectionObserver((entries, observer) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const img = entry.target;
+        const src = img.getAttribute("data-src");
+        if (src) {
+          img.src = src;
+          img.removeAttribute("data-src");
         }
-      });
-    }, {
-      rootMargin: "0px 0px 50px 0px",
-      threshold: 0.01
+        observer.unobserve(img);
+      }
     });
+  }, { rootMargin: "50px" });
 
-    lazyImages.forEach(img => {
-      imageObserver.observe(img);
-    });
-  } else {
-    lazyImages.forEach(img => {
-      img.src = img.dataset.src;
-      img.classList.remove("lazy");
-    });
-  }
+  observers.add(imageObserver);
+
+  // Pronalazi sve slike sa lazy loading atributom i dodaje ih u observer
+  document.querySelectorAll("img.lazy").forEach(img => imageObserver.observe(img));
+
+  // Vraćamo cleanup funkciju za oslobađanje observera
+  return () => {
+    observers.delete(imageObserver);
+    imageObserver.disconnect();
+  };
+}
+
+/**
+ * Čisti sve IntersectionObserver instance prilikom unmount-a.
+ */
+export function cleanupObservers() {
+  observers.forEach(observer => observer.disconnect());
+  observers.clear();
 }

@@ -157,25 +157,50 @@ function isHiddenFeed(feed) {
   return false;
 }
 
+
 /**
  * Proverava da li postoji keširan feed u localStorage i vraća ga ako je validan.
+ * Ako postoje novi feedovi, dodaje ih u postojeći keš.
  */
-function getCachedFeeds(lastFetchKey, cachedFeedsKey, forceRefresh) {
-  const lastFetchTime = localStorage.getItem(lastFetchKey);
-  if (!forceRefresh && lastFetchTime) {
-    const elapsedTime = Date.now() - new Date(lastFetchTime).getTime();
-    if (elapsedTime < 10 * 60 * 1000) {  // Keš traje 10 minuta
-      console.log("[CACHE] Koristimo keširane feedove...");
-      const cachedFeeds = localStorage.getItem(cachedFeedsKey);
-      if (cachedFeeds) {
-        let data = JSON.parse(cachedFeeds);
-        data.sort((a, b) => new Date(b.date_published).getTime() - new Date(a.date_published).getTime());
-        return data.filter(feed => !isHiddenFeed(feed)).slice(0, 200);
-      }
+function getCachedFeeds(lastFetchKey, cachedFeedsKey, newFeeds = []) {
+  const cachedFeeds = localStorage.getItem(cachedFeedsKey);
+  
+  if (cachedFeeds) {
+    let existingFeeds = JSON.parse(cachedFeeds);
+    
+    // Dedupliciramo feedove po ID-ju i dodajemo samo nove
+    const existingFeedIds = new Set(existingFeeds.map(feed => feed.id));
+    const filteredNewFeeds = newFeeds.filter(feed => !existingFeedIds.has(feed.id));
+
+    // Dodajemo samo nove feedove na vrh liste
+    if (filteredNewFeeds.length > 0) {
+      existingFeeds = [...filteredNewFeeds, ...existingFeeds];
+      
+      // Ograničavamo broj feedova na 200
+      existingFeeds = existingFeeds.slice(0, 200);
+      
+      localStorage.setItem(cachedFeedsKey, JSON.stringify(existingFeeds));
+      localStorage.setItem(lastFetchKey, new Date().toISOString());
+      
+      console.log(`[CACHE] Dodato ${filteredNewFeeds.length} novih feedova u keš.`);
+    } else {
+      console.log("[CACHE] Nema novih feedova, koristimo postojeći keš.");
     }
+
+    return existingFeeds;
   }
+
+  // Ako nema keša, sačuvaj nove feedove ako postoje
+  if (newFeeds.length > 0) {
+    localStorage.setItem(cachedFeedsKey, JSON.stringify(newFeeds));
+    localStorage.setItem(lastFetchKey, new Date().toISOString());
+    console.log(`[CACHE] Keširan prvi set feedova (${newFeeds.length} feedova).`);
+    return newFeeds;
+  }
+
   return null;
 }
+
 
 
 
@@ -264,13 +289,14 @@ export async function fetchCategoryFeeds(category, forceRefresh = false) {
   }
 }
 
+
 /**
  * Kreira jednu "news card" za prikaz feed-a.
  */
 function createNewsCard(feed) {
   const card = document.createElement('div');
   card.className = "news-card";
-  
+
   // Definiši BASE_IMAGE_URL pre upotrebe
   const BASE_IMAGE_URL = window.location.hostname.includes("dach.news")
     ? "https://www.dach.news"
@@ -279,67 +305,62 @@ function createNewsCard(feed) {
     : window.location.hostname.includes("exyunews.onrender.com")
     ? "https://exyunews.onrender.com"
     : "https://newsdocker-1.onrender.com";
-  
+
   // Dodaj click event sa ripple efektom
-  card.addEventListener('click', function(e) {
+  card.addEventListener('click', function (e) {
     // Ukloni prethodni ripple, ako postoji
     const existingRipple = card.querySelector('.ripple');
     if (existingRipple) {
       existingRipple.remove();
     }
-    
-    // Dobij koordinatu klika unutar kartice
+
+    // Dodaj ripple efekat
     const rect = card.getBoundingClientRect();
     const ripple = document.createElement('span');
     ripple.className = 'ripple';
     const size = Math.max(rect.width, rect.height);
-    ripple.style.width = ripple.style.height = size + 'px';
-    ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
-    ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
+    ripple.style.width = ripple.style.height = `${size}px`;
+    ripple.style.left = `${e.clientX - rect.left - size / 2}px`;
+    ripple.style.top = `${e.clientY - rect.top - size / 2}px`;
     card.appendChild(ripple);
-    
-    // Nakon završetka animacije ukloni ripple
+
     ripple.addEventListener('animationend', () => {
       ripple.remove();
     });
-    
+
     // Klik na karticu -> otvori modal
     document.querySelectorAll('.news-card').forEach(existingCard => existingCard.classList.remove('active'));
     card.classList.add('active');
     openNewsModal(feed);
   });
-  
+
+  // Slika
   const img = document.createElement('img');
   img.className = "news-card-image lazy news-image";
   img.src = feed.image ? feed.image : `${BASE_IMAGE_URL}/src/icons/no-image.png`;
   img.alt = feed.title ? feed.title : 'Nachrichtenbild'; // SEO-friendly alt na nemačkom
-  
-  // Ako se slika ne može učitati (CSP blokira ili ne postoji), koristi no-image.png
-  img.onerror = function() {
-    this.onerror = null; // Sprečava beskonačnu petlju ako default slika ne postoji
+
+  // Ako se slika ne može učitati, koristi no-image.png
+  img.onerror = function () {
+    this.onerror = null;
     this.src = "https://www.dach.news/src/icons/no-image.png";
   };
-  
-  // Osiguraj da se slika prikazuje u centru boxa
+
   img.width = 80;
   img.height = 80;
-  img.style.objectFit = "cover"; // Crop da popuni box
-  img.style.display = "block"; // Sprečava neželjene margine
-  
+  img.style.objectFit = "cover";
+  img.style.display = "block";
+
+  // Popravi putanju za slike sa API-ja
   if (feed.image && feed.image.startsWith("/")) {
-    // Ako feed.image ne sadrži već sufiks ":news-card", dodaj ga
-    if (!feed.image.includes(":news-card")) {
-      img.src = `${BASE_IMAGE_URL}${feed.image}:news-card`;
-    } else {
-      img.src = `${BASE_IMAGE_URL}${feed.image}`;
-    }
+    img.src = `${BASE_IMAGE_URL}${feed.image.includes(":news-card") ? feed.image : feed.image + ":news-card"}`;
   } else if (feed.image) {
     img.src = feed.image;
   } else {
     img.src = `${BASE_IMAGE_URL}/img/noimg.png`;
   }
-  
-  // Sadržaj
+
+  // Sadržaj kartice
   const contentDiv = document.createElement('div');
   contentDiv.className = "news-card-content";
 
@@ -352,10 +373,7 @@ function createNewsCard(feed) {
 
   const sourceSpan = document.createElement('span');
   sourceSpan.className = "source";
-  const normalizedSource = feed.source
-    ? removeTLD(feed.source.toUpperCase().replace(/\s+/g, ''))
-    : 'UNBEKANNTEQUELLE';
-  sourceSpan.textContent = normalizedSource;
+  sourceSpan.textContent = removeTLD(feed.source?.toUpperCase().replace(/\s+/g, '') || 'UNBEKANNTEQUELLE');
 
   const flagImg = document.createElement('img');
   flagImg.className = "flag-icon";
@@ -368,12 +386,10 @@ function createNewsCard(feed) {
 
   const timeSpan = document.createElement('span');
   timeSpan.className = "time";
-  const timeString = feed.date_published ? timeAgo(feed.date_published) : '';
-  timeSpan.textContent = ` • ${timeString}`;
+  timeSpan.textContent = ` • ${timeAgo(feed.date_published) || ''}`;
 
   meta.appendChild(sourceSpan);
   meta.appendChild(timeSpan);
-
   contentDiv.appendChild(title);
   contentDiv.appendChild(meta);
 
@@ -382,6 +398,7 @@ function createNewsCard(feed) {
 
   return card;
 }
+
 
 /**
  * Prikazuje listu feedova (vesti) u #news-container.
@@ -633,3 +650,16 @@ export function unblockSource(src) {
   blockedSources = blockedSources.filter(s => s !== cleanedSource);
   localStorage.setItem('blockedSources', JSON.stringify(blockedSources));
 };
+
+
+// Event delegation za sve kartice vesti unutar #news-container
+document.getElementById('news-container').addEventListener('click', function(e) {
+  const card = e.target.closest('.news-card');
+  if (card) {
+    // Uzmi podatke iz data atribute ili na drugi način, ako treba
+    const newsId = card.getAttribute('data-news-id'); 
+    if (newsId) {
+      openNewsModal({ id: newsId }); // Pozovi modal sa podacima
+    }
+  }
+});

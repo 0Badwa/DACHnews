@@ -5,6 +5,7 @@
 import { openNewsModal } from './newsModal.js';
 import { initFeeds, displayAktuellFeeds, displayNewsByCategory } from './feeds.js';
 import { brandMap, ALLOWED_SOURCES, sourceAliases } from './sourcesConfig.js';
+import { initializeLazyLoading } from './ui.js';
 
 if ('scrollRestoration' in history) {
   history.scrollRestoration = 'manual';
@@ -89,29 +90,24 @@ function removeActiveClass() {
   });
 }
 
+
 /** Kreira tabove **/
+// Globalni AbortController za upravljanje event listenerima
+let controller = new AbortController();
+
 function buildTabs() {
+  // Pre nego što dodamo nove listenere, uklanjamo sve stare
+  controller.abort();
+  controller = new AbortController(); // Kreiramo novi controller
+
   const tabsContainer = document.getElementById('tabs-container');
   if (!tabsContainer) return;
 
-  // Ukloni text čvorove
-  Array.from(tabsContainer.childNodes).forEach(node => {
-    if (node.nodeType === Node.TEXT_NODE) {
-      tabsContainer.removeChild(node);
-    }
-  });
-
-  // Ukloni stare tabove (osim Aktuell)
+  // Uklanjamo stare tabove osim "Aktuell"
   const existingTabs = tabsContainer.querySelectorAll('.tab:not([data-tab="Aktuell"])');
   existingTabs.forEach(t => t.remove());
 
-  // Učitaj redosled
-  const savedOrder = localStorage.getItem('categoriesOrder');
-  if (savedOrder) {
-    categoriesOrder = JSON.parse(savedOrder);
-  }
-
-  // Kreiraj tabove
+  // Kreiramo tabove ponovo
   categoriesOrder.forEach(cat => {
     if (isCategoryBlocked(cat)) return;
     const btn = document.createElement('button');
@@ -123,20 +119,21 @@ function buildTabs() {
     btn.id = 'tab-' + cat.toLowerCase().replace(/\s+/g, '-');
     btn.setAttribute('aria-controls', 'news-container');
 
-    btn.addEventListener('click', async () => {
+    // Sada dodajemo event listener sa AbortController-om
+    btn.addEventListener('click', () => {
       removeActiveClass();
       btn.classList.add('active');
-      const category = btn.getAttribute('data-tab');
-      if (category === 'Aktuell') {
-        await displayAktuellFeeds();
+      if (cat === 'Aktuell') {
+        displayAktuellFeeds();
       } else {
-        await displayNewsByCategory(category);
+        displayNewsByCategory(cat);
       }
-    });
+    }, { signal: controller.signal });
 
     tabsContainer.appendChild(btn);
   });
 }
+
 
 /** Otvara modal za menjanje kategorija **/
 function openRearrangeModal() {
@@ -586,39 +583,45 @@ function closeSettingsModal() {
   }
 }
 
+
 /** DOMContentLoaded **/
 document.addEventListener('DOMContentLoaded', async () => {
-  const urlParams = new URLSearchParams(window.location.search);
-  let newsId = urlParams.get('newsId');
-  if (!newsId) {
-    const path = window.location.pathname;
-    if (path.startsWith('/news/')) {
-      newsId = path.split('/news/')[1];
-    }
-  }
+  const cleanupLazyLoading = initializeLazyLoading(); // Aktivira lazy loading i vraća cleanup funkciju
 
+  // Efikasno dohvaćanje newsId iz URL-a
+  const urlParams = new URLSearchParams(window.location.search);
+  let newsId = urlParams.get('newsId') ?? window.location.pathname.split('/news/')[1] ?? null;
+
+  // Ako postoji ID vesti, učitaj je i otvori modal
   if (newsId) {
     try {
       const response = await fetch(`/api/news/${newsId}`);
-      if (!response.ok) {
-        console.error("Vest nije pronađena:", newsId);
-      } else {
+      if (response.ok) {
         const news = await response.json();
         openNewsModal(news);
+      } else {
+        console.error("[ERROR] Vest nije pronađena:", newsId);
       }
     } catch (error) {
-      console.error("Greška pri učitavanju vesti:", error);
+      console.error("[ERROR] Greška pri učitavanju vesti:", error);
     }
   }
 
-  applyCardFontSize();
+  // Paralelna inicijalizacija ključnih funkcija
+  await Promise.all([
+    applyCardFontSize(),
+    buildTabs(),
+    initSwipe(),
+    !newsId ? initFeeds() : Promise.resolve() // Inicijalizuj feedove samo ako nije otvorena vest
+  ]);
 
-  buildTabs();
-  initSwipe();
+  // Kada korisnik napusti stranicu, oslobodi sve observere i memoriju
+  window.addEventListener('beforeunload', () => {
+    cleanupLazyLoading();
+    cleanupObservers();
+  });
+});
 
-  if (!newsId) {
-    initFeeds();
-  }
 
   const menuButton = document.getElementById('menu-button');
   const settingsModal = document.getElementById('settings-modal');
@@ -732,8 +735,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (!tutorialShown) {
     const tutOverlay = document.getElementById('tutorial-overlay');
     if (tutOverlay) tutOverlay.style.display = 'flex';
-  }
-});
+  };
 
 /** Otvara Über modal **/
 function openUberModal() {

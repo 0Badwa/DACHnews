@@ -76,6 +76,25 @@ app.use('/src', express.static(path.join(__dirname, 'src'), {
 
 await initRedis();
 
+// Čuvamo referencu na interval u promenljivoj
+const feedInterval = setInterval(processFeeds, 12 * 60 * 1000);
+
+// Slušamo event za gašenje aplikacije kako bismo očistili interval i prekinuli Redis konekciju
+process.on('SIGINT', async () => {
+  console.log("[Shutdown] Čišćenje intervala i zatvaranje Redis konekcije...");
+  clearInterval(feedInterval);
+  await redisClient.disconnect();
+  process.exit();
+});
+
+process.on('exit', async () => {
+  console.log("[Exit] Čišćenje intervala i zatvaranje Redis konekcije...");
+  clearInterval(feedInterval);
+  await redisClient.disconnect();
+});
+
+
+
 /**
  * Generiše detaljniji HTML sa Open Graph, Twitter tagovima, povezanim eksternim CSS-om
  * i AI sekcijom za analizu ako postoji (ili placeholder ako nema).
@@ -245,30 +264,42 @@ app.get('/image/:id', async (req, res) => {
   }
 });
 
-
 /**
  * API ruta za pojedinačnu vest u JSON formatu.
  */
 app.get('/api/news/:id', async (req, res) => {
   const newsId = req.params.id;
+  let news = null;
+
   try {
-    // Pokušaj da se vest pronađe u kategorijama
-    let allFeeds = await getAllFeedsFromRedis();
-    let news = allFeeds.find(item => item.id === newsId);
-    
-    // Ako nije pronađena, pokušaj sa SEO vesti
+    console.log(`[API] Traženje vesti ID: ${newsId} pomoću strimovanja...`);
+
+    // Strimujemo feedove i tražimo vest sa newsId
+    for await (const batch of getFeedsGenerator()) {
+      news = batch.find(item => item.id === newsId);
+      if (news) break; // Ako nađemo vest, prekidamo iteraciju
+    }
+
+    // Ako vest nije pronađena, pokušavamo sa SEO feedovima
     if (!news) {
+      console.log(`[API] Vest ID: ${newsId} nije pronađena u kategorijama, pretraga u SEO cache-u...`);
       const seoFeeds = await getSeoFeedsFromRedis();
       news = seoFeeds.find(item => item.id === newsId);
     }
-    
-    if (!news) return res.status(404).send("News not found");
+
+    if (!news) {
+      console.log(`[API] Vest ID: ${newsId} nije pronađena.`);
+      return res.status(404).send("News not found");
+    }
+
+    console.log(`[API] Vest ID: ${newsId} pronađena, vraćam JSON...`);
     res.json(news);
   } catch (error) {
-    console.error(`[API] Error fetching news ${newsId}:`, error);
+    console.error(`[API] Greška pri dohvaćanju vesti ${newsId}:`, error);
     res.status(500).send("Server error");
   }
 });
+
 
 /**
  * Ruta za generisanje XML sitemap-a.
@@ -364,21 +395,30 @@ app.post('/api/unblock-source', async (req, res) => {
 // Redirekcija za nevažeće ili istekao URL-ove sa newsId parametrom
 app.get('/news/:id', async (req, res) => {
   const newsId = req.params.id;
-  
+  let news = null;
+
   try {
-    let allFeeds = await getAllFeedsFromRedis();
-    let news = allFeeds.find(item => item.id === newsId);
-    
+    console.log(`[Redirect] Traženje vesti ID: ${newsId} pomoću strimovanja...`);
+
+    // Strimujemo feedove i tražimo vest sa newsId
+    for await (const batch of getFeedsGenerator()) {
+      news = batch.find(item => item.id === newsId);
+      if (news) break; // Ako nađemo vest, prekidamo iteraciju
+    }
+
+    // Ako vest nije pronađena, proveravamo SEO cache
     if (!news) {
+      console.log(`[Redirect] Vest ID: ${newsId} nije pronađena u kategorijama, pretraga u SEO cache-u...`);
       const seoFeeds = await getSeoFeedsFromRedis();
       news = seoFeeds.find(item => item.id === newsId);
     }
 
     if (!news) {
-      console.log(`[Redirect] News ID ${newsId} not found. Redirecting to homepage.`);
+      console.log(`[Redirect] Vest ID: ${newsId} nije pronađena. Preusmeravam na početnu stranicu.`);
       return res.redirect(301, 'https://www.dach.news');
     }
 
+    console.log(`[Redirect] Vest ID: ${newsId} pronađena, generišem HTML...`);
     res.send(generateHtmlForNews(news));
   } catch (error) {
     console.error(`[Error] Fetching news ${newsId}:`, error);
@@ -386,13 +426,15 @@ app.get('/news/:id', async (req, res) => {
   }
 });
 
-
+// Redirekcija ako se sajt otvori na starom hostu
 app.use((req, res, next) => {
   if (req.headers.host === 'newsdocker-1.onrender.com') {
     return res.redirect(301, 'https://www.dach.news' + req.url);
   }
   next();
 });
+
+
 
 /**********************************************
  * DODATE NOVE FUNKCIJE ZA RSS

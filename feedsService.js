@@ -11,7 +11,7 @@ import sharp from 'sharp';
 import pLimit from 'p-limit';
 
 // Konstante
-const SEVEN_DAYS = 60 * 60 * 24 * 7;
+const SEVEN_DAYS = 60 * 60 * 24 * 4;
 const RSS_FEED_URL = "https://rss.app/feeds/v1.1/_sf1gbLo1ZadJmc5e.json"; // Glavni feed
 const GPT_API_URL = "https://api.openai.com/v1/chat/completions";
 
@@ -19,6 +19,13 @@ const GPT_API_URL = "https://api.openai.com/v1/chat/completions";
 export const redisClient = createClient({
   url: process.env.REDIS_URL || 'redis://redis:6379', // Dodali smo fallback vrijednost
 });
+
+// Hvatanje potencijalnih Redis grešaka
+redisClient.on('error', err => {
+  console.error('[Redis] Redis Client Error:', err);
+  redisClient.disconnect();
+});
+
 
 /**
  * Funkcija za uspostavljanje konekcije na Redis.
@@ -30,8 +37,10 @@ export async function initRedis() {
     console.log("[Redis] Konektovan na Redis!");
   } catch (err) {
     console.error("[Redis] Greška pri povezivanju:", err);
+    process.exit(1); // Prekida aplikaciju ako se ne poveže na Redis
   }
 }
+
 
 /**
  * Funkcija koja preuzima glavni RSS feed.
@@ -236,7 +245,13 @@ async function storeImageInRedis(imageUrl, id) {
   if (!imageUrl) return false;
   try {
     const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
-    const buffer = Buffer.from(response.data);
+
+    // Ograničavamo veličinu slike na maksimalno 5MB
+    const buffer = Buffer.from(response.data.slice(0, 5 * 1024 * 1024));
+
+    // Nakon obrade, oslobađamo memoriju
+    response.data = null;
+
     const sizes = {
       "news-card": { width: 80, height: 80, fit: "cover" },
       "news-modal": { width: 320, height: 240, fit: "inside" }
@@ -247,8 +262,8 @@ async function storeImageInRedis(imageUrl, id) {
         .resize(width, height, { fit })
         .webp({ quality: 80 })
         .toBuffer();
-        console.log(`[storeImageInRedis] Kreirana verzija ${key} za ID:${id} (dimenzije: ${width}x${height})`);
 
+      console.log(`[storeImageInRedis] Kreirana verzija ${key} za ID:${id} (dimenzije: ${width}x${height})`);
       await redisClient.set(`img:${id}:${key}`, resizedImage.toString('base64'));
     }
 
@@ -259,6 +274,7 @@ async function storeImageInRedis(imageUrl, id) {
     return false;
   }
 }
+
 
 /**
  * Izvlačenje domena iz URL-a.
@@ -345,11 +361,33 @@ export async function addItemToRedis(item, category, analysis = null) {
   console.log(`[addItemToRedis] Upisano ID:${item.id}, category:${category}`);
 }
 
+
+/**
+ * Generator funkcija koja vraća vesti iz Redis-a u paginaciji.
+ * Smanjuje memorijski pritisak koristeći SCAN i LRange za dohvat po delovima.
+ */
+async function* getFeedsGenerator() {
+  let cursor = 0;
+  do {
+    // Skeniramo Redis ključeve u batch-evima
+    const [newCursor, keys] = await redisClient.scan(cursor, {
+      MATCH: 'category:*',
+      COUNT: 10 // Procesiramo po 10 ključeva po iteraciji
+    });
+    cursor = newCursor;
+
+    for (const key of keys) {
+      const items = await redisClient.lRange(key, 0, -1);
+      yield items.map(item => JSON.parse(item)); // Emitujemo parsirane vesti
+    }
+  } while (cursor !== "0"); // Nastavljamo dok ne pređemo ceo Redis
+}
+
 /**
  * Vraća sve vesti iz Redis-a (spaja iz svih "category:*" listi) i deduplira ih po feed.id.
+ * Koristi strimovanje da ne akumulira previše podataka u memoriji.
  */
 export async function getAllFeedsFromRedis() {
-  const keys = await redisClient.keys("category:*");
   let all = [];
 
   let blockedSources = [];
@@ -360,17 +398,20 @@ export async function getAllFeedsFromRedis() {
     console.error("[Redis] Greška pri čitanju blokiranih izvora:", err);
   }
 
-  for (const key of keys) {
-    const items = await redisClient.lRange(key, 0, -1);
-    let parsed = items.map(x => JSON.parse(x));
-    parsed = parsed.filter(item => !blockedSources.includes(item.source));
-    all = all.concat(parsed);
+  console.log("[getAllFeedsFromRedis] Počinjemo strimovanje feed-ova iz Redis-a...");
+
+  for await (const batch of getFeedsGenerator()) {
+    let filteredBatch = batch.filter(item => !blockedSources.includes(item.source));
+    all = all.concat(filteredBatch);
   }
 
+  // Dedupliciranje vesti po ID-ju
   const uniqueFeeds = {};
   all.forEach(feed => {
     uniqueFeeds[feed.id] = feed;
   });
+
+  console.log(`[getAllFeedsFromRedis] Ukupno dohvaceno: ${Object.keys(uniqueFeeds).length} unikatnih vesti.`);
   return Object.values(uniqueFeeds);
 }
 
@@ -388,6 +429,7 @@ export async function getSeoFeedsFromRedis() {
     return [];
   }
 }
+
 
 /**
  * Glavna funkcija za obradu feed-ova.
