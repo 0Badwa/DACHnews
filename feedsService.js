@@ -351,9 +351,9 @@ export async function addItemToRedis(item, category, analysis = null) {
   await redisClient.sAdd("processed_ids", item.id);
   await redisClient.expire("processed_ids", SEVEN_DAYS);
 
-  // Dodavanje vesti u listu "Aktuell" (poslednjih 300 vesti)
+  // Dodavanje vesti u listu "Aktuell" (poslednjih 200 vesti)
   await redisClient.lPush("Aktuell", JSON.stringify(newsObj));
-  await redisClient.lTrim("Aktuell", 0, 299);
+  await redisClient.lTrim("Aktuell", 0, 199);
 
   // Dodavanje vesti u SEO hash (bez TTL) za statičke SEO stranice, uključujući analizu
   await redisClient.hSet("seo:news", item.id, JSON.stringify(newsObj));
