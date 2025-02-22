@@ -314,7 +314,6 @@ function normalizeSource(source) {
   return normalizedSource;
 }
 
-
 /**
  * Dodavanje jedne vesti u Redis, sa smanjenom slikom (ako postoji).
  * Sada funkcija prima i dodatni parametar 'analysis' koji sadrži AI analizu vesti.
@@ -358,9 +357,13 @@ export async function addItemToRedis(item, category, analysis = null) {
   // Dodavanje vesti u SEO hash (bez TTL) za statičke SEO stranice, uključujući analizu
   await redisClient.hSet("seo:news", item.id, JSON.stringify(newsObj));
 
+  // Čuvanje u PostgreSQL samo ako vest ima analizu
+  if (analysis) {
+    await saveNewsToPostgres(newsObj);
+  }
+
   console.log(`[addItemToRedis] Upisano ID:${item.id}, category:${category}`);
 }
-
 
 /**
  * Generator funkcija koja vraća vesti iz Redis-a u paginaciji.

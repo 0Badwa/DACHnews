@@ -176,8 +176,8 @@ function getCachedFeeds(lastFetchKey, cachedFeedsKey, newFeeds = []) {
     if (filteredNewFeeds.length > 0) {
       existingFeeds = [...filteredNewFeeds, ...existingFeeds];
       
-      // Ograničavamo broj feedova na 200
-      existingFeeds = existingFeeds.slice(0, 200);
+      // Ograničavamo broj feedova na 100
+      existingFeeds = existingFeeds.slice(0, 100);
       
       localStorage.setItem(cachedFeedsKey, JSON.stringify(existingFeeds));
       localStorage.setItem(lastFetchKey, new Date().toISOString());
@@ -238,7 +238,7 @@ if (cachedData) return cachedData;
     localStorage.setItem(cachedFeedsKey, JSON.stringify(data));
     localStorage.setItem(lastFetchKey, new Date().toISOString());
 
-    return data.slice(0, 200);
+    return data.slice(0, 100);
 
   } catch (error) {
     if (error.name === 'AbortError') {
@@ -278,7 +278,7 @@ export async function fetchCategoryFeeds(category, forceRefresh = false) {
     localStorage.setItem(cachedFeedsKey, JSON.stringify(data));
     localStorage.setItem(lastFetchKey, new Date().toISOString());
 
-    return data.slice(0, 200);
+    return data.slice(0, 100);
 
   } catch (error) {
     console.error("[fetchCategoryFeeds] Greška:", error);

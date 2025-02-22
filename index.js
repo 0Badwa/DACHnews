@@ -24,6 +24,54 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
+import pg from 'pg';
+const { Pool } = pg;
+
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false },
+});
+
+// Test konekcije
+pool.query('SELECT 1')
+  .then(() => console.log('✅ Konekcija uspešna!'))
+  .catch(err => console.error('❌ Greška:', err));
+
+export default pool;
+
+
+/**
+ * Čuva vest u PostgreSQL bazi ako ima analizu.
+ */
+async function saveNewsToPostgres(newsObj) {
+  if (!newsObj.analysis) return; // Preskačemo ako nema analize
+
+  const query = `
+    INSERT INTO news (id, title, date_published, url, content_text, category, source, analysis, image)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+    ON CONFLICT (id) DO NOTHING;
+  `;
+
+  const values = [
+    newsObj.id,
+    newsObj.title,
+    newsObj.date_published,
+    newsObj.url,
+    newsObj.content_text,
+    newsObj.category,
+    newsObj.source,
+    newsObj.analysis,
+    newsObj.image || null,
+  ];
+
+  try {
+    await pgPool.query(query, values);
+    console.log(`[PostgreSQL] Vest ID:${newsObj.id} upisana u bazu.`);
+  } catch (error) {
+    console.error(`[PostgreSQL] Greška pri upisu vesti ID:${newsObj.id}:`, error);
+  }
+}
+
 // Služi Bing verifikacioni fajl
 app.get('/BingSiteAuth.xml', (req, res) => {
   res.sendFile(path.join(__dirname, 'BingSiteAuth.xml'));
