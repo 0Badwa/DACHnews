@@ -79,6 +79,10 @@ app.get('/BingSiteAuth.xml', (req, res) => {
   res.sendFile(path.join(__dirname, 'BingSiteAuth.xml'));
 });
 
+app.get('/robots.txt', (req, res) => {
+  res.sendFile(path.join(__dirname, 'robots.txt'));
+});
+
 app.use('/favicon.ico', express.static(path.join(__dirname, 'src/icons/favicon.ico')));
 app.use('/fonts', express.static(path.join(__dirname, 'src/fonts')));
 
