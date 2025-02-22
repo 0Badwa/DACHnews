@@ -11,6 +11,42 @@ import sharp from 'sharp';
 import pLimit from 'p-limit';
 import { saveNewsToPostgres } from './index.js';
 
+import B2 from 'backblaze-b2';
+
+// Inicijalizacija Backblaze B2 sa vrednostima iz .env
+const b2 = new B2({
+  applicationKeyId: process.env.B2_KEY_ID,
+  applicationKey: process.env.B2_APPLICATION_KEY,
+});
+
+/**
+ * uploadToB2
+ * Uploaduje dati buffer na Backblaze B2 u bucket definisan u B2_BUCKET_ID.
+ * @param {Buffer} fileBuffer - buffer slike
+ * @param {string} fileName - ime fajla (npr. "12345-news-card.webp")
+ * @returns {Promise<object|null>} - rezultat upload-a ili null ako dođe do greške
+ */
+async function uploadToB2(fileBuffer, fileName) {
+  try {
+    // Autorizuj se na B2
+    await b2.authorize();
+    const uploadUrlResponse = await b2.getUploadUrl({
+      bucketId: process.env.B2_BUCKET_ID,
+    });
+    const { uploadUrl, authorizationToken } = uploadUrlResponse.data;
+    const response = await b2.uploadFile({
+      uploadUrl,
+      uploadAuthToken: authorizationToken,
+      fileName,
+      data: fileBuffer,
+      info: { "src_last_modified_millis": Date.now().toString() },
+    });
+    return response;
+  } catch (err) {
+    console.error("B2 upload error:", err);
+    return null;
+  }
+}
 
 
 // Konstante
@@ -241,8 +277,10 @@ async function smanjiSliku(buffer) {
   }
 }
 
+
+
 /**
- * Čuva smanjenu sliku u Redis u Base64 formatu (pod ključem "img:<id>").
+ * Čuva smanjenu sliku u Redis u Base64 formatu (pod ključem "img:<id>:<variant>") i uploaduje je na Backblaze B2.
  */
 async function storeImageInRedis(imageUrl, id) {
   if (!imageUrl) return false;
@@ -251,8 +289,7 @@ async function storeImageInRedis(imageUrl, id) {
 
     // Ograničavamo veličinu slike na maksimalno 5MB
     const buffer = Buffer.from(response.data.slice(0, 5 * 1024 * 1024));
-
-    // Nakon obrade, oslobađamo memoriju
+    // Oslobađamo memoriju
     response.data = null;
 
     const sizes = {
@@ -268,16 +305,24 @@ async function storeImageInRedis(imageUrl, id) {
 
       console.log(`[storeImageInRedis] Kreirana verzija ${key} za ID:${id} (dimenzije: ${width}x${height})`);
       await redisClient.set(`img:${id}:${key}`, resizedImage.toString('base64'));
+
+      // Upload verzije na Backblaze B2
+      const fileName = `${id}-${key}.webp`;
+      const b2Result = await uploadToB2(resizedImage, fileName);
+      if (b2Result) {
+        console.log(`[storeImageInRedis] Uploaded ${fileName} to Backblaze B2`);
+      } else {
+        console.error(`[storeImageInRedis] Failed to upload ${fileName} to Backblaze B2`);
+      }
     }
 
-    console.log(`[storeImageInRedis] Kreirane verzije za ID:${id} (80x80, 320x240)`);
+    console.log(`[storeImageInRedis] Kreirane verzije za ID:${id} (80x80, 240x180)`);
     return true;
   } catch (error) {
     console.error(`[storeImageInRedis] Greška pri optimizaciji slike za ID:${id}:`, error);
     return false;
   }
 }
-
 
 /**
  * Izvlačenje domena iz URL-a.
