@@ -341,10 +341,20 @@ function createNewsCard(feed) {
   img.alt = feed.title ? feed.title : 'Nachrichtenbild'; // SEO-friendly alt na nemačkom
 
   // Ako se slika ne može učitati, koristi no-image.png
-  img.onerror = function () {
-    this.onerror = null;
-    this.src = "https://www.dach.news/src/icons/no-image.png";
-  };
+  //img.onerror = function () {
+    //this.onerror = null;
+    //this.src = "https://www.dach.news/src/icons/no-image.png";
+  //};
+
+// Ako se slika ne može učitati (npr. je iza paywalla), ukloni celu news karticu
+img.onerror = function () {
+  // Sprečava eventualno rekurzivno pozivanje
+  this.onerror = null;
+  // Uklanja celu karticu iz DOM-a
+  card.remove();
+};
+
+
 
   img.width = 80;
   img.height = 80;
