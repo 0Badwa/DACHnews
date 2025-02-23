@@ -253,6 +253,8 @@ export async function fetchAllFeedsFromServer(forceRefresh = false) {
 }
 
 
+
+
 /**
  * Fetch do 100 feedova iz određene kategorije, keširano ~10 min (/api/feeds-by-category).
  */
@@ -264,13 +266,14 @@ export async function fetchCategoryFeeds(category, forceRefresh = false) {
     const lastFetchKey = `feeds-${catForUrl}-lastFetch`;
     const cachedFeedsKey = `feeds-${catForUrl}`;
 
-    // ✅ **Dodaj keširanje ovde**
+    // Ako je forceRefresh true, očisti keš
     if (forceRefresh) {
       localStorage.removeItem(lastFetchKey);
       localStorage.removeItem(cachedFeedsKey);
     }
+    // Uvek prosleđujemo prazan niz kao novi feedove (ne forceRefresh boolean)
     let cachedData = getCachedFeeds(lastFetchKey, cachedFeedsKey, []);
-        if (cachedData) return cachedData;
+    if (cachedData) return cachedData;
 
     const url = `/api/feeds-by-category/${encodeURIComponent(catForUrl)}`;
     const response = await fetch(url);
