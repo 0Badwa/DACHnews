@@ -265,8 +265,12 @@ export async function fetchCategoryFeeds(category, forceRefresh = false) {
     const cachedFeedsKey = `feeds-${catForUrl}`;
 
     // ✅ **Dodaj keširanje ovde**
-    let cachedData = getCachedFeeds(lastFetchKey, cachedFeedsKey, forceRefresh);
-    if (cachedData) return cachedData;
+    if (forceRefresh) {
+      localStorage.removeItem(lastFetchKey);
+      localStorage.removeItem(cachedFeedsKey);
+    }
+    let cachedData = getCachedFeeds(lastFetchKey, cachedFeedsKey, []);
+        if (cachedData) return cachedData;
 
     const url = `/api/feeds-by-category/${encodeURIComponent(catForUrl)}`;
     const response = await fetch(url);
