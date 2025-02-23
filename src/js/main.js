@@ -612,9 +612,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     applyCardFontSize(),
     buildTabs(),
     initSwipe(),
-    !newsId ? initFeeds() : Promise.resolve() // Inicijalizuj feedove samo ako nije otvorena vest
+    initFeeds() // Uvek učitavaj feedove
   ]);
-
+  
   // Kada korisnik napusti stranicu, oslobodi sve observere i memoriju
   window.addEventListener('beforeunload', () => {
     cleanupLazyLoading();

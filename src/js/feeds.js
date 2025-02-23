@@ -316,7 +316,7 @@ function createNewsCard(feed) {
   const BASE_IMAGE_URL = window.location.hostname.includes("dach.news")
     ? "https://www.dach.news"
     : window.location.hostname.includes("localhost")
-    ? "http://localhost:3001"
+    ? "http://localhost:3002"
     : window.location.hostname.includes("exyunews.onrender.com")
     ? "https://exyunews.onrender.com"
     : "https://newsdocker-1.onrender.com";

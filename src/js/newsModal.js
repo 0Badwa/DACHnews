@@ -146,7 +146,7 @@ export function openNewsModal(feed) {
   }
 
 
-  
+
 // Dugme X - zatvaranje
 closeModalButton.onclick = () => {
   modal.style.display = 'none';
@@ -171,7 +171,7 @@ closeModalButton.onclick = () => {
   // a podrazumevano se koristi https://www.dach.news
   const hostname = window.location.hostname;
   const BASE_URL = hostname.includes("localhost")
-    ? "http://localhost:3001"
+    ? "http://localhost:3002"
     : hostname === "exyunews.onrender.com"
       ? "https://exyunews.onrender.com"
       : hostname === "www.exyunews.onrender.com"
@@ -215,7 +215,7 @@ closeModalButton.onclick = () => {
       }
     }
     if (id) {
-      // Učitava verziju za modal (320x240) koristeći dobijeni id
+      // Učitava verziju za modal (240x180) koristeći dobijeni id
       tempImg.src = encodeURI(`${BASE_URL}/image/${id}:news-modal`);
     } else if (feed.image && feed.image.startsWith('/')) {
       // Ako ne možemo da izvučemo id, formiramo URL iz feed.image
