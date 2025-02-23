@@ -595,7 +595,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Ako postoji ID vesti, učitaj je i otvori modal
   if (newsId) {
     try {
-      const response = await fetch(`/api/news/${newsId}`);
+      const response = await fetch(`${window.location.origin}/api/news/${newsId}`);
       if (response.ok) {
         const news = await response.json();
         openNewsModal(news);
