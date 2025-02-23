@@ -494,7 +494,6 @@ export { getFeedsGenerator };
  */
 export async function processFeeds() {
   console.log("[processFeeds] Počinje procesiranje feed-ova...");
-
   const allItems = await fetchRSSFeed();
   console.log(`[processFeeds] Ukupno preuzeto ${allItems.length} feedova.`);
 
@@ -512,7 +511,8 @@ export async function processFeeds() {
       "https://p6.focus.de",
       "https://cdn.burda-forward.de",
       "https://quadro.burda-forward.de",
-      "https://static.boerse.de"
+      "https://static.boerse.de",
+      "https://cdn.lr-online.de"
     ];
     // Preskačemo stavke čiji URL sadrži neki od blokiranih linkova
     if (item.url && blockedSources.some(source => item.url.includes(source))) {

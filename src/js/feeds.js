@@ -163,44 +163,52 @@ function isHiddenFeed(feed) {
  * Ako postoje novi feedovi, dodaje ih u postojeći keš.
  */
 function getCachedFeeds(lastFetchKey, cachedFeedsKey, newFeeds = []) {
-  const cachedFeeds = localStorage.getItem(cachedFeedsKey);
+  const now = Date.now();
+  // Očekujemo da je keširan objekat u formatu { data: [...], expiry: <timestamp> }
+  const cachedRaw = localStorage.getItem(cachedFeedsKey);
+  let cachedData = cachedRaw ? JSON.parse(cachedRaw) : null;
   
-  if (cachedFeeds) {
-    let existingFeeds = JSON.parse(cachedFeeds);
-    
+  if (cachedData && cachedData.expiry && cachedData.expiry < now) {
+    localStorage.removeItem(cachedFeedsKey);
+    cachedData = null;
+  }
+  
+  if (cachedData && Array.isArray(cachedData.data)) {
+    let existingFeeds = cachedData.data;
     // Dedupliciramo feedove po ID-ju i dodajemo samo nove
     const existingFeedIds = new Set(existingFeeds.map(feed => feed.id));
     const filteredNewFeeds = newFeeds.filter(feed => !existingFeedIds.has(feed.id));
 
-    // Dodajemo samo nove feedove na vrh liste
     if (filteredNewFeeds.length > 0) {
       existingFeeds = [...filteredNewFeeds, ...existingFeeds];
-      
       // Ograničavamo broj feedova na 100
       existingFeeds = existingFeeds.slice(0, 100);
-      
-      localStorage.setItem(cachedFeedsKey, JSON.stringify(existingFeeds));
+      // Ažuriramo keš
+      localStorage.setItem(cachedFeedsKey, JSON.stringify({
+        data: existingFeeds,
+        expiry: now + 600000 // 10 minuta TTL
+      }));
       localStorage.setItem(lastFetchKey, new Date().toISOString());
-      
       console.log(`[CACHE] Dodato ${filteredNewFeeds.length} novih feedova u keš.`);
     } else {
       console.log("[CACHE] Nema novih feedova, koristimo postojeći keš.");
     }
-
     return existingFeeds;
   }
-
+  
   // Ako nema keša, sačuvaj nove feedove ako postoje
   if (newFeeds.length > 0) {
-    localStorage.setItem(cachedFeedsKey, JSON.stringify(newFeeds));
+    localStorage.setItem(cachedFeedsKey, JSON.stringify({
+      data: newFeeds,
+      expiry: now + 600000 // 10 minuta TTL
+    }));
     localStorage.setItem(lastFetchKey, new Date().toISOString());
     console.log(`[CACHE] Keširan prvi set feedova (${newFeeds.length} feedova).`);
     return newFeeds;
   }
-
+  
   return null;
 }
-
 
 
 /**

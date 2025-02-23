@@ -109,7 +109,9 @@ app.use(
         "https://img.burda-forward.de",
         "https://p6.focus.de", // ponovljeno radi potencijalnih grešaka
         "https://cdn.burda-forward.de",
-        "https://img.zeit.de" // Dodato ovde
+        "https://img.zeit.de",
+        "https://cdn.lr-online.de",      // Dodato za lr-online.de
+        "https://www.nd-aktuell.de" 
       ],
       connectSrc: ["'self'"],
       fontSrc: ["'self'", "data:"],

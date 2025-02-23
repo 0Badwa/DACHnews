@@ -118,31 +118,29 @@ const observers = new Set();
  * Vraća funkciju za čišćenje observera pri unmountu.
  */
 export function initializeLazyLoading() {
-  const imageObserver = new IntersectionObserver((entries, observer) => {
+  const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
         const img = entry.target;
-        const src = img.getAttribute("data-src");
-        if (src) {
-          img.src = src;
-          img.removeAttribute("data-src");
+        const dataSrc = img.getAttribute('data-src');
+        if (dataSrc) {
+          img.src = dataSrc;
+          img.removeAttribute('data-src');
         }
         observer.unobserve(img);
       }
     });
-  }, { rootMargin: "50px" });
+  }, { 
+    rootMargin: '200px 0px',
+    threshold: 0.01
+  });
 
-  observers.add(imageObserver);
-
-  // Pronalazi sve slike sa lazy loading atributom i dodaje ih u observer
-  document.querySelectorAll("img.lazy").forEach(img => imageObserver.observe(img));
-
-  // Vraćamo cleanup funkciju za oslobađanje observera
-  return () => {
-    observers.delete(imageObserver);
-    imageObserver.disconnect();
-  };
+  document.querySelectorAll('.lazy').forEach(img => observer.observe(img));
+  
+  // Vraća funkciju za čišćenje observer-a pri unmount-u
+  return () => observer.disconnect();
 }
+
 
 /**
  * Čisti sve IntersectionObserver instance prilikom unmount-a.
