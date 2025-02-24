@@ -181,15 +181,20 @@ nav .menu button {
 }
 
 /* ========== 5) NEWS CONTAINER & CARDS ========== */
+/* Osigurajte da #news-container podržava animacije */
 #news-container {
+  position: relative; /* Potrebno za pozicioniranje #swipe-overlay */
+  width: 100%;
   margin-top: 0px;
-  padding: 140px 0.3rem 0.3rem 0.3rem; /* top right bottom left */
-  min-height: calc(100vh - 130px); /* Ovo osigurava da container zauzima celokupan preostali prostor */
-  overflow-y: auto; /* Prikazuje scrollbar samo kad je potreban */
-  /* Skriva scrollbar */
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  padding: 140px 0.3rem 0.3rem 0.3rem;
+  min-height: calc(100vh - 130px);
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  transform: translateX(0); /* Osnovna pozicija za animacije */
+  transition: transform 0.4s ease-out; /* Tranzicija za swipe */
 }
+
 #news-container::-webkit-scrollbar {
   display: none; /* Chrome, Safari i Edge */
 }
@@ -864,15 +869,19 @@ background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z
 
 
 /* Preklopni element koji će prikazivati swipe animaciju */
-.swipe-overlay {
+/* Ažurirani #swipe-overlay */
+#swipe-overlay {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  pointer-events: none; /* Da ne blokira interakcije */
-  z-index: 999; /* Na vrhu sadržaja */
+  pointer-events: none;
+  z-index: 999;
   background: transparent;
+  opacity: 0;
+  transform: translateX(0); /* Osnovna pozicija za animacije */
+  transition: opacity 0.4s ease-out, transform 0.4s ease-out;
 }
 
 /* ========== NOVI SWITCH DUGME STIL (CYBERPUNK) =====o1===== */

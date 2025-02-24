@@ -78,31 +78,22 @@ export function initSwipe() {
   }
 
   /**
-   * Kraj gesta (touchend/mouseup) – proveravamo da li prelazimo na sledeću/prethodnu kat.
+   * Kraj gesta (touchend/mouseup) – proveravamo da li prelazimo na sledeću/prethodnu kategoriju.
    */
   function touchEnd() {
     dragging = false;
     cancelAnimationFrame(animationID);
 
-    // Vraćamo transition za glatko vraćanje/odlazak
-    swipeContainer.style.transition = 'transform 0.3s ease-out';
-
+    // Uzimamo pomeraj
     const movedBy = currentTranslate - previousTranslate;
 
-    // Dodato logovanje pre provere pomeraja
-    console.log("[swipe.js] touchEnd - Pre provere pomeraja, currentIndex:", currentIndex, "movedBy:", movedBy);
-
-
-    // Ako je pomeraj ispod -threshold => prelazak napred (sledeća kategorija)
     if (movedBy < -threshold && currentIndex < categories.length - 1) {
       currentIndex++;
       if (!firstSwipeOccurred) {
         firstSwipeOccurred = true;
-        showGreenRectangle(); // indikator da je prvi swipe detektovan
+        showGreenRectangle();
       }
-    }
-    // Ako je pomeraj iznad threshold => prelazak unazad (prethodna kategorija)
-    else if (movedBy > threshold && currentIndex > 0) {
+    } else if (movedBy > threshold && currentIndex > 0) {
       currentIndex--;
       if (!firstSwipeOccurred) {
         firstSwipeOccurred = true;
@@ -110,22 +101,19 @@ export function initSwipe() {
       }
     }
 
-    // Dodato logovanje posle provere pomeraja
-    console.log("[swipe.js] touchEnd - Posle provere pomeraja, currentIndex:", currentIndex);
+    // Umesto direktnog resetovanja pozicije, pozovite animaciju:
+    applySwipeAnimation('swipe-out-left', 'swipe-in-right');
 
-
-    // Pošto imamo samo jedan container (ne više “stranica”),
-    // posle prelaska na novu kategoriju resetujemo poziciju na 0.
-    currentTranslate = 0;
-    previousTranslate = 0;
-    setSliderPosition();
-
-    // Učitavamo novu kategoriju
-    if (currentIndex === 0) {
-      displayAktuellFeeds();
-    } else {
-      displayNewsByCategory(categories[currentIndex]);
-    }
+    // Učitavanje nove kategorije nakon 400ms (nakon završetka animacije)
+    setTimeout(() => {
+      if (currentIndex === 0) {
+        displayAktuellFeeds();
+      } else {
+        displayNewsByCategory(categories[currentIndex]);
+      }
+      // Resetovanje pozicije nakon animacije
+      previousTranslate = currentTranslate;
+    }, 400);
   }
 
   /**
@@ -164,4 +152,24 @@ export function initSwipe() {
   swipeContainer.addEventListener('mouseleave', () => {
     if (dragging) touchEnd();
   });
+  
+  // DODATA FUNKCIJA applySwipeAnimation
+  function applySwipeAnimation(outClass, inClass) {
+    // Pretpostavljamo da su swipeContainer i swipeOverlay definisani
+    // Ako swipeOverlay nije definisan, pokušajte da ga dobijete iz DOM-a
+    const swipeOverlay = document.getElementById('swipe-overlay');
+    swipeContainer.classList.add(outClass);
+    if (swipeOverlay) {
+      swipeOverlay.classList.add(inClass);
+    }
+    setTimeout(() => {
+      swipeContainer.classList.remove(outClass);
+      if (swipeOverlay) {
+        swipeOverlay.classList.remove(inClass);
+      }
+      currentTranslate = 0;
+      setSliderPosition();
+      previousTranslate = 0;
+    }, 400); // Trajanje animacije
+  }
 }

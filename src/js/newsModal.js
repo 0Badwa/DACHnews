@@ -170,7 +170,7 @@ closeModalButton.onclick = () => {
   // Definicija BASE_URL – podržava localhost, exyunews.onrender.com i www.exyunews.onrender.com,
   // a podrazumevano se koristi https://www.dach.news
   const hostname = window.location.hostname;
-  const BASE_URL = hostname.includes("localhost")
+  const BASE_URL = hostname.includes("localhost") || hostname === "192.168.1.16"
     ? "http://localhost:3002"
     : hostname === "exyunews.onrender.com"
       ? "https://exyunews.onrender.com"
