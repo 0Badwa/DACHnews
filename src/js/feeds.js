@@ -389,9 +389,15 @@ img.onerror = function () {
   const contentDiv = document.createElement('div');
   contentDiv.className = "news-card-content";
 
+  const maxTitleLength = 70;
   const title = document.createElement('h3');
   title.className = "news-title truncated-title";
-  title.textContent = feed.title || 'No title';
+  title.textContent = feed.title 
+    ? (feed.title.length > maxTitleLength 
+        ? feed.title.substring(0, maxTitleLength - 1) + '…' 
+        : feed.title) 
+    : 'No title';
+  
 
   const meta = document.createElement('p');
   meta.className = "news-meta";
