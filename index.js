@@ -24,6 +24,18 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
+// Middleware za logovanje botova
+app.use((req, res, next) => {
+    const userAgent = req.get('User-Agent') || 'Unknown';
+    const botRegex = /(Googlebot|Bingbot|YandexBot|DuckDuckBot|Baiduspider|Slurp|Facebot|Twitterbot)/i;
+
+    if (botRegex.test(userAgent)) {
+        console.log(`[BOT DETECTED] ${userAgent} - Path: ${req.path}`);
+    }
+
+    next();
+});
+
 import pg from 'pg';
 const { Pool } = pg;
 
