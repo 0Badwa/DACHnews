@@ -4,20 +4,29 @@
  * Ovaj fajl prikazuje i ažurira modal za pojedinačnu vest.
  ***********************************************/
 
+
 /**
  * Funkcija koja ažurira <title>, <meta> description, kao i Open Graph i Twitter card meta tagove
  * na osnovu prosleđene vesti (feed).
  */
 function updateDynamicMeta(feed) {
-  // 1) Title
-  document.title = feed.title
-    ? `${feed.title} – DACH.news`
+  const maxTitleLength = 70;
+  
+  // Skrati naslov ako je predugačak
+  let trimmedTitle = feed.title 
+    ? (feed.title.length > maxTitleLength 
+      ? feed.title.substring(0, maxTitleLength - 1) + '…' 
+      : feed.title) 
     : 'DACH.news';
+
+  // 1) Title
+  document.title = `${trimmedTitle} – DACH.news`;
 
   // 2) Meta description (prvih ~160 karaktera)
   const description = feed.content_text
     ? feed.content_text.substring(0, 160)
     : (feed.title || 'Aktuelle Nachrichten aus der DACH-Region');
+
   const metaDesc = document.querySelector('meta[name="description"]');
   if (metaDesc) {
     metaDesc.setAttribute('content', description);
@@ -38,8 +47,7 @@ function updateDynamicMeta(feed) {
   }
   const ogUrl = document.querySelector('meta[property="og:url"]');
   if (ogUrl) {
-    // Ako hoćete da menja URL, npr: ogUrl.setAttribute('content', `https://www.dach.news/news/${feed.id}`);
-    ogUrl.setAttribute('content', 'https://dach.news');
+    ogUrl.setAttribute('content', `https://www.dach.news/news/${feed.id}`);
   }
 
   // 4) Twitter
@@ -56,6 +64,7 @@ function updateDynamicMeta(feed) {
     twImage.setAttribute('content', feed.image || 'https://dach.news/preview.jpg');
   }
 }
+
 
 /**
  * Funkcija koja otvara modal za pojedinačnu vest (feed),

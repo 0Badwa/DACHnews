@@ -163,7 +163,7 @@ function generateHtmlForNews(news) {
     <html lang="de">
     <head>
       <meta charset="UTF-8">
-      <title>${news.title} - DACH.news: Nachrichten aus Deutschland, Österreich, Schweiz</title>
+<title>${news.title.length > 70 ? news.title.substring(0, 67) + '...' : news.title} - DACH.news</title>
       <meta name="description" content="${news.content_text ? news.content_text.substring(0, 160) : ''}">
       <link rel="canonical" href="${new URL('/news/' + news.id, 'https://www.dach.news').href}">
 
