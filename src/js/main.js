@@ -4,8 +4,9 @@
 
 import { openNewsModal } from './newsModal.js';
 import { initFeeds, displayAktuellFeeds, displayNewsByCategory } from './feeds.js';
-import { brandMap, ALLOWED_SOURCES, sourceAliases } from './sourcesConfig.js';
-import { initializeLazyLoading, cleanupObservers } from './ui.js';
+import { brandMap, ALLOWED_SOURCES, sourceAliases, sourceDisplayNames } from './sourcesConfig.js';
+import { initializeLazyLoading, cleanupObservers } from './ui.js'; // Potvrđujemo da je uvoz tačan
+
 
 if ('scrollRestoration' in history) {
   history.scrollRestoration = 'manual';
@@ -276,6 +277,8 @@ function handleDrop(e) {
   draggedItem.style.opacity = '1';
 }
 
+
+
 /** Quellen modal **/
 function openQuellenModal() {
   if (!ALLOWED_SOURCES || ALLOWED_SOURCES.length === 0) {
@@ -303,7 +306,7 @@ function openQuellenModal() {
     }
     const country = brandMap[normalized] || 'other';
     if (groupedSources[country]) {
-      groupedSources[country].push(normalized.toUpperCase());
+      groupedSources[country].push(src);
     }
   });
 
@@ -319,31 +322,122 @@ function openQuellenModal() {
 
   Object.keys(groupedSources).forEach(country => {
     if (groupedSources[country].length > 0) {
+      // Dodaj prazan red iznad imena države
+      const spacer = document.createElement('div');
+      spacer.style.height = '1rem';
+      sourcesListEl.appendChild(spacer);
+
+      // Kreiraj kontejner za državu i switch
+      const countryContainer = document.createElement('div');
+      countryContainer.className = 'source-item country-header';
+
       const countryHeader = document.createElement('h3');
       countryHeader.textContent = countryNames[country];
-      countryHeader.style.margin = '0.5rem 0';
+      countryHeader.style.margin = '0';
       countryHeader.style.fontWeight = 'bold';
-      sourcesListEl.appendChild(countryHeader);
+
+      const countrySwitchContainer = document.createElement('div');
+      countrySwitchContainer.classList.add('switch-container');
+      const isCountryBlocked = groupedSources[country].every(src => isSourceBlocked(src));
+      if (!isCountryBlocked) {
+        countrySwitchContainer.classList.add('active');
+      }
+
+      const countrySwitchSlider = document.createElement('div');
+      countrySwitchSlider.classList.add('switch-slider');
+      countrySwitchContainer.appendChild(countrySwitchSlider);
+
+      const countrySources = groupedSources[country]; // Definisanje countrySources ovde za closure
+
+      countrySwitchContainer.onclick = () => {
+        const shouldBlock = countrySwitchContainer.classList.contains('active');
+        const sourceItems = sourcesListEl.querySelectorAll(`.source-item:not(.country-header)`);
+
+        // Blokiraj ili odblokiraj sve medije iz države
+        countrySources.forEach(src => {
+          if (shouldBlock) {
+            blockSource(src);
+          } else {
+            unblockSource(src);
+          }
+        });
+
+        // Ažuriraj vizuelno stanje switch-eva za medije unutar države
+        sourceItems.forEach(item => {
+          const span = item.querySelector('span[data-source-lc]');
+          if (span) {
+            const itemSrcLC = span.getAttribute('data-source-lc');
+            // Poredi sa countrySources (prebačenim u lowercase)
+            if (countrySources.map(s => s.toLowerCase()).includes(itemSrcLC)) {
+              const switchContainer = item.querySelector('.switch-container');
+              if (shouldBlock) {
+                switchContainer.classList.remove('active');
+              } else {
+                switchContainer.classList.add('active');
+              }
+            }
+          }
+        });
+
+        countrySwitchContainer.classList.toggle('active');
+
+        // Osveži feed nakon promene
+        const activeTab = document.querySelector('.tab.active');
+        if (activeTab) {
+          const catName = activeTab.getAttribute('data-tab');
+          if (catName === 'Aktuell') {
+            displayAktuellFeeds(true);
+          } else {
+            displayNewsByCategory(catName, true);
+          }
+        }
+      };
+
+      countryContainer.appendChild(countryHeader);
+      countryContainer.appendChild(countrySwitchContainer);
+      sourcesListEl.appendChild(countryContainer);
 
       groupedSources[country].forEach(src => {
         const sourceItem = document.createElement('div');
         sourceItem.className = 'source-item';
 
         const spanName = document.createElement('span');
-        spanName.textContent = src;
+        // Postavljamo data-source-lc atribut u malim slovima
+        spanName.textContent = sourceDisplayNames[src] || src;
+        spanName.setAttribute('data-source-lc', src.toLowerCase());
 
         const isBlocked = isSourceBlocked(src);
 
         const switchContainer = document.createElement("div");
         switchContainer.classList.add("switch-container");
-        switchContainer.onclick = () => toggleSource(src, switchContainer);
+        switchContainer.onclick = () => {
+          toggleSource(src, switchContainer);
+          // Ažuriraj stanje switch-a države nakon promene
+          const countrySwitch = sourcesListEl.querySelector(`.country-header .switch-container`);
+          if (countrySwitch) {
+            const isCountryStillActive = countrySources.some(s => !isSourceBlocked(s));
+            countrySwitch.classList.toggle('active', isCountryStillActive);
+          }
+          // Ažuriraj vizuelno stanje ostalih switch-eva unutar države
+          const allSourceItems = sourcesListEl.querySelectorAll(`.source-item:not(.country-header)`);
+          allSourceItems.forEach(item => {
+            const innerSpan = item.querySelector('span[data-source-lc]');
+            if (innerSpan) {
+              const innerSourceLC = innerSpan.getAttribute('data-source-lc');
+              if (countrySources.map(s => s.toLowerCase()).includes(innerSourceLC)) {
+                const innerSwitch = item.querySelector('.switch-container');
+                innerSwitch.classList.toggle('active', !isSourceBlocked(innerSourceLC));
+              }
+            }
+          });
+        };
 
         const switchSlider = document.createElement("div");
         switchSlider.classList.add("switch-slider");
         switchContainer.appendChild(switchSlider);
 
         if (!isBlocked) {
-          switchContainer.classList.add("active");
+          switchContainer.classList.add('active');
         }
 
         sourceItem.appendChild(spanName);
@@ -353,6 +447,9 @@ function openQuellenModal() {
     }
   });
 }
+
+
+
 
 /** Zatvara quellen modal **/
 function closeQuellenModal() {
@@ -583,43 +680,46 @@ function closeSettingsModal() {
   }
 }
 
-
 /** DOMContentLoaded **/
 document.addEventListener('DOMContentLoaded', async () => {
-  const cleanupLazyLoading = initializeLazyLoading(); // Aktivira lazy loading i vraća cleanup funkciju
+  try {
+    console.log('initializeLazyLoading:', typeof initializeLazyLoading); // Treba da ispiše "function"
+    const cleanupLazyLoading = initializeLazyLoading(); // Pozivamo funkciju
+    console.log('Lazy loading initialized'); // Dodajemo log za proveru
 
-  // Efikasno dohvaćanje newsId iz URL-a
-  const urlParams = new URLSearchParams(window.location.search);
-  let newsId = urlParams.get('newsId') ?? window.location.pathname.split('/news/')[1] ?? null;
+    // Efikasno dohvaćanje newsId iz URL-a
+    const urlParams = new URLSearchParams(window.location.search);
+    let newsId = urlParams.get('newsId') ?? window.location.pathname.split('/news/')[1] ?? null;
 
-  // Ako postoji ID vesti, učitaj je i otvori modal
-  if (newsId) {
-    try {
-      const response = await fetch(`${window.location.origin}/api/news/${newsId}`);
-      if (response.ok) {
-        const news = await response.json();
-        openNewsModal(news);
-      } else {
-        console.error("[ERROR] Vest nije pronađena:", newsId);
+    if (newsId) {
+      try {
+        const response = await fetch(`${window.location.origin}/api/news/${newsId}`);
+        if (response.ok) {
+          const news = await response.json();
+          openNewsModal(news);
+        } else {
+          console.error("[ERROR] Vest nije pronađena:", newsId);
+        }
+      } catch (error) {
+        console.error("[ERROR] Greška pri učitavanju vesti:", error);
       }
-    } catch (error) {
-      console.error("[ERROR] Greška pri učitavanju vesti:", error);
     }
-  }
 
-  // Paralelna inicijalizacija ključnih funkcija
-  await Promise.all([
-    applyCardFontSize(),
-    buildTabs(),
-    initSwipe(),
-    initFeeds() // Uvek učitavaj feedove
-  ]);
-  
-  // Kada korisnik napusti stranicu, oslobodi sve observere i memoriju
-  window.addEventListener('beforeunload', () => {
-    cleanupLazyLoading();
-    cleanupObservers();
-  });
+    // Paralelna inicijalizacija ključnih funkcija
+    await Promise.all([
+      applyCardFontSize(),
+      buildTabs(),
+      initSwipe(),
+      initFeeds()
+    ]);
+
+    window.addEventListener('beforeunload', () => {
+      cleanupLazyLoading();
+      cleanupObservers();
+    });
+  } catch (error) {
+    console.error("[DOMContentLoaded] Greška:", error);
+  }
 });
 
 

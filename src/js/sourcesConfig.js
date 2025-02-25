@@ -1,6 +1,53 @@
 /**
+ * sourcesConfig.js
+ */
+
+/**
+ * Ova mapa povezuje normalizovane nazive izvora sa njihovim punim, čitljivim imenima za prikaz.
+ * Ključevi su u UPPERCASE formatu da odgovaraju normalizovanim izvorima iz feed-a.
+ */
+export const sourceDisplayNames = {
+  // Nemačka
+  'ANALYSE-UND-KRITIK': 'Analyse & Kritik',
+  'ARD-TAGESSCHAU': 'Tagesschau',
+  'CICERO': 'Cicero',
+  'DER-FREITAG': 'Der Freitag',
+  'DER-SPIEGEL': 'Der Spiegel',
+  'DIE-TAGESZEITUNG': 'taz',
+  'FRANKFURTER-RUNDSCHAU': 'Frankfurter Rundschau',
+  'JUNGLE-WORLD': 'Jungle World',
+  'NEUES-DEUTSCHLAND': 'Neues Deutschland',
+  'QUEER': 'Queer.de',
+  'SUEDDEUTSCHE': 'Süddeutsche Zeitung',
+  'VOLKSSTIMME': 'Volksstimme',
+  'ZEIT': 'Die Zeit',
+  'ZDF': 'ZDF',
+
+  // Austrija
+  'AUGUSTIN': 'Augustin',
+  'DERSTANDARD': 'Der Standard',
+  'FALTER': 'Falter',
+  'KURIER': 'Kurier',
+  'PROFIL': 'Profil',
+  'SALZBURGER-NACHRICHTEN': 'Salzburger Nachrichten',
+  'WIENERZEITUNG': 'Wiener Zeitung',
+
+  // Švajcarska
+  'AARGAUERZEITUNG': 'Aargauer Zeitung',
+  'BLICK': 'Blick',
+  'NZZ': 'Neue Zürcher Zeitung',
+  'PSZEITUNG': 'PS Zeitung',
+  'REPUBLIK': 'Republik',
+  'ST-GALLER-TAGBLATT': 'St. Galler Tagblatt',
+  'TAGESANZEIGER': 'Tages-Anzeiger',
+  'VORWAERTS': 'Vorwärts',
+  'WOZ': 'WOZ Die Wochenzeitung'
+};
+
+/**
  * Ova mapa povezuje domen (npr. 'spiegel') sa ISO kodom države (npr. 'de'),
  * što se koristi za dodelu zastavice (flag) i za definisanje dozvoljenih izvora.
+ * Ključevi su u lowercase formatu jer se koriste za normalizaciju domena.
  */
 export const brandMap = {
   // DE (Nemačka)
@@ -42,6 +89,7 @@ export const brandMap = {
 
 /**
  * Alternativne domene za izvore – ako medij koristi više domena.
+ * Ključevi su u lowercase formatu, a vrednosti su nizovi domena koje treba mapirati na glavni izvor.
  */
 export const sourceAliases = {
   // Nemački mediji
@@ -84,5 +132,6 @@ export const sourceAliases = {
 /**
  * ALLOWED_SOURCES -> lista dozvoljenih izvora (u UPPERCASE),
  * generisana iz ključeva brandMap-a.
+ * Ovo se koristi za validaciju i prikaz u Quellen modalu.
  */
 export const ALLOWED_SOURCES = Object.keys(brandMap).map(key => key.toUpperCase());

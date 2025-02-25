@@ -13,7 +13,7 @@ import {
 import { openNewsModal } from './newsModal.js';
 
 // Uvoz brandMap i sourceAliases iz sourcesConfig.js
-import { brandMap, sourceAliases } from './sourcesConfig.js';
+import { brandMap, sourceAliases, sourceDisplayNames } from './sourcesConfig.js';
 
 
 /**
@@ -125,37 +125,53 @@ function getBlockedCategories() {
   }
 }
 
+
+
 /**
  * Proverava da li je feed sakriven (blokiran) na osnovu izvora, kategorije,
  * da li je datum objavljivanja u budućnosti, i da li vest ima sliku.
  */
 function isHiddenFeed(feed) {
-  // Sakrij vest ako nema sliku
-  if (!feed.image) return true;
+  if (!feed.image) {
+    console.log(`[isHiddenFeed] Feed sakriven: Nema slike, ID: ${feed.id}`);
+    return true;
+  }
 
-  // NE PRIKAZUJ vesti sa datumom sutra ili u budućnosti
   if (feed.date_published) {
     const publishedDate = new Date(feed.date_published);
     const now = new Date();
-    if (publishedDate > now) return true;
+    if (publishedDate > now) {
+      console.log(`[isHiddenFeed] Feed sakriven: Datum u budućnosti, ID: ${feed.id}`);
+      return true;
+    }
   }
 
   const blockedSources = getBlockedSources();
   const blockedCats = getBlockedCategories();
 
-  // "Ohne Kategorie" tretiramo kao "Sonstiges"
   const cat = (feed.category === "Ohne Kategorie") ? "Sonstiges" : feed.category;
-  if (blockedCats.includes(cat)) return true;
+  if (blockedCats.includes(cat)) {
+    console.log(`[isHiddenFeed] Feed sakriven zbog blokirane kategorije: ${cat}, ID: ${feed.id}`);
+    return true;
+  }
 
   if (feed.source) {
-    const normalizedSource = removeTLD(feed.source.toUpperCase().replace(/\s+/g, ''));
-    if (blockedSources.includes(normalizedSource)) {
+    const normalizedSource = normalizeSourceForDisplay(feed.source);
+    if (!normalizedSource) {
+      console.log(`[isHiddenFeed] Feed sakriven: Nepoznat izvor, Raw: ${feed.source}, ID: ${feed.id}`);
+      return true;
+    }
+    const blockedSourceCheck = removeTLD(normalizedSource.toUpperCase().replace(/\s+/g, ''));
+    console.log(`[isHiddenFeed] Provera izvora: ${blockedSourceCheck}, Blocked: ${blockedSources}`);
+    if (blockedSources.includes(blockedSourceCheck)) {
+      console.log(`[isHiddenFeed] Feed sakriven zbog blokiranog izvora: ${blockedSourceCheck}, ID: ${feed.id}`);
       return true;
     }
   }
 
   return false;
 }
+
 
 
 /**
@@ -306,6 +322,56 @@ export async function fetchCategoryFeeds(category, forceRefresh = false) {
 
 
 /**
+ * Normalizuje izvor za prikaz koristeći sourceAliases i brandMap.
+ * Vraća ključ koji odgovara sourceDisplayNames ili null za nepoznate izvore.
+ */
+function normalizeSourceForDisplay(source) {
+  if (!source) return null;
+
+  console.log("Raw source:", source);
+
+  let normalized = source.trim().toLowerCase();
+  normalized = normalized.replace(/^https?:\/\//, '').replace(/^www\./, '');
+  normalized = removeTLD(normalized.split('/')[0]);
+
+  console.log("Normalized source:", normalized);
+
+  // Ručna mapiranja za specifične slučajeve
+  if (normalized === 'sn') return 'SALZBURGER-NACHRICHTEN';
+  if (normalized === 'fr') return 'FRANKFURTER-RUNDSCHAU';
+  if (normalized === 'spiegel') return 'DER-SPIEGEL';
+  if (normalized === 'freitag') return 'DER-FREITAG';
+  if (normalized === 'tagesschau' || normalized === 'ardmediathek' || normalized === 'watson') return 'ZDF';
+  if (normalized === 'tagblatt') return 'ST-GALLER-TAGBLATT';
+  if (normalized === 'thurgauerzeitung') return 'ST-GALLER-TAGBLATT';
+
+  for (let mainSource in sourceAliases) {
+    if (sourceAliases[mainSource].includes(normalized)) {
+      const result = mainSource.toUpperCase();
+      console.log("Mapped to:", result);
+      return result;
+    }
+  }
+
+  if (brandMap[normalized]) {
+    const result = normalized.toUpperCase();
+    console.log("Mapped via brandMap:", result);
+    return result;
+  }
+
+  const upperSource = source.toUpperCase().replace(/\s+/g, '');
+  if (sourceDisplayNames[upperSource]) {
+    console.log("Direct match:", upperSource);
+    return upperSource;
+  }
+
+  console.log("Nepoznat izvor, filtriraće se:", normalized);
+  return null; // Vraća null za nepoznate izvore umesto "UNBEKANNTEQUELLE"
+}
+
+
+
+/**
  * Kreira jednu "news card" za prikaz feed-a.
  */
 function createNewsCard(feed) {
@@ -355,21 +421,13 @@ function createNewsCard(feed) {
   img.src = feed.image ? feed.image : `${BASE_IMAGE_URL}/src/icons/no-image.png`;
   img.alt = feed.title ? feed.title : 'Nachrichtenbild'; // SEO-friendly alt na nemačkom
 
-  // Ako se slika ne može učitati, koristi no-image.png
-  //img.onerror = function () {
-    //this.onerror = null;
-    //this.src = "https://www.dach.news/src/icons/no-image.png";
-  //};
-
-// Ako se slika ne može učitati (npr. je iza paywalla), ukloni celu news karticu
-img.onerror = function () {
-  // Sprečava eventualno rekurzivno pozivanje
-  this.onerror = null;
-  // Uklanja celu karticu iz DOM-a
-  card.remove();
-};
-
-
+  // Ako se slika ne može učitati (npr. je iza paywalla), ukloni celu news karticu
+  img.onerror = function () {
+    // Sprečava eventualno rekurzivno pozivanje
+    this.onerror = null;
+    // Uklanja celu karticu iz DOM-a
+    card.remove();
+  };
 
   img.width = 80;
   img.height = 80;
@@ -404,7 +462,10 @@ img.onerror = function () {
 
   const sourceSpan = document.createElement('span');
   sourceSpan.className = "source";
-  sourceSpan.textContent = removeTLD(feed.source?.toUpperCase().replace(/\s+/g, '') || 'UNBEKANNTEQUELLE');
+  
+  // Normalizujemo izvor i uzimamo prilagođeni naziv
+  const normalizedSource = normalizeSourceForDisplay(feed.source);
+  sourceSpan.textContent = sourceDisplayNames[normalizedSource] || normalizedSource;
 
   const flagImg = document.createElement('img');
   flagImg.className = "flag-icon";
@@ -438,20 +499,27 @@ export function displayFeedsList(feedsList, categoryName) {
   const container = document.getElementById('news-container');
   if (!container) return;
 
-  // Dedupliciramo feedove – zadržavamo samo jedinstvene na osnovu id-ja
   let uniqueFeeds = Array.from(new Map(feedsList.map(feed => [feed.id, feed])).values());
 
-  // Filtriraj vesti prema blokiranim izvorima iz localStorage
   const blockedSources = getBlockedSources();
+  console.log(`[displayFeedsList] Blokirani izvori: ${blockedSources}`);
   uniqueFeeds = uniqueFeeds.filter(feed => {
     if (!feed.source) return true;
-    const normalizedSource = removeTLD(feed.source.toUpperCase().replace(/\s+/g, ''));
-    return !blockedSources.includes(normalizedSource);
+    const normalizedSource = normalizeSourceForDisplay(feed.source);
+    if (!normalizedSource) {
+      console.log(`[displayFeedsList] Feed filtriran: Nepoznat izvor, Raw: ${feed.source}, ID: ${feed.id}`);
+      return false;
+    }
+    const blockedSourceCheck = removeTLD(normalizedSource.toUpperCase().replace(/\s+/g, ''));
+    if (blockedSources.includes(blockedSourceCheck)) {
+      console.log(`[displayFeedsList] Feed filtriran zbog blokiranog izvora: ${blockedSourceCheck}, ID: ${feed.id}`);
+      return false;
+    }
+    return true;
   });
 
-  // Očistimo kontejner pre dodavanja novih vesti
   container.innerHTML = '';
-  // ...
+  // ... (ostatak funkcije ostaje isti)
 
 
   // Ako je prazan niz

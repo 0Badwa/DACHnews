@@ -155,8 +155,6 @@ export function initSwipe() {
   
   // DODATA FUNKCIJA applySwipeAnimation
   function applySwipeAnimation(outClass, inClass) {
-    // Pretpostavljamo da su swipeContainer i swipeOverlay definisani
-    // Ako swipeOverlay nije definisan, pokušajte da ga dobijete iz DOM-a
     const swipeOverlay = document.getElementById('swipe-overlay');
     swipeContainer.classList.add(outClass);
     if (swipeOverlay) {
@@ -170,6 +168,11 @@ export function initSwipe() {
       currentTranslate = 0;
       setSliderPosition();
       previousTranslate = 0;
-    }, 400); // Trajanje animacije
-  }
-}
+      // Dodajte ovde poziv za učitavanje nove kategorije
+      if (currentIndex === 0) {
+        displayAktuellFeeds();
+      } else {
+        displayNewsByCategory(categories[currentIndex]);
+      }
+    }, 400);
+  }}
