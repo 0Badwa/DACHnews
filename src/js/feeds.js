@@ -328,13 +328,13 @@ export async function fetchCategoryFeeds(category, forceRefresh = false) {
 function normalizeSourceForDisplay(source) {
   if (!source) return null;
 
-  console.log("Raw source:", source);
+  // console.log("Raw source:", source);
 
   let normalized = source.trim().toLowerCase();
   normalized = normalized.replace(/^https?:\/\//, '').replace(/^www\./, '');
   normalized = removeTLD(normalized.split('/')[0]);
 
-  console.log("Normalized source:", normalized);
+ // console.log("Normalized source:", normalized);
 
   // Ručna mapiranja za specifične slučajeve
   if (normalized === 'sn') return 'SALZBURGER-NACHRICHTEN';
@@ -348,20 +348,20 @@ function normalizeSourceForDisplay(source) {
   for (let mainSource in sourceAliases) {
     if (sourceAliases[mainSource].includes(normalized)) {
       const result = mainSource.toUpperCase();
-      console.log("Mapped to:", result);
+      // console.log("Mapped to:", result);
       return result;
     }
   }
 
   if (brandMap[normalized]) {
     const result = normalized.toUpperCase();
-    console.log("Mapped via brandMap:", result);
+    // console.log("Mapped via brandMap:", result);
     return result;
   }
 
   const upperSource = source.toUpperCase().replace(/\s+/g, '');
   if (sourceDisplayNames[upperSource]) {
-    console.log("Direct match:", upperSource);
+   //  console.log("Direct match:", upperSource);
     return upperSource;
   }
 
