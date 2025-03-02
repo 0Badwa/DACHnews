@@ -300,39 +300,48 @@ app.get('/api/feeds-by-category/:category', async (req, res) => {
   }
 });
 
+
+
+
 /**
  * Ruta za dohvatanje slike iz Redis-a.
  * Podržava varijante preko "id:variant" forme (ili default "news-card").
  */
 app.get('/image/:id', async (req, res) => {
+  // Razdvajanje id i varijante (npr. "news-card" ili "news-modal")
   const param = req.params.id;
   let id, variant;
-
-  // Ako parametar sadrži dvotačku, razdvajamo id i varijantu
   if (param.includes(':')) {
     [id, variant] = param.split(':');
   } else {
-    // Ako nije definisana varijanta, koristi "news-card"
     id = param;
     variant = 'news-card';
   }
-
   const imgKey = `img:${id}:${variant}`;
-
   try {
     const base64 = await redisClient.get(imgKey);
-    if (!base64) {
-      console.log(`[Route /image/:id] No image found for key: ${imgKey}`);
-      return res.status(404).send("Image not found.");
+    if (base64) {
+      const buffer = Buffer.from(base64, 'base64');
+      res.setHeader('Content-Type', 'image/webp');
+      return res.send(buffer);
+    } else {
+      // Ako slika nije pronađena u Redis, pokušaj fallback na Cloudflare URL
+      const r2Key = `r2url:${id}:${variant}`;
+      const cloudflareUrl = await redisClient.get(r2Key);
+      if (cloudflareUrl) {
+        console.log(`[Route /image/:id] Fallback na Cloudflare URL za ključ: ${r2Key}`);
+        return res.redirect(cloudflareUrl);
+      } else {
+        console.log(`[Route /image/:id] No image found for key: ${imgKey} and no fallback r2url`);
+        return res.status(404).send("Image not found.");
+      }
     }
-    const buffer = Buffer.from(base64, 'base64');
-    res.setHeader('Content-Type', 'image/webp');
-    res.send(buffer);
   } catch (error) {
     console.error("[Route /image/:id] Error:", error);
     res.status(500).send("Server error");
   }
 });
+
 
 /**
  * API ruta za pojedinačnu vest u JSON formatu.

@@ -276,6 +276,8 @@ async function smanjiSliku(buffer) {
 }
 
 
+
+
 /**
  * Čuva smanjenu sliku u Redis u Base64 formatu (pod ključem "img:<id>:<variant>") i uploaduje je na Cloudflare R2.
  */
@@ -302,7 +304,8 @@ async function storeImageInRedis(imageUrl, id) {
         .toBuffer();
 
       console.log(`[storeImageInRedis] Kreirana verzija ${key} za ID:${id} (dimenzije: ${width}x${height})`);
-      await redisClient.set(`img:${id}:${key}`, resizedImage.toString('base64'), 'EX', 86400); // Ističe za 24h
+      // Čuvamo sliku u Redis kao Base64 (TTL 24h)
+      await redisClient.set(`img:${id}:${key}`, resizedImage.toString('base64'), 'EX', 86400);
 
       // Upload verzije na Cloudflare R2
       const fileName = `${id}-${key}.webp`;
@@ -311,6 +314,8 @@ async function storeImageInRedis(imageUrl, id) {
       if (r2Result && r2Result.url) {
         cloudflareImageUrls[key] = r2Result.url;
         console.log(`[storeImageInRedis] Uploaded ${fileName} to Cloudflare R2: ${r2Result.url}`);
+        // NOVO: Čuvamo Cloudflare URL kao fallback u Redis (TTL 24h)
+        await redisClient.set(`r2url:${id}:${key}`, r2Result.url, 'EX', 86400);
       } else {
         console.error(`[storeImageInRedis] Failed to upload ${fileName} to Cloudflare R2`);
       }
@@ -323,6 +328,7 @@ async function storeImageInRedis(imageUrl, id) {
     return null;
   }
 }
+
 
 
 /**
