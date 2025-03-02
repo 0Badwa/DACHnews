@@ -343,8 +343,12 @@ app.get('/image/:id', async (req, res) => {
 });
 
 
+
+
 /**
  * API ruta za pojedinačnu vest u JSON formatu.
+ * Ako vest nije pronađena u Redis-kešu, fallback – dohvat sa neon.tech API-ja i
+ * korišćenje Cloudflare fallback URL-a za sliku.
  */
 app.get('/api/news/:id', async (req, res) => {
   const newsId = req.params.id;
@@ -353,21 +357,29 @@ app.get('/api/news/:id', async (req, res) => {
   try {
     console.log(`[API] Traženje vesti ID: ${newsId} pomoću strimovanja...`);
 
-    // Strimujemo feedove i tražimo vest sa newsId
+    // Prvo pokušavamo dohvatiti vest iz Redis keša
     for await (const batch of getFeedsGenerator()) {
       news = batch.find(item => item.id === newsId);
-      if (news) break; // Ako nađemo vest, prekidamo iteraciju
+      if (news) break;
     }
 
-    // Ako vest nije pronađena, pokušavamo sa SEO feedovima
+    // Ako vest nije pronađena u kešu, pokušavamo fallback sa neon.tech API-ja
     if (!news) {
-      console.log(`[API] Vest ID: ${newsId} nije pronađena u kategorijama, pretraga u SEO cache-u...`);
-      const seoFeeds = await getSeoFeedsFromRedis();
-      news = seoFeeds.find(item => item.id === newsId);
+      console.log(`[API] Vest ID: ${newsId} nije pronađena u kešu, pozivam neon.tech API...`);
+      const neonResponse = await axios.get(`https://neon.tech/api/news/${newsId}`);
+      if (neonResponse.status === 200 && neonResponse.data) {
+        news = neonResponse.data;
+        // Pokušavamo da dohvatimo Cloudflare URL za sliku kao fallback
+        const r2Key = `r2url:${newsId}:news-card`;
+        const cloudflareUrl = await redisClient.get(r2Key);
+        if (cloudflareUrl) {
+          news.image = cloudflareUrl;
+        }
+      }
     }
 
     if (!news) {
-      console.log(`[API] Vest ID: ${newsId} nije pronađena.`);
+      console.log(`[API] Vest ID: ${newsId} nije pronađena ni u kešu ni putem neon.tech fallback-a.`);
       return res.status(404).send("News not found");
     }
 
@@ -378,6 +390,8 @@ app.get('/api/news/:id', async (req, res) => {
     res.status(500).send("Server error");
   }
 });
+
+
 
 
 /**
