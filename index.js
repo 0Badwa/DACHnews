@@ -523,10 +523,12 @@ app.get('/news/:id', async (req, res) => {
         if (neonResponse.status === 200 && neonResponse.data) {
           news = neonResponse.data;
          // Ako vest nema definisanu sliku, konstrušemo URL za Cloudflare R2.
-if (!news.image) {
-  const bucket = process.env.CLOUDFLARE_R2_BUCKET;
-  news.image = `${process.env.CLOUDFLARE_R2_ENDPOINT}/${bucket}/${fileName}`;
-}
+         if (!news.image) {
+          const bucket = process.env.CLOUDFLARE_R2_BUCKET;
+          const fileName = `${news.id}-news-card.webp`; // Ili neka druga logika za generisanje imena fajla
+          news.image = `${process.env.CLOUDFLARE_R2_ENDPOINT}/${bucket}/${fileName}`;
+        }
+        
 
         }
       } catch (err) {
