@@ -11,42 +11,40 @@ import sharp from 'sharp';
 import pLimit from 'p-limit';
 import { saveNewsToPostgres } from './index.js';
 
-import B2 from 'backblaze-b2';
+import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 
-// Inicijalizacija Backblaze B2 sa vrednostima iz .env
-const b2 = new B2({
-  applicationKeyId: process.env.B2_KEY_ID,
-  applicationKey: process.env.B2_APPLICATION_KEY,
+const s3 = new S3Client({
+  region: process.env.CLOUDFLARE_R2_REGION,
+  endpoint: process.env.CLOUDFLARE_R2_ENDPOINT,
+  credentials: {
+    accessKeyId: process.env.CLOUDFLARE_R2_ACCESS_KEY,
+    secretAccessKey: process.env.CLOUDFLARE_R2_SECRET_KEY
+  }
 });
 
-/**
- * uploadToB2
- * Uploaduje dati buffer na Backblaze B2 u bucket definisan u B2_BUCKET_ID.
- * @param {Buffer} fileBuffer - buffer slike
- * @param {string} fileName - ime fajla (npr. "12345-news-card.webp")
- * @returns {Promise<object|null>} - rezultat upload-a ili null ako dođe do greške
- */
-async function uploadToB2(fileBuffer, fileName) {
+
+async function uploadToCloudflareR2(fileBuffer, fileName) {
   try {
-    // Autorizuj se na B2
-    await b2.authorize();
-    const uploadUrlResponse = await b2.getUploadUrl({
-      bucketId: process.env.B2_BUCKET_ID,
+    const command = new PutObjectCommand({
+      Bucket: process.env.CLOUDFLARE_R2_BUCKET,
+      Key: fileName,
+      Body: fileBuffer,
+      ContentType: "image/webp",
     });
-    const { uploadUrl, authorizationToken } = uploadUrlResponse.data;
-    const response = await b2.uploadFile({
-      uploadUrl,
-      uploadAuthToken: authorizationToken,
+
+    await s3.send(command);
+    console.log(`[uploadToCloudflareR2] Uploadovan fajl: ${fileName}`);
+    
+    return {
       fileName,
-      data: fileBuffer,
-      info: { "src_last_modified_millis": Date.now().toString() },
-    });
-    return response;
-  } catch (err) {
-    console.error("B2 upload error:", err);
+      url: `${process.env.CLOUDFLARE_R2_ENDPOINT}/${process.env.CLOUDFLARE_R2_BUCKET}/${fileName}`
+    };
+  } catch (error) {
+    console.error("[uploadToCloudflareR2] Greška pri uploadu:", error);
     return null;
   }
 }
+
 
 
 // Konstante
@@ -278,9 +276,8 @@ async function smanjiSliku(buffer) {
 }
 
 
-
 /**
- * Čuva smanjenu sliku u Redis u Base64 formatu (pod ključem "img:<id>:<variant>") i uploaduje je na Backblaze B2.
+ * Čuva smanjenu sliku u Redis u Base64 formatu (pod ključem "img:<id>:<variant>") i uploaduje je na Cloudflare R2.
  */
 async function storeImageInRedis(imageUrl, id) {
   if (!imageUrl) return false;
@@ -289,13 +286,14 @@ async function storeImageInRedis(imageUrl, id) {
 
     // Ograničavamo veličinu slike na maksimalno 5MB
     const buffer = Buffer.from(response.data.slice(0, 5 * 1024 * 1024));
-    // Oslobađamo memoriju
-    response.data = null;
+    response.data = null; // Oslobađamo memoriju
 
     const sizes = {
       "news-card": { width: 80, height: 80, fit: "cover" },
       "news-modal": { width: 240, height: 180, fit: "inside" }
     };
+
+    let cloudflareImageUrls = {}; // Čuvamo URL-ove za svaku verziju slike
 
     for (const [key, { width, height, fit }] of Object.entries(sizes)) {
       const resizedImage = await sharp(buffer)
@@ -304,25 +302,28 @@ async function storeImageInRedis(imageUrl, id) {
         .toBuffer();
 
       console.log(`[storeImageInRedis] Kreirana verzija ${key} za ID:${id} (dimenzije: ${width}x${height})`);
-      await redisClient.set(`img:${id}:${key}`, resizedImage.toString('base64'));
+      await redisClient.set(`img:${id}:${key}`, resizedImage.toString('base64'), 'EX', 86400); // Ističe za 24h
 
-      // Upload verzije na Backblaze B2
+      // Upload verzije na Cloudflare R2
       const fileName = `${id}-${key}.webp`;
-      const b2Result = await uploadToB2(resizedImage, fileName);
-      if (b2Result) {
-        console.log(`[storeImageInRedis] Uploaded ${fileName} to Backblaze B2`);
+      const r2Result = await uploadToCloudflareR2(resizedImage, fileName);
+      
+      if (r2Result && r2Result.url) {
+        cloudflareImageUrls[key] = r2Result.url;
+        console.log(`[storeImageInRedis] Uploaded ${fileName} to Cloudflare R2: ${r2Result.url}`);
       } else {
-        console.error(`[storeImageInRedis] Failed to upload ${fileName} to Backblaze B2`);
+        console.error(`[storeImageInRedis] Failed to upload ${fileName} to Cloudflare R2`);
       }
     }
 
     console.log(`[storeImageInRedis] Kreirane verzije za ID:${id} (80x80, 240x180)`);
-    return true;
+    return cloudflareImageUrls; // Vraćamo mapu URL-ova
   } catch (error) {
     console.error(`[storeImageInRedis] Greška pri optimizaciji slike za ID:${id}:`, error);
-    return false;
+    return null;
   }
 }
+
 
 /**
  * Izvlačenje domena iz URL-a.

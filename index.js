@@ -499,11 +499,12 @@ app.get('/news/:id', async (req, res) => {
         const neonResponse = await axios.get(`https://neon.tech/api/news/${newsId}`);
         if (neonResponse.status === 200 && neonResponse.data) {
           news = neonResponse.data;
-          // Ako vest nema definisanu sliku, konstrušemo URL za Backblaze B2.
-          if (!news.image) {
-            const bucket = process.env.B2_BUCKET_NAME || 'dachnewsmodal';
-            news.image = `https://f000.backblazeb2.com/file/${process.env.B2_BUCKET_NAME}/${newsId}-news-modal.webp`;
-          }
+         // Ako vest nema definisanu sliku, konstrušemo URL za Cloudflare R2.
+if (!news.image) {
+  const bucket = process.env.CLOUDFLARE_R2_BUCKET;
+  news.image = `${process.env.CLOUDFLARE_R2_ENDPOINT}/${bucket}/${fileName}`;
+}
+
         }
       } catch (err) {
         console.error(`[Redirect] Greška pri dohvaćanju vesti sa neon.tech:`, err);
