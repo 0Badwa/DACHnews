@@ -236,9 +236,9 @@ function generateHtmlForNews(news) {
       <p>Source: ${news.source}</p>
       <p>Category: ${news.category}</p>
 
-      <!-- AI-Perspektive: Meinung & Kommentar -->
+      <!-- KI-Perspektive: Meinung & Kommentar -->
       <section>
-        <h2>AI-Perspektive: Meinung &amp; Kommentar</h2>
+        <h2>KI-Perspektive: Meinung &amp; Kommentar</h2>
         <p>${news.analysis ? news.analysis : 'Keine AI-Analyse verfügbar.'}</p>
       </section>
     </body>

@@ -135,7 +135,7 @@ Obavezno dodeli jednu kategoriju svakoj vesti. Ako vest ne pripada nijednoj od o
         content: JSON.stringify(combinedContent)
       }
     ],
-    max_tokens: 5000,
+    max_tokens: 2000,
     temperature: 0.2
   };
 
@@ -229,7 +229,7 @@ Gib mir die Analyse und den Kommentar unbedingt in einem einzigen Absatz zurück
         content: JSON.stringify(combinedContent)
       }
     ],
-    max_tokens: 15000,
+    max_tokens: 10000,
     temperature: 0.7,  
     top_p: 0.9,        
     frequency_penalty: 0.3,  
