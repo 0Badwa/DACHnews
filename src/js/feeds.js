@@ -398,16 +398,21 @@ function createNewsCard(feed) {
   const card = document.createElement('div');
   card.className = "news-card";
 
+
+
+
 // Definiši BASE_IMAGE_URL pre upotrebe
-const BASE_IMAGE_URL = window.location.hostname.includes("cdn.dach.news")
-  ? "https://cdn.dach.news"
-  : window.location.hostname.includes("dach.news")
+const BASE_IMAGE_URL = window.location.hostname.includes("dach.news")
   ? "https://www.dach.news"
   : window.location.hostname.includes("localhost")
   ? "http://localhost:3002"
   : window.location.hostname.includes("exyunews.onrender.com")
   ? "https://exyunews.onrender.com"
   : "https://newsdocker-1.onrender.com";
+
+// Definiši BASE_IMAGE_URL za news modal slike koje se učitavaju samo sa cdn.dach.news
+const BASE_NEWS_MODAL_IMAGE_URL = "https://cdn.dach.news";
+
 
 
 
@@ -459,13 +464,20 @@ const BASE_IMAGE_URL = window.location.hostname.includes("cdn.dach.news")
   img.style.display = "block";
 
   // Popravi putanju za slike sa API-ja
-  if (feed.image && feed.image.startsWith("/")) {
-    img.src = `${BASE_IMAGE_URL}${feed.image.includes(":news-card") ? feed.image : feed.image + ":news-card"}`;
-  } else if (feed.image) {
-    img.src = feed.image;
+if (feed.image && feed.image.startsWith("/")) {
+  if (feed.image.includes(":news-modal")) {
+    // Ako je news-modal slika, učitavaj sa cdn.dach.news
+    img.src = `https://cdn.dach.news${feed.image}`;
   } else {
-    img.src = `${BASE_IMAGE_URL}/src/icons/no-image.png`;
+    // Ako nije news-modal, učitavaj sa BASE_IMAGE_URL
+    img.src = `${BASE_IMAGE_URL}${feed.image.includes(":news-card") ? feed.image : feed.image + ":news-card"}`;
   }
+} else if (feed.image) {
+  img.src = feed.image;
+} else {
+  img.src = `${BASE_IMAGE_URL}/src/icons/no-image.png`;
+}
+
 
   // Sadržaj kartice
   const contentDiv = document.createElement('div');
