@@ -603,7 +603,7 @@ console.log("[DEBUG] Debugging message for feedsService.js");
 
 /**
  * Čisti SEO keš (hash "seo:news") od vesti starijih od 7 dana.
- */
+ 
 export async function cleanupSeoCache() {
   const now = Date.now();
   const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
@@ -633,7 +633,7 @@ export async function cleanupSeoCache() {
     console.error("[cleanupSeoCache] Greška pri čišćenju SEO keša:", error);
   }
 }
-
+*/
 
 /**
  * Dohvata sve izvore iz Redis-a.

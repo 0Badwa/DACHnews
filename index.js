@@ -16,8 +16,6 @@ import {
   processFeeds,
   getFeedsGenerator,
   getAllFeedsFromRedis,
-  getSeoFeedsFromRedis,
-  cleanupSeoCache,
 } from './feedsService.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -466,7 +464,7 @@ setInterval(processFeeds, 12 * 60 * 1000);
 processFeeds();
 
 // Pokreće čišćenje SEO keša svakih 6 sati
-setInterval(cleanupSeoCache, 6 * 60 * 60 * 1000);
+// setInterval(cleanupSeoCache, 6 * 60 * 60 * 1000);
 
 
 /**
@@ -530,12 +528,17 @@ app.get('/news/:id', async (req, res) => {
       if (news) break;
     }
 
-    // Ako vest nije pronađena, proveravamo SEO cache
-    if (!news) {
-      console.log(`[Redirect] Vest ID: ${newsId} nije pronađena u kategorijama, pretraga u SEO cache-u...`);
-      const seoFeeds = await getSeoFeedsFromRedis();
-      news = seoFeeds.find(item => item.id === newsId);
-    }
+   // Ako vest nije pronađena, pretražujemo sve kategorije
+if (!news) {
+  console.log(`[Redirect] Vest ID: ${newsId} nije pronađena u kategorijama, pretražujem sve kategorije...`);
+  const categoryKeys = await redisClient.keys("category:*");
+  for (const key of categoryKeys) {
+    const items = await redisClient.lRange(key, 0, -1);
+    news = items.map(item => JSON.parse(item)).find(item => item.id === newsId);
+    if (news) break;
+  }
+}
+
 
     // Ako vest i dalje nije pronađena, pokušavamo dohvat sa neon.tech API
     if (!news) {
