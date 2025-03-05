@@ -398,14 +398,18 @@ function createNewsCard(feed) {
   const card = document.createElement('div');
   card.className = "news-card";
 
-  // Definiši BASE_IMAGE_URL pre upotrebe
-  const BASE_IMAGE_URL = window.location.hostname.includes("dach.news")
-    ? "https://www.dach.news"
-    : window.location.hostname.includes("localhost")
-    ? "http://localhost:3002"
-    : window.location.hostname.includes("exyunews.onrender.com")
-    ? "https://exyunews.onrender.com"
-    : "https://newsdocker-1.onrender.com";
+// Definiši BASE_IMAGE_URL pre upotrebe
+const BASE_IMAGE_URL = window.location.hostname.includes("cdn.dach.news")
+  ? "https://cdn.dach.news"
+  : window.location.hostname.includes("dach.news")
+  ? "https://www.dach.news"
+  : window.location.hostname.includes("localhost")
+  ? "http://localhost:3002"
+  : window.location.hostname.includes("exyunews.onrender.com")
+  ? "https://exyunews.onrender.com"
+  : "https://newsdocker-1.onrender.com";
+
+
 
   // Dodaj click event sa ripple efektom
   card.addEventListener('click', function (e) {
