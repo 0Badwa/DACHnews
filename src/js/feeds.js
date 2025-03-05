@@ -463,17 +463,23 @@ const BASE_NEWS_MODAL_IMAGE_URL = "https://cdn.dach.news";
   img.style.objectFit = "cover";
   img.style.display = "block";
 
+
   // Popravi putanju za slike sa API-ja
 if (feed.image && feed.image.startsWith("/")) {
   if (feed.image.includes(":news-modal")) {
-    // Ako je news-modal slika, učitavaj sa cdn.dach.news
-    img.src = `https://cdn.dach.news${feed.image}`;
+    // Ako je news-modal slika, učitavaj isključivo sa cdn.dach.news
+    img.src = `https://cdn.dach.news${feed.image.replace(":news-modal", "")}`;
   } else {
     // Ako nije news-modal, učitavaj sa BASE_IMAGE_URL
     img.src = `${BASE_IMAGE_URL}${feed.image.includes(":news-card") ? feed.image : feed.image + ":news-card"}`;
   }
 } else if (feed.image) {
-  img.src = feed.image;
+  // Ako je URL već iz Cloudflare R2 bucket-a, koristi ga direktno
+  if (feed.image.includes("r2.cloudflarestorage.com")) {
+    img.src = feed.image;
+  } else {
+    img.src = feed.image;
+  }
 } else {
   img.src = `${BASE_IMAGE_URL}/src/icons/no-image.png`;
 }
