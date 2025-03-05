@@ -289,7 +289,7 @@ async function storeImageInRedis(imageUrl, id) {
   try {
     const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
     // Ograničavamo veličinu slike na 5MB
-    const buffer = Buffer.from(response.data.slice(0, 5 * 1024 * 1024));
+    const buffer = Buffer.from(response.data.slice(0, 1 * 1024 * 1024));
     response.data = null; // Oslobađamo memoriju
 
     const sizes = {
@@ -425,6 +425,56 @@ export async function addItemToRedis(item, category, analysis = null) {
 
   console.log(`[addItemToRedis] Upisano ID:${item.id}, category:${category}`);
 }
+
+/**
+ * Funkcija koja dodaje više feedova u Redis koristeći pipelining.
+ * Parametri:
+ * - feedBatch: niz feed objekata koje treba obraditi
+ * - catResponse: rezultat GPT kategorizacije (niz objekata sa id i category)
+ * - analysisResponse: rezultat GPT analize (niz objekata sa id i analysis)
+ */
+export async function addMultipleFeedsToRedis(feedBatch, catResponse, analysisResponse) {
+  const pipeline = redisClient.multi();
+
+  feedBatch.forEach(item => {
+    const catObj = catResponse.find(c => c.id === item.id);
+    const analysisObj = analysisResponse.find(a => a.id === item.id);
+    const cat = (catObj && catObj.category) ? catObj.category : "Uncategorized";
+    const analysis = (analysisObj && analysisObj.analysis) ? analysisObj.analysis : null;
+
+    // Kreiramo objekat vesti slično kao u addItemToRedis
+    const newsObj = {
+      id: item.id,
+      title: item.title,
+      date_published: item.date_published || null,
+      url: item.url || null,
+      content_text: item.content_text || "",
+      category: cat,
+      source: (item.authors && item.authors.length > 0)
+        ? item.authors[0].name
+        : extractSource(item.url),
+      analysis: analysis
+    };
+
+    // Ako postoji slika, možete koristiti istu logiku kao u addItemToRedis.
+    // Za primer, ovde samo prosleđujemo originalnu sliku.
+    newsObj.image = item.image ? item.image : null;
+
+    // Dodajemo komande u pipeline:
+    pipeline.rPush(`category:${cat}`, JSON.stringify(newsObj));
+    pipeline.expire(`category:${cat}`, SEVEN_DAYS);
+    pipeline.sAdd("processed_ids", item.id);
+    pipeline.expire("processed_ids", SEVEN_DAYS);
+    pipeline.lPush("Aktuell", JSON.stringify(newsObj));
+    pipeline.lTrim("Aktuell", 0, 199);
+  });
+
+  // Izvršavamo sve komande odjednom
+  await pipeline.exec();
+}
+
+
+
 
 /**
  * Generator funkcija koja vraća vesti iz Redis-a u paginaciji.
@@ -582,15 +632,7 @@ export async function processFeeds() {
       continue;
     }
 
-    await Promise.all(
-      batch.map(item => {
-        const catObj = catResponse.find(c => c.id === item.id);
-        const analysisObj = analysisResponse.find(a => a.id === item.id);
-        const cat = (catObj && catObj.category) ? catObj.category : "Uncategorized";
-        const analysis = (analysisObj && analysisObj.analysis) ? analysisObj.analysis : null;
-        return limit(() => addItemToRedis(item, cat, analysis));
-      })
-    );
+    await addMultipleFeedsToRedis(batch, catResponse, analysisResponse);
   }
 
   console.log("[processFeeds] Završeno dodavanje novih feedova u Redis.");
