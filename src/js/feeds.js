@@ -463,12 +463,11 @@ const BASE_NEWS_MODAL_IMAGE_URL = "https://cdn.dach.news";
   img.style.objectFit = "cover";
   img.style.display = "block";
 
-
-  // Popravi putanju za slike sa API-ja
+// Popravi putanju za slike sa API-ja
 if (feed.image && feed.image.startsWith("/")) {
   if (feed.image.includes(":news-modal")) {
     // Ako je news-modal slika, učitavaj isključivo sa cdn.dach.news
-    img.src = `https://cdn.dach.news${feed.image.replace(":news-modal", "")}`;
+    img.src = `https://cdn.dach.news/image/${feed.image.split("/").pop().replace(":news-modal", "")}`;
   } else {
     // Ako nije news-modal, učitavaj sa BASE_IMAGE_URL
     img.src = `${BASE_IMAGE_URL}${feed.image.includes(":news-card") ? feed.image : feed.image + ":news-card"}`;
