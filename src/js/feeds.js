@@ -460,7 +460,7 @@ function createNewsCard(feed) {
   } else if (feed.image) {
     img.src = feed.image;
   } else {
-    img.src = `${BASE_IMAGE_URL}/img/noimg.png`;
+    img.src = `${BASE_IMAGE_URL}/src/icons/no-image.png`;
   }
 
   // Sadržaj kartice
