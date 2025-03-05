@@ -345,10 +345,9 @@ app.get('/image/:id', async (req, res) => {
 
 
 
-
 /**
  * API ruta za pojedinačnu vest u JSON formatu.
- * Ako vest nije pronađena u Redis-kešu, fallback – dohvat sa neon.tech API-ja i
+ * Ako vest nije pronađena u "Aktuell" ili kategorijama, koristi se fallback – dohvat sa neon.tech API-ja i
  * korišćenje Cloudflare fallback URL-a za sliku.
  */
 app.get('/api/news/:id', async (req, res) => {
@@ -356,15 +355,26 @@ app.get('/api/news/:id', async (req, res) => {
   let news = null;
 
   try {
-    console.log(`[API] Traženje vesti ID: ${newsId} pomoću strimovanja...`);
+    console.log(`[API] Traženje vesti ID: ${newsId} u "Aktuell"...`);
 
-    // Prvo pokušavamo dohvatiti vest iz Redis keša
-    for await (const batch of getFeedsGenerator()) {
-      news = batch.find(item => item.id === newsId);
-      if (news) break;
+    // Pretražujemo "Aktuell" listu
+    const aktuellRaw = await redisClient.lRange("Aktuell", 0, -1);
+    const aktuellNews = aktuellRaw.map(item => JSON.parse(item));
+    news = aktuellNews.find(item => item.id === newsId);
+
+    // Ako vest nije pronađena u "Aktuell", pretražujemo kategorijske ključeve
+    if (!news) {
+      console.log(`[API] Vest ID: ${newsId} nije pronađena u "Aktuell", pretražujem kategorije...`);
+      const categoryKeys = await redisClient.keys("category:*");
+      for (const key of categoryKeys) {
+        const rawItems = await redisClient.lRange(key, 0, -1);
+        const categoryNews = rawItems.map(item => JSON.parse(item));
+        news = categoryNews.find(item => item.id === newsId);
+        if (news) break;
+      }
     }
 
-    // Ako vest nije pronađena u kešu, pokušavamo fallback sa neon.tech API-ja
+    // Ako vest nije pronađena u Redis-kešu, koristimo fallback sa neon.tech API-ja
     if (!news) {
       console.log(`[API] Vest ID: ${newsId} nije pronađena u kešu, pozivam neon.tech API...`);
       const neonResponse = await axios.get(`https://neon.tech/api/news/${newsId}`);
@@ -395,16 +405,23 @@ app.get('/api/news/:id', async (req, res) => {
 
 
 
+
 /**
- * Ruta za generisanje XML sitemap-a.
+ * Ruta za generisanje XML sitemap-a koristeći "Aktuell" keš.
  */
 app.get('/sitemap.xml', async (req, res) => {
   try {
-    const allFeeds = await getSeoFeedsFromRedis(); // Koristimo SEO keš
+    // Preuzimamo vesti iz "Aktuell" liste
+    const rawItems = await redisClient.lRange("Aktuell", 0, -1);
+    const allFeeds = rawItems.map(item => JSON.parse(item));
+    
     let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
     xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
+    
     for (const news of allFeeds) {
-      const lastmod = news.date_published ? new Date(news.date_published).toISOString() : new Date().toISOString();
+      const lastmod = news.date_published 
+        ? new Date(news.date_published).toISOString() 
+        : new Date().toISOString();
       xml += '  <url>\n';
       xml += `    <loc>https://www.dach.news/news/${news.id}</loc>\n`;
       xml += `    <lastmod>${lastmod}</lastmod>\n`;
@@ -412,7 +429,7 @@ app.get('/sitemap.xml', async (req, res) => {
       xml += '    <priority>1.0</priority>\n';
       xml += '  </url>\n';
     }
-
+    
     // Dodajemo RSS feed u sitemap
     xml += '  <url>\n';
     xml += `    <loc>https://www.dach.news/rss</loc>\n`;
@@ -420,7 +437,7 @@ app.get('/sitemap.xml', async (req, res) => {
     xml += '    <changefreq>hourly</changefreq>\n';
     xml += '    <priority>0.9</priority>\n';
     xml += '  </url>\n';
-
+    
     xml += '</urlset>';
     res.header('Content-Type', 'application/xml');
     res.send(xml);
@@ -430,15 +447,19 @@ app.get('/sitemap.xml', async (req, res) => {
   }
 });
 
+/**
+ * Debug ruta: Prikazuje Redis ključeve za "Aktuell".
+ */
 app.get('/api/debug/html-keys', async (req, res) => {
   try {
-    const keys = await redisClient.keys('seo:news');
+    const keys = await redisClient.keys('Aktuell');
     res.json(keys);
   } catch (error) {
     console.error("Error fetching Redis keys:", error);
     res.status(500).json({ error: error.toString() });
   }
 });
+
 
 // Pokrećemo proces vesti na svakih 12 minuta
 setInterval(processFeeds, 12 * 60 * 1000);

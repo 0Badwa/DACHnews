@@ -414,7 +414,7 @@ export async function addItemToRedis(item, category, analysis = null) {
   await redisClient.lTrim("Aktuell", 0, 199);
 
   // Dodavanje vesti u SEO hash (bez TTL) za statičke SEO stranice, uključujući analizu
-  await redisClient.hSet("seo:news", item.id, JSON.stringify(newsObj));
+  // await redisClient.hSet("seo:news", item.id, JSON.stringify(newsObj));
 
   // Čuvanje u PostgreSQL samo ako vest ima analizu
   if (analysis) {
@@ -483,7 +483,7 @@ export async function getAllFeedsFromRedis() {
 /**
  * Vraća sve SEO vesti iz Redis hash "seo:news"
  */
-export async function getSeoFeedsFromRedis() {
+/** export async function getSeoFeedsFromRedis() {
   try {
     const data = await redisClient.hGetAll("seo:news");
     // Redis vraća objekat gde su ključevi ID-jevi, a vrednosti JSON stringovi.
@@ -493,9 +493,9 @@ export async function getSeoFeedsFromRedis() {
     console.error("[getSeoFeedsFromRedis] Greška pri dohvaćanju SEO vesti:", error);
     return [];
   }
-}
+}   */
 
-export { getFeedsGenerator };
+export { getFeedsGenerator };   
 
 /**
  * Glavna funkcija za obradu feed-ova.
