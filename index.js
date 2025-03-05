@@ -123,7 +123,7 @@ app.use(
         "https://img.zeit.de",
         "https://cdn.lr-online.de",      // Dodato za lr-online.de
         "https://www.nd-aktuell.de",
-        "https://*.r2.cloudflarestorage.com" 
+        "*.r2.cloudflarestorage.com"
       ],
       connectSrc: ["'self'"],
       fontSrc: ["'self'", "data:"],
