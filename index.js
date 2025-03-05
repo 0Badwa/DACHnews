@@ -109,7 +109,7 @@ app.use(
         "data:",
         "https://www.dach.news",
         "https://dach.news",
-        "https://developnews.onrender.com",  // Dodaj novi domen ovde
+        "https://developnews.onrender.com",
         "https://www.exyunews.onrender.com",
         "https://newsdocker-1.onrender.com",
         "https://static.boerse.de",
@@ -118,20 +118,26 @@ app.use(
         "https://media.example.com",
         "https://quadro.burda-forward.de",
         "https://img.burda-forward.de",
-        "https://p6.focus.de", // ponovljeno radi potencijalnih grešaka
         "https://cdn.burda-forward.de",
         "https://img.zeit.de",
-        "https://cdn.lr-online.de",      // Dodato za lr-online.de
+        "https://cdn.lr-online.de",
         "https://www.nd-aktuell.de",
         "*.r2.cloudflarestorage.com",
         "https://360f5ba78daf45acb5827f956a445165.r2.cloudflarestorage.com",
-        "https://cdn.dach.news"
+        "https://cdn.dach.news",
+        "https://img.blick.ch",
+        "https://cdn.prod.www.spiegel.de",
+        "https://www.sn.at",
+        "https://i.ds.at",
+        "https://images.tagesschau.de",
+        "https://img.chmedia.ch",
+        "https://www.fr.de"
       ],
       connectSrc: ["'self'"],
       fontSrc: ["'self'", "data:"],
       objectSrc: ["'none'"],
       upgradeInsecureRequests: []
-    },
+    }
   })
 );
 
