@@ -125,6 +125,7 @@ app.use(
         "https://www.nd-aktuell.de",
         "*.r2.cloudflarestorage.com",
         "https://360f5ba78daf45acb5827f956a445165.r2.cloudflarestorage.com",
+        "https://cdn.dach.news"
       ],
       connectSrc: ["'self'"],
       fontSrc: ["'self'", "data:"],
