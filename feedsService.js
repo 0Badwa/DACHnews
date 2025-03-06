@@ -285,53 +285,64 @@ async function smanjiSliku(buffer) {
  * Zamenite ovu funkciju u fajlu feedsService.js (otprilike oko linije 300).
  */
 async function storeImageInRedis(imageUrl, id) {
-  if (!imageUrl) return false;
+  if (!imageUrl) {
+    console.log(`[storeImageInRedis] Nema imageUrl za ID: ${id}, preskačem upload.`);
+    return false;
+  }
+
+  console.log(`[storeImageInRedis] Početak obrade slike za ID: ${id}, imageUrl: ${imageUrl}`);
+
   try {
     const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
-    // Ograničavamo veličinu slike na 5MB
+    console.log(`[storeImageInRedis] Slika preuzeta za ID: ${id}, veličina: ${response.data.length} bajtova`);
+
+    // Ograničavamo veličinu slike na 1MB (smanjio sam limit da bude brži test)
     const buffer = Buffer.from(response.data.slice(0, 1 * 1024 * 1024));
     response.data = null; // Oslobađamo memoriju
 
     const sizes = {
-      "news-card": { width: 80, height: 80, fit: "cover" },
-      "news-modal": { width: 240, height: 180, fit: "inside" }
+      "news-modal": { width: 240, height: 180, fit: "inside" }  // Samo ova verzija
     };
 
     let cloudflareImageUrls = {};
 
     for (const [key, { width, height, fit }] of Object.entries(sizes)) {
-      // Ograničavamo konkurentnost operacija obrade slika
-      const processTask = () =>
-        sharp(buffer)
-          .resize(width, height, { fit })
-          .webp({ quality: 80 })
-          .toBuffer();
+      console.log(`[storeImageInRedis] Pripremam verziju ${key} za ID:${id} (dimenzije: ${width}x${height})`);
 
-      const resizedImage = await limit(processTask);
+      const resizedImage = await sharp(buffer)
+        .resize(width, height, { fit })
+        .webp({ quality: 80 })
+        .toBuffer();
 
-      if (key === "news-card") {
-        // Za 80x80 verziju, keširamo u Redis
-        await redisClient.set(`img:${id}:${key}`, resizedImage.toString('base64'), 'EX', 86400);
-      }
+      console.log(`[storeImageInRedis] Kreirana verzija ${key} za ID:${id}, šaljem na Cloudflare R2`);
 
-      // Za obe verzije, upload na Cloudflare R2 i čuvanje fallback URL-a
+      // Upload na Cloudflare R2
       const fileName = `${id}-${key}.webp`;
+      console.log(`[storeImageInRedis] Pokušaj upload-a: ${fileName}`);
+      
       const r2Result = await uploadToCloudflareR2(resizedImage, fileName);
+
       if (r2Result && r2Result.url) {
+        console.log(`[storeImageInRedis] Uploadovan fajl: ${fileName} - URL: ${r2Result.url}`);
         cloudflareImageUrls[key] = r2Result.url;
-        await redisClient.set(`r2url:${id}:${key}`, `https://cdn.dach.news/${fileName}`, 'EX', 86400);
+
+        // Upisujemo URL u Redis
+        await redisClient.set(`r2url:${id}:${key}`, r2Result.url, 'EX', 86400);
+        console.log(`[storeImageInRedis] Sačuvan URL u Redis: r2url:${id}:${key} = ${r2Result.url}`);
       } else {
-        console.error(`[storeImageInRedis] Failed to upload ${fileName} to Cloudflare R2`);
+        console.error(`[storeImageInRedis] Neuspešan upload za ID: ${id}`);
       }
     }
 
-    console.log(`[storeImageInRedis] Kreirane verzije za ID:${id} (news-card i news-modal)`);
+    console.log(`[storeImageInRedis] Završena obrada slike za ID:${id}`);
     return cloudflareImageUrls;
+
   } catch (error) {
     console.error(`[storeImageInRedis] Greška pri optimizaciji slike za ID:${id}:`, error);
     return null;
   }
 }
+
 
 
 
