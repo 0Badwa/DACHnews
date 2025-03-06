@@ -319,7 +319,7 @@ async function storeImageInRedis(imageUrl, id) {
       const r2Result = await uploadToCloudflareR2(resizedImage, fileName);
       if (r2Result && r2Result.url) {
         cloudflareImageUrls[key] = r2Result.url;
-        await redisClient.set(`r2url:${id}:${key}`, r2Result.url, 'EX', 86400);
+        await redisClient.set(`r2url:${id}:${key}`, `https://cdn.dach.news/${fileName}`, 'EX', 86400);
       } else {
         console.error(`[storeImageInRedis] Failed to upload ${fileName} to Cloudflare R2`);
       }
