@@ -444,41 +444,33 @@ const BASE_NEWS_MODAL_IMAGE_URL = "https://cdn.dach.news";
     openNewsModal(feed);
   });
 
-  // Slika
-  const img = document.createElement('img');
-  img.className = "news-card-image lazy news-image";
-  img.src = feed.image ? feed.image : `${BASE_IMAGE_URL}/src/icons/no-image.png`;
-  img.alt = feed.title ? feed.title : 'Nachrichtenbild'; // SEO-friendly alt na nemačkom
 
-  // Ako se slika ne može učitati (npr. je iza paywalla), ukloni celu news karticu
-  img.onerror = function () {
-    // Sprečava eventualno rekurzivno pozivanje
-    this.onerror = null;
-    // Uklanja celu karticu iz DOM-a
-    card.remove();
-  };
 
-  img.width = 80;
-  img.height = 80;
-  img.style.objectFit = "cover";
-  img.style.display = "block";
+  
+// Slika
+const img = document.createElement('img');
+img.className = "news-card-image lazy news-image";
+img.src = feed.image ? feed.image : `${BASE_IMAGE_URL}/src/icons/no-image.png`;
+img.alt = feed.title ? feed.title : 'Nachrichtenbild'; // SEO-friendly alt na nemačkom
 
-// Popravi putanju za slike sa API-ja
+// Ako se slika ne može učitati (npr. je iza paywalla), ukloni celu news karticu
+img.onerror = function () {
+  // Sprečava eventualno rekurzivno pozivanje
+  this.onerror = null;
+  // Uklanja celu karticu iz DOM-a
+  card.remove();
+};
+
+img.width = 80;
+img.height = 80;
+img.style.objectFit = "cover";
+img.style.display = "block";
+
+// Popravi putanju za slike sa API-ja koristeći samo Redis
 if (feed.image && feed.image.startsWith("/")) {
-  if (feed.image.includes(":news-modal")) {
-    // Ako je news-modal slika, učitavaj isključivo sa cdn.dach.news
-    img.src = `https://cdn.dach.news/image/${feed.image.split("/").pop().replace(":news-modal", "")}`;
-  } else {
-    // Ako nije news-modal, učitavaj sa BASE_IMAGE_URL
-    img.src = `${BASE_IMAGE_URL}${feed.image.includes(":news-card") ? feed.image : feed.image + ":news-card"}`;
-  }
+  img.src = `${BASE_IMAGE_URL}/image/${feed.image.split("/").pop().replace(":news-modal", "")}`;
 } else if (feed.image) {
-  // Ako je URL već iz Cloudflare R2 bucket-a, koristi ga direktno
-  if (feed.image.includes("r2.cloudflarestorage.com")) {
-    img.src = feed.image;
-  } else {
-    img.src = feed.image;
-  }
+  img.src = `${BASE_IMAGE_URL}/image/${feed.image}`;
 } else {
   img.src = `${BASE_IMAGE_URL}/src/icons/no-image.png`;
 }

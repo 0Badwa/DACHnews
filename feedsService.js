@@ -11,42 +11,6 @@ import sharp from 'sharp';
 import pLimit from 'p-limit';
 import { saveNewsToPostgres } from './index.js';
 
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
-
-
-
-const s3 = new S3Client({
-  region: process.env.CLOUDFLARE_R2_REGION,
-  endpoint: process.env.CLOUDFLARE_R2_ENDPOINT,
-  credentials: {
-    accessKeyId: process.env.CLOUDFLARE_R2_ACCESS_KEY,
-    secretAccessKey: process.env.CLOUDFLARE_R2_SECRET_KEY
-  }
-});
-
-
-async function uploadToCloudflareR2(fileBuffer, fileName) {
-  try {
-    const command = new PutObjectCommand({
-      Bucket: process.env.CLOUDFLARE_R2_BUCKET,
-      Key: fileName,
-      Body: fileBuffer,
-      ContentType: "image/webp",
-    });
-
-    await s3.send(command);
-    console.log(`[uploadToCloudflareR2] Uploadovan fajl: ${fileName}`);
-    
-    return {
-      fileName,
-      url: `${process.env.CLOUDFLARE_R2_ENDPOINT}/${process.env.CLOUDFLARE_R2_BUCKET}/${fileName}`
-    };
-  } catch (error) {
-    console.error("[uploadToCloudflareR2] Greška pri uploadu:", error);
-    return null;
-  }
-}
-
 
 
 // Konstante
@@ -278,11 +242,9 @@ async function smanjiSliku(buffer) {
 }
 
 
-
 /**
- * Čuva smanjenu sliku – 80x80 se kešira u Redis, dok se 240x180 (news-modal) uploaduje samo na Cloudflare R2.
- * Ako upload uspe, fallback URL se čuva u Redis-u za obe verzije (TTL 24h).
- * Zamenite ovu funkciju u fajlu feedsService.js (otprilike oko linije 300).
+ * Funkcija za čuvanje slike isključivo u Redis, bez ikakvog Cloudflare, Backblaze itd.
+ * Radi samo resize na 240px, pa čuva result u Redis (base64).
  */
 async function storeImageInRedis(imageUrl, id) {
   if (!imageUrl) {
@@ -293,53 +255,31 @@ async function storeImageInRedis(imageUrl, id) {
   console.log(`[storeImageInRedis] Početak obrade slike za ID: ${id}, imageUrl: ${imageUrl}`);
 
   try {
+    // Preuzimamo originalnu sliku
     const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
     console.log(`[storeImageInRedis] Slika preuzeta za ID: ${id}, veličina: ${response.data.length} bajtova`);
 
-    // Ograničavamo veličinu slike na 1MB (smanjio sam limit da bude brži test)
+    // Ograničavamo veličinu fajla na ~1MB, ako želiš
     const buffer = Buffer.from(response.data.slice(0, 1 * 1024 * 1024));
-    response.data = null; // Oslobađamo memoriju
+    response.data = null;
 
-    const sizes = {
-      "news-modal": { width: 240, height: 180, fit: "inside" }  // Samo ova verzija
-    };
+    // Radimo samo JEDAN resize na 240px:
+    const resizedImage = await sharp(buffer)
+      .resize(240, null, { fit: 'inside' })
+      .webp({ quality: 80 })
+      .toBuffer();
 
-    let cloudflareImageUrls = {};
+    // Sada čuvamo tu 240px verziju direktno u Redis kao base64
+    const base64 = resizedImage.toString('base64');
+    await redisClient.set(`img:${id}:news-modal`, base64, { EX: 86400 }); // TTL ~24h
 
-    for (const [key, { width, height, fit }] of Object.entries(sizes)) {
-      console.log(`[storeImageInRedis] Pripremam verziju ${key} za ID:${id} (dimenzije: ${width}x${height})`);
+    console.log(`[storeImageInRedis] Uspesno sacuvana slika (240px) u Redis za ID: ${id}`);
 
-      const resizedImage = await sharp(buffer)
-        .resize(width, height, { fit })
-        .webp({ quality: 80 })
-        .toBuffer();
-
-      console.log(`[storeImageInRedis] Kreirana verzija ${key} za ID:${id}, šaljem na Cloudflare R2`);
-
-      // Upload na Cloudflare R2
-      const fileName = `${id}-${key}.webp`;
-      console.log(`[storeImageInRedis] Pokušaj upload-a: ${fileName}`);
-      
-      const r2Result = await uploadToCloudflareR2(resizedImage, fileName);
-
-      if (r2Result && r2Result.url) {
-        console.log(`[storeImageInRedis] Uploadovan fajl: ${fileName} - URL: ${r2Result.url}`);
-        cloudflareImageUrls[key] = r2Result.url;
-
-        // Upisujemo URL u Redis
-        await redisClient.set(`r2url:${id}:${key}`, r2Result.url, 'EX', 86400);
-        console.log(`[storeImageInRedis] Sačuvan URL u Redis: r2url:${id}:${key} = ${r2Result.url}`);
-      } else {
-        console.error(`[storeImageInRedis] Neuspešan upload za ID: ${id}`);
-      }
-    }
-
-    console.log(`[storeImageInRedis] Završena obrada slike za ID:${id}`);
-    return cloudflareImageUrls;
-
+    // Vraćamo true da signaliziramo da je slika u redu
+    return true;
   } catch (error) {
-    console.error(`[storeImageInRedis] Greška pri optimizaciji slike za ID:${id}:`, error);
-    return null;
+    console.error(`[storeImageInRedis] Greška pri obradi slike za ID:${id}:`, error);
+    return false;
   }
 }
 
@@ -384,6 +324,8 @@ function normalizeSource(source) {
   return normalizedSource;
 }
 
+
+
 /**
  * Dodavanje jedne vesti u Redis, sa smanjenom slikom (ako postoji).
  * Sada funkcija prima i dodatni parametar 'analysis' koji sadrži AI analizu vesti.
@@ -404,9 +346,14 @@ export async function addItemToRedis(item, category, analysis = null) {
   };
 
   // Ako ima sliku, pokušaj optimizacije
+  // (IZMENJENO oko linije 330)
   if (item.image) {
     const success = await storeImageInRedis(item.image, item.id);
-    newsObj.image = success ? `/image/${item.id}` : item.image;
+    if (success) {
+      newsObj.image = `/image/${item.id}:news-modal`;
+    } else {
+      newsObj.image = item.image; // ili null, po želji
+    }
   } else {
     newsObj.image = null;
   }
@@ -424,18 +371,17 @@ export async function addItemToRedis(item, category, analysis = null) {
   await redisClient.lPush("Aktuell", JSON.stringify(newsObj));
   await redisClient.lTrim("Aktuell", 0, 199);
 
-  // Dodavanje vesti u SEO hash (bez TTL) za statičke SEO stranice, uključujući analizu
-  // await redisClient.hSet("seo:news", item.id, JSON.stringify(newsObj));
-
-  // Čuvanje u PostgreSQL samo ako vest ima analizu
+  // Čuvanje vesti u PostgreSQL samo ako ima analizu
   if (analysis) {
     // Za SQL čuvamo samo newsmodal verziju (240x180)
-  newsObj.image = `/image/${item.id}:news-modal`;
+    newsObj.image = `/image/${item.id}:news-modal`;
     await saveNewsToPostgres(newsObj);
   }
 
   console.log(`[addItemToRedis] Upisano ID:${item.id}, category:${category}`);
 }
+
+
 
 /**
  * Funkcija koja dodaje više feedova u Redis koristeći pipelining.
