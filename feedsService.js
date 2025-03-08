@@ -101,7 +101,7 @@ Obavezno dodeli jednu kategoriju svakoj vesti. Ako vest ne pripada nijednoj od o
         content: JSON.stringify(combinedContent)
       }
     ],
-    max_tokens: 2000,
+    max_tokens: 4000,
     temperature: 0.2
   };
 
