@@ -37,7 +37,7 @@
   <!-- Učitaj CSS -->
   <link rel="stylesheet" href="src/css/styles.css">
 </head>
-<html data-theme="dark" lang="de">
+<body data-theme="dark">
   <nav>
     <div class="menu">
       <button id="menu-button" class="menu-button">☰</button>
@@ -45,7 +45,7 @@
         <!-- Menüeinträge dynamisch oder im Modal -->
       </div>
     </div>
-    <img id="logo" src="src/icons/dachnewslogo-dark.webp" alt="DACH.news – Nachrichtenaggregator" width="360" height="60">
+    <img src="src/icons/dachnewslogo.webp" alt="DACH.news – Nachrichtenaggregator" width="360" height="60">
   </nav>
 
   <h1 style="display: none;">DACH.news – Nachrichten aus Deutschland, Österreich und der Schweiz</h1>
@@ -178,12 +178,10 @@
           <span>Kategorien</span>
           <button id="kategorien-button" class="settings-action-button">Öffnen</button>
         </div>
-
         <div class="settings-item">
-          <span>Modus</span>
-          <button id="theme-toggle-button" class="settings-action-button">Dunkel/Hell</button>
+          <span>Kontakt</span>
+          <button id="kontakt-button" class="settings-action-button">Öffnen</button>
         </div>
-        
         <div class="settings-item">
           <span>Datenschutz</span>
           <button id="datenschutz-button" class="settings-action-button">Öffnen</button>
@@ -234,7 +232,22 @@
 </div>
 
 
-  
+  <!-- Modal: Kontakt -->
+  <div id="kontakt-modal" class="modal" style="display: none;">
+    <div class="rearrange-modal-content uber-modal-content" style="margin: 0 3rem;">
+      <div class="modal-title" 
+           style="color: var(--primary-color); font-weight: bold; font-size: 120%;">
+        Kontakt
+      </div>
+      <p style="margin: 1rem 0;">
+        Bei Fragen, Anregungen oder Feedback zu DACH.news kontaktieren Sie uns bitte per E-Mail an 
+        <a href="mailto:info@dach.news">info.dach.news@gmail.com</a>
+      </p>
+      <div class="modal-buttons">
+        <button class="save-button" id="close-kontakt-modal">Schließen</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Modal: Datenschutz -->
   <div id="datenschutz-modal" class="modal" style="display: none;">
@@ -270,10 +283,6 @@
           <br><br>Die ausgewählten Medien zeichnen 
         sich durch Objektivität aus und vermeiden reißerische oder polarisierende 
         Inhalte.
-        <br><br>
-        Bei Fragen, Anregungen oder Feedback zu DACH.news kontaktieren Sie uns bitte per E-Mail an 
-
-
       </p>
       <div class="modal-buttons">
         <button class="save-button" id="close-uber-modal">Schließen</button>

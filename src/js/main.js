@@ -92,15 +92,14 @@ function removeActiveClass() {
 }
 
 
-
 /** Kreira tabove **/
 // Globalni AbortController za upravljanje event listenerima
 let controller = new AbortController();
 
-
 function buildTabs() {
+  // Pre nego što dodamo nove listenere, uklanjamo sve stare
   controller.abort();
-  controller = new AbortController();
+  controller = new AbortController(); // Kreiramo novi controller
 
   const tabsContainer = document.getElementById('tabs-container');
   if (!tabsContainer) return;
@@ -109,12 +108,9 @@ function buildTabs() {
   const existingTabs = tabsContainer.querySelectorAll('.tab:not([data-tab="Aktuell"])');
   existingTabs.forEach(t => t.remove());
 
-  // UVEK postavi "Aktuell" kao podrazumevanu kategoriju
-  const defaultCategory = "Aktuell";
-
+  // Kreiramo tabove ponovo
   categoriesOrder.forEach(cat => {
-    if (cat === "Aktuell") return; // Preskoči jer je već tu
-
+    if (isCategoryBlocked(cat)) return;
     const btn = document.createElement('button');
     btn.className = 'tab';
     btn.setAttribute('data-tab', cat);
@@ -124,11 +120,10 @@ function buildTabs() {
     btn.id = 'tab-' + cat.toLowerCase().replace(/\s+/g, '-');
     btn.setAttribute('aria-controls', 'news-container');
 
+    // Sada dodajemo event listener sa AbortController-om
     btn.addEventListener('click', () => {
       removeActiveClass();
       btn.classList.add('active');
-      btn.setAttribute('aria-selected', 'true');
-
       if (cat === 'Aktuell') {
         displayAktuellFeeds();
       } else {
@@ -138,14 +133,7 @@ function buildTabs() {
 
     tabsContainer.appendChild(btn);
   });
-
-  // **Automatski klik na "Aktuell" da bi uvek bila početna kategorija**
-  setTimeout(() => {
-    const defaultTab = document.querySelector('.tab[data-tab="Aktuell"]');
-    if (defaultTab) defaultTab.click();
-  }, 50);
 }
-
 
 
 /** Otvara modal za menjanje kategorija **/
@@ -197,9 +185,6 @@ function openRearrangeModal() {
     switchSlider.className = 'switch-slider';
     switchContainer.appendChild(switchSlider);
 
-
-
-    
     /**
      * Kada blokiraš/deblokiraš kategoriju:
      *  - ukloni keširani feed te kategorije,
@@ -664,13 +649,12 @@ function initSwipe() {
 }
 
 /** Inicijalno učitavanje feedova **/
-function loadFeeds() {
-  const aktuellTab = document.querySelector('.tab[data-tab="Aktuell"]');
-  if (aktuellTab) {
-    aktuellTab.click();
+function loadFeeds(defaultTab = 'Aktuell') {
+  const tabBtn = document.querySelector(`.tab[data-tab="${defaultTab}"]`);
+  if (tabBtn) {
+    tabBtn.click();
   }
 }
-
 
 function increaseFontSize() {
   currentCardFontSize++;
@@ -696,17 +680,9 @@ function closeSettingsModal() {
   }
 }
 
-
-
 /** DOMContentLoaded **/
 document.addEventListener('DOMContentLoaded', async () => {
   try {
-    // NOVO: Učitaj sačuvanu temu iz localStorage (ili postavi "dark" ako nema)
-    const savedTheme = localStorage.getItem('theme') || 'dark';
-    // Postavi data-theme na <body> (ili <html>, ako si se za to opredelio)
-    document.documentElement.setAttribute('data-theme', savedTheme);
-    document.body.setAttribute('data-theme', savedTheme);
-
     console.log('initializeLazyLoading:', typeof initializeLazyLoading); // Treba da ispiše "function"
     const cleanupLazyLoading = initializeLazyLoading(); // Pozivamo funkciju
     console.log('Lazy loading initialized'); // Dodajemo log za proveru
@@ -726,11 +702,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
       } catch (error) {
         console.error("[ERROR] Greška pri učitavanju vesti:", error);
-      }
-
-      const logo = document.getElementById('logo');
-      if (logo) {
-        logo.src = savedTheme === 'dark' ? 'src/icons/dachnewslogo-dark.webp' : 'src/icons/dachnewslogo-light.webp';
       }
     }
 
@@ -906,31 +877,4 @@ function openDatenschutzModal() {
       modal.style.display = 'none';
     };
   }
-}
-
-
-
-// Funkcija koja menja data-theme na <body>
-function toggleTheme() {
-  // Uzmi trenutnu temu iz `html` umesto `body`
-  const currentTheme = document.documentElement.getAttribute('data-theme');
-
-  // Menjaj temu i sačuvaj u `localStorage`
-  const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-  document.documentElement.setAttribute('data-theme', newTheme);
-  document.body.setAttribute('data-theme', newTheme);
-  localStorage.setItem('theme', newTheme);
-
-
-  // Menja logo prema temi
-  const logo = document.getElementById('logo');
-  if (logo) {
-    logo.src = newTheme === 'dark' ? 'src/icons/dachnewslogo-dark.webp' : 'src/icons/dachnewslogo-light.webp';
-  }
-}
-
-// Event listener na dugme
-const themeToggleBtn = document.getElementById('theme-toggle-button');
-if (themeToggleBtn) {
-  themeToggleBtn.addEventListener('click', toggleTheme);
 }

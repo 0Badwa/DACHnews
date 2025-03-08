@@ -11,42 +11,42 @@ import sharp from 'sharp';
 import pLimit from 'p-limit';
 import { saveNewsToPostgres } from './index.js';
 
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import B2 from 'backblaze-b2';
 
-
-
-const s3 = new S3Client({
-  region: process.env.CLOUDFLARE_R2_REGION,
-  endpoint: process.env.CLOUDFLARE_R2_ENDPOINT,
-  credentials: {
-    accessKeyId: process.env.CLOUDFLARE_R2_ACCESS_KEY,
-    secretAccessKey: process.env.CLOUDFLARE_R2_SECRET_KEY
-  }
+// Inicijalizacija Backblaze B2 sa vrednostima iz .env
+const b2 = new B2({
+  applicationKeyId: process.env.B2_KEY_ID,
+  applicationKey: process.env.B2_APPLICATION_KEY,
 });
 
-
-async function uploadToCloudflareR2(fileBuffer, fileName) {
+/**
+ * uploadToB2
+ * Uploaduje dati buffer na Backblaze B2 u bucket definisan u B2_BUCKET_ID.
+ * @param {Buffer} fileBuffer - buffer slike
+ * @param {string} fileName - ime fajla (npr. "12345-news-card.webp")
+ * @returns {Promise<object|null>} - rezultat upload-a ili null ako dođe do greške
+ */
+async function uploadToB2(fileBuffer, fileName) {
   try {
-    const command = new PutObjectCommand({
-      Bucket: process.env.CLOUDFLARE_R2_BUCKET,
-      Key: fileName,
-      Body: fileBuffer,
-      ContentType: "image/webp",
+    // Autorizuj se na B2
+    await b2.authorize();
+    const uploadUrlResponse = await b2.getUploadUrl({
+      bucketId: process.env.B2_BUCKET_ID,
     });
-
-    await s3.send(command);
-    console.log(`[uploadToCloudflareR2] Uploadovan fajl: ${fileName}`);
-    
-    return {
+    const { uploadUrl, authorizationToken } = uploadUrlResponse.data;
+    const response = await b2.uploadFile({
+      uploadUrl,
+      uploadAuthToken: authorizationToken,
       fileName,
-      url: `${process.env.CLOUDFLARE_R2_ENDPOINT}/${process.env.CLOUDFLARE_R2_BUCKET}/${fileName}`
-    };
-  } catch (error) {
-    console.error("[uploadToCloudflareR2] Greška pri uploadu:", error);
+      data: fileBuffer,
+      info: { "src_last_modified_millis": Date.now().toString() },
+    });
+    return response;
+  } catch (err) {
+    console.error("B2 upload error:", err);
     return null;
   }
 }
-
 
 
 // Konstante
@@ -137,7 +137,7 @@ Obavezno dodeli jednu kategoriju svakoj vesti. Ako vest ne pripada nijednoj od o
         content: JSON.stringify(combinedContent)
       }
     ],
-    max_tokens: 2000,
+    max_tokens: 5000,
     temperature: 0.2
   };
 
@@ -231,7 +231,7 @@ Gib mir die Analyse und den Kommentar unbedingt in einem einzigen Absatz zurück
         content: JSON.stringify(combinedContent)
       }
     ],
-    max_tokens: 10000,
+    max_tokens: 15000,
     temperature: 0.7,  
     top_p: 0.9,        
     frequency_penalty: 0.3,  
@@ -278,43 +278,51 @@ async function smanjiSliku(buffer) {
 }
 
 
+
 /**
- * Čuva smanjenu sliku u Redis sa TTL od 4 dana.
+ * Čuva smanjenu sliku u Redis u Base64 formatu (pod ključem "img:<id>:<variant>") i uploaduje je na Backblaze B2.
  */
 async function storeImageInRedis(imageUrl, id) {
-  if (!imageUrl) {
-    console.log(`[storeImageInRedis] Nema imageUrl za ID: ${id}, preskačem upis.`);
-    return false;
-  }
-
-  console.log(`[storeImageInRedis] Početak obrade slike za ID: ${id}, imageUrl: ${imageUrl}`);
-
+  if (!imageUrl) return false;
   try {
     const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
-    console.log(`[storeImageInRedis] Slika preuzeta za ID: ${id}, veličina: ${response.data.length} bajtova`);
 
-    const buffer = Buffer.from(response.data);
-    
-    const resizedImage = await sharp(buffer)
-      .resize(240, 180, { fit: "inside" })
-      .webp({ quality: 80 })
-      .toBuffer();
+    // Ograničavamo veličinu slike na maksimalno 5MB
+    const buffer = Buffer.from(response.data.slice(0, 5 * 1024 * 1024));
+    // Oslobađamo memoriju
+    response.data = null;
 
-    const redisKey = `img:${id}:news-modal`;
-    await redisClient.set(redisKey, resizedImage.toString('base64'), 'EX', 345600);
-    
-    console.log(`[storeImageInRedis] Sačuvana slika u Redis za ID:${id} sa TTL 4 dana`);
-    
+    const sizes = {
+      "news-card": { width: 80, height: 80, fit: "cover" },
+      "news-modal": { width: 240, height: 180, fit: "inside" }
+    };
+
+    for (const [key, { width, height, fit }] of Object.entries(sizes)) {
+      const resizedImage = await sharp(buffer)
+        .resize(width, height, { fit })
+        .webp({ quality: 80 })
+        .toBuffer();
+
+      console.log(`[storeImageInRedis] Kreirana verzija ${key} za ID:${id} (dimenzije: ${width}x${height})`);
+      await redisClient.set(`img:${id}:${key}`, resizedImage.toString('base64'));
+
+      // Upload verzije na Backblaze B2
+      const fileName = `${id}-${key}.webp`;
+      const b2Result = await uploadToB2(resizedImage, fileName);
+      if (b2Result) {
+        console.log(`[storeImageInRedis] Uploaded ${fileName} to Backblaze B2`);
+      } else {
+        console.error(`[storeImageInRedis] Failed to upload ${fileName} to Backblaze B2`);
+      }
+    }
+
+    console.log(`[storeImageInRedis] Kreirane verzije za ID:${id} (80x80, 240x180)`);
     return true;
   } catch (error) {
     console.error(`[storeImageInRedis] Greška pri optimizaciji slike za ID:${id}:`, error);
     return false;
   }
 }
-
-
-
-
 
 /**
  * Izvlačenje domena iz URL-a.
@@ -395,7 +403,7 @@ export async function addItemToRedis(item, category, analysis = null) {
   await redisClient.lTrim("Aktuell", 0, 199);
 
   // Dodavanje vesti u SEO hash (bez TTL) za statičke SEO stranice, uključujući analizu
-  // await redisClient.hSet("seo:news", item.id, JSON.stringify(newsObj));
+  await redisClient.hSet("seo:news", item.id, JSON.stringify(newsObj));
 
   // Čuvanje u PostgreSQL samo ako vest ima analizu
   if (analysis) {
@@ -406,56 +414,6 @@ export async function addItemToRedis(item, category, analysis = null) {
 
   console.log(`[addItemToRedis] Upisano ID:${item.id}, category:${category}`);
 }
-
-/**
- * Funkcija koja dodaje više feedova u Redis koristeći pipelining.
- * Parametri:
- * - feedBatch: niz feed objekata koje treba obraditi
- * - catResponse: rezultat GPT kategorizacije (niz objekata sa id i category)
- * - analysisResponse: rezultat GPT analize (niz objekata sa id i analysis)
- */
-export async function addMultipleFeedsToRedis(feedBatch, catResponse, analysisResponse) {
-  const pipeline = redisClient.multi();
-
-  feedBatch.forEach(item => {
-    const catObj = catResponse.find(c => c.id === item.id);
-    const analysisObj = analysisResponse.find(a => a.id === item.id);
-    const cat = (catObj && catObj.category) ? catObj.category : "Uncategorized";
-    const analysis = (analysisObj && analysisObj.analysis) ? analysisObj.analysis : null;
-
-    // Kreiramo objekat vesti slično kao u addItemToRedis
-    const newsObj = {
-      id: item.id,
-      title: item.title,
-      date_published: item.date_published || null,
-      url: item.url || null,
-      content_text: item.content_text || "",
-      category: cat,
-      source: (item.authors && item.authors.length > 0)
-        ? item.authors[0].name
-        : extractSource(item.url),
-      analysis: analysis
-    };
-
-    // Ako postoji slika, možete koristiti istu logiku kao u addItemToRedis.
-    // Za primer, ovde samo prosleđujemo originalnu sliku.
-    newsObj.image = item.image ? item.image : null;
-
-    // Dodajemo komande u pipeline:
-    pipeline.rPush(`category:${cat}`, JSON.stringify(newsObj));
-    pipeline.expire(`category:${cat}`, SEVEN_DAYS);
-    pipeline.sAdd("processed_ids", item.id);
-    pipeline.expire("processed_ids", SEVEN_DAYS);
-    pipeline.lPush("Aktuell", JSON.stringify(newsObj));
-    pipeline.lTrim("Aktuell", 0, 199);
-  });
-
-  // Izvršavamo sve komande odjednom
-  await pipeline.exec();
-}
-
-
-
 
 /**
  * Generator funkcija koja vraća vesti iz Redis-a u paginaciji.
@@ -514,7 +472,7 @@ export async function getAllFeedsFromRedis() {
 /**
  * Vraća sve SEO vesti iz Redis hash "seo:news"
  */
-/** export async function getSeoFeedsFromRedis() {
+export async function getSeoFeedsFromRedis() {
   try {
     const data = await redisClient.hGetAll("seo:news");
     // Redis vraća objekat gde su ključevi ID-jevi, a vrednosti JSON stringovi.
@@ -524,9 +482,9 @@ export async function getAllFeedsFromRedis() {
     console.error("[getSeoFeedsFromRedis] Greška pri dohvaćanju SEO vesti:", error);
     return [];
   }
-}   */
+}
 
-export { getFeedsGenerator };   
+export { getFeedsGenerator };
 
 /**
  * Glavna funkcija za obradu feed-ova.
@@ -613,7 +571,15 @@ export async function processFeeds() {
       continue;
     }
 
-    await addMultipleFeedsToRedis(batch, catResponse, analysisResponse);
+    await Promise.all(
+      batch.map(item => {
+        const catObj = catResponse.find(c => c.id === item.id);
+        const analysisObj = analysisResponse.find(a => a.id === item.id);
+        const cat = (catObj && catObj.category) ? catObj.category : "Uncategorized";
+        const analysis = (analysisObj && analysisObj.analysis) ? analysisObj.analysis : null;
+        return limit(() => addItemToRedis(item, cat, analysis));
+      })
+    );
   }
 
   console.log("[processFeeds] Završeno dodavanje novih feedova u Redis.");
@@ -626,7 +592,7 @@ console.log("[DEBUG] Debugging message for feedsService.js");
 
 /**
  * Čisti SEO keš (hash "seo:news") od vesti starijih od 7 dana.
- 
+ */
 export async function cleanupSeoCache() {
   const now = Date.now();
   const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
@@ -656,7 +622,7 @@ export async function cleanupSeoCache() {
     console.error("[cleanupSeoCache] Greška pri čišćenju SEO keša:", error);
   }
 }
-*/
+
 
 /**
  * Dohvata sve izvore iz Redis-a.
