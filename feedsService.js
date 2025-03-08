@@ -241,10 +241,10 @@ async function smanjiSliku(buffer) {
   }
 }
 
-
 /**
- * Funkcija za čuvanje slike isključivo u Redis, bez ikakvog Cloudflare, Backblaze itd.
- * Radi samo resize na 240px, pa čuva result u Redis (base64).
+ * Funkcija za čuvanje slike isključivo u Redis, bez ikakvog Cloudflare ili Backblaze servisa.
+ * Kreira dve verzije: 80x80 (news-card) i 240x180 (news-modal), obe u WebP formatu.
+ * Smešta ih u Redis kao Base64 string, sa TTL od 24h.
  */
 async function storeImageInRedis(imageUrl, id) {
   if (!imageUrl) {
@@ -259,29 +259,34 @@ async function storeImageInRedis(imageUrl, id) {
     const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
     console.log(`[storeImageInRedis] Slika preuzeta za ID: ${id}, veličina: ${response.data.length} bajtova`);
 
-    // Ograničavamo veličinu fajla na ~1MB, ako želiš
+    // Opcionalno ograničavamo veličinu fajla na ~1MB
     const buffer = Buffer.from(response.data.slice(0, 1 * 1024 * 1024));
     response.data = null;
 
-    // Radimo samo JEDAN resize na 240px:
-    const resizedImage = await sharp(buffer)
-      .resize(240, null, { fit: 'inside' })
+    // 1) Pravimo manju verziju 80x80 (news-card)
+    const smallBuffer = await sharp(buffer)
+      .resize(80, 80, { fit: 'cover' })
       .webp({ quality: 80 })
       .toBuffer();
+    const smallBase64 = smallBuffer.toString('base64');
+    await redisClient.set(`img:${id}:news-card`, smallBase64, { EX: 86400 }); // TTL ~24h
 
-    // Sada čuvamo tu 240px verziju direktno u Redis kao base64
-    const base64 = resizedImage.toString('base64');
-    await redisClient.set(`img:${id}:news-modal`, base64, { EX: 86400 }); // TTL ~24h
+    // 2) Pravimo veću verziju 240x180 (news-modal)
+    const bigBuffer = await sharp(buffer)
+      .resize(240, 180, { fit: 'inside' })
+      .webp({ quality: 80 })
+      .toBuffer();
+    const bigBase64 = bigBuffer.toString('base64');
+    await redisClient.set(`img:${id}:news-modal`, bigBase64, { EX: 86400 }); // TTL ~24h
 
-    console.log(`[storeImageInRedis] Uspesno sacuvana slika (240px) u Redis za ID: ${id}`);
-
-    // Vraćamo true da signaliziramo da je slika u redu
+    console.log(`[storeImageInRedis] Uspešno sačuvane dve verzije slike (80px i 240px) za ID: ${id}`);
     return true;
   } catch (error) {
     console.error(`[storeImageInRedis] Greška pri obradi slike za ID:${id}:`, error);
     return false;
   }
 }
+
 
 
 
@@ -350,13 +355,18 @@ export async function addItemToRedis(item, category, analysis = null) {
   if (item.image) {
     const success = await storeImageInRedis(item.image, item.id);
     if (success) {
+      // Umesto full eksternog URL-a, koristimo /image/ID:news-card
+      // (mada možete ostaviti samo news-modal, stvar je dogovora)
       newsObj.image = `/image/${item.id}:news-modal`;
     } else {
-      newsObj.image = item.image; // ili null, po želji
+      newsObj.image = null; 
     }
   } else {
     newsObj.image = null;
   }
+
+  
+
 
   // Dodavanje u odgovarajuću kategoriju
   const redisKey = `category:${category}`;

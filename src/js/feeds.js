@@ -446,7 +446,7 @@ const BASE_NEWS_MODAL_IMAGE_URL = "https://cdn.dach.news";
 
 
 
-  
+
 // Slika
 const img = document.createElement('img');
 img.className = "news-card-image lazy news-image";
@@ -466,14 +466,20 @@ img.height = 80;
 img.style.objectFit = "cover";
 img.style.display = "block";
 
-// Popravi putanju za slike sa API-ja koristeći samo Redis
-if (feed.image && feed.image.startsWith("/")) {
-  img.src = `${BASE_IMAGE_URL}/image/${feed.image.split("/").pop().replace(":news-modal", "")}`;
-} else if (feed.image) {
+
+
+
+// Popravi putanju za slike sa API-ja (koristi samo Redis-keš)
+if (feed.image) {
+  // feed.image bi trebalo da sadrži nešto poput "abc123:news-card" ili "abc123:news-modal"
+  // (tj. bez kompletnih eksternih URL-ova)
   img.src = `${BASE_IMAGE_URL}/image/${feed.image}`;
 } else {
+  // Ako nema keširane slike, fallback na lokalnu ikonicu
   img.src = `${BASE_IMAGE_URL}/src/icons/no-image.png`;
 }
+
+
 
 
   // Sadržaj kartice
