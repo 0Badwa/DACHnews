@@ -400,18 +400,27 @@ function createNewsCard(feed) {
 
 
 
+  const BASE_IMAGE_URL = window.location.origin.includes("localhost") 
+  ? "http://localhost:3002" 
+  : "https://www.dach.news";
 
-// Definiši BASE_IMAGE_URL pre upotrebe
-const BASE_IMAGE_URL = window.location.hostname.includes("dach.news")
-  ? "https://www.dach.news"
-  : window.location.hostname.includes("localhost")
-  ? "http://localhost:3002"
-  : window.location.hostname.includes("exyunews.onrender.com")
-  ? "https://exyunews.onrender.com"
-  : "https://newsdocker-1.onrender.com";
+const tempImg = new Image();
+tempImg.onload = () => {
+  modalImage.src = tempImg.src;
+  modal.style.display = 'flex';
+};
+tempImg.onerror = () => {
+  console.warn("[newsModal] Could not load image:", feed.image);
+  modalImage.src = `${BASE_IMAGE_URL}/src/icons/no-image.png`;
+  modal.style.display = 'flex';
+};
 
-// Definiši BASE_IMAGE_URL za news modal slike koje se učitavaju samo sa cdn.dach.news
-const BASE_NEWS_MODAL_IMAGE_URL = "https://cdn.dach.news";
+// Ako je vest u Redis-u, dohvatamo sliku odatle
+if (feed.id) {
+  tempImg.src = `${BASE_IMAGE_URL}/image/${feed.id}:news-modal`;
+} else {
+  tempImg.src = feed.image || (`${BASE_IMAGE_URL}/src/icons/no-image.png`);
+}
 
 
 
