@@ -404,11 +404,16 @@ function createNewsCard(feed) {
   ? "http://localhost:3002" 
   : "https://www.dach.news";
 
-const tempImg = new Image();
-tempImg.onload = () => {
-  modalImage.src = tempImg.src;
-  modal.style.display = 'flex';
-};
+  const modalImage = document.getElementById('news-modal-image');
+  if (!modalImage) {
+    console.error("[feeds.js] modalImage nije pronađen u DOM-u.");
+    return;
+  }
+  
+  tempImg.onload = () => {
+    modalImage.src = tempImg.src;
+  };
+  
 tempImg.onerror = () => {
   console.warn("[newsModal] Could not load image:", feed.image);
   modalImage.src = `${BASE_IMAGE_URL}/src/icons/no-image.png`;

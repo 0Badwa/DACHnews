@@ -108,30 +108,12 @@ app.use(
         "'self'",
         "data:",
         "https://www.dach.news",
-        "https://dach.news",
-        "https://developnews.onrender.com",
-        "https://www.exyunews.onrender.com",
-        "https://newsdocker-1.onrender.com",
-        "https://static.boerse.de",
-        "https://p6.focus.de",
-        "https://cdn.swp.de",
-        "https://media.example.com",
-        "https://quadro.burda-forward.de",
-        "https://img.burda-forward.de",
-        "https://cdn.burda-forward.de",
-        "https://img.zeit.de",
-        "https://cdn.lr-online.de",
-        "https://www.nd-aktuell.de",
-        "*.r2.cloudflarestorage.com",
-        "https://360f5ba78daf45acb5827f956a445165.r2.cloudflarestorage.com",
-        "https://cdn.dach.news",
-        "https://img.blick.ch",
-        "https://cdn.prod.www.spiegel.de",
+        "https://img.nzz.ch",
         "https://www.sn.at",
-        "https://i.ds.at",
+        "https://www.fr.de",
         "https://images.tagesschau.de",
         "https://img.chmedia.ch",
-        "https://www.fr.de"
+        "https://jungle.world"
       ],
       connectSrc: ["'self'"],
       fontSrc: ["'self'", "data:"],
@@ -140,6 +122,7 @@ app.use(
     }
   })
 );
+
 
 
 app.use(express.json());
@@ -153,6 +136,18 @@ app.use('/src', express.static(path.join(__dirname, 'src'), {
 }));
 
 await initRedis();
+
+
+
+async function verifyRedisImages() {
+  const keys = await redisClient.keys("img:*");
+  console.log(`[Redis] Pronađeno ${keys.length} sačuvanih slika u Redis kešu.`);
+}
+
+verifyRedisImages();
+
+
+
 
 // Čuvamo referencu na interval u promenljivoj
 const feedInterval = setInterval(processFeeds, 12 * 60 * 1000);
@@ -321,7 +316,7 @@ app.get('/image/:id', async (req, res) => {
     [id, variant] = param.split(':');
   } else {
     id = param;
-    variant = 'news-modal'; // Podrazumevana verzija za modal
+    variant = 'news-modal';
   }
 
   const imgKey = `img:${id}:${variant}`;
@@ -332,14 +327,15 @@ app.get('/image/:id', async (req, res) => {
       res.setHeader('Content-Type', 'image/webp');
       return res.send(buffer);
     } else {
-      console.log(`[Route /image/:id] No image found for key: ${imgKey}`);
+      console.warn(`[Redis] Slika nije pronađena: ${imgKey}`);
       return res.status(404).send("Image not found.");
     }
   } catch (error) {
-    console.error("[Route /image/:id] Error:", error);
+    console.error(`[Redis] Greška prilikom učitavanja slike (${imgKey}):`, error);
     res.status(500).send("Server error");
   }
 });
+
 
 
 /**
