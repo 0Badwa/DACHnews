@@ -221,3 +221,4 @@ tempImg.onerror = () => {
     modalImage.src = `${BASE_URL}/src/icons/no-image.png`;
     modal.style.display = 'flex';
 };
+}
