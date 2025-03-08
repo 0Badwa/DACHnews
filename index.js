@@ -103,7 +103,7 @@ app.use(
     directives: {
       defaultSrc: ["'self'"],
       scriptSrc: ["'self'", "https://www.googletagmanager.com"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
       imgSrc: [
         "'self'",
         "data:",
@@ -131,15 +131,28 @@ app.use(
         "https://i.ds.at",
         "https://images.tagesschau.de",
         "https://img.chmedia.ch",
-        "https://www.fr.de"
+        "https://www.fr.de",
+        "https://f002.backblazeb2.com",  // Backblaze B2 CDN
+        "*.backblazeb2.com"  // Omogućava sve subdomene Backblaze-a
       ],
-      connectSrc: ["'self'"],
-      fontSrc: ["'self'", "data:"],
+      connectSrc: [
+        "'self'",
+        "https://api.openai.com",  // GPT API
+        "https://neon.tech", // API za fallback vesti
+        "https://api.backblazeb2.com" // Backblaze B2 API
+      ],
+      fontSrc: [
+        "'self'",
+        "data:",
+        "https://fonts.gstatic.com"
+      ],
       objectSrc: ["'none'"],
       upgradeInsecureRequests: []
     }
   })
 );
+
+
 
 
 app.use(express.json());
@@ -153,6 +166,18 @@ app.use('/src', express.static(path.join(__dirname, 'src'), {
 }));
 
 await initRedis();
+
+
+
+async function verifyRedisImages() {
+  const keys = await redisClient.keys("img:*");
+  console.log(`[Redis] Pronađeno ${keys.length} sačuvanih slika u Redis kešu.`);
+}
+
+verifyRedisImages();
+
+
+
 
 // Čuvamo referencu na interval u promenljivoj
 const feedInterval = setInterval(processFeeds, 12 * 60 * 1000);
@@ -310,21 +335,20 @@ app.get('/api/feeds-by-category/:category', async (req, res) => {
 
 
 
-
 /**
  * Ruta za dohvatanje slike iz Redis-a.
- * Podržava varijante preko "id:variant" forme (ili default "news-card").
+ * Ako slika ne postoji, vraća 404.
  */
 app.get('/image/:id', async (req, res) => {
-  // Razdvajanje id i varijante (npr. "news-card" ili "news-modal")
   const param = req.params.id;
   let id, variant;
   if (param.includes(':')) {
     [id, variant] = param.split(':');
   } else {
     id = param;
-    variant = 'news-card';
+    variant = 'news-modal';
   }
+
   const imgKey = `img:${id}:${variant}`;
   try {
     const base64 = await redisClient.get(imgKey);
@@ -333,19 +357,11 @@ app.get('/image/:id', async (req, res) => {
       res.setHeader('Content-Type', 'image/webp');
       return res.send(buffer);
     } else {
-      // Ako slika nije pronađena u Redis, pokušaj fallback na Cloudflare URL
-      const r2Key = `r2url:${id}:${variant}`;
-      const cloudflareUrl = await redisClient.get(r2Key);
-      if (cloudflareUrl) {
-        console.log(`[Route /image/:id] Fallback na Cloudflare URL za ključ: ${r2Key}`);
-        return res.redirect(cloudflareUrl);
-      } else {
-        console.log(`[Route /image/:id] No image found for key: ${imgKey} and no fallback r2url`);
-        return res.status(404).send("Image not found.");
-      }
+      console.warn(`[Redis] Slika nije pronađena: ${imgKey}`);
+      return res.status(404).send("Image not found.");
     }
   } catch (error) {
-    console.error("[Route /image/:id] Error:", error);
+    console.error(`[Redis] Greška prilikom učitavanja slike (${imgKey}):`, error);
     res.status(500).send("Server error");
   }
 });
@@ -354,8 +370,6 @@ app.get('/image/:id', async (req, res) => {
 
 /**
  * API ruta za pojedinačnu vest u JSON formatu.
- * Ako vest nije pronađena u "Aktuell" ili kategorijama, koristi se fallback – dohvat sa neon.tech API-ja i
- * korišćenje Cloudflare fallback URL-a za sliku.
  */
 app.get('/api/news/:id', async (req, res) => {
   const newsId = req.params.id;
@@ -381,23 +395,10 @@ app.get('/api/news/:id', async (req, res) => {
       }
     }
 
-    // Ako vest nije pronađena u Redis-kešu, koristimo fallback sa neon.tech API-ja
-    if (!news) {
-      console.log(`[API] Vest ID: ${newsId} nije pronađena u kešu, pozivam neon.tech API...`);
-      const neonResponse = await axios.get(`https://neon.tech/api/news/${newsId}`);
-      if (neonResponse.status === 200 && neonResponse.data) {
-        news = neonResponse.data;
-        // Pokušavamo da dohvatimo Cloudflare URL za sliku kao fallback
-        const r2Key = `r2url:${newsId}:news-card`;
-        const cloudflareUrl = await redisClient.get(r2Key);
-        if (cloudflareUrl) {
-          news.image = cloudflareUrl;
-        }
-      }
-    }
+    // Uklonjen deo koji poziva Neon.tech API kao fallback
 
     if (!news) {
-      console.log(`[API] Vest ID: ${newsId} nije pronađena ni u kešu ni putem neon.tech fallback-a.`);
+      console.log(`[API] Vest ID: ${newsId} nije pronađena.`);
       return res.status(404).send("News not found");
     }
 
@@ -408,6 +409,7 @@ app.get('/api/news/:id', async (req, res) => {
     res.status(500).send("Server error");
   }
 });
+
 
 
 
@@ -471,6 +473,13 @@ app.get('/api/debug/html-keys', async (req, res) => {
 // Pokrećemo proces vesti na svakih 12 minuta
 setInterval(processFeeds, 12 * 60 * 1000);
 processFeeds();
+setTimeout(async () => {
+  const imgKeys = await redisClient.keys("img:*");
+  console.log(`[Debug] Trenutno sačuvane slike u Redis: ${imgKeys.length}`);
+}, 10000);
+
+
+
 
 // Pokreće čišćenje SEO keša svakih 6 sati
 // setInterval(cleanupSeoCache, 6 * 60 * 60 * 1000);
@@ -518,10 +527,8 @@ app.post('/api/unblock-source', async (req, res) => {
 app.get('/news/:id', async (req, res) => {
   const newsId = req.params.id;
   const userAgent = req.headers['user-agent'] || '';
-
-  // Ako zahtev NIJE od jednog od SEO botova (Googlebot, Bingbot, YandexBot, DuckDuckBot, Yahoo! Slurp),
-  // preusmeravamo korisnika na glavnu stranicu gde se otvara modal
   const allowedBots = ['googlebot', 'bingbot', 'yandexbot', 'duckduckbot', 'slurp'];
+
   if (!allowedBots.some(bot => userAgent.toLowerCase().includes(bot))) {
     return res.redirect(302, '/?newsId=' + newsId);
   }
@@ -529,49 +536,17 @@ app.get('/news/:id', async (req, res) => {
   let news = null;
 
   try {
-    console.log(`[Redirect] Traženje vesti ID: ${newsId} pomoću strimovanja...`);
+    console.log(`[Redirect] Traženje vesti ID: ${newsId} pomoću Redis-a...`);
 
-    // Strimujemo feedove i tražimo vest sa newsId
+    // Pretražujemo Redis keš
     for await (const batch of getFeedsGenerator()) {
       news = batch.find(item => item.id === newsId);
       if (news) break;
     }
 
-   // Ako vest nije pronađena, pretražujemo sve kategorije
-if (!news) {
-  console.log(`[Redirect] Vest ID: ${newsId} nije pronađena u kategorijama, pretražujem sve kategorije...`);
-  const categoryKeys = await redisClient.keys("category:*");
-  for (const key of categoryKeys) {
-    const items = await redisClient.lRange(key, 0, -1);
-    news = items.map(item => JSON.parse(item)).find(item => item.id === newsId);
-    if (news) break;
-  }
-}
-
-
-    // Ako vest i dalje nije pronađena, pokušavamo dohvat sa neon.tech API
+    // Ako vest nije pronađena u kategorijama
     if (!news) {
-      console.log(`[Redirect] Vest ID: ${newsId} nije pronađena u kešu, pokušavam dohvat sa neon.tech...`);
-      try {
-        const neonResponse = await axios.get(`https://neon.tech/api/news/${newsId}`);
-        if (neonResponse.status === 200 && neonResponse.data) {
-          news = neonResponse.data;
-         // Ako vest nema definisanu sliku, konstrušemo URL za Cloudflare R2.
-         if (!news.image) {
-          const bucket = process.env.CLOUDFLARE_R2_BUCKET;
-          const fileName = `${news.id}-news-card.webp`; // Ili neka druga logika za generisanje imena fajla
-          news.image = `${process.env.CLOUDFLARE_R2_ENDPOINT}/${bucket}/${fileName}`;
-        }
-        
-
-        }
-      } catch (err) {
-        console.error(`[Redirect] Greška pri dohvaćanju vesti sa neon.tech:`, err);
-      }
-    }
-
-    if (!news) {
-      console.log(`[Redirect] Vest ID: ${newsId} nije pronađena. Preusmeravam na početnu stranicu.`);
+      console.log(`[Redirect] Vest ID: ${newsId} nije pronađena.`);
       return res.redirect(301, 'https://www.dach.news');
     }
 
@@ -581,15 +556,6 @@ if (!news) {
     console.error(`[Error] Fetching news ${newsId}:`, error);
     res.redirect(301, 'https://www.dach.news');
   }
-});
-
-
-// Redirekcija ako se sajt otvori na starom hostu
-app.use((req, res, next) => {
-  if (req.headers.host === 'newsdocker-1.onrender.com') {
-    return res.redirect(301, 'https://www.dach.news' + req.url);
-  }
-  next();
 });
 
 
