@@ -310,21 +310,20 @@ app.get('/api/feeds-by-category/:category', async (req, res) => {
 
 
 
-
 /**
  * Ruta za dohvatanje slike iz Redis-a.
- * Podržava varijante preko "id:variant" forme (ili default "news-card").
+ * Ako slika ne postoji, vraća 404.
  */
 app.get('/image/:id', async (req, res) => {
-  // Razdvajanje id i varijante (npr. "news-card" ili "news-modal")
   const param = req.params.id;
   let id, variant;
   if (param.includes(':')) {
     [id, variant] = param.split(':');
   } else {
     id = param;
-    variant = 'news-card';
+    variant = 'news-modal'; // Podrazumevana verzija za modal
   }
+
   const imgKey = `img:${id}:${variant}`;
   try {
     const base64 = await redisClient.get(imgKey);
@@ -333,16 +332,8 @@ app.get('/image/:id', async (req, res) => {
       res.setHeader('Content-Type', 'image/webp');
       return res.send(buffer);
     } else {
-      // Ako slika nije pronađena u Redis, pokušaj fallback na Cloudflare URL
-      const r2Key = `r2url:${id}:${variant}`;
-      const cloudflareUrl = await redisClient.get(r2Key);
-      if (cloudflareUrl) {
-        console.log(`[Route /image/:id] Fallback na Cloudflare URL za ključ: ${r2Key}`);
-        return res.redirect(cloudflareUrl);
-      } else {
-        console.log(`[Route /image/:id] No image found for key: ${imgKey} and no fallback r2url`);
-        return res.status(404).send("Image not found.");
-      }
+      console.log(`[Route /image/:id] No image found for key: ${imgKey}`);
+      return res.status(404).send("Image not found.");
     }
   } catch (error) {
     console.error("[Route /image/:id] Error:", error);

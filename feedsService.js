@@ -278,15 +278,12 @@ async function smanjiSliku(buffer) {
 }
 
 
-
 /**
- * Čuva smanjenu sliku – 80x80 se kešira u Redis, dok se 240x180 (news-modal) uploaduje samo na Cloudflare R2.
- * Ako upload uspe, fallback URL se čuva u Redis-u za obe verzije (TTL 24h).
- * Zamenite ovu funkciju u fajlu feedsService.js (otprilike oko linije 300).
+ * Čuva smanjenu sliku u Redis sa TTL od 4 dana.
  */
 async function storeImageInRedis(imageUrl, id) {
   if (!imageUrl) {
-    console.log(`[storeImageInRedis] Nema imageUrl za ID: ${id}, preskačem upload.`);
+    console.log(`[storeImageInRedis] Nema imageUrl za ID: ${id}, preskačem upis.`);
     return false;
   }
 
@@ -296,52 +293,25 @@ async function storeImageInRedis(imageUrl, id) {
     const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
     console.log(`[storeImageInRedis] Slika preuzeta za ID: ${id}, veličina: ${response.data.length} bajtova`);
 
-    // Ograničavamo veličinu slike na 1MB (smanjio sam limit da bude brži test)
-    const buffer = Buffer.from(response.data.slice(0, 1 * 1024 * 1024));
-    response.data = null; // Oslobađamo memoriju
+    const buffer = Buffer.from(response.data);
+    
+    const resizedImage = await sharp(buffer)
+      .resize(240, 180, { fit: "inside" })
+      .webp({ quality: 80 })
+      .toBuffer();
 
-    const sizes = {
-      "news-modal": { width: 240, height: 180, fit: "inside" }  // Samo ova verzija
-    };
-
-    let cloudflareImageUrls = {};
-
-    for (const [key, { width, height, fit }] of Object.entries(sizes)) {
-      console.log(`[storeImageInRedis] Pripremam verziju ${key} za ID:${id} (dimenzije: ${width}x${height})`);
-
-      const resizedImage = await sharp(buffer)
-        .resize(width, height, { fit })
-        .webp({ quality: 80 })
-        .toBuffer();
-
-      console.log(`[storeImageInRedis] Kreirana verzija ${key} za ID:${id}, šaljem na Cloudflare R2`);
-
-      // Upload na Cloudflare R2
-      const fileName = `${id}-${key}.webp`;
-      console.log(`[storeImageInRedis] Pokušaj upload-a: ${fileName}`);
-      
-      const r2Result = await uploadToCloudflareR2(resizedImage, fileName);
-
-      if (r2Result && r2Result.url) {
-        console.log(`[storeImageInRedis] Uploadovan fajl: ${fileName} - URL: ${r2Result.url}`);
-        cloudflareImageUrls[key] = r2Result.url;
-
-        // Upisujemo URL u Redis
-        await redisClient.set(`r2url:${id}:${key}`, r2Result.url, 'EX', 86400);
-        console.log(`[storeImageInRedis] Sačuvan URL u Redis: r2url:${id}:${key} = ${r2Result.url}`);
-      } else {
-        console.error(`[storeImageInRedis] Neuspešan upload za ID: ${id}`);
-      }
-    }
-
-    console.log(`[storeImageInRedis] Završena obrada slike za ID:${id}`);
-    return cloudflareImageUrls;
-
+    const redisKey = `img:${id}:news-modal`;
+    await redisClient.set(redisKey, resizedImage.toString('base64'), 'EX', 345600);
+    
+    console.log(`[storeImageInRedis] Sačuvana slika u Redis za ID:${id} sa TTL 4 dana`);
+    
+    return true;
   } catch (error) {
     console.error(`[storeImageInRedis] Greška pri optimizaciji slike za ID:${id}:`, error);
-    return null;
+    return false;
   }
 }
+
 
 
 
