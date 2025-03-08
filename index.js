@@ -443,6 +443,13 @@ app.get('/api/debug/html-keys', async (req, res) => {
 // Pokrećemo proces vesti na svakih 12 minuta
 setInterval(processFeeds, 12 * 60 * 1000);
 processFeeds();
+setTimeout(async () => {
+  const imgKeys = await redisClient.keys("img:*");
+  console.log(`[Debug] Trenutno sačuvane slike u Redis: ${imgKeys.length}`);
+}, 10000);
+
+
+
 
 // Pokreće čišćenje SEO keša svakih 6 sati
 // setInterval(cleanupSeoCache, 6 * 60 * 60 * 1000);

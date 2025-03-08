@@ -410,15 +410,26 @@ function createNewsCard(feed) {
     return;
   }
   
+  const tempImg = new Image(); // Dodajemo deklaraciju tempImg
+
   tempImg.onload = () => {
     modalImage.src = tempImg.src;
   };
   
-tempImg.onerror = () => {
-  console.warn("[newsModal] Could not load image:", feed.image);
-  modalImage.src = `${BASE_IMAGE_URL}/src/icons/no-image.png`;
-  modal.style.display = 'flex';
-};
+
+
+  tempImg.onload = () => {
+    modalImage.src = tempImg.src;
+  };
+  
+  tempImg.onerror = () => {
+    console.warn("[newsModal] Could not load image:", feed.image);
+    if (modalImage) {
+      modalImage.src = `${BASE_IMAGE_URL}/src/icons/no-image.png`;
+    }
+  };
+  
+  
 
 // Ako je vest u Redis-u, dohvatamo sliku odatle
 if (feed.id) {
