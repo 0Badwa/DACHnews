@@ -104,54 +104,14 @@ app.use(
       defaultSrc: ["'self'"],
       scriptSrc: ["'self'", "https://www.googletagmanager.com"],
       styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-      imgSrc: [
-        "'self'",
-        "data:",
-        "https://www.dach.news",
-        "https://dach.news",
-        "https://developnews.onrender.com",
-        "https://www.exyunews.onrender.com",
-        "https://newsdocker-1.onrender.com",
-        "https://static.boerse.de",
-        "https://p6.focus.de",
-        "https://cdn.swp.de",
-        "https://media.example.com",
-        "https://quadro.burda-forward.de",
-        "https://img.burda-forward.de",
-        "https://cdn.burda-forward.de",
-        "https://img.zeit.de",
-        "https://cdn.lr-online.de",
-        "https://www.nd-aktuell.de",
-        "*.r2.cloudflarestorage.com",
-        "https://360f5ba78daf45acb5827f956a445165.r2.cloudflarestorage.com",
-        "https://cdn.dach.news",
-        "https://img.blick.ch",
-        "https://cdn.prod.www.spiegel.de",
-        "https://www.sn.at",
-        "https://i.ds.at",
-        "https://images.tagesschau.de",
-        "https://img.chmedia.ch",
-        "https://www.fr.de",
-        "https://f002.backblazeb2.com",  // Backblaze B2 CDN
-        "*.backblazeb2.com"  // Omogućava sve subdomene Backblaze-a
-      ],
-      connectSrc: [
-        "'self'",
-        "https://api.openai.com",  // GPT API
-        "https://neon.tech", // API za fallback vesti
-        "https://api.backblazeb2.com" // Backblaze B2 API
-      ],
-      fontSrc: [
-        "'self'",
-        "data:",
-        "https://fonts.gstatic.com"
-      ],
+      imgSrc: ["*", "data:", "blob:"], // OVO DOZVOLJAVA SVE SLIKE
+      connectSrc: ["'self'", "https://api.openai.com", "https://neon.tech"],
+      fontSrc: ["'self'", "data:", "https://fonts.gstatic.com"],
       objectSrc: ["'none'"],
       upgradeInsecureRequests: []
     }
   })
 );
-
 
 
 
