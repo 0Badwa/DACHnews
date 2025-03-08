@@ -4,11 +4,7 @@
 
 /* ========== 1) GLOBAL OVERRIDES ========== */
 :root {
-  --background-color: #000; /* Tamnosiva bila #1c1c1c */
-  --secondary-color: #000;     /* Crna za kartice */
-  --primary-color: #32CD32;    /* Nova zelena */
-  --text-color: #ffffff;
-  --border-color: #333;
+ 
   --font-size: 16px;
   --news-title-font-size: 1rem;
   --font-family: 'Roboto', sans-serif; /* Glavni font: Roboto */
@@ -22,6 +18,16 @@
   --secondary-color: #000; 
   --border-color: #333;
 }
+
+:root[data-theme="light"] {
+  --background-color: #f3f3f3;
+  --text-color: #000000;
+  --primary-color: #007700;
+  --secondary-color: #ffffff;
+  --border-color: #ccc;
+}
+
+
 
 @font-face {
   font-family: 'Roboto';
@@ -67,7 +73,7 @@ html, body {
   margin: 0; 
   padding: 0;
   overflow-x: hidden;
-  background-color: var(--background-color) !important;
+  background-color: var(--background-color);
   color: var(--text-color);
   font-family: var(--font-family);
   font-size: var(--font-size);
@@ -200,11 +206,18 @@ nav .menu button {
 }
 
 
+:root[data-theme="light"] .category-indicator {
+  color: var(--primary-color);
+}
+
+
+
+
 /* Crna pozadina (umesto tamnosive) */
 .news-card {
   display: flex;
   align-items: flex-start;
-  background-color: #000; 
+  background-color: var(--secondary-color); 
   border: 1px solid var(--border-color);
   border-radius: 5px;
   padding: 0.2rem;
@@ -294,7 +307,7 @@ nav .menu button {
 #news-container h2 {
   color: #fff;
   /* text-shadow: 0 0 7px #32CD32; */ /* Uklonjen neon glow efekat */
-  background-color: #000; /* crna pozadina */
+  background-color: var(--secondary-color); /* crna pozadina */
   margin-bottom: 4px;
   font-size: 1.1rem;
   text-align: center;
@@ -350,7 +363,7 @@ nav .menu button {
 background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z-index: 2000;
 }
 .rearrange-modal-content {
-  background-color: #000; /* unutar modala takođe crna */
+  background-color: var(--secondary-color); /* unutar modala takođe crna */
   padding: 0.3rem;
   border-radius: 8px;
   max-width: 500px; 
@@ -378,7 +391,7 @@ background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z
   left: 0;
   width: 100%;
   height: calc(100vh - 60px); /* Visina ekrana minus 60px */
-  background-color: #000 !important; /* Potpuno crna pozadina */
+  background-color: var(--background-color);
   z-index: 2000; /* Visok z-index da bude iznad ostalog sadržaja */
   overflow-y: auto; /* Omogući skrolovanje ako je potrebno */
   margin: 0; /* Ukloni margine */
@@ -387,7 +400,7 @@ background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z
 
 /* Unutrašnji kontejner za sadržaj modala */
 .news-modal-content {
-  background-color: #000; /* Crna pozadina unutar modala */
+  background-color: var(--secondary-color); /* Crna pozadina unutar modala */
   padding: 1rem;
   border-radius: 8px;
   max-width: 800px; /* Maksimalna širina sadržaja */
@@ -422,8 +435,7 @@ background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z
   padding: 0rem 0.5rem;
   font-family: 'Roboto Condensed', sans-serif; /* cond */
   font-size: 0.9rem; /* Beli tekst za opis */
-  color: #fff; /* default white, override za .source ispod */
-}
+  color: var(--text-color);}
 
 /* Izvor u news-modal */
 .news-modal-content .source {
@@ -504,7 +516,7 @@ background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z
   font-size: 0.9rem;
   padding: 0.2rem 0.8rem;
   margin-bottom: 0.2rem; /* Veći razmak između stavki */
-  background-color: #000; /* Podrazumevana pozadina */
+  background-color: var(--secondary-color); /* Podrazumevana pozadina */
   border: 1px solid var(--border-color); /* Granica */
   border-radius: 5px; /* Zaobljeni uglovi */
   cursor: pointer;
@@ -634,7 +646,7 @@ background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z
   align-items: center;
   padding: 0.2rem 0.8rem; /* Smanjen padding da odgovara kategorijama */
   margin-bottom: 0.2rem;  /* Smanjen razmak između izvora */
-  background-color: #000; /* Podrazumevana pozadina */
+  background-color: var(--secondary-color); /* Podrazumevana pozadina */
   border: 1px solid var(--border-color); /* Granica */
   border-radius: 5px; /* Zaobljeni uglovi */
   font-size: 0.9rem; /* Manja veličina fonta */
@@ -975,9 +987,12 @@ background-color: rgba(0, 0, 0, 0.7) !important; /* Providna crna pozadina */  z
   background-color: #000;
   border: 1px solid var(--border-color);
   border-radius: 5px;
+  color: var(--primary-color);
 }
 
 /* Osiguraj da switch za državu bude poravnat sa ostalima */
 .country-header .switch-container {
   margin-left: auto; /* Poravnanje na desnu stranu */
 }
+
+

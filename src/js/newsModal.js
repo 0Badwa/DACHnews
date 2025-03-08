@@ -132,7 +132,7 @@ export function openNewsModal(feed) {
 
   const analysisHeading = document.createElement('h3');
   analysisHeading.className = 'modal-analysis-title';
-  analysisHeading.textContent = 'AI-Perspektive: Meinung & Kommentar';
+  analysisHeading.textContent = 'KI-Perspektive: Meinung & Kommentar';
   analysisContainer.appendChild(analysisHeading);
 
   const analysisText = document.createElement('p');
