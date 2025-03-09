@@ -486,37 +486,77 @@ app.post('/api/unblock-source', async (req, res) => {
 // Redirekcija za nevažeće ili istekao URL-ove sa newsId parametrom
 app.get('/news/:id', async (req, res) => {
   const newsId = req.params.id;
+  // Nehmen wir die Kategorie aus den Query-Parametern; wenn nicht übergeben, verwenden wir "Aktuell"
+  const category = req.query.cat || 'Aktuell';
   const userAgent = req.headers['user-agent'] || '';
   const allowedBots = ['googlebot', 'bingbot', 'yandexbot', 'duckduckbot', 'slurp'];
 
+  // Falls die Anfrage von Bots kommt, leiten wir sofort weiter (fügen auch die Kategorie hinzu)
   if (!allowedBots.some(bot => userAgent.toLowerCase().includes(bot))) {
-    return res.redirect(302, '/?newsId=' + newsId);
+    return res.redirect(302, '/?newsId=' + newsId + '&cat=' + category);
   }
 
   let news = null;
 
   try {
-    console.log(`[Redirect] Traženje vesti ID: ${newsId} pomoću Redis-a...`);
+    console.log(`[Redirect] Suche Nachricht mit ID: ${newsId} über Redis...`);
 
-    // Pretražujemo Redis keš
+    // Durchsuche den Redis-Cache
     for await (const batch of getFeedsGenerator()) {
       news = batch.find(item => item.id === newsId);
       if (news) break;
     }
 
-    // Ako vest nije pronađena u kategorijama
     if (!news) {
-      console.log(`[Redirect] Vest ID: ${newsId} nije pronađena.`);
-      return res.redirect(301, 'https://www.dach.news');
+      console.log(`[Redirect] Nachricht mit ID: ${newsId} wurde nicht gefunden.`);
+      // Erstelle URL für die Weiterleitung zur Kategorie
+      const redirectUrl = `/?cat=${encodeURIComponent(category)}`;
+      // Generiere eine HTML-Seite mit einer Nachricht und einem Meta-Tag für automatische Weiterleitung
+      return res.send(`
+        <!DOCTYPE html>
+        <html lang="de">
+          <head>
+            <meta charset="UTF-8">
+            <title>Nachricht nicht verfügbar</title>
+            <meta http-equiv="refresh" content="5; url=${redirectUrl}" />
+            <style>
+              body { 
+                font-family: Arial, sans-serif; 
+                background-color: #121212; 
+                color: #eee; 
+                display: flex; 
+                justify-content: center; 
+                align-items: center; 
+                height: 100vh; 
+                margin: 0;
+              }
+              .message {
+                text-align: center;
+              }
+              a { color: #32CD32; text-decoration: none; }
+            </style>
+          </head>
+          <body>
+            <div class="message">
+              <h1>Nachricht nicht verfügbar</h1>
+              <p>Diese Nachricht ist nicht mehr verfügbar, aber lesen Sie ähnliche Nachrichten aus der Kategorie <strong>${category}</strong>.</p>
+              <p>Sie werden in 5 Sekunden weitergeleitet. Falls nicht, klicken Sie <a href="${redirectUrl}">hier</a>.</p>
+            </div>
+          </body>
+        </html>
+      `);
     }
 
-    console.log(`[Redirect] Vest ID: ${newsId} pronađena, generišem HTML...`);
+    console.log(`[Redirect] Nachricht mit ID: ${newsId} gefunden, generiere HTML...`);
     res.send(generateHtmlForNews(news));
   } catch (error) {
-    console.error(`[Error] Fetching news ${newsId}:`, error);
+    console.error(`[Error] Abruf der Nachricht ${newsId}:`, error);
     res.redirect(301, 'https://www.dach.news');
   }
 });
+
+
+
 
 
 
