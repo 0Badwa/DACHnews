@@ -455,10 +455,9 @@ img.alt = feed.title ? feed.title : 'Nachrichtenbild'; // SEO-friendly alt na ne
 
 // Ako se slika ne može učitati (npr. je iza paywalla), ukloni celu news karticu
 img.onerror = function () {
-  // Sprečava eventualno rekurzivno pozivanje
   this.onerror = null;
-  // Uklanja celu karticu iz DOM-a
-  card.remove();
+  // Umesto uklanjanja kartice:
+  this.src = "src/icons/no-image.png";
 };
 
 img.width = 80;
