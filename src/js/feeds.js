@@ -446,38 +446,39 @@ const BASE_NEWS_MODAL_IMAGE_URL = "https://cdn.dach.news";
 
 
 
-
 // Slika
 const img = document.createElement('img');
 img.className = "news-card-image lazy news-image";
-img.src = feed.image ? feed.image : `${BASE_IMAGE_URL}/src/icons/no-image.png`;
+// Postavimo inicijalnu vrednost za img.src
 img.alt = feed.title ? feed.title : 'Nachrichtenbild'; // SEO-friendly alt na nemačkom
-
-// Ako se slika ne može učitati (npr. je iza paywalla), ukloni celu news karticu
-img.onerror = function () {
-  this.onerror = null;
-  // Umesto uklanjanja kartice:
-  this.src = "src/icons/no-image.png";
-};
-
 img.width = 80;
 img.height = 80;
 img.style.objectFit = "cover";
 img.style.display = "block";
 
+// Ako se slika ne može učitati, koristi fallback (umesto brisanja kartice)
+img.onerror = function () {
+  this.onerror = null;
+  this.src = `${BASE_IMAGE_URL}/src/icons/no-image.png`;
+};
 
-
-// Popravi putanju za slike sa API-ja (koristi samo Redis-keš)
+// Popravljeno generisanje URL-a za sliku:
 if (feed.image) {
-  // Ako feed.image već počinje sa 'http', koristi ga direktno,
-  // inače dodaj prefiks interni za Redis-keš
   if (feed.image.startsWith('http')) {
+    // Ako je feed.image pun URL, koristimo ga direktno
     img.src = feed.image;
   } else {
-    img.src = `${BASE_IMAGE_URL}/image/${feed.image}`;
+    // Ako feed.image nije pun URL, proveravamo da li već počinje sa "/image/"
+    let imagePath = feed.image;
+    if (imagePath.startsWith('/image/')) {
+      // Uklanjamo višak "/image/" (7 karaktera)
+      imagePath = imagePath.substring(7);
+    }
+    // Sastavljamo URL koristeći BASE_IMAGE_URL
+    img.src = `${BASE_IMAGE_URL}/image/${imagePath}`;
   }
 } else {
-  // Ako nema keširane slike, fallback na lokalnu ikonicu
+  // Ako nema definisanu sliku, koristimo fallback
   img.src = `${BASE_IMAGE_URL}/src/icons/no-image.png`;
 }
 
