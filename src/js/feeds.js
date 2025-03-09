@@ -467,16 +467,20 @@ img.style.display = "block";
 
 
 
-
 // Popravi putanju za slike sa API-ja (koristi samo Redis-keš)
 if (feed.image) {
-  // feed.image bi trebalo da sadrži nešto poput "abc123:news-card" ili "abc123:news-modal"
-  // (tj. bez kompletnih eksternih URL-ova)
-  img.src = `${BASE_IMAGE_URL}/image/${feed.image}`;
+  // Ako feed.image već počinje sa 'http', koristi ga direktno,
+  // inače dodaj prefiks interni za Redis-keš
+  if (feed.image.startsWith('http')) {
+    img.src = feed.image;
+  } else {
+    img.src = `${BASE_IMAGE_URL}/image/${feed.image}`;
+  }
 } else {
   // Ako nema keširane slike, fallback na lokalnu ikonicu
   img.src = `${BASE_IMAGE_URL}/src/icons/no-image.png`;
 }
+
 
 
 
