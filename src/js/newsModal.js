@@ -195,35 +195,35 @@ const invalidImageSources = [
   "https://quadro.burda-forward.de"
 ];
 
-
+// Kreiramo Image objekat za učitavanje slike modala
 const tempImg = new Image();
 tempImg.onload = () => {
-  // Kada se slika učita, postavi je u modal i prikaži modal
+  // Kada se slika učita, postavimo je u modal i prikažemo modal
   modalImage.src = tempImg.src;
   modal.style.display = 'flex';
 };
 tempImg.onerror = () => {
   console.warn("[newsModal] Could not load image:", feed.image);
-  // Ako se slika ne učita, koristi fallback sliku
+  // Ako se slika ne učita, koristimo fallback sliku
   modalImage.src = `${BASE_URL}/src/icons/no-image.png`;
   modal.style.display = 'flex';
 };
 
-// Novo generisanje URL-a za sliku:
-// Ako feed.image postoji, proveravamo sledeće:
+// Generisanje URL-a za sliku
 if (feed.image) {
-  if (feed.image.startsWith('/image/')) {
-    // Ako feed.image već počinje sa "/image/", koristi ga direktno
-    tempImg.src = encodeURI(`${BASE_URL}${feed.image}`);
-  } else if (feed.image.startsWith('http')) {
-    // Ako je feed.image pun URL, koristi ga bez promene
+  if (feed.image.startsWith('http')) {
+    // Ako je feed.image pun URL, koristimo ga direktno
     tempImg.src = feed.image;
   } else {
-    // Inače, pretpostavljamo da je feed.image interni ID i dodajemo prefiks "/image/" i sufiks ":news-modal"
-    tempImg.src = encodeURI(`${BASE_URL}/image/${feed.image}:news-modal`);
+    // Ako feed.image počinje sa "/image/", uklanjamo ga da ne dođe do dupliranja
+    let imagePath = feed.image;
+    if (imagePath.startsWith('/image/')) {
+      imagePath = imagePath.substring(7); // Uklanja "/image/"
+    }
+    // Dodajemo prefiks "/image/" i sufiks ":news-modal"
+    tempImg.src = encodeURI(`${BASE_URL}/image/${imagePath}:news-modal`);
   }
 } else {
-  // Ako feed.image nije definisan, koristi fallback sliku
   tempImg.src = `${BASE_URL}/src/icons/no-image.png`;
 }
 }
