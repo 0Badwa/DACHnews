@@ -187,53 +187,40 @@ closeModalButton.onclick = () => {
         ? "https://www.exyunews.onrender.com"
         : "https://www.dach.news";
 
-  // Domena koje smo ranije blokirali
-  const invalidImageSources = [
-    "https://p6.focus.de",
-    "https://quadro.burda-forward.de"
-  ];
 
-  const tempImg = new Image();
-  tempImg.onload = () => {
-    // Kad se temp slika učita, postavimo je u modal i prikažemo modal
-    modalImage.src = tempImg.src;
-    modal.style.display = 'flex';
-  };
-  tempImg.onerror = () => {
-    console.warn("[newsModal] Could not load image:", feed.image);
-    // Umesto zatvaranja, koristimo fallback "no-image.png"
-    modalImage.src = `${BASE_URL}/src/icons/no-image.png`;
-    modal.style.display = 'flex';
-  };
+        
+// Domena koje smo ranije blokirali
+const invalidImageSources = [
+  "https://p6.focus.de",
+  "https://quadro.burda-forward.de"
+];
 
-  // Ako je slika sa blokiranog domena -> fallback
-  if (feed.image && invalidImageSources.some(src => feed.image.startsWith(src))) {
-    console.warn("[newsModal] Blokirana slika:", feed.image);
-    tempImg.src = `${BASE_URL}/src/icons/no-image.png`;
-  } else {
-    // Normalan slučaj
-    let id;
-    if (feed && feed.id) {
-      // Umesto odsecanja dvotačke, koristimo ceo feed.id
-      id = feed.id;
-    } else if (feed.image && feed.image.startsWith('/')) {
-      // Pokušaj da se izvuče id iz feed.image pretpostavljajući format "/image/{id}" ili "/image/{id}:news-card"
-      const parts = feed.image.split('/');
-      if (parts.length >= 3) {
-        id = parts[2].split(':')[0];
-      }
-    }
-    if (id) {
-      // Učitava verziju za modal (240x180) koristeći dobijeni id
-      tempImg.src = encodeURI(`${BASE_URL}/image/${id}:news-modal`);
-    } else if (feed.image && feed.image.startsWith('/')) {
-      // Ako ne možemo da izvučemo id, formiramo URL iz feed.image
-      let finalUrl = BASE_URL + feed.image;
-      if (!feed.image.includes(':news-modal')) {
-        finalUrl += ':news-modal';
-      }
-      tempImg.src = encodeURI(finalUrl);
-    } else {
-      tempImg.src = feed.image || (`${BASE_URL}/src/icons/no-image.png`);
-    }
-  }}
+const tempImg = new Image();
+tempImg.onload = () => {
+  // Kad se temp slika učita, postavimo je u modal i prikažemo modal
+  modalImage.src = tempImg.src;
+  modal.style.display = 'flex';
+};
+tempImg.onerror = () => {
+  console.warn("[newsModal] Could not load image:", feed.image);
+  // Umesto zatvaranja, koristimo fallback "no-image.png"
+  modalImage.src = `${BASE_URL}/src/icons/no-image.png`;
+  modal.style.display = 'flex';
+};
+
+// Ako je feed.image već u formatu "/image/...", koristimo ga direktno
+if (feed.image && feed.image.startsWith('/image/')) {
+  tempImg.src = encodeURI(`${BASE_URL}${feed.image}`);
+} else if (feed && feed.id) {
+  // Koristimo feed.id za kreiranje URL-a
+  tempImg.src = encodeURI(`${BASE_URL}/image/${feed.id}:news-modal`);
+} else if (feed.image && feed.image.startsWith('/')) {
+  // Ako feed.image počinje sa '/' ali ne sadrži "/image/", formiramo URL
+  let finalUrl = BASE_URL + feed.image;
+  if (!feed.image.includes(':news-modal')) {
+    finalUrl += ':news-modal';
+  }
+  tempImg.src = encodeURI(finalUrl);
+} else {
+  tempImg.src = feed.image || (`${BASE_URL}/src/icons/no-image.png`);
+}}
