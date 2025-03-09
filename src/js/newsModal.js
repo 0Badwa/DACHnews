@@ -188,39 +188,42 @@ closeModalButton.onclick = () => {
         : "https://www.dach.news";
 
 
-        
+
 // Domena koje smo ranije blokirali
 const invalidImageSources = [
   "https://p6.focus.de",
   "https://quadro.burda-forward.de"
 ];
 
+
 const tempImg = new Image();
 tempImg.onload = () => {
-  // Kad se temp slika učita, postavimo je u modal i prikažemo modal
+  // Kada se slika učita, postavi je u modal i prikaži modal
   modalImage.src = tempImg.src;
   modal.style.display = 'flex';
 };
 tempImg.onerror = () => {
   console.warn("[newsModal] Could not load image:", feed.image);
-  // Umesto zatvaranja, koristimo fallback "no-image.png"
+  // Ako se slika ne učita, koristi fallback sliku
   modalImage.src = `${BASE_URL}/src/icons/no-image.png`;
   modal.style.display = 'flex';
 };
 
-// Ako je feed.image već u formatu "/image/...", koristimo ga direktno
-if (feed.image && feed.image.startsWith('/image/')) {
-  tempImg.src = encodeURI(`${BASE_URL}${feed.image}`);
-} else if (feed && feed.id) {
-  // Koristimo feed.id za kreiranje URL-a
-  tempImg.src = encodeURI(`${BASE_URL}/image/${feed.id}:news-modal`);
-} else if (feed.image && feed.image.startsWith('/')) {
-  // Ako feed.image počinje sa '/' ali ne sadrži "/image/", formiramo URL
-  let finalUrl = BASE_URL + feed.image;
-  if (!feed.image.includes(':news-modal')) {
-    finalUrl += ':news-modal';
+// Novo generisanje URL-a za sliku:
+// Ako feed.image postoji, proveravamo sledeće:
+if (feed.image) {
+  if (feed.image.startsWith('/image/')) {
+    // Ako feed.image već počinje sa "/image/", koristi ga direktno
+    tempImg.src = encodeURI(`${BASE_URL}${feed.image}`);
+  } else if (feed.image.startsWith('http')) {
+    // Ako je feed.image pun URL, koristi ga bez promene
+    tempImg.src = feed.image;
+  } else {
+    // Inače, pretpostavljamo da je feed.image interni ID i dodajemo prefiks "/image/" i sufiks ":news-modal"
+    tempImg.src = encodeURI(`${BASE_URL}/image/${feed.image}:news-modal`);
   }
-  tempImg.src = encodeURI(finalUrl);
 } else {
-  tempImg.src = feed.image || (`${BASE_URL}/src/icons/no-image.png`);
-}}
+  // Ako feed.image nije definisan, koristi fallback sliku
+  tempImg.src = `${BASE_URL}/src/icons/no-image.png`;
+}
+}
