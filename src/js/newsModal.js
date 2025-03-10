@@ -4,10 +4,6 @@
  * Ovaj fajl prikazuje i ažurira modal za pojedinačnu vest.
  ***********************************************/
 
-/**
- * Funkcija koja ažurira <title> i <meta> tagove
- * na osnovu prosleđene vesti (feed).
- */
 function updateDynamicMeta(feed) {
   const maxTitleLength = 70;
   
@@ -60,11 +56,10 @@ function updateDynamicMeta(feed) {
 
 /**
  * Otvara modal i prikazuje detalje (velika slika, analiza i slično).
- * 
- * // CHANGED: Ako feed.image == true, koristimo :news-modal;
- * // Inače fallback slika.
+ * Sada prima i feedList (niz svih vesti) i currentIndex (pozicija u tom nizu),
+ * kako bismo u modal-u mogli da pređemo na sledeću/prethodnu vest kad korisnik svajpuje.
  */
-export function openNewsModal(feed) {
+export function openNewsModal(feed, feedList = [], currentIndex = -1) {
   updateDynamicMeta(feed);
 
   const modal = document.getElementById('news-modal');
@@ -142,7 +137,6 @@ export function openNewsModal(feed) {
     }
   }
 
-  // CHANGED START
   modalImage.onerror = function () {
     this.onerror = null;
     this.src = "src/icons/no-image.png";
@@ -153,13 +147,69 @@ export function openNewsModal(feed) {
   } else {
     modalImage.src = "src/icons/no-image.png";
   }
-  // CHANGED END
+
+  // ========== NOVO: SWIPE LEVO/DESNO ZA SLEDEĆU/PREDHODNU VEST ==========
+  let startX = 0;
+  let isDragging = false;
+  const threshold = 50; // pikseli
+
+  function onTouchStart(e) {
+    isDragging = true;
+    startX = e.type.includes('mouse') ? e.pageX : e.touches[0].clientX;
+  }
+
+  function onTouchMove(e) {
+    if (!isDragging) return;
+    const currentX = e.type.includes('mouse') ? e.pageX : e.touches[0].clientX;
+    const deltaX = currentX - startX;
+
+    // Ako deltaX > threshold => prelazimo na PRETHODNU vest
+    if (deltaX > threshold) {
+      isDragging = false;
+      if (currentIndex > 0) {
+        openNewsModal(feedList[currentIndex - 1], feedList, currentIndex - 1);
+      }
+    }
+    // Ako deltaX < -threshold => prelazimo na SLEDEĆU vest
+    else if (deltaX < -threshold) {
+      isDragging = false;
+      if (currentIndex < feedList.length - 1) {
+        openNewsModal(feedList[currentIndex + 1], feedList, currentIndex + 1);
+      }
+    }
+  }
+
+  function onTouchEnd() {
+    isDragging = false;
+  }
+
+  // Dodaj event listenere
+  modal.addEventListener('touchstart', onTouchStart, { passive: true });
+  modal.addEventListener('touchmove', onTouchMove, { passive: true });
+  modal.addEventListener('touchend', onTouchEnd);
+
+  modal.addEventListener('mousedown', onTouchStart);
+  modal.addEventListener('mousemove', onTouchMove);
+  modal.addEventListener('mouseup', onTouchEnd);
+  modal.addEventListener('mouseleave', () => { if (isDragging) onTouchEnd(); });
+
+  // ========== Kraj swipe logike ==========
 
   closeModalButton.onclick = () => {
     modal.style.display = 'none';
     if (window.location.search.includes('newsId')) {
       window.history.replaceState({}, '', '/');
     }
+
+    // Očistimo event listenere da se ne gomilaju
+    modal.removeEventListener('touchstart', onTouchStart);
+    modal.removeEventListener('touchmove', onTouchMove);
+    modal.removeEventListener('touchend', onTouchEnd);
+
+    modal.removeEventListener('mousedown', onTouchStart);
+    modal.removeEventListener('mousemove', onTouchMove);
+    modal.removeEventListener('mouseup', onTouchEnd);
+    modal.removeEventListener('mouseleave', () => { if (isDragging) onTouchEnd(); });
   };
 
   weiterButton.onclick = () => {

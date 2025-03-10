@@ -343,10 +343,9 @@ function normalizeSourceForDisplay(source) {
 /**
  * Kreira jednu "news card" za prikaz feed-a.
  * 
- * // CHANGED: Proveravamo feed.image kao boolean (true/null),
- * // i ako postoji -> "/image/<ID>:news-card", inače fallback "no-image.png".
+ * // CHANGED: Proširili smo potpis: (feed, feedArray, index).
  */
-function createNewsCard(feed) {
+function createNewsCard(feed, feedArray, index) {
   const card = document.createElement('div');
   card.className = "news-card";
 
@@ -369,7 +368,9 @@ function createNewsCard(feed) {
 
     document.querySelectorAll('.news-card').forEach(existingCard => existingCard.classList.remove('active'));
     card.classList.add('active');
-    openNewsModal(feed);
+
+    // CHANGED: Prosledimo feedList i index
+    openNewsModal(feed, feedArray, index);
   });
 
   // CHANGED START
@@ -493,8 +494,9 @@ export function displayFeedsList(feedsList, categoryName) {
     new Date(b.date_published).getTime() - new Date(a.date_published).getTime()
   );
 
-  uniqueFeeds.forEach(feed => {
-    const card = createNewsCard(feed);
+  // CHANGED: Prosleđujemo i indeks (i)
+  uniqueFeeds.forEach((feed, i) => {
+    const card = createNewsCard(feed, uniqueFeeds, i);
     container.appendChild(card);
   });
 
