@@ -313,6 +313,7 @@ app.get('/image/:id', async (req, res) => {
   try {
     const base64 = await redisClient.get(imgKey);
     if (base64) {
+      res.setHeader("Cache-Control", "public, max-age=345600, immutable");
       const buffer = Buffer.from(base64, 'base64');
       res.setHeader('Content-Type', 'image/webp');
       return res.send(buffer);
