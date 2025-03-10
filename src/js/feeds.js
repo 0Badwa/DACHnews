@@ -446,10 +446,11 @@ const BASE_NEWS_MODAL_IMAGE_URL = "https://cdn.dach.news";
 
 
 
+
+  
 // Slika
 const img = document.createElement('img');
 img.className = "news-card-image lazy news-image";
-// Postavimo inicijalnu vrednost za img.src
 img.alt = feed.title ? feed.title : 'Nachrichtenbild'; // SEO-friendly alt na nemačkom
 img.width = 80;
 img.height = 80;
@@ -462,26 +463,12 @@ img.onerror = function () {
   this.src = `${BASE_IMAGE_URL}/src/icons/no-image.png`;
 };
 
-// Popravljeno generisanje URL-a za sliku:
+// Uvek koristimo Redis rutu (news-card, 80x80) ili fallback
 if (feed.image) {
-  if (feed.image.startsWith('http')) {
-    // Ako je feed.image pun URL, koristimo ga direktno
-    img.src = feed.image;
-  } else {
-    // Ako feed.image nije pun URL, proveravamo da li već počinje sa "/image/"
-    let imagePath = feed.image;
-    if (imagePath.startsWith('/image/')) {
-      // Uklanjamo višak "/image/" (7 karaktera)
-      imagePath = imagePath.substring(7);
-    }
-    // Sastavljamo URL koristeći BASE_IMAGE_URL
-    img.src = `${BASE_IMAGE_URL}/image/${imagePath}`;
-  }
+  img.src = `${BASE_IMAGE_URL}/image/${feed.id}:news-card`;
 } else {
-  // Ako nema definisanu sliku, koristimo fallback
   img.src = `${BASE_IMAGE_URL}/src/icons/no-image.png`;
 }
-
 
 
 

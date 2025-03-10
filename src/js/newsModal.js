@@ -209,20 +209,12 @@ tempImg.onerror = () => {
   modal.style.display = 'flex';
 };
 
+
+
 // Generisanje URL-a za sliku
 if (feed.image) {
-  if (feed.image.startsWith('http')) {
-    // Ako je feed.image pun URL, koristimo ga direktno
-    tempImg.src = feed.image;
-  } else {
-    // Ako feed.image počinje sa "/image/", uklanjamo ga da ne dođe do dupliranja
-    let imagePath = feed.image;
-    if (imagePath.startsWith('/image/')) {
-      imagePath = imagePath.substring(7); // Uklanja "/image/"
-    }
-    // Dodajemo prefiks "/image/" i sufiks ":news-modal"
-    tempImg.src = encodeURI(`${BASE_URL}/image/${imagePath}:news-modal`);
-  }
+  // Uvek koristimo Redis rutu (news-modal: 240x180)
+  tempImg.src = `${BASE_URL}/image/${feed.id}:news-modal`;
 } else {
   tempImg.src = `${BASE_URL}/src/icons/no-image.png`;
 }
