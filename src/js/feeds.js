@@ -15,14 +15,12 @@ import { openNewsModal } from './newsModal.js';
 // Uvoz brandMap i sourceAliases iz sourcesConfig.js
 import { brandMap, sourceAliases, sourceDisplayNames } from './sourcesConfig.js';
 
-
 // Dodajte globalne promenljive za keširanje blokiranih izvora i kategorija
 let blockedSourcesCache = [];
 let blockedCategoriesCache = [];
 
 /**
  * Funkcija koja ažurira keš iz localStorage.
- * Pozovite ovu funkciju jednom pre filtriranja feedova.
  */
 function updateBlockedCache() {
   try {
@@ -34,7 +32,6 @@ function updateBlockedCache() {
   }
 }
 
-
 /**
  * Helper funkcija koja uklanja TLD-ove .CH, .DE, .AT iz prosleđenog stringa.
  */
@@ -44,19 +41,14 @@ function removeTLD(source) {
 
 /**
  * Parsira domain ili ime izvora da bismo lakše pronašli zastavu.
- * Uklanja "http(s)://", "www.", završne "/" i sve razmake.
  */
 function parseDomain(source) {
   if (!source) return '';
   let s = source.trim().toLowerCase();
 
-  // Ukloni protokol (http:// ili https://)
   s = s.replace(/^https?:\/\//, '');
-  // Ukloni "www."
   s = s.replace(/^www\./, '');
-  // Ukloni sve posle prvog '/', ako postoji
   s = s.split('/')[0];
-  // Ukloni razmake
   s = s.replace(/\s+/g, '');
 
   return s;
@@ -68,7 +60,6 @@ function parseDomain(source) {
 function getCountryFlag(source) {
   let normalizedSource = parseDomain(source).toLowerCase();
 
-  // Mapiranje alternativnih domena na glavni naziv iz sourceAliases
   for (let mainSource in sourceAliases) {
     if (sourceAliases[mainSource].includes(normalizedSource)) {
       normalizedSource = mainSource;
@@ -76,12 +67,10 @@ function getCountryFlag(source) {
     }
   }
 
-  // Vraća zastavu iz brandMap ako postoji, inače proverava TLD
   if (brandMap[normalizedSource]) {
     return `src/icons/flags/${brandMap[normalizedSource]}.svg`;
   }
 
-  // Ako nije prepoznat brend, proveri TLD
   if (normalizedSource.endsWith('.de')) {
     return 'src/icons/flags/de.svg';
   } else if (normalizedSource.endsWith('.at')) {
@@ -90,13 +79,11 @@ function getCountryFlag(source) {
     return 'src/icons/flags/ch.svg';
   }
 
-  // Podrazumevana zastava ako ništa nije prepoznato
   return 'src/icons/flags/un.svg';
 }
 
-
 /**
- * Vraća string tipa "vor X Minuten/Stunden/Tagen...", na nemačkom jeziku.
+ * Vraća string tipa "vor X Minuten/Stunden/Tagen...", na nemačkom.
  */
 function timeAgo(dateString) {
   if (!dateString) return '';
@@ -144,16 +131,14 @@ function getBlockedCategories() {
   }
 }
 
-
-
 /**
- * Proverava da li je feed sakriven (blokiran) na osnovu izvora, kategorije,
- * da li je datum objavljivanja u budućnosti, i da li vest ima sliku.
+ * Proverava da li je feed sakriven (blokiran).
  */
 function isHiddenFeed(feed) {
   if (!feed.image) {
-    console.log(`[isHiddenFeed] Feed sakriven: Nema slike, ID: ${feed.id}`);
-    return true;
+    // console.log(`[isHiddenFeed] Feed sakriven: Nema slike, ID: ${feed.id}`);
+    // Ako hoćemo da filtriramo sve bez slike - ostaje vaš izbor
+    // return true;
   }
 
   if (feed.date_published) {
@@ -168,7 +153,6 @@ function isHiddenFeed(feed) {
   const blockedSources = blockedSourcesCache;
   const blockedCats = blockedCategoriesCache;
 
-
   const cat = (feed.category === "Ohne Kategorie") ? "Sonstiges" : feed.category;
   if (blockedCats.includes(cat)) {
     console.log(`[isHiddenFeed] Feed sakriven zbog blokirane kategorije: ${cat}, ID: ${feed.id}`);
@@ -182,7 +166,6 @@ function isHiddenFeed(feed) {
       return true;
     }
     const blockedSourceCheck = removeTLD(normalizedSource.toUpperCase().replace(/\s+/g, ''));
-    console.log(`[isHiddenFeed] Provera izvora: ${blockedSourceCheck}, Blocked: ${blockedSources}`);
     if (blockedSources.includes(blockedSourceCheck)) {
       console.log(`[isHiddenFeed] Feed sakriven zbog blokiranog izvora: ${blockedSourceCheck}, ID: ${feed.id}`);
       return true;
@@ -192,15 +175,12 @@ function isHiddenFeed(feed) {
   return false;
 }
 
-
-
 /**
  * Proverava da li postoji keširan feed u localStorage i vraća ga ako je validan.
  * Ako postoje novi feedovi, dodaje ih u postojeći keš.
  */
 function getCachedFeeds(lastFetchKey, cachedFeedsKey, newFeeds = []) {
   const now = Date.now();
-  // Očekujemo da je keširan objekat u formatu { data: [...], expiry: <timestamp> }
   const cachedRaw = localStorage.getItem(cachedFeedsKey);
   let cachedData = cachedRaw ? JSON.parse(cachedRaw) : null;
   
@@ -211,18 +191,15 @@ function getCachedFeeds(lastFetchKey, cachedFeedsKey, newFeeds = []) {
   
   if (cachedData && Array.isArray(cachedData.data)) {
     let existingFeeds = cachedData.data;
-    // Dedupliciramo feedove po ID-ju i dodajemo samo nove
     const existingFeedIds = new Set(existingFeeds.map(feed => feed.id));
     const filteredNewFeeds = newFeeds.filter(feed => !existingFeedIds.has(feed.id));
 
     if (filteredNewFeeds.length > 0) {
       existingFeeds = [...filteredNewFeeds, ...existingFeeds];
-      // Ograničavamo broj feedova na 100
       existingFeeds = existingFeeds.slice(0, 100);
-      // Ažuriramo keš
       localStorage.setItem(cachedFeedsKey, JSON.stringify({
         data: existingFeeds,
-        expiry: now + 600000 // 10 minuta TTL
+        expiry: now + 600000
       }));
       localStorage.setItem(lastFetchKey, new Date().toISOString());
       console.log(`[CACHE] Dodato ${filteredNewFeeds.length} novih feedova u keš.`);
@@ -232,11 +209,10 @@ function getCachedFeeds(lastFetchKey, cachedFeedsKey, newFeeds = []) {
     return existingFeeds;
   }
   
-  // Ako nema keša, sačuvaj nove feedove ako postoje
   if (newFeeds.length > 0) {
     localStorage.setItem(cachedFeedsKey, JSON.stringify({
       data: newFeeds,
-      expiry: now + 600000 // 10 minuta TTL
+      expiry: now + 600000
     }));
     localStorage.setItem(lastFetchKey, new Date().toISOString());
     console.log(`[CACHE] Keširan prvi set feedova (${newFeeds.length} feedova).`);
@@ -245,7 +221,6 @@ function getCachedFeeds(lastFetchKey, cachedFeedsKey, newFeeds = []) {
   
   return null;
 }
-
 
 /**
  * Fetch do 50 najnovijih feed-ova iz "Aktuell" (ruta /api/feeds), keš ~10 min.
@@ -261,11 +236,9 @@ export async function fetchAllFeedsFromServer(forceRefresh = false) {
       localStorage.removeItem(cachedFeedsKey);
     }
 
-    // Prosleđujemo prazan niz umesto forceRefresh kako bi se izbegla greška newFeeds.filter is not a function.
     let cachedData = getCachedFeeds(lastFetchKey, cachedFeedsKey, []);
     if (cachedData) return cachedData;
 
-    // Inače, fetchujemo
     const response = await fetch("/api/feeds");
     if (!response.ok) {
       console.error("[fetchAllFeedsFromServer] Server returned status:", response.status);
@@ -275,9 +248,7 @@ export async function fetchAllFeedsFromServer(forceRefresh = false) {
 
     let data = await response.json();
     data.sort((a, b) => new Date(b.date_published).getTime() - new Date(a.date_published).getTime());
-    // data = data.filter(feed => !isHiddenFeed(feed));
 
-    // U localStorage
     localStorage.setItem(cachedFeedsKey, JSON.stringify(data));
     localStorage.setItem(lastFetchKey, new Date().toISOString());
 
@@ -296,35 +267,27 @@ export async function fetchAllFeedsFromServer(forceRefresh = false) {
   }
 }
 
-
-
-
 /**
- * Fetch do 100 feedova iz određene kategorije, keširano ~10 min (/api/feeds-by-category).
+ * Fetch do 100 feedova iz određene kategorije (keš ~10 min).
  */
 export async function fetchCategoryFeeds(category, forceRefresh = false) {
   showLoader();
   try {
-    // "Sonstiges" => "Uncategorized" na serveru
     const catForUrl = (category === "Sonstiges") ? "Uncategorized" : category;
     const lastFetchKey = `feeds-${catForUrl}-lastFetch`;
     const cachedFeedsKey = `feeds-${catForUrl}`;
 
-    // Ako je forceRefresh true, očisti keš
     if (forceRefresh) {
       localStorage.removeItem(lastFetchKey);
       localStorage.removeItem(cachedFeedsKey);
     }
-    // Uvek prosleđujemo prazan niz kao novi feedove (ne forceRefresh boolean)
     let cachedData = getCachedFeeds(lastFetchKey, cachedFeedsKey, []);
     if (cachedData) return cachedData;
 
     const url = `/api/feeds-by-category/${encodeURIComponent(catForUrl)}`;
     const response = await fetch(url);
-
     let data = await response.json();
     data.sort((a, b) => new Date(b.date_published).getTime() - new Date(a.date_published).getTime());
-    // data = data.filter(feed => !isHiddenFeed(feed));
 
     localStorage.setItem(cachedFeedsKey, JSON.stringify(data));
     localStorage.setItem(lastFetchKey, new Date().toISOString());
@@ -340,23 +303,16 @@ export async function fetchCategoryFeeds(category, forceRefresh = false) {
   }
 }
 
-
 /**
- * Normalizuje izvor za prikaz koristeći sourceAliases i brandMap.
- * Vraća ključ koji odgovara sourceDisplayNames ili null za nepoznate izvore.
+ * Normalizuje izvor za prikaz.
  */
 function normalizeSourceForDisplay(source) {
   if (!source) return null;
-
-  // console.log("Raw source:", source);
-
   let normalized = source.trim().toLowerCase();
   normalized = normalized.replace(/^https?:\/\//, '').replace(/^www\./, '');
   normalized = removeTLD(normalized.split('/')[0]);
 
- // console.log("Normalized source:", normalized);
-
-  // Ručna mapiranja za specifične slučajeve
+  // Ručna mapiranja
   if (normalized === 'sn') return 'SALZBURGER-NACHRICHTEN';
   if (normalized === 'fr') return 'FRANKFURTER-RUNDSCHAU';
   if (normalized === 'spiegel') return 'DER-SPIEGEL';
@@ -367,64 +323,38 @@ function normalizeSourceForDisplay(source) {
 
   for (let mainSource in sourceAliases) {
     if (sourceAliases[mainSource].includes(normalized)) {
-      const result = mainSource.toUpperCase();
-      // console.log("Mapped to:", result);
-      return result;
+      return mainSource.toUpperCase();
     }
   }
 
   if (brandMap[normalized]) {
-    const result = normalized.toUpperCase();
-    // console.log("Mapped via brandMap:", result);
-    return result;
+    return normalized.toUpperCase();
   }
 
   const upperSource = source.toUpperCase().replace(/\s+/g, '');
   if (sourceDisplayNames[upperSource]) {
-   //  console.log("Direct match:", upperSource);
     return upperSource;
   }
 
   console.log("Nepoznat izvor, filtriraće se:", normalized);
-  return null; // Vraća null za nepoznate izvore umesto "UNBEKANNTEQUELLE"
+  return null;
 }
-
-
 
 /**
  * Kreira jednu "news card" za prikaz feed-a.
+ * 
+ * // CHANGED: Proveravamo feed.image kao boolean (true/null),
+ * // i ako postoji -> "/image/<ID>:news-card", inače fallback "no-image.png".
  */
 function createNewsCard(feed) {
   const card = document.createElement('div');
   card.className = "news-card";
 
-
-
-
-// Definiši BASE_IMAGE_URL pre upotrebe
-const BASE_IMAGE_URL = window.location.hostname.includes("dach.news")
-  ? "https://www.dach.news"
-  : window.location.hostname.includes("localhost")
-  ? "http://localhost:3002"
-  : window.location.hostname.includes("exyunews.onrender.com")
-  ? "https://exyunews.onrender.com"
-  : "https://newsdocker-1.onrender.com";
-
-// Definiši BASE_IMAGE_URL za news modal slike koje se učitavaju samo sa cdn.dach.news
-const BASE_NEWS_MODAL_IMAGE_URL = "https://cdn.dach.news";
-
-
-
-
-  // Dodaj click event sa ripple efektom
   card.addEventListener('click', function (e) {
-    // Ukloni prethodni ripple, ako postoji
     const existingRipple = card.querySelector('.ripple');
     if (existingRipple) {
       existingRipple.remove();
     }
-
-    // Dodaj ripple efekat
     const rect = card.getBoundingClientRect();
     const ripple = document.createElement('span');
     ripple.className = 'ripple';
@@ -433,47 +363,37 @@ const BASE_NEWS_MODAL_IMAGE_URL = "https://cdn.dach.news";
     ripple.style.left = `${e.clientX - rect.left - size / 2}px`;
     ripple.style.top = `${e.clientY - rect.top - size / 2}px`;
     card.appendChild(ripple);
-
     ripple.addEventListener('animationend', () => {
       ripple.remove();
     });
 
-    // Klik na karticu -> otvori modal
     document.querySelectorAll('.news-card').forEach(existingCard => existingCard.classList.remove('active'));
     card.classList.add('active');
     openNewsModal(feed);
   });
 
+  // CHANGED START
+  const img = document.createElement('img');
+  img.className = "news-card-image lazy news-image";
+  img.alt = feed.title ? feed.title : 'Nachrichtenbild';
+  img.width = 80;
+  img.height = 80;
+  img.style.objectFit = "cover";
+  img.style.display = "block";
 
+  img.onerror = function () {
+    this.onerror = null;
+    this.src = `src/icons/no-image.png`;
+  };
 
+  if (feed.image) {
+    // Ako feed.image == true, formiramo /image/<ID>:news-card
+    img.src = `${window.location.origin}/image/${feed.id}:news-card`;
+  } else {
+    img.src = `src/icons/no-image.png`;
+  }
+  // CHANGED END
 
-  
-// Slika
-const img = document.createElement('img');
-img.className = "news-card-image lazy news-image";
-img.alt = feed.title ? feed.title : 'Nachrichtenbild'; // SEO-friendly alt na nemačkom
-img.width = 80;
-img.height = 80;
-img.style.objectFit = "cover";
-img.style.display = "block";
-
-// Ako se slika ne može učitati, koristi fallback (umesto brisanja kartice)
-img.onerror = function () {
-  this.onerror = null;
-  this.src = `${BASE_IMAGE_URL}/src/icons/no-image.png`;
-};
-
-// Uvek koristimo Redis rutu (news-card, 80x80) ili fallback
-if (feed.image) {
-  img.src = `${BASE_IMAGE_URL}/image/${feed.id}:news-card`;
-} else {
-  img.src = `${BASE_IMAGE_URL}/src/icons/no-image.png`;
-}
-
-
-
-
-  // Sadržaj kartice
   const contentDiv = document.createElement('div');
   contentDiv.className = "news-card-content";
 
@@ -486,14 +406,11 @@ if (feed.image) {
         : feed.title) 
     : 'No title';
   
-
   const meta = document.createElement('p');
   meta.className = "news-meta";
 
   const sourceSpan = document.createElement('span');
   sourceSpan.className = "source";
-  
-  // Normalizujemo izvor i uzimamo prilagođeni naziv
   const normalizedSource = normalizeSourceForDisplay(feed.source);
   sourceSpan.textContent = sourceDisplayNames[normalizedSource] || normalizedSource;
 
@@ -521,35 +438,24 @@ if (feed.image) {
   return card;
 }
 
-
 /**
- * Preprocesira feedove tako što računa normalizovani izvor za svaki feed,
- * grupiše feedove po tom ključu, i vraća samo feedove iz neblokiranih grupa.
+ * Preprocesira feedove, grupiše ih po izvoru, isključuje blokirane izvore.
  */
 function preprocessFeeds(feedsList) {
-  // Kreiramo mapu: ključ = normalizovani izvor, vrednost = niz feedova
   const feedsBySource = new Map();
 
   feedsList.forEach(feed => {
-    // Izračunaj normalizovani izvor i dodaj ga u feed (ako već nije izračunat)
     const normalized = normalizeSourceForDisplay(feed.source);
-    // Ako je feed bez izvora ili nepoznat, možete ga odmah uključiti ili filtrirati
     if (!normalized) return;
-    
     if (!feedsBySource.has(normalized)) {
       feedsBySource.set(normalized, []);
     }
     feedsBySource.get(normalized).push(feed);
   });
 
-  // Kreiraj skup blokiranih izvora (pretpostavljamo da su već keširani)
   const blockedSet = new Set(blockedSourcesCache);
-
-  // Sakupljamo dozvoljene feedove
   const allowedFeeds = [];
   feedsBySource.forEach((feeds, sourceKey) => {
-    // Ako je normalizovani izvor blokiran, preskoči celu grupu
-    // (Napomena: prilagodite logiku – možda želite da uključite feedove bez odgovarajućeg ključa)
     if (blockedSet.has(sourceKey.toUpperCase())) return;
     allowedFeeds.push(...feeds);
   });
@@ -557,31 +463,23 @@ function preprocessFeeds(feedsList) {
   return allowedFeeds;
 }
 
-
 /**
  * Prikazuje listu feedova (vesti) u #news-container.
  */
 export function displayFeedsList(feedsList, categoryName) {
-  // Osveži keš blokiranih izvora i kategorija jednom pre filtriranja
   updateBlockedCache();
-
   const container = document.getElementById('news-container');
   if (!container) return;
 
-  // Prvo kreiramo jedinstvenu listu feedova
   let uniqueFeeds = Array.from(new Map(feedsList.map(feed => [feed.id, feed])).values());
-  
-  // Preprocesiraj feedove – grupišemo ih i isključujemo čitave grupe iz blokiranih izvora
   uniqueFeeds = preprocessFeeds(uniqueFeeds);
   
   container.innerHTML = '';
 
-  // Ako je prazan niz
   if (!uniqueFeeds || uniqueFeeds.length === 0) {
     container.innerHTML = `<p>Es gibt keine Nachrichten für die Kategorie: ${categoryName}</p>`;
     updateCategoryIndicator(categoryName);
 
-    // Resetuj scroll i za container i za ceo prozor
     requestAnimationFrame(() => {
       container.scrollTop = 0;
       window.scrollTo(0, 0);
@@ -591,21 +489,17 @@ export function displayFeedsList(feedsList, categoryName) {
     return;
   }
 
-  // Sortiramo vesti (najnovije prve)
   uniqueFeeds.sort((a, b) => 
     new Date(b.date_published).getTime() - new Date(a.date_published).getTime()
   );
 
-  // Kreiramo i dodajemo svaku news karticu u kontejner
   uniqueFeeds.forEach(feed => {
     const card = createNewsCard(feed);
     container.appendChild(card);
   });
 
-  // Ažuriramo naziv kategorije
   updateCategoryIndicator(categoryName);
 
-  // Resetuj scroll višestruko
   requestAnimationFrame(() => {
     container.scrollTop = 0;
     window.scrollTo(0, 0);
@@ -629,7 +523,7 @@ export function displayFeedsList(feedsList, categoryName) {
 }
 
 /**
- * Prikazuje "Aktuell" feedove (poziva fetchAllFeedsFromServer).
+ * Prikazuje "Aktuell" feedove.
  */
 export async function displayAktuellFeeds(forceRefresh = false) {
   const container = document.getElementById('news-container');
@@ -801,15 +695,13 @@ export function unblockSource(src) {
   localStorage.setItem('blockedSources', JSON.stringify(blockedSources));
 };
 
-
-// Event delegation za sve kartice vesti unutar #news-container
+// Event delegation za sve kartice vesti
 document.getElementById('news-container').addEventListener('click', function(e) {
   const card = e.target.closest('.news-card');
   if (card) {
-    // Uzmi podatke iz data atribute ili na drugi način, ako treba
     const newsId = card.getAttribute('data-news-id'); 
     if (newsId) {
-      openNewsModal({ id: newsId }); // Pozovi modal sa podacima
+      openNewsModal({ id: newsId });
     }
   }
 });

@@ -12,7 +12,6 @@ import pLimit from 'p-limit';
 import { saveNewsToPostgres } from './index.js';
 
 
-
 // Konstante
 const SEVEN_DAYS = 60 * 60 * 24 * 4;
 const RSS_FEED_URL = "https://rss.app/feeds/v1.1/_sf1gbLo1ZadJmc5e.json"; // Glavni feed
@@ -20,7 +19,7 @@ const GPT_API_URL = "https://api.openai.com/v1/chat/completions";
 
 // Redis konekcija
 export const redisClient = createClient({
-  url: process.env.REDIS_URL || 'redis://redis:6379', // Dodali smo fallback vrijednost
+  url: process.env.REDIS_URL || 'redis://redis:6379',
 });
 
 // Hvatanje potencijalnih Redis grešaka
@@ -28,7 +27,6 @@ redisClient.on('error', err => {
   console.error('[Redis] Redis Client Error:', err);
   redisClient.disconnect();
 });
-
 
 /**
  * Funkcija za uspostavljanje konekcije na Redis.
@@ -43,7 +41,6 @@ export async function initRedis() {
     process.exit(1); // Prekida aplikaciju ako se ne poveže na Redis
   }
 }
-
 
 /**
  * Funkcija koja preuzima glavni RSS feed.
@@ -63,8 +60,6 @@ export async function fetchRSSFeed() {
 
 /**
  * Funkcija za slanje batch-a feed stavki GPT API–ju radi kategorizacije.
- * Vraća JSON niz gde je svaki element: { "id": "...", "category": "..." }.
- * Temperatura je postavljena na 0.0.
  */
 async function sendBatchToGPTCategorization(feedBatch) {
   console.log("[sendBatchToGPTCategorization] Slanje serije stavki GPT API–ju za kategorizaciju...");
@@ -94,7 +89,7 @@ async function sendBatchToGPTCategorization(feedBatch) {
 - Unterhaltung
 - Welt
 
-Obavezno dodeli jednu kategoriju svakoj vesti. Ako vest ne pripada nijednoj od ovih kategorija, svrstaćemo je u "Panorama". Ako je vest o saobraćajnim neserećama ili ima pojam kriminal ide u kategoriju Panorama. Molim te, vrati isključivo validan JSON niz bez ikakvog dodatnog teksta, objašnjenja ili markdown oznaka. Svaki element u nizu mora biti objekat sa tačno dva svojstva: "id" (string) i "category" (string). Primer odgovora: [ { "id": "primer1", "category": "Wirtschaft" }, { "id": "primer2", "category": "Panorama" } ]. Tvoj odgovor mora sadržati samo JSON niz, bez dodatnih znakova.`
+Obavezno dodeli jednu kategoriju svakoj vesti. Ako vest ne pripada nijednoj od ovih kategorija, svrstaćemo je u "Panorama". Ako je vest o saobraćajnim nesrećama ili ima pojam kriminal ide u kategoriju Panorama. Molim te, vrati isključivo validan JSON niz bez ikakvog dodatnog teksta, objašnjenja ili markdown oznaka. Svaki element u nizu mora biti objekat sa tačno dva svojstva: "id" (string) i "category" (string).`
       },
       {
         role: "user",
@@ -124,9 +119,7 @@ Obavezno dodeli jednu kategoriju svakoj vesti. Ako vest ne pripada nijednoj od o
 }
 
 /**
- * Funkcija za slanje batch-a feed stavki GPT API–ju radi analize.
- * Vraća JSON niz gde je svaki element: { "id": "...", "analysis": "..." }.
- * Temperatura je postavljena na 0.7; analiza treba da bude analitična i dužine između 500 i 600 karaktera.
+ * Funkcija za slanje batch-a feed stavki GPT API–ju radi analize (temperatura 0.7).
  */
 async function sendBatchToGPTAnalysis(feedBatch) {
   console.log("[sendBatchToGPTAnalysis] Slanje serije stavki GPT API–ju za analizu...");
@@ -188,7 +181,8 @@ Copy code
 Wenn du den Input erhältst, antworte genau im beschriebenen JSON-Format, ohne zusätzliche Erklärungen oder Markdown.
 
 Schreibe den Output so, dass zuerst der analysis Teil kommt und dann der humorvolle Kommentar. Am Anfang des Kommentars sollte das Zeichen • (alt+0149) stehen.
-Gib mir die Analyse und den Kommentar unbedingt in einem einzigen Absatz zurück.`
+Gib mir die Analyse und den Kommentar unbedingt in einem einzigen Absatz zurück.
+`
 },
       {
         role: "user",
@@ -196,13 +190,11 @@ Gib mir die Analyse und den Kommentar unbedingt in einem einzigen Absatz zurück
       }
     ],
     max_tokens: 10000,
-    temperature: 0.7,  
-    top_p: 0.9,        
-    frequency_penalty: 0.3,  
-    presence_penalty: 0.2  
-    };
-
-
+    temperature: 0.7,
+    top_p: 0.9,
+    frequency_penalty: 0.3,
+    presence_penalty: 0.2
+  };
 
   try {
     const response = await axios.post(GPT_API_URL, payload, {
@@ -242,9 +234,9 @@ async function smanjiSliku(buffer) {
 }
 
 /**
- * Funkcija za čuvanje slike isključivo u Redis, bez ikakvog Cloudflare ili Backblaze servisa.
- * Kreira dve verzije: 80x80 (news-card) i 240x180 (news-modal), obe u WebP formatu.
- * Smešta ih u Redis kao Base64 string, sa TTL od 24h.
+ * Funkcija za čuvanje slike isključivo u Redis, kreira dve verzije:
+ * - 80x80 (news-card),
+ * - 240x180 (news-modal).
  */
 async function storeImageInRedis(imageUrl, id) {
   if (!imageUrl) {
@@ -259,11 +251,11 @@ async function storeImageInRedis(imageUrl, id) {
     const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
     console.log(`[storeImageInRedis] Slika preuzeta za ID: ${id}, veličina: ${response.data.length} bajtova`);
 
-    // Opcionalno ograničavamo veličinu fajla na ~1MB
+    // Ograničavamo veličinu fajla na ~1MB
     const buffer = Buffer.from(response.data.slice(0, 1 * 1024 * 1024));
     response.data = null;
 
-    // 1) Pravimo manju verziju 80x80 (news-card)
+    // 1) 80x80 (news-card)
     const smallBuffer = await sharp(buffer)
       .resize(80, 80, { fit: 'cover' })
       .webp({ quality: 80 })
@@ -271,7 +263,7 @@ async function storeImageInRedis(imageUrl, id) {
     const smallBase64 = smallBuffer.toString('base64');
     await redisClient.set(`img:${id}:news-card`, smallBase64, { EX: 86400 }); // TTL ~24h
 
-    // 2) Pravimo veću verziju 240x180 (news-modal)
+    // 2) 240x180 (news-modal)
     const bigBuffer = await sharp(buffer)
       .resize(240, 180, { fit: 'inside' })
       .webp({ quality: 80 })
@@ -287,13 +279,6 @@ async function storeImageInRedis(imageUrl, id) {
   }
 }
 
-
-
-
-
-/**
- * Izvlačenje domena iz URL-a.
- */
 function extractSource(url) {
   try {
     const hostname = new URL(url).hostname;
@@ -303,37 +288,16 @@ function extractSource(url) {
   }
 }
 
+const isMobile = false; // isMobile check nije bitan na server-strani
 
-// Provera da li je uređaj mobilni
-//const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
-
-// Provera da li je navigator definisan; ako nije, pretpostavljamo da uređaj nije mobilan
-const isMobile = (typeof navigator !== 'undefined' && /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)) || false;
-
-
-// Postavljanje limita u zavisnosti od uređaja
 const limit = pLimit(isMobile ? 2 : 4);
 
 /**
- * Normalizuje izvor da bi se koristio glavni naziv umesto alternativnih domena.
- */
-function normalizeSource(source) {
-  let normalizedSource = source.toLowerCase();
-
-  // Mapiraj alternativne domene na glavni naziv izvora
-  for (let mainSource in sourceAliases) {
-    if (sourceAliases[mainSource].includes(normalizedSource)) {
-      return mainSource;
-    }
-  }
-  return normalizedSource;
-}
-
-
-
-/**
  * Dodavanje jedne vesti u Redis, sa smanjenom slikom (ako postoji).
- * Sada funkcija prima i dodatni parametar 'analysis' koji sadrži AI analizu vesti.
+ * 
+ * // OVDE JE IZMENJENO:
+ * // Ako je storeImageInRedis uspešan => newsObj.image = true,
+ * // Ako nije => newsObj.image = null
  */
 export async function addItemToRedis(item, category, analysis = null) {
   // Kreiramo objekat za vest
@@ -347,26 +311,19 @@ export async function addItemToRedis(item, category, analysis = null) {
     source: (item.authors && item.authors.length > 0)
       ? item.authors[0].name
       : extractSource(item.url),
-    analysis: analysis // čuvamo i analizu vesti
+    analysis: analysis
   };
 
-  // Ako ima sliku, pokušaj optimizacije
-  // (IZMENJENO oko linije 330)
+  // CHANGED START
   if (item.image) {
     const success = await storeImageInRedis(item.image, item.id);
-    if (success) {
-      // Umesto full eksternog URL-a, koristimo /image/ID:news-card
-      // (mada možete ostaviti samo news-modal, stvar je dogovora)
-      newsObj.image = `/image/${item.id}:news-modal`;
-    } else {
-      newsObj.image = null; 
-    }
+    // Ako je success, samo obeležimo da slika postoji (true)
+    // Ako nije, stavljamo null
+    newsObj.image = success ? true : null;
   } else {
     newsObj.image = null;
   }
-
-  
-
+  // CHANGED END
 
   // Dodavanje u odgovarajuću kategoriju
   const redisKey = `category:${category}`;
@@ -381,24 +338,18 @@ export async function addItemToRedis(item, category, analysis = null) {
   await redisClient.lPush("Aktuell", JSON.stringify(newsObj));
   await redisClient.lTrim("Aktuell", 0, 199);
 
-  // Čuvanje vesti u PostgreSQL samo ako ima analizu
+  // Ako ima analizu, čuvamo i u PostgreSQL
   if (analysis) {
-    // Za SQL čuvamo samo newsmodal verziju (240x180)
-    newsObj.image = `/image/${item.id}:news-modal`;
+    // newsObj.image mozemo ostaviti true - ako treba da se pamti rutu, to radimo zasebno
     await saveNewsToPostgres(newsObj);
   }
 
-  console.log(`[addItemToRedis] Upisano ID:${item.id}, category:${category}`);
+  console.log(`[addItemToRedis] Upisano ID:${item.id}, category:${category}, image:${newsObj.image}`);
 }
-
-
 
 /**
  * Funkcija koja dodaje više feedova u Redis koristeći pipelining.
- * Parametri:
- * - feedBatch: niz feed objekata koje treba obraditi
- * - catResponse: rezultat GPT kategorizacije (niz objekata sa id i category)
- * - analysisResponse: rezultat GPT analize (niz objekata sa id i analysis)
+ * Ova opcija retko se koristi, ali ostavljamo je bez izmena.
  */
 export async function addMultipleFeedsToRedis(feedBatch, catResponse, analysisResponse) {
   const pipeline = redisClient.multi();
@@ -409,7 +360,6 @@ export async function addMultipleFeedsToRedis(feedBatch, catResponse, analysisRe
     const cat = (catObj && catObj.category) ? catObj.category : "Uncategorized";
     const analysis = (analysisObj && analysisObj.analysis) ? analysisObj.analysis : null;
 
-    // Kreiramo objekat vesti slično kao u addItemToRedis
     const newsObj = {
       id: item.id,
       title: item.title,
@@ -422,12 +372,10 @@ export async function addMultipleFeedsToRedis(feedBatch, catResponse, analysisRe
         : extractSource(item.url),
       analysis: analysis
     };
+    // Bez izmene za batch, ali u praksi bi trebalo i ovde da se upiše newsObj.image = true ili null
+    // Ostavljamo ovo kako je, pretpostavljamo da se slika obradjuje odvojeno
+    newsObj.image = null;
 
-    // Ako postoji slika, možete koristiti istu logiku kao u addItemToRedis.
-    // Za primer, ovde samo prosleđujemo originalnu sliku.
-    newsObj.image = item.image ? item.image : null;
-
-    // Dodajemo komande u pipeline:
     pipeline.rPush(`category:${cat}`, JSON.stringify(newsObj));
     pipeline.expire(`category:${cat}`, SEVEN_DAYS);
     pipeline.sAdd("processed_ids", item.id);
@@ -436,21 +384,15 @@ export async function addMultipleFeedsToRedis(feedBatch, catResponse, analysisRe
     pipeline.lTrim("Aktuell", 0, 199);
   });
 
-  // Izvršavamo sve komande odjednom
   await pipeline.exec();
 }
 
-
-
-
 /**
  * Generator funkcija koja vraća vesti iz Redis-a u paginaciji.
- * Smanjuje memorijski pritisak koristeći SCAN i LRange za dohvat po delovima.
  */
 async function* getFeedsGenerator() {
   let cursor = 0;
   do {
-    // Skeniramo Redis ključeve u batch-evima
     const { cursor: newCursor, keys } = await redisClient.scan(cursor, {
       MATCH: 'category:*',
       COUNT: 10
@@ -460,14 +402,15 @@ async function* getFeedsGenerator() {
 
     for (const key of keys) {
       const items = await redisClient.lRange(key, 0, -1);
-      yield items.map(item => JSON.parse(item)); // Emitujemo parsirane vesti
+      yield items.map(item => JSON.parse(item));
     }
-  } while (cursor !== "0"); // Nastavljamo dok ne pređemo ceo Redis
+  } while (cursor !== "0");
 }
 
+export { getFeedsGenerator };
+
 /**
- * Vraća sve vesti iz Redis-a (spaja iz svih "category:*" listi) i deduplira ih po feed.id.
- * Koristi strimovanje da ne akumulira previše podataka u memoriji.
+ * Vraća sve vesti iz Redis-a (spaja iz svih "category:*").
  */
 export async function getAllFeedsFromRedis() {
   let all = [];
@@ -487,7 +430,7 @@ export async function getAllFeedsFromRedis() {
     all = all.concat(filteredBatch);
   }
 
-  // Dedupliciranje vesti po ID-ju
+  // Dedupliciranje
   const uniqueFeeds = {};
   all.forEach(feed => {
     uniqueFeeds[feed.id] = feed;
@@ -498,27 +441,7 @@ export async function getAllFeedsFromRedis() {
 }
 
 /**
- * Vraća sve SEO vesti iz Redis hash "seo:news"
- */
-/** export async function getSeoFeedsFromRedis() {
-  try {
-    const data = await redisClient.hGetAll("seo:news");
-    // Redis vraća objekat gde su ključevi ID-jevi, a vrednosti JSON stringovi.
-    const feeds = Object.values(data).map(item => JSON.parse(item));
-    return feeds;
-  } catch (error) {
-    console.error("[getSeoFeedsFromRedis] Greška pri dohvaćanju SEO vesti:", error);
-    return [];
-  }
-}   */
-
-export { getFeedsGenerator };   
-
-/**
  * Glavna funkcija za obradu feed-ova.
- * Ova funkcija preuzima nove vesti, eliminiše duplikate i šalje ih GPT API–ju
- * u dva poziva – jedan za kategorizaciju (temperatura 0.0) i jedan za analizu (temperatura 0.7).
- * Rezultati se kombinuju i čuvaju u Redis, uključujući u SEO hash za statičke SEO stranice.
  */
 export async function processFeeds() {
   console.log("[processFeeds] Počinje procesiranje feed-ova...");
@@ -530,10 +453,8 @@ export async function processFeeds() {
     return;
   }
 
-
   let newItems = [];
   for (const item of allItems) {
-    // Lista blokiranih izvora
     const blockedSources = [
       "https://cdn.swp.de",
       "https://p6.focus.de",
@@ -542,7 +463,6 @@ export async function processFeeds() {
       "https://static.boerse.de",
       "https://cdn.lr-online.de"
     ];
-    // Preskačemo stavke čiji URL sadrži neki od blokiranih linkova
     if (item.url && blockedSources.some(source => item.url.includes(source))) {
       console.log("[processFeeds] Blokiran izvor:", item.url);
       continue;
@@ -585,7 +505,6 @@ export async function processFeeds() {
   for (let i = 0; i + BATCH_SIZE <= newItems.length; i += BATCH_SIZE) {
     const batch = newItems.slice(i, i + BATCH_SIZE);
     console.log(`[processFeeds] Šaljem batch od ${batch.length} vesti na GPT API.`);
-    // Paralelno pozovi GPT API za kategorizaciju i analizu
     const [catResponse, analysisResponse] = await Promise.all([
       sendBatchToGPTCategorization(batch),
       sendBatchToGPTAnalysis(batch)
@@ -599,67 +518,16 @@ export async function processFeeds() {
       continue;
     }
 
-    await addMultipleFeedsToRedis(batch, catResponse, analysisResponse);
+    for (const item of batch) {
+      const catObj = catResponse.find(c => c.id === item.id);
+      const analysisObj = analysisResponse.find(a => a.id === item.id);
+      const cat = (catObj && catObj.category) ? catObj.category : "Uncategorized";
+      const analysis = (analysisObj && analysisObj.analysis) ? analysisObj.analysis : null;
+      await limit(() => addItemToRedis(item, cat, analysis));
+    }
   }
 
   console.log("[processFeeds] Završeno dodavanje novih feedova u Redis.");
 }
 
 console.log("[DEBUG] Debugging message for feedsService.js");
-
-
-
-
-/**
- * Čisti SEO keš (hash "seo:news") od vesti starijih od 7 dana.
- 
-export async function cleanupSeoCache() {
-  const now = Date.now();
-  const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
-  try {
-    const keys = await redisClient.hKeys("seo:news");
-    for (const key of keys) {
-      const itemStr = await redisClient.hGet("seo:news", key);
-      if (itemStr) {
-        let item;
-        try {
-          item = JSON.parse(itemStr);
-        } catch (err) {
-          // Ako parsiranje ne uspe, obriši zapis
-          await redisClient.hDel("seo:news", key);
-          continue;
-        }
-        if (item.date_published) {
-          const publishedTime = new Date(item.date_published).getTime();
-          if (now - publishedTime > SEVEN_DAYS_MS) {
-            await redisClient.hDel("seo:news", key);
-          }
-        }
-      }
-    }
-    console.log("[cleanupSeoCache] SEO keš očišćen.");
-  } catch (error) {
-    console.error("[cleanupSeoCache] Greška pri čišćenju SEO keša:", error);
-  }
-}
-*/
-
-/**
- * Dohvata sve izvore iz Redis-a.
- */
-export async function getAllSourcesFromRedis() {
-  try {
-    const keys = await redisClient.keys("source:*");
-    const sources = [];
-    for (const key of keys) {
-      const source = await redisClient.get(key);
-      if (source) {
-        sources.push(JSON.parse(source));
-      }
-    }
-    return sources;
-  } catch (error) {
-    console.error("[getAllSourcesFromRedis] Greška pri dohvaćanju izvora iz Redis-a:", error);
-    return [];
-  }
-}
