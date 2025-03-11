@@ -1,20 +1,11 @@
-# Koristi Node.js kao osnovni image
-FROM node:18
-
-# Postavi radni direktorijum unutar kontejnera
+# Build stage
+FROM node:18-alpine AS builder
 WORKDIR /app
-
-# Kopiraj package.json i package-lock.json u radni direktorijum
 COPY package*.json ./
-
-# Instaliraj zavisnosti
-RUN npm install
-
-# Kopiraj ostatak aplikacije u kontejner
+RUN npm ci --production
 COPY . .
 
-# Eksponiraj port na kojem aplikacija radi
-EXPOSE 3001
-
-# Pokreni aplikaciju
-CMD ["npm", "start"]
+# Final stage
+FROM node:18-alpine
+WORKDIR /app
+COPY --from=builder /app .
