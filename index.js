@@ -494,6 +494,7 @@ app.get('/news/:id', async (req, res) => {
 
   // Falls die Anfrage von Bots kommt, leiten wir sofort weiter (fügen auch die Kategorie hinzu)
   if (!allowedBots.some(bot => userAgent.toLowerCase().includes(bot))) {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate'); // Kompletan header
     return res.redirect(302, '/?newsId=' + newsId + '&cat=' + category);
   }
 
