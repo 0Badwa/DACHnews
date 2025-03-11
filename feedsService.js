@@ -11,6 +11,8 @@ import sharp from 'sharp';
 import pLimit from 'p-limit';
 import { saveNewsToPostgres } from './index.js';
 
+const imageLimit = pLimit(3); // Max 3 paralelne operacije
+
 
 // Konstante
 const SEVEN_DAYS = 60 * 60 * 24 * 4;
@@ -240,44 +242,41 @@ async function smanjiSliku(buffer) {
  */
 async function storeImageInRedis(imageUrl, id) {
   if (!imageUrl) {
-    console.log(`[storeImageInRedis] Nema imageUrl za ID: ${id}, preskačem upload.`);
     return false;
   }
 
-  console.log(`[storeImageInRedis] Početak obrade slike za ID: ${id}, imageUrl: ${imageUrl}`);
-
   try {
-    // Preuzimamo originalnu sliku
-    const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
-    console.log(`[storeImageInRedis] Slika preuzeta za ID: ${id}, veličina: ${response.data.length} bajtova`);
+    // Preuzimanje slike
+    const response = await fetch(imageUrl);
+    const buffer = await response.arrayBuffer();
 
-    // Ograničavamo veličinu fajla na ~1MB
-    const buffer = Buffer.from(response.data.slice(0, 1 * 1024 * 1024));
-    response.data = null;
+    // Obrada slika sa p-limit
+    await imageLimit(async () => {
+      // 1) 80x80 verzija (news-card)
+      const smallBuffer = await sharp(buffer)
+        .resize(80, 80, { fit: 'cover' })
+        .webp({ quality: 80 })
+        .toBuffer();
+      
+      // 2) 240x180 verzija (news-modal)
+      const bigBuffer = await sharp(buffer)
+        .resize(240, 180, { fit: 'inside' })
+        .webp({ quality: 80 })
+        .toBuffer();
 
-    // 1) 80x80 (news-card)
-    const smallBuffer = await sharp(buffer)
-      .resize(80, 80, { fit: 'cover' })
-      .webp({ quality: 80 })
-      .toBuffer();
-    const smallBase64 = smallBuffer.toString('base64');
-    await redisClient.set(`img:${id}:news-card`, smallBase64, { EX: 86400 }); // TTL ~24h
+      // Čuvanje u Redis 
+      await redisClient.set(`img:${id}:news-card`, smallBuffer.toString('base64'), { EX: 86400 });
+      await redisClient.set(`img:${id}:news-modal`, bigBuffer.toString('base64'), { EX: 86400 });
+    });
 
-    // 2) 240x180 (news-modal)
-    const bigBuffer = await sharp(buffer)
-      .resize(240, 180, { fit: 'inside' })
-      .webp({ quality: 80 })
-      .toBuffer();
-    const bigBase64 = bigBuffer.toString('base64');
-    await redisClient.set(`img:${id}:news-modal`, bigBase64, { EX: 86400 }); // TTL ~24h
-
-    console.log(`[storeImageInRedis] Uspešno sačuvane dve verzije slike (80px i 240px) za ID: ${id}`);
+    console.log(`[storeImageInRedis] Uspešno sačuvane dve verzije slike za ID: ${id}`);
     return true;
   } catch (error) {
-    console.error(`[storeImageInRedis] Greška pri obradi slike za ID:${id}:`, error);
+    console.error(`[storeImageInRedis] Greška za ID:${id}:`, error);
     return false;
   }
 }
+
 
 function extractSource(url) {
   try {
@@ -336,7 +335,7 @@ export async function addItemToRedis(item, category, analysis = null) {
 
   // Dodavanje vesti u listu "Aktuell" (poslednjih 200 vesti)
   await redisClient.lPush("Aktuell", JSON.stringify(newsObj));
-  await redisClient.lTrim("Aktuell", 0, 199);
+  await redisClient.lTrim("Aktuell", 0, 149);
 
   // Ako ima analizu, čuvamo i u PostgreSQL
   if (analysis) {
@@ -381,7 +380,7 @@ export async function addMultipleFeedsToRedis(feedBatch, catResponse, analysisRe
     pipeline.sAdd("processed_ids", item.id);
     pipeline.expire("processed_ids", SEVEN_DAYS);
     pipeline.lPush("Aktuell", JSON.stringify(newsObj));
-    pipeline.lTrim("Aktuell", 0, 199);
+    pipeline.lTrim("Aktuell", 0, 149);
   });
 
   await pipeline.exec();
