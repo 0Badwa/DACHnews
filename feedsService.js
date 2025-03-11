@@ -495,8 +495,8 @@ export async function processFeeds() {
   }
   console.log(`[processFeeds] Posle dupl. provere ostalo ${newItems.length} vesti.`);
 
-  if (newItems.length < 10) {
-    console.log("[processFeeds] Manje od 10 novih vesti, preskačemo GPT za sada.");
+  if (newItems.length < 5) {
+    console.log("[processFeeds] Manje od 5 novih vesti, preskačemo GPT za sada.");
     return;
   }
 
