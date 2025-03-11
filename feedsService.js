@@ -501,7 +501,7 @@ export async function processFeeds() {
     return;
   }
 
-  const BATCH_SIZE = 10;
+  const BATCH_SIZE = 5;
   for (let i = 0; i + BATCH_SIZE <= newItems.length; i += BATCH_SIZE) {
     const batch = newItems.slice(i, i + BATCH_SIZE);
     console.log(`[processFeeds] Šaljem batch od ${batch.length} vesti na GPT API.`);
