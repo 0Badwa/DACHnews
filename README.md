@@ -2,9 +2,9 @@
 
 AI-curated news system built as a production-grade web application.
 
-This repository contains the full source code of a live system designed around
-deterministic ingestion, strict deduplication, Redis-first architecture, and
-background AI processing.
+This repository contains the full source code of a production-built and
+production-tested system designed around deterministic ingestion, strict
+deduplication, Redis-first architecture, and background AI processing.
 
 The code is shared for technical review and audit purposes.
 It is not intended as a demo, tutorial, or starter project.
@@ -29,28 +29,29 @@ Core design goals:
 
 ## High-level architecture
 
-**Ingestion**
+### Ingestion
 - Batch-based RSS ingestion (pull model)
 - Scheduled processing (non-streaming)
 - Single canonical feed source
 
-**Deduplication**
+### Deduplication
 - ID-based deduplication (Redis sets)
 - Title-based deduplication
 - Source filtering
 - Guards against future-dated items
 
-**AI processing**
-- AI used as a background worker, never in the request path
+### AI processing
+- AI used strictly as a background worker
+- No AI calls in the request/response path
 - Separate AI calls for categorization and analysis
 - Strict JSON contracts for all AI outputs
 
-**Runtime data**
-- Redis is the primary runtime data store and source of truth
+### Runtime data
+- Redis as the primary runtime data store and source of truth
 - PostgreSQL used only for long-term storage of analyzed items
 
-**Frontend & SEO**
-- Framework-free frontend (vanilla JS, no build step)
+### Frontend & SEO
+- Framework-free frontend (vanilla JavaScript, no build step)
 - Bot-aware rendering (crawler vs user)
 - Server-rendered HTML for SEO, dynamic UI for users
 
@@ -64,7 +65,7 @@ Core design goals:
 - OpenAI API (background processing)
 - Vanilla JavaScript frontend
 - Docker / docker-compose
-- Cloudflare (images, CDN)
+- Cloudflare (CDN and image storage)
 
 ---
 
@@ -75,15 +76,16 @@ Core design goals:
 - `src/` — frontend assets and UI logic
 - `docker-compose.yml` — local service orchestration
 - `Dockerfile` — production container build
+- `robots.txt` — crawler directives
 
 ---
 
 ## How to review this repository
 
 This repository is best reviewed by:
-- Scanning commit history for incremental, production-oriented changes
 - Inspecting ingestion and deduplication logic
 - Reviewing how Redis is used as a central runtime store
+- Examining commit history for incremental, production-oriented changes
 - Noting how AI calls are isolated from the request/response cycle
 
 The project is intentionally minimal in documentation beyond this file.
@@ -93,10 +95,11 @@ The code itself is the primary artifact.
 
 ## Status
 
-- Previously deployed production system
-- Production-tested under real traffic
-- Not currently publicly accessible
-- Google Lighthouse scores: 100 / 100 / 100 / 100
+- Production-built system
+- Production-tested
+- Not currently publicly deployed
+- Google Lighthouse scores: 100 / 100 / 100 / 100  
+  (performance, accessibility, best practices, SEO)
 
 ---
 
