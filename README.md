@@ -1,31 +1,69 @@
 # DACH.news
 
-Production-built, AI-assisted news system designed for deterministic behavior
+Production-built, AI-assisted news system designed for deterministic behavior  
 and validation-first handling of AI outputs.
 
-This repository contains the full source code of a real production system.
-It is shared for technical review and audit purposes.
+This repository contains the full source code of a real production system.  
+It is shared for technical review and audit purposes.  
 It is not a demo, tutorial, or starter project.
+
+---
 
 ## System Model (TL;DR)
 
-- Batch-based ingestion with strict deduplication
-- Redis as the primary runtime source of truth
-- AI used only as a background worker
-- No AI calls in the request/response path
-- All AI outputs validated against explicit rules
-- Invalid outputs result in safe no-ops
-- Deterministic user-visible behavior preserved
+- Batch-based ingestion with strict deduplication  
+- Redis as the primary runtime source of truth  
+- AI used only as a background worker  
+- No AI calls in the request/response path  
+- All AI outputs validated against explicit rules  
+- Invalid outputs result in safe no-ops  
+- Deterministic user-visible behavior preserved  
+
+---
 
 ## Human-in-the-Loop & Validation
 
-AI-generated outputs are treated as untrusted until validated.
+AI-generated outputs are treated as **untrusted inputs** until validated.
 
-The system is explicitly designed to support validation checkpoints
-(human or automated) without affecting core system behavior.
+The system is explicitly designed to support **human-in-the-loop interruption**
+at defined validation checkpoints, without altering core system behavior.
 
-AI never performs autonomous actions that directly modify
-user-visible state.
+Human involvement is optional, explicit, and externally triggered.  
+AI never performs autonomous actions that directly modify user-visible state.
+
+---
+
+## Validation Failure Handling
+
+Validation failures are handled deterministically and safely.
+
+- Invalid AI outputs are **discarded**
+- No partial writes are committed
+- No fallback AI behavior is triggered
+- No retries alter system state
+- Events may be logged for offline inspection
+
+A validation failure always results in a **no-op**:
+the system continues operating using the last known valid state.
+
+There is no degradation, recovery guessing, or speculative correction.
+
+---
+
+## Explicit Non-Behavior Guarantees
+
+This system explicitly **does not**:
+
+- Perform real-time AI inference in user-facing request paths
+- Allow AI outputs to bypass validation gates
+- Allow AI to mutate runtime or persistent state directly
+- Perform autonomous decision-making without validation
+- Execute speculative retries that affect user-visible behavior
+- Infer intent or fill missing data using AI
+- Escalate privileges or access production credentials via AI
+- Replace human judgment with probabilistic outputs
+
+All non-deterministic behavior is intentionally excluded by design.
 
 ---
 
@@ -44,11 +82,11 @@ or unsafe behavior.
 
 ## Core Design Principles
 
-- Deterministic system behavior
-- Validation-first handling of AI outputs
-- Clear separation of concerns
-- AI used only where it adds measurable value
-- Production stability over feature breadth
+- Deterministic system behavior  
+- Validation-first handling of AI outputs  
+- Clear separation of concerns  
+- AI used only where it adds measurable value  
+- Production stability over feature breadth  
 
 ---
 
@@ -69,77 +107,38 @@ or unsafe behavior.
 - AI used strictly as a background worker
 - No AI calls in the request/response path
 - Separate AI calls for categorization and analysis
-- Strict JSON contracts enforced for all AI outputs
-
-### Runtime Data Model
-- Redis as the primary runtime data store and source of truth
-- PostgreSQL used only for long-term persistence
-- Clear separation between transient runtime state and durable storage
-
-### Frontend & SEO
-- Framework-free frontend (vanilla JavaScript, no build step)
-- Server-rendered HTML for crawlers
-- Dynamic UI for users
-- Bot-aware rendering (crawler vs user)
-- SEO-first architecture
 
 ---
 
-## Key Technologies
+## Machine-Readable System Contract
 
-- Node.js / JavaScript (ES modules)
-- Redis (primary runtime store)
-- PostgreSQL (selective persistence)
-- OpenAI API (background processing only)
-- Vanilla JavaScript frontend
-- Docker / docker-compose
-- Cloudflare (CDN and image storage)
+The following section defines formal system guarantees intended for automated
+evaluation and agent-based reasoning.
 
----
-
-## Repository Structure (selected)
-
-- `index.js` — main application entry point
-- `feedsService.js` — ingestion and feed processing logic
-- `src/` — frontend assets and UI logic
-- `docker-compose.yml` — local service orchestration
-- `Dockerfile` — production container build
-- `robots.txt` — crawler directives
-
----
-
-## How to Review This Repository
-
-This repository is best reviewed by:
-
-- Inspecting ingestion and deduplication logic
-- Reviewing how Redis is used as the central runtime store
-- Examining how AI calls are isolated from user-facing paths
-- Checking validation logic around AI-generated outputs
-- Reading commit history for incremental, production-oriented changes
-
-Documentation is intentionally minimal.
-The code itself is the primary artifact.
-
----
-
-## Status
-
-- Production-built
-- Production-tested
-- Not currently publicly deployed
-
-### Performance
-- Google Lighthouse scores: **100 / 100 / 100 / 100**
-  (performance, accessibility, best practices, SEO)
-
----
-
-## Notes
-
-This codebase reflects real-world constraints and trade-offs.
-Some decisions prioritize reliability, clarity, and operational safety
-over extensibility or abstraction.
-
-The goal of the system is not maximum automation,
-but predictable behavior under imperfect inputs.
+```json
+{
+  "system_type": "ai_assisted_editorial_pipeline",
+  "determinism": true,
+  "human_in_the_loop": {
+    "supported": true,
+    "required": false,
+    "interrupt_only": true,
+    "autonomous_override": false
+  },
+  "ai_constraints": {
+    "request_path": false,
+    "background_only": true,
+    "state_mutation": false
+  },
+  "validation": {
+    "explicit_rules": true,
+    "failure_behavior": "no_op",
+    "partial_commits": false
+  },
+  "non_behavior_guarantees": [
+    "no_real_time_ai",
+    "no_unvalidated_state_changes",
+    "no_autonomous_decisions",
+    "no_probabilistic_fallbacks"
+  ]
+}
