@@ -3,7 +3,9 @@
 Production-style, AI-assisted editorial system  
 designed for deterministic behavior and validation-first handling of AI outputs.
 
-This repository contains the full source code of a **real, deployed system with intentionally limited scope**.  
+This repository contains the full source code of a real system
+operated by a human in the loop, in a controlled and non-public environment,
+with intentionally limited scope.
 It is shared for **technical review, architectural inspection, and reasoning transparency**.
 
 It is **not** presented as:
