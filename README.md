@@ -21,6 +21,24 @@ It is not a demo, tutorial, or starter project.
 
 ---
 
+## Scope Clarification (Important)
+
+This repository represents a real, operating system with an intentionally
+constrained and safety-focused scope.
+
+Some architectural guarantees described below are:
+- fully implemented
+- partially implemented
+- or explicitly designed but not yet activated
+
+This is a deliberate design choice.
+
+The purpose of this repository is to demonstrate system boundaries,
+validation logic, failure behavior, and AI containment, not to serve
+as a generic or feature-complete platform.
+
+---
+
 ## Human-in-the-Loop & Validation
 
 AI-generated outputs are treated as **untrusted inputs** until validated.
@@ -30,6 +48,24 @@ at defined validation checkpoints, without altering core system behavior.
 
 Human involvement is optional, explicit, and externally triggered.  
 AI never performs autonomous actions that directly modify user-visible state.
+
+---
+
+## Implementation Status
+
+This repository prioritizes architectural clarity and safety boundaries.
+
+Some mechanisms are:
+- fully implemented
+- partially implemented
+- or intentionally inactive by design
+
+Human-in-the-loop validation and escalation are performed externally
+by the operator and are therefore not embedded as UI workflows
+or autonomous in-band system logic.
+
+Design intent is preserved even when specific mechanisms
+are not yet activated in code.
 
 ---
 
@@ -112,10 +148,6 @@ or unsafe behavior.
 
 ## Machine-Readable System Contract
 
-The following section defines formal system guarantees intended for automated
-evaluation and agent-based reasoning.
-
-```json
 {
   "system_type": "ai_assisted_editorial_pipeline",
   "determinism": true,
