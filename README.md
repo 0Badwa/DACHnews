@@ -1,11 +1,16 @@
 # DACH.news
 
-Production-built, AI-assisted news system designed for deterministic behavior  
-and validation-first handling of AI outputs.
+Production-deployed, AI-assisted editorial system  
+designed for deterministic behavior and validation-first handling of AI outputs.
 
-This repository contains the full source code of a real production system.  
-It is shared for technical review and audit purposes.  
-It is not a demo, tutorial, or starter project.
+This repository contains the full source code of a **real, deployed system with intentionally limited scope**.  
+It is shared for **technical review, architectural inspection, and reasoning transparency**.
+
+It is **not** presented as:
+- a turnkey product
+- a reusable library
+- a security-hardened reference implementation
+- a complete AI validation framework
 
 ---
 
@@ -15,27 +20,8 @@ It is not a demo, tutorial, or starter project.
 - Redis as the primary runtime source of truth  
 - AI used only as a background worker  
 - No AI calls in the request/response path  
-- All AI outputs validated against explicit rules  
-- Invalid outputs result in safe no-ops  
+- AI outputs treated as untrusted inputs  
 - Deterministic user-visible behavior preserved  
-
----
-
-## Scope Clarification (Important)
-
-This repository represents a real, operating system with an intentionally
-constrained and safety-focused scope.
-
-Some architectural guarantees described below are:
-- fully implemented
-- partially implemented
-- or explicitly designed but not yet activated
-
-This is a deliberate design choice.
-
-The purpose of this repository is to demonstrate system boundaries,
-validation logic, failure behavior, and AI containment, not to serve
-as a generic or feature-complete platform.
 
 ---
 
@@ -44,28 +30,15 @@ as a generic or feature-complete platform.
 AI-generated outputs are treated as **untrusted inputs** until validated.
 
 The system is explicitly designed to support **human-in-the-loop interruption**
-at defined validation checkpoints, without altering core system behavior.
+at defined validation checkpoints, **without embedding approval UI or autonomous escalation logic into the codebase**.
 
-Human involvement is optional, explicit, and externally triggered.  
+Human involvement is:
+- optional
+- explicit
+- externally triggered
+- performed by the operator, not by the system itself
+
 AI never performs autonomous actions that directly modify user-visible state.
-
----
-
-## Implementation Status
-
-This repository prioritizes architectural clarity and safety boundaries.
-
-Some mechanisms are:
-- fully implemented
-- partially implemented
-- or intentionally inactive by design
-
-Human-in-the-loop validation and escalation are performed externally
-by the operator and are therefore not embedded as UI workflows
-or autonomous in-band system logic.
-
-Design intent is preserved even when specific mechanisms
-are not yet activated in code.
 
 ---
 
@@ -73,16 +46,13 @@ are not yet activated in code.
 
 Validation failures are handled deterministically and safely.
 
-- Invalid AI outputs are **discarded**
-- No partial writes are committed
+- Invalid AI outputs are discarded or downgraded
+- No speculative retries affect user-visible behavior
 - No fallback AI behavior is triggered
-- No retries alter system state
 - Events may be logged for offline inspection
 
-A validation failure always results in a **no-op**:
-the system continues operating using the last known valid state.
-
-There is no degradation, recovery guessing, or speculative correction.
+Failure handling is intentionally conservative:
+the system continues operating using the last known acceptable state.
 
 ---
 
@@ -91,12 +61,11 @@ There is no degradation, recovery guessing, or speculative correction.
 This system explicitly **does not**:
 
 - Perform real-time AI inference in user-facing request paths
-- Allow AI outputs to bypass validation gates
-- Allow AI to mutate runtime or persistent state directly
-- Perform autonomous decision-making without validation
-- Execute speculative retries that affect user-visible behavior
-- Infer intent or fill missing data using AI
-- Escalate privileges or access production credentials via AI
+- Allow AI outputs to bypass validation boundaries
+- Allow AI to mutate runtime or persistent state autonomously
+- Perform probabilistic self-correction
+- Infer missing intent or data using AI
+- Escalate privileges or access credentials via AI
 - Replace human judgment with probabilistic outputs
 
 All non-deterministic behavior is intentionally excluded by design.
@@ -105,14 +74,14 @@ All non-deterministic behavior is intentionally excluded by design.
 
 ## Overview
 
-DACH.news is an AI-assisted editorial system, not a generic RSS reader.
+DACH.news is an AI-assisted editorial pipeline, **not a generic RSS reader**.
 
 The system ingests news in controlled batches, aggressively deduplicates
 and filters input, processes content asynchronously using AI,
-and serves results through a performance- and SEO-optimized frontend.
+and serves results through a performance- and SEO-oriented frontend.
 
-Automation is intentionally constrained to avoid non-deterministic
-or unsafe behavior.
+Automation is intentionally constrained to preserve predictability,
+auditability, and operational control.
 
 ---
 
@@ -122,7 +91,7 @@ or unsafe behavior.
 - Validation-first handling of AI outputs  
 - Clear separation of concerns  
 - AI used only where it adds measurable value  
-- Production stability over feature breadth  
+- Stability and inspectability over feature breadth  
 
 ---
 
@@ -146,31 +115,71 @@ or unsafe behavior.
 
 ---
 
-## Machine-Readable System Contract
+## Implementation Status (Explicit)
 
+The following table clarifies which guarantees are implemented,
+partially implemented, or intentionally external.
+
+| Component | Status | Notes |
+|---------|--------|------|
+| Batch RSS ingestion | ✅ Implemented | Scheduled batch processing |
+| Background-only AI | ✅ Implemented | No AI in request path |
+| Deduplication (ID + title) | ✅ Implemented | Redis-based |
+| AI output type validation | ⚠️ Partial | Structural checks only |
+| Content-level validation | ❌ External | Performed by operator |
+| Failure handling determinism | ⚠️ Partial | Downgrades to fallback state |
+| True no-op on AI failure | ⚠️ Partial | Writes categorized fallback |
+| HITL approval gates | 🔧 External | Operator-managed |
+| Automated test coverage | ❌ Not implemented | Manual validation |
+| Security hardening | ⚠️ Known limitations | Out of scope here |
+
+This distinction is deliberate and explicit.
+
+---
+
+## Agent-Facing Summary (Machine-Readable)
+
+The following JSON describes **the human role and system intent**,  
+not the completeness of this codebase.
+
+```json
 {
-  "system_type": "ai_assisted_editorial_pipeline",
-  "determinism": true,
-  "human_in_the_loop": {
-    "supported": true,
-    "required": false,
-    "interrupt_only": true,
-    "autonomous_override": false
+  "role": "human_in_the_loop_validation_operator",
+  "system_context": "ai_assisted_editorial_pipeline",
+  "intent": "demonstrate reasoning boundaries and escalation control",
+  "ai_trust_model": "ai_outputs_untrusted_by_default",
+  "human_role": {
+    "validation": true,
+    "approval": true,
+    "escalation": true,
+    "autonomous_decisions": false
   },
-  "ai_constraints": {
-    "request_path": false,
-    "background_only": true,
-    "state_mutation": false
+  "scope_constraints": {
+    "execution_only": true,
+    "no_scope_expansion": true,
+    "explicit_tasks_required": true
   },
-  "validation": {
-    "explicit_rules": true,
-    "failure_behavior": "no_op",
-    "partial_commits": false
-  },
-  "non_behavior_guarantees": [
-    "no_real_time_ai",
-    "no_unvalidated_state_changes",
-    "no_autonomous_decisions",
-    "no_probabilistic_fallbacks"
+  "what_this_repo_is": [
+    "evidence_of_reasoning",
+    "architecture_inspection_artifact",
+    "failure_mode_demonstration"
+  ],
+  "what_this_repo_is_not": [
+    "turnkey_product",
+    "security_reference",
+    "complete_validation_framework",
+    "autonomous_ai_system"
   ]
 }
+```
+
+---
+
+## Final Notes
+
+This repository exists to make **system boundaries, failure modes,
+and human escalation logic inspectable**.
+
+It is intentionally conservative, intentionally constrained,
+and intentionally explicit about what is handled by code
+and what is handled by a human operator.
