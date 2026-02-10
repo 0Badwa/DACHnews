@@ -1,6 +1,6 @@
 # DACH.news
 
-Production-deployed, AI-assisted editorial system  
+Production-style, AI-assisted editorial system  
 designed for deterministic behavior and validation-first handling of AI outputs.
 
 This repository contains the full source code of a **real, deployed system with intentionally limited scope**.  
